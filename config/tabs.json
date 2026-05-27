@@ -1,0 +1,59 @@
+{
+  "tabs": [
+    {
+      "id": "play",
+      "label": "Play",
+      "icon": "ti-dice",
+      "enabled": true,
+      "default_visible": true,
+      "order": 1,
+      "description": "Board and game controls"
+    },
+    {
+      "id": "settings",
+      "label": "Settings",
+      "icon": "ti-settings",
+      "enabled": true,
+      "default_visible": true,
+      "order": 2,
+      "description": "Board rules and players"
+    },
+    {
+      "id": "train",
+      "label": "Train",
+      "icon": "ti-brain",
+      "enabled": true,
+      "default_visible": false,
+      "order": 3,
+      "description": "RL training controls"
+    },
+    {
+      "id": "stats",
+      "label": "Stats & Replay",
+      "icon": "ti-chart-bar",
+      "enabled": true,
+      "default_visible": true,
+      "order": 4,
+      "description": "Win rates and history"
+    },
+    {
+      "id": "bots",
+      "label": "Bots",
+      "icon": "ti-robot",
+      "enabled": true,
+      "default_visible": false,
+      "order": 5,
+      "description": "Saved bot models"
+    },
+    {
+      "id": "admin",
+      "label": "Admin",
+      "icon": "ti-shield",
+      "enabled": true,
+      "default_visible": true,
+      "order": 99,
+      "admin_only": true,
+      "description": "Tab visibility control"
+    }
+  ]
+}

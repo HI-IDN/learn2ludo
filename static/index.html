@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn2Ludo</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
+<link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <img src="/static/favicon.svg" alt="Learn2Ludo" class="logo-img" onerror="this.style.display='none'">
+    <span class="logo-dot"></span>
+    <span>Learn2Ludo</span>
+  </div>
+  <nav id="tab-nav">
+    <!-- tabs injected by JS -->
+  </nav>
+</header>
+
+<main>
+  <!-- PLAY -->
+  <div class="panel" id="panel-play">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+      <div>
+        <h1 style="font-size:22px; font-weight:700;">Play</h1>
+        <p style="font-size:13px; color:var(--text2); margin-top:4px;">Click <strong>New game</strong>, then roll. Solid pawns are pieces in play. Movable pieces hover; regular pawns preview possible landing squares.</p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-primary" onclick="newGame()"><i class="ti ti-plus"></i> New game</button>
+      </div>
+    </div>
+    <div id="board-container">
+      <div id="board-wrap">
+        <svg id="ludo-board" class="board-svg" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
+          <!-- drawn by JS -->
+        </svg>
+      </div>
+      <div id="game-info">
+        <div class="player-order-title">Player order</div>
+        <div id="players-list"></div>
+        <div class="player-order-title current-turn-label">Current turn</div>
+        <div class="dice-display">
+          <div class="turn-banner idle" id="turn-banner">
+            <i class="fa-solid fa-circle-info"></i>
+            <span id="turn-player-name">New game</span>
+          </div>
+          <div class="action-instruction" id="action-instruction">Press <strong>New game</strong> to start.</div>
+          <div class="dice-face" id="dice-face">⚀</div>
+          <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
+            <button class="btn btn-primary btn-sm" id="roll-btn" onclick="rollDice()" disabled>
+              <i class="fa-solid fa-dice-d6"></i> Roll
+            </button>
+          </div>
+        </div>
+        <div class="player-order-title move-history-label">Move history</div>
+        <div class="move-history-card">
+          <div id="move-history-list" class="move-history-list">
+            <div class="move-history-empty">No committed moves yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAIN -->
+  <div class="panel" id="panel-train">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+      <div>
+        <h1 style="font-size:22px; font-weight:700;">Train</h1>
+        <p style="font-size:13px; color:var(--text2); margin-top:4px;">RL training controls</p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-primary" id="train-start-btn" onclick="startTraining()"><i class="ti ti-player-play"></i> Start</button>
+        <button class="btn btn-danger" id="train-stop-btn" onclick="stopTraining()" disabled><i class="ti ti-player-stop"></i> Stop</button>
+      </div>
+    </div>
+    <div class="train-layout">
+      <div class="card" style="background:var(--bg2);">
+        <p class="section-title">Configuration</p>
+        <div class="form-row">
+          <label>Episodes</label>
+          <input type="number" id="cfg-episodes" value="1000" min="10" max="100000">
+        </div>
+        <div class="form-row">
+          <label>Opponent policy</label>
+          <select id="cfg-opponent">
+            <option value="random">Random</option>
+            <option value="greedy">Greedy heuristic</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Number of players</label>
+          <select id="cfg-players">
+            <option value="2">2 players</option>
+            <option value="4" selected>4 players</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Agent player slot</label>
+          <select id="cfg-agent">
+            <option value="0">Player 1 (Red)</option>
+            <option value="1">Player 2 (Blue)</option>
+            <option value="2">Player 3 (Green)</option>
+            <option value="3">Player 4 (Yellow)</option>
+          </select>
+        </div>
+        <p class="section-title" style="margin-top:16px;">Reward shaping</p>
+        <div class="form-row">
+          <label>Win reward</label>
+          <input type="number" id="rew-win" value="100">
+        </div>
+        <div class="form-row">
+          <label>Capture reward</label>
+          <input type="number" id="rew-capture" value="10">
+        </div>
+        <div class="form-row">
+          <label>Per-square advance</label>
+          <input type="number" id="rew-advance" value="0.1" step="0.01">
+        </div>
+      </div>
+      <div>
+        <div class="card" style="background:var(--bg2); margin-bottom:16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <p class="section-title" style="margin:0;">Progress</p>
+            <span class="badge badge-purple" id="train-status-badge">idle</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="train-progress-bar" style="width:0%"></div></div>
+          <div id="train-episode-label" style="font-size:11px; color:var(--text3); text-align:right; margin-top:4px;">0 / 0</div>
+          <div style="margin-top:16px;">
+            <div class="train-metric"><span>Win rate</span><strong id="m-winrate">—</strong></div>
+            <div class="train-metric"><span>Avg reward</span><strong id="m-avgreward">—</strong></div>
+            <div class="train-metric"><span>Total wins</span><strong id="m-wins">—</strong></div>
+          </div>
+        </div>
+        <div class="card" style="background:var(--bg2);">
+          <p class="section-title">Reward trend (last 20 episodes)</p>
+          <div class="mini-chart" id="reward-chart"></div>
+        </div>
+        <div class="card" style="background:var(--bg2); margin-top:16px; border: 1px dashed var(--border2);">
+          <p class="section-title" style="color:var(--accent2);">Plug in your RL algorithm</p>
+          <p style="font-size:13px; color:var(--text2); line-height:1.6;">
+            Edit <code style="font-family:var(--mono); color:var(--accent2);">rl/environment.py</code> → <code style="font-family:var(--mono); color:var(--accent2);">TrainingSession.run_episode()</code>.
+            Replace the random action with your agent.<br><br>
+            The env is gym-compatible: <code style="font-family:var(--mono); color:var(--text2);">obs, reward, done, info = env.step(action)</code>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="panel" id="panel-settings">
+    <div style="margin-bottom:24px;">
+      <h1 style="font-size:22px; font-weight:700;">Settings</h1>
+      <p style="font-size:13px; color:var(--text2); margin-top:4px;">Board rules and game configuration</p>
+    </div>
+    <div class="settings-grid">
+      <div class="settings-card">
+        <h2>Game rules</h2>
+        <div class="rule-row">
+          <div><div class="rule-name">Six to enter</div><div class="rule-desc">Pieces need a 6 to leave yard</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-six-enter" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Six = extra turn</div><div class="rule-desc">Rolling 6 grants another roll</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-six-extra" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Captures enabled</div><div class="rule-desc">Landing on opponent sends them home</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-capture" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Safe squares</div><div class="rule-desc">Marked squares protect from capture</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-safe" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Max consecutive sixes</div><div class="rule-desc">3 sixes in a row = forfeit turn</div></div>
+          <select id="rule-max-sixes" onchange="saveSettings()" style="width:64px; padding:4px 8px; font-size:12px;">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="99">∞</option>
+          </select>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Three rolls from empty board</div><div class="rule-desc">If a player has no pawn in play, they may roll up to 3 times to enter</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-no-pawn-three-rolls" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Equal number of rounds</div><div class="rule-desc">After a player wins, continue until the first player would start the next round.</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-equal-turns" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Continue after first winner</div><div class="rule-desc">Keep playing to determine 2nd, 3rd, and 4th place</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-continue-places" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="settings-card">
+        <h2>Players</h2>
+        <div class="form-row">
+          <label>Number of players</label>
+          <select id="set-num-players" onchange="saveSettings()">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+          </select>
+        </div>
+        <div style="margin-top:16px;">
+          <p style="font-size:12px; color:var(--text2); margin-bottom:12px;">Player types</p>
+          <div id="player-types"></div>
+        </div>
+      </div>
+      <div class="settings-card">
+        <h2>Display</h2>
+        <div class="rule-row">
+          <div><div class="rule-name">Show valid moves</div><div class="rule-desc">Highlight clickable pieces</div></div>
+          <label class="toggle"><input type="checkbox" id="set-show-moves" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Show cell numbers</div><div class="rule-desc">Annotate the main track cells 0–51 for debugging and teaching</div></div>
+          <label class="toggle"><input type="checkbox" id="set-show-cell-numbers" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Auto-roll for bots</div><div class="rule-desc">Skip manual roll for bot turns</div></div>
+          <label class="toggle"><input type="checkbox" id="set-auto-roll" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Auto-roll dice</div><div class="rule-desc">Roll automatically for every player after a short pause</div></div>
+          <label class="toggle"><input type="checkbox" id="set-auto-dice" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Animate moves</div><div class="rule-desc">Smooth piece movement</div></div>
+          <label class="toggle"><input type="checkbox" id="set-animate" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Auto-play single legal move</div><div class="rule-desc">If exactly one move is legal after a roll, play it automatically</div></div>
+          <label class="toggle"><input type="checkbox" id="set-auto-single-move" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="panel" id="panel-stats">
+    <div style="margin-bottom:24px;">
+      <h1 style="font-size:22px; font-weight:700;">Stats & Replay</h1>
+      <p style="font-size:13px; color:var(--text2); margin-top:4px;">Win rates, training history, game replays</p>
+    </div>
+    <div class="stats-row" id="stats-overview">
+      <div class="stat-card"><div class="stat-label">Games played</div><div class="stat-value" id="st-games">0</div></div>
+      <div class="stat-card"><div class="stat-label">Training sessions</div><div class="stat-value" id="st-sessions">0</div></div>
+      <div class="stat-card"><div class="stat-label">Best win rate</div><div class="stat-value" id="st-winrate">—</div></div>
+    </div>
+    <div style="margin-top:8px;">
+      <p class="section-title">Training history</p>
+      <div id="history-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <p id="no-history" style="font-size:13px; color:var(--text3); padding:24px 0;">No training sessions yet. Run a training session from the Train tab.</p>
+    </div>
+  </div>
+
+  <!-- BOTS -->
+  <div class="panel" id="panel-bots">
+    <div style="margin-bottom:24px;">
+      <h1 style="font-size:22px; font-weight:700;">Bots</h1>
+      <p style="font-size:13px; color:var(--text2); margin-top:4px;">Manage saved bot models</p>
+    </div>
+    <div style="background:var(--bg2); border:1px dashed var(--border2); border-radius:var(--radius-lg); padding:48px; text-align:center;">
+      <i class="ti ti-robot" style="font-size:32px; color:var(--text3); display:block; margin-bottom:12px;"></i>
+      <p style="font-size:14px; color:var(--text2);">No saved bots yet</p>
+      <p style="font-size:12px; color:var(--text3); margin-top:4px;">Train a bot and save the model checkpoint here</p>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="panel" id="panel-admin">
+    <div style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
+      <h1 style="font-size:22px; font-weight:700;">Admin</h1>
+      <span class="badge badge-purple" id="admin-auth-badge">locked</span>
+    </div>
+    <div id="admin-locked-msg" class="card" style="background:var(--bg2); max-width:400px;">
+      <p style="font-size:14px; font-weight:600; margin-bottom:4px;">Admin access required</p>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">Enter your admin password to manage tabs and system settings. First-run: any password will be set as the admin password.</p>
+      <div class="alert" id="admin-alert"></div>
+      <div style="display:flex; gap:8px;">
+        <input type="password" id="admin-pw" placeholder="Password…" style="flex:1;" onkeydown="if(event.key==='Enter')doAdminLogin()">
+        <button class="btn btn-primary" onclick="doAdminLogin()">Unlock</button>
+      </div>
+    </div>
+    <div id="admin-panel" style="display:none;">
+      <div class="alert alert-success" id="admin-save-ok">Settings saved.</div>
+      <p class="section-title">Tab visibility &amp; defaults</p>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">Control which tabs are available and whether they are visible by default for new users.</p>
+      <div id="tab-config-list"></div>
+      <div style="display:flex; gap:8px; margin-top:20px;">
+        <button class="btn btn-primary" onclick="saveTabConfig()"><i class="ti ti-device-floppy"></i> Save changes</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Admin login overlay (shown when tab clicked and not authed) -->
+<div class="admin-overlay" id="admin-overlay" style="display:none;">
+  <div class="admin-dialog">
+    <h2>Admin</h2>
+    <p>Enter admin password to access settings.</p>
+    <div class="alert" id="overlay-alert"></div>
+    <div style="display:flex; gap:8px;">
+      <input type="password" id="overlay-pw" placeholder="Password…" style="flex:1;" onkeydown="if(event.key==='Enter')doOverlayLogin()">
+      <button class="btn btn-primary" onclick="doOverlayLogin()">Unlock</button>
+    </div>
+    <button class="btn btn-sm" style="margin-top:12px; width:100%; justify-content:center;" onclick="closeOverlay()">Cancel</button>
+  </div>
+</div>
+
+<script>
+const DICE_FACES = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
+const COLORS = {red:'#AC1A2F', blue:'#0098AA', green:'#719500', yellow:'#F5CF47', orange:'#EB7125'};
+const PLAYER_COLORS = ['red','green','yellow','blue'];
+const PLAYER_SLOTS_BY_COUNT = {2: [0, 2], 3: [0, 1, 2], 4: [0, 1, 2, 3]};
+function playerSlot(playerIdx, numPlayers = gameState?.num_players || parseInt(document.getElementById('set-num-players')?.value || 4)) {
+  return (PLAYER_SLOTS_BY_COUNT[numPlayers] || PLAYER_SLOTS_BY_COUNT[4])[playerIdx] ?? playerIdx;
+}
+function playerColorName(playerIdx, numPlayers = gameState?.num_players || parseInt(document.getElementById('set-num-players')?.value || 4)) {
+  return PLAYER_COLORS[playerSlot(playerIdx, numPlayers)] || 'blue';
+}
+const DEFAULT_HUMAN_NAMES = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+const BOT_LABELS = {random: 'Botten Random', greedy: 'Botten Greedy'};
+
+function getPlayerType(i) {
+  return settings.player_types?.[i] || (i === 0 ? 'human' : 'random');
+}
+
+function getPlayerName(i) {
+  const type = getPlayerType(i);
+  if (type !== 'human') {
+    const base = BOT_LABELS[type] || `Botten ${type}`;
+    const np = gameState?.num_players || parseInt(document.getElementById('set-num-players')?.value || settings.num_players || 4);
+    const same = Array.from({length: np}, (_, idx) => idx).filter(idx => getPlayerType(idx) === type);
+    if (same.length > 1) return `${base} #${same.indexOf(i) + 1}`;
+    return base;
+  }
+  return settings.player_names?.[i] || DEFAULT_HUMAN_NAMES[i] || `Player ${i+1}`;
+}
+
+function setPlayerName(i, value) {
+  settings.player_names = settings.player_names || {};
+  settings.player_names[i] = value || DEFAULT_HUMAN_NAMES[i] || `Player ${i+1}`;
+  localStorage.setItem('ludo_settings', JSON.stringify(settings));
+  renderPlayers();
+}
+
+function setPlayerType(i, value) {
+  settings.player_types = settings.player_types || {};
+  settings.player_types[i] = value;
+  localStorage.setItem('ludo_settings', JSON.stringify(settings));
+  renderPlayerTypes();
+  renderPlayers();
+}
+
+function currentPlayerHasNoPawnInPlay() {
+  if (!gameState) return false;
+  const p = gameState.players?.[gameState.current_player];
+  return !!p && p.pieces.every(pc => pc.in_yard || pc.finished);
+}
+
+function currentPlayerName() {
+  return getPlayerName(gameState?.current_player || 0);
+}
+
+let adminToken = null;
+let tabConfig = [];
+let gameState = null;
+let pollInterval = null;
+let trainPollInterval = null;
+let settings = {};
+let autoSingleMovePending = false;
+let autoRollPending = false;
+let autoBotMovePending = false;
+
+// ---- INIT ----
+async function init() {
+  loadSettings();
+  applySettingsToControls();
+  await loadTabs();
+  await loadStats();
+  renderPlayerTypes();
+  renderPlayers();
+}
+
+// ---- TABS ----
+async function loadTabs() {
+  try {
+    const r = await fetch('/api/tabs');
+    const data = await r.json();
+    tabConfig = data.tabs;
+  } catch {
+    // Fallback config if server not running
+    tabConfig = [
+      {id:'play', label:'Play', icon:'ti-dice', enabled:true, default_visible:true, order:1, description:'Board and game controls'},
+      {id:'settings', label:'Settings', icon:'ti-settings', enabled:true, default_visible:true, order:2, description:'Board rules and players'},
+      {id:'train', label:'Train', icon:'ti-brain', enabled:true, default_visible:false, order:3, description:'RL training controls'},
+      {id:'stats', label:'Stats & Replay', icon:'ti-chart-bar', enabled:true, default_visible:true, order:4, description:'Win rates and history'},
+      {id:'bots', label:'Bots', icon:'ti-robot', enabled:true, default_visible:false, order:5, description:'Saved bot models'},
+      {id:'admin', label:'Admin', icon:'ti-shield', enabled:true, default_visible:true, order:99, admin_only:true, description:'Tab visibility control'}
+    ];
+  }
+  normaliseTabs();
+  renderTabs();
+}
+
+function normaliseTabs() {
+  const defaults = [
+    {id:'play', label:'Play', icon:'ti-dice', enabled:true, default_visible:true, order:1, description:'Board and game controls'},
+    {id:'settings', label:'Settings', icon:'ti-settings', enabled:true, default_visible:true, order:2, description:'Board rules and players'},
+    {id:'train', label:'Train', icon:'ti-brain', enabled:true, default_visible:false, order:3, description:'RL training controls'},
+    {id:'stats', label:'Stats & Replay', icon:'ti-chart-bar', enabled:true, default_visible:true, order:4, description:'Win rates and history'},
+    {id:'bots', label:'Bots', icon:'ti-robot', enabled:true, default_visible:false, order:5, description:'Saved bot models'},
+    {id:'admin', label:'Admin', icon:'ti-shield', enabled:true, default_visible:true, order:99, admin_only:true, description:'Tab visibility control'}
+  ];
+  const byId = Object.fromEntries(tabConfig.map(t => [t.id, t]));
+  tabConfig = defaults.map(d => ({...d, ...(byId[d.id] || {}), default_visible: d.id === 'play' ? true : ((byId[d.id] || d).default_visible)}));
+  const prefs = JSON.parse(localStorage.getItem('ludo_tab_prefs') || '{}');
+  if (prefs.play === false) {
+    prefs.play = true;
+    localStorage.setItem('ludo_tab_prefs', JSON.stringify(prefs));
+  }
+}
+
+function getVisibleTabs() {
+  const user_prefs = JSON.parse(localStorage.getItem('ludo_tab_prefs') || '{}');
+  return tabConfig
+    .filter(t => t.enabled)
+    .filter(t => {
+      if (t.admin_only) return true;
+      return user_prefs[t.id] !== undefined ? user_prefs[t.id] : t.default_visible;
+    })
+    .sort((a,b) => a.order - b.order);
+}
+
+function renderTabs() {
+  const nav = document.getElementById('tab-nav');
+  nav.innerHTML = '';
+  const visible = getVisibleTabs();
+  visible.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (t.admin_only ? ' admin-tab' : '');
+    btn.id = 'tab-btn-' + t.id;
+    btn.innerHTML = `<i class="ti ${t.icon}" aria-hidden="true"></i>${t.label}`;
+    btn.onclick = () => switchTab(t.id);
+    nav.appendChild(btn);
+  });
+  // Activate first tab
+  const first = visible[0];
+  if (first) switchTab(first.id);
+}
+
+function switchTab(id) {
+  if (id === 'admin' && !adminToken) {
+    const overlay = document.getElementById('admin-overlay');
+    overlay.style.display = 'flex';
+    return;
+  }
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const btn = document.getElementById('tab-btn-' + id);
+  if (btn) btn.classList.add('active');
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+
+  if (id === 'stats') loadStats();
+  if (id === 'admin' && adminToken) renderAdminPanel();
+}
+
+// ---- ADMIN AUTH ----
+async function doAdminLogin() {
+  const pw = document.getElementById('admin-pw').value;
+  await loginWithPw(pw, 'admin-alert', () => {
+    document.getElementById('admin-locked-msg').style.display = 'none';
+    document.getElementById('admin-panel').style.display = 'block';
+    document.getElementById('admin-auth-badge').textContent = 'unlocked';
+    renderAdminPanel();
+  });
+}
+
+async function doOverlayLogin() {
+  const pw = document.getElementById('overlay-pw').value;
+  await loginWithPw(pw, 'overlay-alert', () => {
+    closeOverlay();
+    switchTab('admin');
+  });
+}
+
+async function loginWithPw(pw, alertId, onSuccess) {
+  const alert = document.getElementById(alertId);
+  alert.className = 'alert';
+  try {
+    const r = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({password: pw})
+    });
+    if (!r.ok) {
+      alert.className = 'alert alert-error show';
+      alert.textContent = 'Invalid password.';
+      return;
+    }
+    const d = await r.json();
+    adminToken = d.token;
+    if (d.first_run) {
+      alert.className = 'alert alert-success show';
+      alert.textContent = 'First run: password set!';
+    }
+    onSuccess();
+  } catch {
+    // Fallback for dev without server
+    adminToken = 'dev-token';
+    onSuccess();
+  }
+}
+
+function closeOverlay() {
+  document.getElementById('admin-overlay').style.display = 'none';
+  document.getElementById('overlay-pw').value = '';
+  document.getElementById('overlay-alert').className = 'alert';
+}
+
+function renderAdminPanel() {
+  const list = document.getElementById('tab-config-list');
+  list.innerHTML = '';
+  tabConfig.forEach(t => {
+    const row = document.createElement('div');
+    row.className = 'tab-config-row';
+    row.innerHTML = `
+      <i class="ti ${t.icon} tab-icon" aria-hidden="true"></i>
+      <div class="tab-meta">
+        <div class="tab-name">${t.label}</div>
+        <div class="tab-desc">${t.description || ''}</div>
+      </div>
+      <div class="tab-config-toggles">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="mini-toggle-label">Enabled</span>
+          <label class="toggle" style="width:32px;height:18px;">
+            <input type="checkbox" ${t.enabled?'checked':''} ${t.admin_only?'disabled':''} onchange="updateTabConfig('${t.id}','enabled',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="mini-toggle-label">Default on</span>
+          <label class="toggle" style="width:32px;height:18px;">
+            <input type="checkbox" ${t.default_visible?'checked':''} ${t.admin_only?'disabled':''} onchange="updateTabConfig('${t.id}','default_visible',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function updateTabConfig(id, field, value) {
+  const tab = tabConfig.find(t => t.id === id);
+  if (tab) tab[field] = value;
+}
+
+async function saveTabConfig() {
+  try {
+    await fetch('/api/tabs', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({token: adminToken, tabs: tabConfig})
+    });
+  } catch {}
+  renderTabs();
+  const ok = document.getElementById('admin-save-ok');
+  ok.classList.add('show');
+  setTimeout(() => ok.classList.remove('show'), 2500);
+}
+
+// ---- GAME ----
+async function newGame() {
+  const rules = getGameRules();
+  const numPlayers = parseInt(document.getElementById('set-num-players')?.value || 4);
+  try {
+    const r = await fetch('/api/game/new', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({num_players: numPlayers, rules})
+    });
+    gameState = await r.json();
+  } catch {
+    // Demo mode
+    gameState = makeDemoState(numPlayers);
+  }
+  renderGame();
+  document.getElementById('roll-btn').disabled = false;
+}
+
+function makeDemoState(np=4) {
+  const players = [];
+  for(let p=0;p<np;p++) {
+    players.push({
+      index:p, color:playerColorName(p, np), finished_pieces:0,
+      pieces: [{index:0,position:-1,finished:false,in_yard:true,absolute_position:null},
+               {index:1,position:-1,finished:false,in_yard:true,absolute_position:null},
+               {index:2,position:-1,finished:false,in_yard:true,absolute_position:null},
+               {index:3,position:-1,finished:false,in_yard:true,absolute_position:null}]
+    });
+  }
+  return {num_players:np,current_player:0,starting_player:0,dice:0,phase:'rolling',winner:null,placements:[],turn_count:0,round_count:0,no_pawn_rolls:0,players,valid_moves:[],history:[]};
+}
+
+function animateDice(finalValue) {
+  const face = document.getElementById('dice-face');
+  const duration = 650;
+  const intervalMs = 55;
+  const start = performance.now();
+  face.classList.add('rolling');
+  return new Promise(resolve => {
+    const timer = setInterval(() => {
+      const randomFace = 1 + Math.floor(Math.random() * 6);
+      face.textContent = DICE_FACES[randomFace];
+      if (performance.now() - start >= duration) {
+        clearInterval(timer);
+        face.textContent = DICE_FACES[finalValue] || DICE_FACES[1];
+        face.classList.remove('rolling');
+        resolve();
+      }
+    }, intervalMs);
+  });
+}
+
+async function rollDice() {
+  if (!gameState) return;
+  const rollBtn = document.getElementById('roll-btn');
+  rollBtn.disabled = true;
+  try {
+    const r = await fetch('/api/game/roll', {method:'POST'});
+    const d = await r.json();
+    await animateDice(d.dice);
+    gameState = d.game;
+  } catch {
+    // Demo mode mirrors the "up to three rolls when no pawn is in play" rule.
+    const val = Math.ceil(Math.random()*6);
+    await animateDice(val);
+    gameState.dice = val;
+    gameState.no_pawn_rolls = (gameState.no_pawn_rolls || 0) + 1;
+    gameState.valid_moves = [];
+    if (val === 6) {
+      const p = gameState.players[gameState.current_player];
+      const piece = p.pieces.findIndex(pc => pc.in_yard && !pc.finished);
+      if (piece >= 0) gameState.valid_moves = [{piece_idx: gameState.current_player*4 + piece, target: 0}];
+      gameState.phase = 'moving';
+    } else if (currentPlayerHasNoPawnInPlay() && gameState.no_pawn_rolls < 3) {
+      gameState.phase = 'rolling';
+    } else {
+      gameState.no_pawn_rolls = 0;
+      const nextPlayer = (gameState.current_player + 1) % gameState.num_players;
+      if (nextPlayer === (gameState.starting_player ?? 0)) gameState.round_count = (gameState.round_count || 0) + 1;
+      gameState.current_player = nextPlayer;
+      gameState.phase = 'rolling';
+    }
+  }
+  renderGame();
+}
+
+function renderGame() {
+  if (!gameState) return;
+  drawBoard();
+  renderPlayers();
+  const phase = gameState.phase;
+  const cp = gameState.current_player;
+  const name = getPlayerName(cp);
+  const currentColorName = playerColorName(cp);
+  const playerColor = COLORS[currentColorName] || COLORS.blue;
+  const noPawnRoll = phase === 'rolling' && currentPlayerHasNoPawnInPlay();
+  const rollNumber = Math.min((gameState.no_pawn_rolls || 0) + 1, 3);
+
+  const banner = document.getElementById('turn-banner');
+  const bannerName = document.getElementById('turn-player-name');
+  const instruction = document.getElementById('action-instruction');
+  const rollBtn = document.getElementById('roll-btn');
+
+  banner.classList.remove('idle');
+  banner.style.background = playerColor;
+  const placements = gameState.placements || (gameState.winner !== null ? [gameState.winner] : []);
+  const currentHasWon = placements.includes(cp) || playerHasFinished(cp);
+  bannerName.textContent = gameState.winner !== null
+    ? `${getPlayerName(gameState.winner)} wins`
+    : currentHasWon
+    ? `${name} has finished`
+    : `${name}'s turn`;
+  banner.querySelector('i').className = (gameState.winner !== null || currentHasWon)
+    ? 'fa-solid fa-crown'
+    : (getPlayerType(cp) !== 'human' ? 'fa-solid fa-robot' : 'fa-solid fa-user');
+
+  let instructionText;
+  if (gameState.winner !== null) {
+    instructionText = 'Game finished. Start a new game to play again.';
+  } else if (phase === 'rolling' && noPawnRoll) {
+    instructionText = rollNumber === 1
+      ? 'No pawn is in play. Roll to try to bring one pawn out of the yard.'
+      : `No pawn is in play. Roll ${rollNumber} of 3 to try to bring one pawn out.`;
+  } else if (phase === 'rolling') {
+    instructionText = 'Roll the dice.';
+  } else {
+    instructionText = 'Choose one of the highlighted pawns to move.';
+  }
+  instruction.textContent = instructionText;
+
+  rollBtn.disabled = phase !== 'rolling' || gameState.winner !== null;
+  rollBtn.classList.toggle('active-player-color', !rollBtn.disabled);
+  rollBtn.style.background = rollBtn.disabled ? '' : playerColor;
+  rollBtn.style.borderColor = rollBtn.disabled ? '' : playerColor;
+
+  // Backward-compatible hidden/status text for screen readers and older markup.
+  const status = document.getElementById('status-msg');
+  if (status) status.textContent = `${bannerName.textContent} — ${instructionText}`;
+
+  renderMoveHistory();
+  scheduleAutoActions();
+}
+
+function describePosition(pos) {
+  if (pos === -1 || pos === null || pos === undefined) return 'yard';
+  if (pos >= 52) return `home ${pos}`;
+  return `cell ${pos}`;
+}
+
+function describeMoveHistoryEntry(entry) {
+  const player = entry.player ?? Math.floor((entry.piece ?? 0) / 4);
+  const colorName = playerColorName(player, gameState?.num_players || 4);
+  const localPiece = ((entry.piece ?? 0) % 4) + 1;
+  const events = entry.events || {};
+  const details = [];
+  if ((events.captures || []).length) details.push(`captured ${events.captures.length}`);
+  if (events.finished) details.push('finished');
+  if (events.extra_turn) details.push('extra turn');
+  const suffix = details.length ? ` · ${details.join(' · ')}` : '';
+  return {
+    player,
+    colorName,
+    text: `pawn ${localPiece}: ${describePosition(entry.from)} → ${describePosition(entry.to)}${suffix}`,
+    meta: `dice ${entry.dice ?? '–'} · round ${((entry.round ?? gameState?.round_count ?? 0) + 1)}`
+  };
+}
+
+function renderMoveHistory() {
+  const list = document.getElementById('move-history-list');
+  if (!list) return;
+  const history = gameState?.history || [];
+  if (!history.length) {
+    list.innerHTML = '<div class="move-history-empty">No committed moves yet.</div>';
+    return;
+  }
+  list.innerHTML = history.slice().reverse().slice(0, 8).map(entry => {
+    const d = describeMoveHistoryEntry(entry);
+    const col = COLORS[d.colorName] || COLORS.blue;
+    const icon = getPlayerType(d.player) !== 'human' ? 'fa-robot' : 'fa-user';
+    return `
+      <div class="move-history-row">
+        <span class="move-history-dot" style="background:${col}"></span>
+        <i class="fa-solid ${icon}" aria-hidden="true"></i>
+        <div class="move-history-text">
+          <strong>${d.text}</strong>
+          <span>${d.meta}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function pawnSvg(x, y, color, movable, globalIdx, label) {
+  const size = movable ? 36 : 30;
+  const movableClass = movable ? ' movable' : '';
+  const title = movable ? `Move piece ${label}` : `Piece ${label}`;
+  return `
+    <foreignObject x="${x - size/2}" y="${y - size/2}" width="${size}" height="${size}" style="overflow:visible; cursor:pointer;" onclick="clickPiece(${globalIdx})">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movableClass}" title="${title}" style="color:${color};">
+        <i class="fa-solid fa-chess-pawn" aria-hidden="true"></i>
+      </div>
+    </foreignObject>`;
+}
+
+function pawnPreviewSvg(x, y, color, globalIdx, label) {
+  const size = 32;
+  return `
+    <foreignObject x="${x - size/2}" y="${y - size/2}" width="${size}" height="${size}" style="overflow:visible; pointer-events:none;">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" title="Possible landing square for piece ${label}" style="color:${color};">
+        <i class="fa-regular fa-chess-pawn" aria-hidden="true"></i>
+      </div>
+    </foreignObject>`;
+}
+
+function gridCenter(gx, gy) {
+  const S = 480, cell = S/15;
+  return {x: gx*cell + cell/2, y: gy*cell + cell/2};
+}
+
+function getTargetCenter(playerIdx, target) {
+  if (target < 0) return null;
+  if (target < 52) {
+    const abs = (target + [0,13,26,39][playerIdx]) % 52;
+    const {gx, gy} = getGridForAbsPos(abs, playerIdx);
+    if (gx >= 0) return gridCenter(gx, gy);
+  }
+  const colorName = playerColorName(playerIdx);
+  const lane = HOME_STRETCH_GRID[colorName] || [];
+  const laneIdx = target - 52;
+  if (laneIdx >= 0 && laneIdx < lane.length) {
+    return gridCenter(lane[laneIdx].gx, lane[laneIdx].gy);
+  }
+  return null;
+}
+
+function getPieceCenterForAnimation(playerIdx, pieceIdx, position) {
+  const S = 480, cell = S/15;
+  if (position < 0) {
+    const yard = getYardPositions(playerIdx);
+    return yard[pieceIdx] || yard[0];
+  }
+  return getTargetCenter(playerIdx, position);
+}
+
+function getMovePath(playerIdx, pieceIdx, fromPos, toPos) {
+  const path = [];
+  const start = getPieceCenterForAnimation(playerIdx, pieceIdx, fromPos);
+  if (start) path.push(start);
+  if (fromPos < 0) {
+    const target = getPieceCenterForAnimation(playerIdx, pieceIdx, toPos);
+    if (target) path.push(target);
+    return path;
+  }
+  const step = toPos >= fromPos ? 1 : -1;
+  for (let pos = fromPos + step; step > 0 ? pos <= toPos : pos >= toPos; pos += step) {
+    const pt = getPieceCenterForAnimation(playerIdx, pieceIdx, pos);
+    if (pt) path.push(pt);
+  }
+  return path;
+}
+
+function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+let animatingPieceGlobalIdx = null;
+
+async function animatePawnSteps(globalIdx, fromPos, toPos) {
+  if (!(settings.animate ?? true)) return;
+  const boardWrap = document.getElementById('board-wrap');
+  const svg = document.getElementById('ludo-board');
+  if (!boardWrap || !svg) return;
+  const playerIdx = Math.floor(globalIdx / 4);
+  const pieceIdx = globalIdx % 4;
+  const colorName = playerColorName(playerIdx);
+  const color = COLORS[colorName] || COLORS.blue;
+  const path = getMovePath(playerIdx, pieceIdx, fromPos, toPos);
+  if (path.length < 2) return;
+
+  animatingPieceGlobalIdx = globalIdx;
+  drawBoard();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'moving-pawn-overlay';
+  overlay.style.color = color;
+  overlay.innerHTML = '<i class="fa-solid fa-chess-pawn" aria-hidden="true"></i>';
+  boardWrap.appendChild(overlay);
+
+  const rect = svg.getBoundingClientRect();
+  const scaleX = rect.width / 480;
+  const scaleY = rect.height / 480;
+
+  for (const pt of path) {
+    overlay.style.transform = `translate(${pt.x * scaleX - 21}px, ${pt.y * scaleY - 21}px)`;
+    await sleep(130);
+  }
+  overlay.remove();
+  animatingPieceGlobalIdx = null;
+}
+
+function drawBoard() {
+  const svg = document.getElementById('ludo-board');
+  const S = 480, cell = S/15;
+  let html = '';
+
+  // Background
+  html += `<rect width="${S}" height="${S}" fill="var(--bg2)" rx="12"/>`;
+
+  // Quadrant yards
+  const yards = [
+    {x:0,y:0,col:COLORS.red},
+    {x:9*cell,y:0,col:COLORS.green},
+    {x:0,y:9*cell,col:COLORS.blue},
+    {x:9*cell,y:9*cell,col:COLORS.yellow}
+  ];
+  yards.forEach(({x,y,col}) => {
+    html += `<rect x="${x+cell*0.15}" y="${y+cell*0.15}" width="${cell*5.7}" height="${cell*5.7}" fill="${col}" opacity="0.16" rx="8"/>`;
+    html += `<image href="/static/logo.svg" x="${x+cell*1.05}" y="${y+cell*1.05}" width="${cell*4.0}" height="${cell*4.0}" opacity="0.10" preserveAspectRatio="xMidYMid meet"/>`;
+    html += `<rect x="${x+cell*0.15}" y="${y+cell*0.15}" width="${cell*5.7}" height="${cell*5.7}" fill="none" stroke="${col}" stroke-width="1.5" opacity="0.45" rx="8"/>`;
+  });
+
+  // Main track grid lines
+  const track = getTrackCells();
+  track.forEach(({gx,gy}) => {
+    html += `<rect x="${gx*cell+0.5}" y="${gy*cell+0.5}" width="${cell-1}" height="${cell-1}" fill="none" stroke="rgba(16,9,159,0.10)" stroke-width="0.5" rx="2"/>`;
+  });
+
+  // Home-entry squares and safe havens. Labels are 1-based to match the board notation.
+  // Player start/safe cells are colored; neutral safe cells stay grey.
+  const startSquares = [
+    {label:1, col:COLORS.red},
+    {label:14, col:COLORS.green},
+    {label:27, col:COLORS.yellow},
+    {label:40, col:COLORS.blue}
+  ];
+  const neutralSafeLabels = [7, 20, 33, 46];
+
+  neutralSafeLabels.forEach(label => {
+    const [gx, gy] = TRACK_GRID[label - 1];
+    html += `<rect x="${gx*cell+1}" y="${gy*cell+1}" width="${cell-2}" height="${cell-2}" fill="#D9D9D9" opacity="0.68" rx="3"/>`;
+    html += `<foreignObject x="${gx*cell+cell*0.34}" y="${gy*cell+cell*0.30}" width="${cell*0.36}" height="${cell*0.36}" style="overflow:visible; pointer-events:none;">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#727985;font-size:10px;line-height:1;">
+        <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
+      </div>
+    </foreignObject>`;
+  });
+
+  startSquares.forEach(({label, col}) => {
+    const [gx, gy] = TRACK_GRID[label - 1];
+    html += `<rect x="${gx*cell+1}" y="${gy*cell+1}" width="${cell-2}" height="${cell-2}" fill="${col}" opacity="0.18" rx="3"/>`;
+    html += `<foreignObject x="${gx*cell+cell*0.34}" y="${gy*cell+cell*0.30}" width="${cell*0.36}" height="${cell*0.36}" style="overflow:visible; pointer-events:none;">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${col};font-size:10px;line-height:1;">
+        <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
+      </div>
+    </foreignObject>`;
+  });
+
+  const exitArrows = [
+    {label:51, col:COLORS.red, icon:'fa-arrow-right-long'},
+    {label:12, col:COLORS.green, icon:'fa-arrow-down-long'},
+    {label:25, col:COLORS.yellow, icon:'fa-arrow-left-long'},
+    {label:38, col:COLORS.blue, icon:'fa-arrow-up-long'}
+  ];
+  exitArrows.forEach(({label, col, icon}) => {
+    const [gx, gy] = TRACK_GRID[label - 1];
+    html += `<foreignObject x="${gx*cell+cell*0.18}" y="${gy*cell+cell*0.18}" width="${cell*0.64}" height="${cell*0.64}" style="overflow:visible; pointer-events:none;">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${col};font-size:17px;line-height:1;">
+        <i class="fa-solid ${icon}" aria-hidden="true"></i>
+      </div>
+    </foreignObject>`;
+  });
+
+  // Home stretch arms: red 53–58, green 59–64, yellow 65–70, blue 71–76.
+  const arms = [
+    {col:COLORS.red, cells:HOME_STRETCH_GRID.red},
+    {col:COLORS.green, cells:HOME_STRETCH_GRID.green},
+    {col:COLORS.yellow, cells:HOME_STRETCH_GRID.yellow},
+    {col:COLORS.blue, cells:HOME_STRETCH_GRID.blue}
+  ];
+  arms.forEach(({col,cells}) => {
+    cells.forEach(({gx,gy}) => {
+      html += `<rect x="${gx*cell+1}" y="${gy*cell+1}" width="${cell-2}" height="${cell-2}" fill="${col}" opacity="0.24" rx="2"/>`;
+    });
+  });
+
+  if (settings.show_cell_numbers) {
+    TRACK_GRID.forEach(([gx, gy], idx) => {
+      html += `<text x="${gx*cell+3}" y="${gy*cell+9}" text-anchor="start" font-size="5.5" font-family="var(--mono)" font-weight="700" fill="#262626" opacity="0.72" pointer-events="none">${idx + 1}</text>`;
+    });
+    Object.values(HOME_STRETCH_GRID).flat().forEach(({gx, gy, label}) => {
+      html += `<text x="${gx*cell+3}" y="${gy*cell+9}" text-anchor="start" font-size="5.5" font-family="var(--mono)" font-weight="700" fill="#262626" opacity="0.72" pointer-events="none">${label}</text>`;
+    });
+  }
+
+  // Center home: four directional color triangles, not a translucent overlay.
+  html += `<rect x="${6*cell}" y="${6*cell}" width="${3*cell}" height="${3*cell}" fill="var(--bg2)" stroke="rgba(16,9,159,0.30)" stroke-width="1" rx="4"/>`;
+  html += `<polygon points="${6*cell},${6*cell} ${9*cell},${6*cell} ${7.5*cell},${7.5*cell}" fill="${COLORS.green}" opacity="0.88"/>`;
+  html += `<polygon points="${9*cell},${6*cell} ${9*cell},${9*cell} ${7.5*cell},${7.5*cell}" fill="${COLORS.yellow}" opacity="0.88"/>`;
+  html += `<polygon points="${9*cell},${9*cell} ${6*cell},${9*cell} ${7.5*cell},${7.5*cell}" fill="${COLORS.blue}" opacity="0.88"/>`;
+  html += `<polygon points="${6*cell},${9*cell} ${6*cell},${6*cell} ${7.5*cell},${7.5*cell}" fill="${COLORS.red}" opacity="0.88"/>`;
+  html += `<line x1="${6*cell}" y1="${6*cell}" x2="${9*cell}" y2="${9*cell}" stroke="white" stroke-width="1.4" opacity="0.95"/>`;
+  html += `<line x1="${9*cell}" y1="${6*cell}" x2="${6*cell}" y2="${9*cell}" stroke="white" stroke-width="1.4" opacity="0.95"/>`;
+
+  // Pieces and landing previews
+  if (gameState) {
+    const validMoveByPiece = new Map((gameState.valid_moves||[]).map(m => [m.piece_idx, m]));
+
+    // Possible post-state indicators: regular pawn at the landing square.
+    validMoveByPiece.forEach((move, globalIdx) => {
+      const playerIdx = Math.floor(globalIdx / 4);
+      const pieceIdx = globalIdx % 4;
+      const player = gameState.players[playerIdx];
+      if (!player) return;
+      const col = COLORS[player.color];
+      const targetCenter = getTargetCenter(playerIdx, move.target);
+      if (targetCenter) {
+        html += pawnPreviewSvg(targetCenter.x, targetCenter.y, col, globalIdx, pieceIdx + 1);
+      }
+    });
+
+    // Actual pieces: solid pawn. Movable pieces hover.
+    gameState.players.forEach(player => {
+      const col = COLORS[player.color];
+      const yardPos = getYardPositions(player.index);
+      let yi = 0;
+      player.pieces.forEach((piece, pi) => {
+        const globalIdx = player.index*4+pi;
+        if (animatingPieceGlobalIdx === globalIdx) return;
+        if (piece.in_yard) {
+          const {x,y} = yardPos[yi++];
+          const movable = validMoveByPiece.has(globalIdx);
+          const glow = movable ? `<circle cx="${x}" cy="${y}" r="${cell*0.48}" fill="${col}" opacity="0.18"/>` : '';
+          html += glow + pawnSvg(x, y, col, movable, globalIdx, pi+1);
+        } else if (!piece.finished && piece.absolute_position !== null) {
+          const {gx,gy} = getGridForAbsPos(piece.absolute_position, player.index);
+          if (gx >= 0) {
+            const cx = gx*cell+cell/2, cy = gy*cell+cell/2;
+            const movable = validMoveByPiece.has(globalIdx);
+            const glow = movable ? `<circle cx="${cx}" cy="${cy}" r="${cell*0.48}" fill="${col}" opacity="0.20"/>` : '';
+            html += glow + pawnSvg(cx, cy, col, movable, globalIdx, pi+1);
+          }
+        }
+      });
+    });
+  }
+
+  svg.innerHTML = html;
+}
+
+function getYardPositions(playerIdx) {
+  const S=480, cell=S/15;
+  const offsets = [
+    [{x:1.5,y:1.5},{x:3,y:1.5},{x:1.5,y:3},{x:3,y:3}],
+    [{x:10.5,y:1.5},{x:12,y:1.5},{x:10.5,y:3},{x:12,y:3}],
+    [{x:10.5,y:10.5},{x:12,y:10.5},{x:10.5,y:12},{x:12,y:12}],
+    [{x:1.5,y:10.5},{x:3,y:10.5},{x:1.5,y:12},{x:3,y:12}],
+  ];
+  return offsets[playerIdx].map(p=>({x:p.x*cell, y:p.y*cell}));
+}
+
+// Simplified track mapping (main 52-square track)
+const TRACK_GRID = [
+  [1,6],[2,6],[3,6],[4,6],[5,6],
+  [6,5],[6,4],[6,3],[6,2],[6,1],[6,0],
+  [7,0],
+  [8,0],[8,1],[8,2],[8,3],[8,4],[8,5],
+  [9,6],[10,6],[11,6],[12,6],[13,6],[14,6],
+  [14,7],
+  [14,8],[13,8],[12,8],[11,8],[10,8],[9,8],
+  [8,9],[8,10],[8,11],[8,12],[8,13],[8,14],
+  [7,14],
+  [6,14],[6,13],[6,12],[6,11],[6,10],[6,9],
+  [5,8],[4,8],[3,8],[2,8],[1,8],[0,8],
+  [0,7],[0,6]
+];
+
+const HOME_STRETCH_GRID = {
+  red: [
+    {gx:1, gy:7, label:53}, {gx:2, gy:7, label:54}, {gx:3, gy:7, label:55},
+    {gx:4, gy:7, label:56}, {gx:5, gy:7, label:57}, {gx:6, gy:7, label:58}
+  ],
+  green: [
+    {gx:7, gy:1, label:59}, {gx:7, gy:2, label:60}, {gx:7, gy:3, label:61},
+    {gx:7, gy:4, label:62}, {gx:7, gy:5, label:63}, {gx:7, gy:6, label:64}
+  ],
+  yellow: [
+    {gx:13, gy:7, label:65}, {gx:12, gy:7, label:66}, {gx:11, gy:7, label:67},
+    {gx:10, gy:7, label:68}, {gx:9, gy:7, label:69}, {gx:8, gy:7, label:70}
+  ],
+  blue: [
+    {gx:7, gy:13, label:71}, {gx:7, gy:12, label:72}, {gx:7, gy:11, label:73},
+    {gx:7, gy:10, label:74}, {gx:7, gy:9, label:75}, {gx:7, gy:8, label:76}
+  ]
+};
+
+function getGridForAbsPos(absPos, playerIdx) {
+  if (absPos < 0 || absPos >= TRACK_GRID.length) return {gx:-1,gy:-1};
+  const [gx,gy] = TRACK_GRID[absPos];
+  return {gx,gy};
+}
+
+function getTrackCells() {
+  return TRACK_GRID.map(([gx,gy])=>({gx,gy}));
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getAutomationDelay() {
+  return 750;
+}
+
+function isCurrentPlayerBot() {
+  if (!gameState) return false;
+  return getPlayerType(gameState.current_player) !== 'human';
+}
+
+function chooseRandomBotMove(moves) {
+  if (!moves || moves.length === 0) return null;
+
+  // Random bot policy: choose a random target square. If several pieces can
+  // make that same move, use the highest pawn id as the tie-breaker.
+  const byTarget = new Map();
+  moves.forEach(move => {
+    const key = String(move.target);
+    const current = byTarget.get(key);
+    if (!current || move.piece_idx > current.piece_idx) byTarget.set(key, move);
+  });
+  const candidates = [...byTarget.values()];
+  return candidates[Math.floor(Math.random() * candidates.length)] || null;
+}
+
+function scheduleAutoActions() {
+  if (!gameState || gameState.winner !== null) return;
+
+  const phase = gameState.phase;
+  const botTurn = isCurrentPlayerBot();
+  const shouldAutoRoll = phase === 'rolling' && ((settings.auto_dice ?? false) || (botTurn && (settings.auto_roll ?? true)));
+
+  if (shouldAutoRoll && !autoRollPending) {
+    autoRollPending = true;
+    setTimeout(async () => {
+      try {
+        if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
+        const stillBotTurn = isCurrentPlayerBot();
+        if (!((settings.auto_dice ?? false) || (stillBotTurn && (settings.auto_roll ?? true)))) return;
+        await rollDice();
+      } finally {
+        autoRollPending = false;
+        // If the roll kept the same player in the rolling phase (for example
+        // roll 1/3 or 2/3 when no pawn is in play), schedule the next
+        // automatic dice roll instead of waiting for a manual click.
+        setTimeout(scheduleAutoActions, 0);
+      }
+    }, getAutomationDelay());
+    return;
+  }
+
+  if (phase === 'moving' && botTurn && !autoBotMovePending) {
+    const move = chooseRandomBotMove(gameState.valid_moves || []);
+    if (!move) return;
+    autoBotMovePending = true;
+    setTimeout(async () => {
+      try {
+        if (!gameState || gameState.phase !== 'moving' || gameState.winner !== null) return;
+        if (!isCurrentPlayerBot()) return;
+        const selected = chooseRandomBotMove(gameState.valid_moves || []);
+        if (selected) await clickPiece(selected.piece_idx);
+      } finally {
+        autoBotMovePending = false;
+      }
+    }, getAutomationDelay());
+    return;
+  }
+
+  scheduleAutoSingleMove();
+}
+
+function scheduleAutoSingleMove() {
+  if (!gameState) return;
+  if (isCurrentPlayerBot()) return;
+  if (!(settings.auto_single_move ?? true)) return;
+  if (autoSingleMovePending) return;
+  if (gameState.phase !== 'moving' || gameState.winner !== null) return;
+  const moves = gameState.valid_moves || [];
+  if (moves.length !== 1) return;
+  autoSingleMovePending = true;
+  setTimeout(async () => {
+    try {
+      const onlyMove = (gameState.valid_moves || [])[0];
+      if (gameState.phase === 'moving' && onlyMove) await clickPiece(onlyMove.piece_idx);
+    } finally {
+      autoSingleMovePending = false;
+    }
+  }, 350);
+}
+
+async function clickPiece(globalIdx) {
+  if (!gameState) return;
+  const move = (gameState.valid_moves||[]).find(m => m.piece_idx === globalIdx);
+  if (!move) return;
+  const playerIdx = Math.floor(globalIdx / 4);
+  const pieceIdx = globalIdx % 4;
+  const pieceBefore = gameState.players?.[playerIdx]?.pieces?.[pieceIdx];
+  const fromPos = pieceBefore ? pieceBefore.position : -1;
+  const movingPlayerBefore = playerIdx;
+  const diceBefore = gameState.dice;
+  const turnBefore = gameState.turn_count || 0;
+  await animatePawnSteps(globalIdx, fromPos, move.target);
+  try {
+    const r = await fetch('/api/game/move', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({piece_idx: move.piece_idx, target: move.target, target_position: move.target})
+    });
+    if (!r.ok) throw new Error('move failed');
+    const d = await r.json();
+    gameState = d.game || d;
+  } catch {
+    // Demo mode: actually move the piece so clicks visibly work even without backend.
+    const piece = gameState.players[playerIdx].pieces[pieceIdx];
+    piece.position = move.target;
+    piece.in_yard = false;
+    if (move.target >= 57) piece.finished = true;
+    piece.absolute_position = move.target < 52 ? ((move.target + [0,13,26,39][playerSlot(playerIdx)] ) % 52) : null;
+    if (gameState.players[playerIdx].pieces.every(pc => pc.finished)) {
+      gameState.placements = gameState.placements || [];
+      if (!gameState.placements.includes(playerIdx)) gameState.placements.push(playerIdx);
+      if (!settings.continue_places) gameState.winner = playerIdx;
+    }
+    gameState.history = gameState.history || [];
+    gameState.history.push({
+      turn: turnBefore,
+      round: gameState.round_count || 0,
+      player: movingPlayerBefore,
+      dice: diceBefore,
+      piece: globalIdx,
+      from: fromPos,
+      to: move.target,
+      events: {captures: [], finished: !!piece.finished, extra_turn: gameState.dice === 6}
+    });
+    gameState.turn_count = turnBefore + 1;
+    gameState.valid_moves = [];
+    gameState.no_pawn_rolls = 0;
+    if (gameState.dice === 6) {
+      gameState.phase = 'rolling';
+    } else {
+      const nextPlayer = (gameState.current_player + 1) % gameState.num_players;
+      if (nextPlayer === (gameState.starting_player ?? 0)) gameState.round_count = (gameState.round_count || 0) + 1;
+      gameState.current_player = nextPlayer;
+      gameState.phase = 'rolling';
+    }
+  }
+  renderGame();
+}
+
+function playerHasFinished(playerIdx) {
+  const placements = gameState?.placements || [];
+  if (placements.includes(playerIdx)) return true;
+  const player = gameState?.players?.[playerIdx];
+  return !!player && player.pieces?.every(pc => pc.finished);
+}
+
+function ordinal(n) {
+  const s = ['th','st','nd','rd'];
+  const v = n % 100;
+  return n + (s[(v-20)%10] || s[v] || s[0]);
+}
+
+function pieceStatusRank(piece) {
+  if (piece.finished) return 0;
+  if (!piece.in_yard) return 1;
+  return 2;
+}
+
+function renderPlayers() {
+  if (!gameState) return;
+  const list = document.getElementById('players-list');
+  list.innerHTML = '';
+  const startingPlayer = gameState.starting_player ?? 0;
+  const placements = gameState.placements || (gameState.winner !== null ? [gameState.winner] : []);
+
+  gameState.players.forEach(p => {
+    const isCurrent = p.index === gameState.current_player;
+    const isStarting = p.index === startingPlayer;
+    const placeIndex = placements.indexOf(p.index);
+    const hasWon = placeIndex >= 0 || playerHasFinished(p.index);
+    const div = document.createElement('div');
+    div.className = 'player-card' + (isStarting ? ' starting' : '') + (hasWon ? ' won' : '');
+    const col = COLORS[p.color];
+    const type = getPlayerType(p.index);
+    const isBot = type !== 'human';
+    const name = getPlayerName(p.index);
+    const pips = [...p.pieces]
+      .sort((a, b) => pieceStatusRank(a) - pieceStatusRank(b))
+      .map(pc => {
+        const icon = pc.finished
+          ? 'fa-solid fa-circle-check'
+          : (!pc.in_yard && !pc.finished ? 'fa-solid fa-circle-half-stroke' : 'fa-regular fa-circle');
+        return `<i class="${icon} pip-icon" style="color:${col}" aria-hidden="true"></i>`;
+      })
+      .join('');
+    const placeLabel = placeIndex >= 0 ? `${placeIndex + 1}${['st','nd','rd'][placeIndex] || 'th'}` : '';
+    div.innerHTML = `
+      <div class="player-dot" style="background:${col}"></div>
+      <div class="player-name-line">
+        <i class="fa-solid ${isBot ? 'fa-robot' : 'fa-user'}" aria-hidden="true"></i>
+        <h3>${name} <span class="player-label-small">${p.color} · ${ordinal(p.index + 1)}</span></h3>
+      </div>
+      <div class="piece-pips">${pips}</div>
+      <div class="order-badges">
+        ${hasWon ? `<span class="badge badge-won" style="font-size:10px;"><i class="fa-solid fa-crown"></i>${placeLabel || 'won'}</span>` : ''}
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ---- SETTINGS ----
+function loadSettings() {
+  try { settings = JSON.parse(localStorage.getItem('ludo_settings') || '{}'); } catch {}
+}
+function applySettingsToControls() {
+  const setChecked = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+  const setValue = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined) el.value = val; };
+  setChecked('rule-six-enter', settings.six_to_enter ?? true);
+  setChecked('rule-six-extra', settings.six_extra_turn ?? true);
+  setChecked('rule-capture', settings.capture_enabled ?? true);
+  setChecked('rule-safe', settings.safe_squares ?? true);
+  setChecked('rule-no-pawn-three-rolls', settings.no_pawn_three_rolls ?? true);
+  setChecked('rule-equal-turns', settings.equal_turns ?? false);
+  setChecked('rule-continue-places', settings.continue_places ?? false);
+  setChecked('set-show-moves', settings.show_moves ?? true);
+  setChecked('set-show-cell-numbers', settings.show_cell_numbers ?? false);
+  setChecked('set-auto-roll', settings.auto_roll ?? true);
+  setChecked('set-auto-dice', settings.auto_dice ?? false);
+  setChecked('set-animate', settings.animate ?? true);
+  setChecked('set-auto-single-move', settings.auto_single_move ?? true);
+  setValue('rule-max-sixes', settings.max_consecutive_sixes ?? 3);
+  setValue('set-num-players', settings.num_players ?? 4);
+}
+function saveSettings() {
+  settings = {
+    six_to_enter: document.getElementById('rule-six-enter')?.checked ?? true,
+    six_extra_turn: document.getElementById('rule-six-extra')?.checked ?? true,
+    capture_enabled: document.getElementById('rule-capture')?.checked ?? true,
+    safe_squares: document.getElementById('rule-safe')?.checked ?? true,
+    max_consecutive_sixes: parseInt(document.getElementById('rule-max-sixes')?.value || 3),
+    num_players: parseInt(document.getElementById('set-num-players')?.value || 4),
+    show_moves: document.getElementById('set-show-moves')?.checked ?? true,
+    show_cell_numbers: document.getElementById('set-show-cell-numbers')?.checked ?? false,
+    auto_roll: document.getElementById('set-auto-roll')?.checked ?? true,
+    auto_dice: document.getElementById('set-auto-dice')?.checked ?? false,
+    animate: document.getElementById('set-animate')?.checked ?? true,
+    auto_single_move: document.getElementById('set-auto-single-move')?.checked ?? true,
+    no_pawn_three_rolls: document.getElementById('rule-no-pawn-three-rolls')?.checked ?? true,
+    equal_turns: document.getElementById('rule-equal-turns')?.checked ?? false,
+    equal_rounds: document.getElementById('rule-equal-turns')?.checked ?? false,
+    continue_places: document.getElementById('rule-continue-places')?.checked ?? false,
+    player_names: settings.player_names || {},
+    player_types: settings.player_types || {},
+  };
+  localStorage.setItem('ludo_settings', JSON.stringify(settings));
+  renderPlayerTypes();
+  if (gameState) renderGame();
+}
+function getGameRules() {
+  return {
+    six_to_enter: settings.six_to_enter ?? true,
+    six_extra_turn: settings.six_extra_turn ?? true,
+    capture_enabled: settings.capture_enabled ?? true,
+    safe_squares: settings.safe_squares ?? true,
+    max_consecutive_sixes: settings.max_consecutive_sixes ?? 3,
+    no_pawn_three_rolls: settings.no_pawn_three_rolls ?? true,
+    equal_turns: settings.equal_turns ?? settings.equal_rounds ?? false,
+    continue_places: settings.continue_places ?? false,
+  };
+}
+function renderPlayerTypes() {
+  const np = parseInt(document.getElementById('set-num-players')?.value || settings.num_players || 4);
+  const list = document.getElementById('player-types');
+  if (!list) return;
+  list.innerHTML = '';
+  for (let i=0;i<np;i++) {
+    const col = COLORS[playerColorName(i, np)];
+    const type = getPlayerType(i);
+    const row = document.createElement('div');
+    row.className = 'rule-row';
+    row.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+        <div style="width:22px;display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;">
+          <div style="width:8px;height:8px;border-radius:50%;background:${col};"></div>
+          <i class="fa-solid ${type === 'human' ? 'fa-user' : 'fa-robot'}" aria-hidden="true" style="color:var(--text3);"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          ${type === 'human'
+            ? `<input type="text" value="${getPlayerName(i).replace(/"/g, '&quot;')}" onchange="setPlayerName(${i}, this.value)" aria-label="Player ${i+1} name" style="width:100%;padding:5px 7px;font-size:12px;margin-bottom:4px;">`
+            : `<div class="rule-name">${getPlayerName(i)}</div>`
+          }
+          <div class="rule-desc">${playerColorName(i, np)}</div>
+        </div>
+      </div>
+      <select style="width:120px;padding:4px 8px;font-size:12px;" id="player-type-${i}" onchange="setPlayerType(${i}, this.value)">
+        <option value="human" ${type==='human'?'selected':''}>Human</option>
+        <option value="random" ${type==='random'?'selected':''}>Random bot</option>
+        <option value="greedy" ${type==='greedy'?'selected':''}>Greedy bot</option>
+      </select>
+    `;
+    list.appendChild(row);
+  }
+}
+
+
+// ---- TRAIN ----
+async function startTraining() {
+  const body = {
+    num_episodes: parseInt(document.getElementById('cfg-episodes').value),
+    opponent: document.getElementById('cfg-opponent').value,
+    num_players: parseInt(document.getElementById('cfg-players').value),
+    agent_player: parseInt(document.getElementById('cfg-agent').value),
+    reward_config: {
+      win: parseFloat(document.getElementById('rew-win').value),
+      capture: parseFloat(document.getElementById('rew-capture').value),
+      piece_advance: parseFloat(document.getElementById('rew-advance').value),
+    }
+  };
+  try {
+    await fetch('/api/train/start', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+  } catch {}
+  document.getElementById('train-start-btn').disabled = true;
+  document.getElementById('train-stop-btn').disabled = false;
+  document.getElementById('train-status-badge').textContent = 'running';
+  document.getElementById('train-status-badge').className = 'badge badge-green';
+  trainPollInterval = setInterval(pollTraining, 800);
+}
+
+async function stopTraining() {
+  try { await fetch('/api/train/stop', {method:'POST'}); } catch {}
+  clearInterval(trainPollInterval);
+  document.getElementById('train-start-btn').disabled = false;
+  document.getElementById('train-stop-btn').disabled = true;
+  document.getElementById('train-status-badge').textContent = 'stopped';
+  document.getElementById('train-status-badge').className = 'badge badge-red';
+}
+
+async function pollTraining() {
+  try {
+    const r = await fetch('/api/train/progress');
+    const d = await r.json();
+    if (!d.running && d.progress) {
+      clearInterval(trainPollInterval);
+      document.getElementById('train-start-btn').disabled = false;
+      document.getElementById('train-stop-btn').disabled = true;
+      document.getElementById('train-status-badge').textContent = 'done';
+      document.getElementById('train-status-badge').className = 'badge badge-blue';
+    }
+    if (d.progress) updateTrainUI(d.progress);
+  } catch {}
+}
+
+function updateTrainUI(p) {
+  const total = p.total_episodes || 1;
+  const pct = Math.round((p.episode / total) * 100);
+  document.getElementById('train-progress-bar').style.width = pct + '%';
+  document.getElementById('train-episode-label').textContent = `${p.episode} / ${total}`;
+  document.getElementById('m-winrate').textContent = (p.win_rate*100).toFixed(1) + '%';
+  document.getElementById('m-avgreward').textContent = p.avg_reward.toFixed(2);
+  document.getElementById('m-wins').textContent = p.wins;
+  // Mini chart
+  const chart = document.getElementById('reward-chart');
+  if (p.recent_rewards && p.recent_rewards.length > 0) {
+    const vals = p.recent_rewards;
+    const mn = Math.min(...vals), mx = Math.max(...vals);
+    const range = mx - mn || 1;
+    chart.innerHTML = vals.map(v => {
+      const h = Math.max(4, Math.round(((v - mn) / range) * 60));
+      return `<div class="bar" style="height:${h}px"></div>`;
+    }).join('');
+  }
+}
+
+// ---- STATS ----
+async function loadStats() {
+  try {
+    const r = await fetch('/api/stats');
+    const d = await r.json();
+    document.getElementById('st-games').textContent = d.games_played || 0;
+    document.getElementById('st-sessions').textContent = d.training_sessions || 0;
+    document.getElementById('st-winrate').textContent = d.best_win_rate ? (d.best_win_rate*100).toFixed(1)+'%' : '—';
+    const hist = document.getElementById('history-list');
+    const noHist = document.getElementById('no-history');
+    if (d.history && d.history.length) {
+      noHist.style.display = 'none';
+      hist.innerHTML = d.history.slice().reverse().map(h => {
+        const date = new Date(h.timestamp*1000).toLocaleString();
+        return `<div class="card" style="background:var(--bg2);display:flex;align-items:center;gap:16px;padding:14px 18px;">
+          <i class="ti ti-brain" style="font-size:18px;color:var(--accent2);" aria-hidden="true"></i>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;">${h.episodes} episodes</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px;">${date}</div>
+          </div>
+          <span class="badge badge-green">Win rate ${(h.win_rate*100).toFixed(1)}%</span>
+          <span class="badge badge-blue">Avg reward ${h.avg_reward}</span>
+        </div>`;
+      }).join('');
+    } else {
+      noHist.style.display = 'block';
+      hist.innerHTML = '';
+    }
+  } catch {}
+}
+
+// ---- BOOT ----
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
