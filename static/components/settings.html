@@ -8,16 +8,8 @@
       <div class="settings-card">
         <h2>Game rules</h2>
         <div class="rule-row">
-          <div><div class="rule-name">Six to enter</div><div class="rule-desc">Pieces need a 6 to leave yard</div></div>
-          <label class="toggle"><input type="checkbox" id="rule-six-enter" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
-        </div>
-        <div class="rule-row">
           <div><div class="rule-name">Six = extra turn</div><div class="rule-desc">Rolling 6 grants another roll</div></div>
           <label class="toggle"><input type="checkbox" id="rule-six-extra" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
-        </div>
-        <div class="rule-row">
-          <div><div class="rule-name">Captures enabled</div><div class="rule-desc">Landing on opponent sends them home</div></div>
-          <label class="toggle"><input type="checkbox" id="rule-capture" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
         </div>
         <div class="rule-row">
           <div><div class="rule-name">Safe squares</div><div class="rule-desc">Marked squares protect from capture</div></div>
@@ -32,8 +24,8 @@
           </select>
         </div>
         <div class="rule-row">
-          <div><div class="rule-name">Three rolls from empty board</div><div class="rule-desc">If a player has no pawn in play, they may roll up to 3 times to enter</div></div>
-          <label class="toggle"><input type="checkbox" id="rule-no-pawn-three-rolls" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          <div><div class="rule-name">Roll attempts from empty board</div><div class="rule-desc">If a player has no pawn in play, allow this many rolls to enter</div></div>
+          <input type="number" id="rule-empty-board-rolls" min="1" value="3" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
         </div>
         <div class="rule-row">
           <div><div class="rule-name">Equal number of rounds</div><div class="rule-desc">After a player wins, continue until the first player would start the next round.</div></div>
@@ -78,10 +70,6 @@
         <div class="rule-row">
           <div><div class="rule-name">Show cell numbers</div><div class="rule-desc">Annotate the main track cells 0–51 for debugging and teaching</div></div>
           <label class="toggle"><input type="checkbox" id="set-show-cell-numbers" onchange="saveSettings()"><span class="toggle-slider"></span></label>
-        </div>
-        <div class="rule-row">
-          <div><div class="rule-name">Auto-roll for bots</div><div class="rule-desc">Skip manual roll for bot turns</div></div>
-          <label class="toggle"><input type="checkbox" id="set-auto-roll" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
         </div>
         <div class="rule-row">
           <div><div class="rule-name">Auto-roll dice</div><div class="rule-desc">Roll automatically for every player after a short pause</div></div>
