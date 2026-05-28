@@ -5,15 +5,5 @@
     "max": 1,
     "step": 0.05
   },
-  "mute_rule": "Volume 0 is muted and shows fa-volume-xmark; any value above 0 shows fa-volume-high.",
-  "notes": "Runtime user settings are saved in localStorage key ludo_settings. Current max volume is intended to be normal audible volume.",
-  "gains": {
-    "dice": 0.18,
-    "move": 0.22,
-    "safe": 0.28,
-    "capture_noise": 0.32,
-    "capture_tone": 0.26,
-    "complete": 0.32,
-    "win": 0.34
-  }
+  "notes": "Sound code is separated from index.html. Runtime setting persists in localStorage key ludo_settings."
 }

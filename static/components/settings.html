@@ -1,0 +1,100 @@
+<!-- SETTINGS -->
+  <div class="panel" id="panel-settings">
+    <div style="margin-bottom:24px;">
+      <h1 style="font-size:22px; font-weight:700;">Settings</h1>
+      <p style="font-size:13px; color:var(--text2); margin-top:4px;">Board rules and game configuration</p>
+    </div>
+    <div class="settings-grid">
+      <div class="settings-card">
+        <h2>Game rules</h2>
+        <div class="rule-row">
+          <div><div class="rule-name">Six to enter</div><div class="rule-desc">Pieces need a 6 to leave yard</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-six-enter" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Six = extra turn</div><div class="rule-desc">Rolling 6 grants another roll</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-six-extra" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Captures enabled</div><div class="rule-desc">Landing on opponent sends them home</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-capture" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Safe squares</div><div class="rule-desc">Marked squares protect from capture</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-safe" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Max consecutive sixes</div><div class="rule-desc">3 sixes in a row = forfeit turn</div></div>
+          <select id="rule-max-sixes" onchange="saveSettings()" style="width:64px; padding:4px 8px; font-size:12px;">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="99">∞</option>
+          </select>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Three rolls from empty board</div><div class="rule-desc">If a player has no pawn in play, they may roll up to 3 times to enter</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-no-pawn-three-rolls" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Equal number of rounds</div><div class="rule-desc">After a player wins, continue until the first player would start the next round.</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-equal-turns" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Continue after first winner</div><div class="rule-desc">Keep playing to determine 2nd, 3rd, and 4th place</div></div>
+          <label class="toggle"><input type="checkbox" id="rule-continue-places" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="settings-card">
+        <h2>Players</h2>
+        <div class="form-row">
+          <label>Number of players</label>
+          <select id="set-num-players" onchange="saveSettings()">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Color assignment</label>
+          <select id="set-slot-mode" onchange="saveSettings()">
+            <option value="fair" selected>Balanced default</option>
+            <option value="fixed">First colors</option>
+            <option value="random">Random colors</option>
+            <option value="explicit">Choose colors</option>
+          </select>
+        </div>
+        <div id="player-slots" class="player-slots"></div>
+        <div style="margin-top:16px;">
+          <p style="font-size:12px; color:var(--text2); margin-bottom:12px;">Player types</p>
+          <div id="player-types"></div>
+        </div>
+      </div>
+      <div class="settings-card">
+        <h2>Display</h2>
+        <div class="rule-row">
+          <div><div class="rule-name">Show valid moves</div><div class="rule-desc">Highlight clickable pieces</div></div>
+          <label class="toggle"><input type="checkbox" id="set-show-moves" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Show cell numbers</div><div class="rule-desc">Annotate the main track cells 0–51 for debugging and teaching</div></div>
+          <label class="toggle"><input type="checkbox" id="set-show-cell-numbers" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Auto-roll for bots</div><div class="rule-desc">Skip manual roll for bot turns</div></div>
+          <label class="toggle"><input type="checkbox" id="set-auto-roll" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Auto-roll dice</div><div class="rule-desc">Roll automatically for every player after a short pause</div></div>
+          <label class="toggle"><input type="checkbox" id="set-auto-dice" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Animate moves</div><div class="rule-desc">Smooth piece movement</div></div>
+          <label class="toggle"><input type="checkbox" id="set-animate" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div class="rule-row">
+          <div><div class="rule-name">Auto-play single legal move</div><div class="rule-desc">If exactly one move is legal after a roll, play it automatically</div></div>
+          <label class="toggle"><input type="checkbox" id="set-auto-single-move" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+  </div>

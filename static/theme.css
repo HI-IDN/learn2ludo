@@ -578,233 +578,40 @@ select {
 }
 
 
-
-/* Board fit tuning */
+/* Smaller board layout */
 main {
-  max-width: 1360px;
-  padding: 18px;
+  max-width: 1280px;
+  padding: 14px;
 }
 
 #board-container {
-  grid-template-columns: minmax(520px, 0.82fr) minmax(300px, 0.18fr);
-  gap: 18px;
+  grid-template-columns: minmax(460px, 0.74fr) minmax(300px, 0.26fr);
+  gap: 16px;
+  align-items: start;
 }
 
 #board-wrap {
   overflow: hidden;
-  padding: 10px;
+  padding: 8px;
 }
 
 .board-svg {
-  max-width: min(78vh, 920px);
+  width: 100%;
+  max-width: min(72vh, 780px);
   min-width: 0;
   margin: 0 auto;
+  display: block;
 }
 
-
-
-/* Pawn options compact move table */
-.pawn-options-turn-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--player-color) 10%, white);
-  border: 1px solid color-mix(in srgb, var(--player-color) 28%, var(--border));
-  margin-bottom: 10px;
+#game-info {
+  gap: 10px;
 }
 
-.pawn-options-turn-head i {
-  color: var(--player-color);
-  font-size: 15px;
-}
-
-.pawn-options-turn-head strong { font-size: 14px; }
-.pawn-options-color,
-.pawn-options-dice {
-  font-size: 12px;
-  color: var(--text2);
-}
-
-.pawn-options-dice {
-  margin-left: auto;
-  font-weight: 700;
-}
-
-.pawn-options-grid.compact {
-  grid-template-columns: 0.7fr 1.6fr 0.7fr !important;
-}
-
-.pawn-option-row.pawn-options-grid.compact {
-  padding: 8px 10px;
-}
-
-
-/* Minimal player order */
-#players-list {
-  gap: 6px;
-}
-
-.player-order-row-min {
-  background: transparent;
-  border: 0;
-  border-radius: var(--radius);
-  padding: 6px 0;
-  display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-}
-
-.player-order-row-min.current {
-  background: rgba(16, 9, 159, 0.04);
-}
-
-.player-order-row-min > i {
-  font-size: 16px;
-  width: 18px;
-  text-align: center;
-}
-
-.player-order-main {
-  min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  flex-wrap: nowrap;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.player-order-name {
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--text);
-}
-
-.player-order-place,
-.player-order-dot,
-.player-order-color {
-  font-weight: 400;
-  font-size: 13px;
-  color: var(--text2);
-}
-
-.player-order-pawns {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  justify-self: end;
-}
-
-.player-order-pawn {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid var(--player-color);
-  background: transparent;
-}
-
-.player-order-pawn.active {
-  background: linear-gradient(90deg, var(--player-color) 50%, transparent 50%);
-}
-
-.player-order-pawn.done {
-  background: var(--player-color);
-}
-
-
-
-
-/* Player-order pawn circles: no white outline */
-.player-order-pawn {
-  box-shadow: none !important;
-}
-
-
-/* Pawn movement settings */
-.compact-delay-grid .delay-inputs {
-  display: flex;
-  gap: 6px;
-}
-
-.compact-delay-grid .delay-inputs input {
-  width: 88px;
-}
-
-.compact-delay-grid .delay-labels {
-  grid-column: 2;
-  display: flex;
-  gap: 36px;
-  font-size: 11px;
-  color: var(--text3);
-  margin-top: 4px;
-}
-
-
-/* Sound controls and win fanfare */
-#sound-toggle-btn.sound-off {
-  color: var(--text3);
-}
-
-.winner-fanfare {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  z-index: 200;
-  opacity: 0;
-  transform: scale(0.98);
-  transition: opacity 220ms ease, transform 220ms ease;
-}
-
-.winner-fanfare.show {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.winner-fanfare-card {
-  background: rgba(255, 255, 255, 0.94);
-  border: 2px solid var(--winner-color);
-  box-shadow: 0 18px 60px rgba(38, 38, 38, 0.18);
-  border-radius: 24px;
-  padding: 20px 28px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  color: var(--winner-color);
-  font-size: 24px;
-}
-
-.winner-fanfare-card i {
-  font-size: 28px;
-}
-
-
-#sound-toggle-btn {
-  min-width: 92px;
-}
-
-
-
-
-
-
-/* Single sound volume control */
-.sound-volume-control {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 9px;
-  border: 1px solid var(--border2);
-  border-radius: 999px;
-  background: var(--bg2);
-  color: var(--text2);
-}
-
-.sound-volume-control input[type="range"] {
-  width: 110px;
-  accent-color: var(--accent);
+@media (max-width: 1000px) {
+  #board-container {
+    grid-template-columns: 1fr;
+  }
+  .board-svg {
+    max-width: min(86vw, 720px);
+  }
 }

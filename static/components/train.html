@@ -1,0 +1,85 @@
+<!-- TRAIN -->
+  <div class="panel" id="panel-train">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+      <div>
+        <h1 style="font-size:22px; font-weight:700;">Train</h1>
+        <p style="font-size:13px; color:var(--text2); margin-top:4px;">RL training controls</p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-primary" id="train-start-btn" onclick="startTraining()"><i class="ti ti-player-play"></i> Start</button>
+        <button class="btn btn-danger" id="train-stop-btn" onclick="stopTraining()" disabled><i class="ti ti-player-stop"></i> Stop</button>
+      </div>
+    </div>
+    <div class="train-layout">
+      <div class="card" style="background:var(--bg2);">
+        <p class="section-title">Configuration</p>
+        <div class="form-row">
+          <label>Episodes</label>
+          <input type="number" id="cfg-episodes" value="1000" min="10" max="100000">
+        </div>
+        <div class="form-row">
+          <label>Opponent policy</label>
+          <select id="cfg-opponent">
+            <option value="random">Random</option>
+            <option value="greedy">Greedy heuristic</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Number of players</label>
+          <select id="cfg-players">
+            <option value="2">2 players</option>
+            <option value="4" selected>4 players</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Agent player slot</label>
+          <select id="cfg-agent">
+            <option value="0">Player 1 (Red)</option>
+            <option value="1">Player 2 (Blue)</option>
+            <option value="2">Player 3 (Green)</option>
+            <option value="3">Player 4 (Yellow)</option>
+          </select>
+        </div>
+        <p class="section-title" style="margin-top:16px;">Reward shaping</p>
+        <div class="form-row">
+          <label>Win reward</label>
+          <input type="number" id="rew-win" value="100">
+        </div>
+        <div class="form-row">
+          <label>Capture reward</label>
+          <input type="number" id="rew-capture" value="10">
+        </div>
+        <div class="form-row">
+          <label>Per-square advance</label>
+          <input type="number" id="rew-advance" value="0.1" step="0.01">
+        </div>
+      </div>
+      <div>
+        <div class="card" style="background:var(--bg2); margin-bottom:16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <p class="section-title" style="margin:0;">Progress</p>
+            <span class="badge badge-purple" id="train-status-badge">idle</span>
+          </div>
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="train-progress-bar" style="width:0%"></div></div>
+          <div id="train-episode-label" style="font-size:11px; color:var(--text3); text-align:right; margin-top:4px;">0 / 0</div>
+          <div style="margin-top:16px;">
+            <div class="train-metric"><span>Win rate</span><strong id="m-winrate">—</strong></div>
+            <div class="train-metric"><span>Avg reward</span><strong id="m-avgreward">—</strong></div>
+            <div class="train-metric"><span>Total wins</span><strong id="m-wins">—</strong></div>
+          </div>
+        </div>
+        <div class="card" style="background:var(--bg2);">
+          <p class="section-title">Reward trend (last 20 episodes)</p>
+          <div class="mini-chart" id="reward-chart"></div>
+        </div>
+        <div class="card" style="background:var(--bg2); margin-top:16px; border: 1px dashed var(--border2);">
+          <p class="section-title" style="color:var(--accent2);">Plug in your RL algorithm</p>
+          <p style="font-size:13px; color:var(--text2); line-height:1.6;">
+            Edit <code style="font-family:var(--mono); color:var(--accent2);">rl/environment.py</code> → <code style="font-family:var(--mono); color:var(--accent2);">TrainingSession.run_episode()</code>.
+            Replace the random action with your agent.<br><br>
+            The env is gym-compatible: <code style="font-family:var(--mono); color:var(--text2);">obs, reward, done, info = env.step(action)</code>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>

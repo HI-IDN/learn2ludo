@@ -1,0 +1,146 @@
+/* Controls and component-level UI extras */
+
+.component-load-error {
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 12px;
+  color: var(--danger);
+  background: #fff;
+}
+
+.sound-volume-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  background: var(--bg2);
+  color: var(--text2);
+}
+
+.sound-volume-control input[type="range"] {
+  width: 110px;
+  accent-color: var(--accent);
+}
+
+.pawn-options-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.pawn-options-turn-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--player-color) 10%, white);
+  border: 1px solid color-mix(in srgb, var(--player-color) 28%, var(--border));
+  margin-bottom: 10px;
+}
+
+.pawn-options-dice {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--text2);
+}
+
+.pawn-options-grid.compact {
+  display: grid;
+  grid-template-columns: .7fr 1.6fr .7fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.pawn-option-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}
+
+.pawn-option-row.clickable {
+  cursor: pointer;
+}
+
+.pawn-option-row.clickable:hover {
+  border-color: var(--accent);
+  background: #F0F0FF;
+}
+
+.player-order-row-min {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+}
+
+.player-order-row-min.current {
+  background: rgba(16, 9, 159, 0.04);
+  border-radius: 10px;
+}
+
+.player-order-name {
+  font-weight: 700;
+}
+
+.player-order-place,
+.player-order-dot,
+.player-order-color {
+  color: var(--text2);
+  font-size: 13px;
+}
+
+.player-order-pawns {
+  display: flex;
+  gap: 5px;
+  justify-self: end;
+}
+
+.player-order-pawn {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--player-color);
+  background: transparent;
+}
+
+.player-order-pawn.active {
+  background: linear-gradient(90deg, var(--player-color) 50%, transparent 50%);
+}
+
+.player-order-pawn.done {
+  background: var(--player-color);
+}
+
+
+/* Player/color configuration */
+.player-config-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  background: var(--bg2);
+}
+
+.player-config-row .form-row {
+  border-bottom: 0;
+  padding: 5px 0;
+}
+
+.player-config-row input[type="text"] {
+  width: 150px;
+}
+
+.player-slots {
+  margin-top: 10px;
+}
+
+.player-slot-row.slot-duplicate {
+  border-color: var(--danger);
+  background: #FDECEF;
+}
