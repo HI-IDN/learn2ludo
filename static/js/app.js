@@ -23,9 +23,6 @@ function boardLayout(trackSize=52, yardCount=4) {
 }
 function fairSlots(n,k){ return Array.from({length:k}, (_,i)=>(i*Math.floor(n/k))%n); }
 function assignSlots(playerCount, slotMode='fair') {
-  if (slotMode === 'explicit' && Array.isArray(settings.explicit_slots)) {
-    return settings.explicit_slots.slice(0, playerCount).map(Number);
-  }
   if (slotMode === 'fixed') return Array.from({length: playerCount}, (_, i) => i);
   if (slotMode === 'random') {
     const a = [0,1,2,3];
@@ -48,7 +45,7 @@ function getPlayerName(i){
   const type=getPlayerType(i);
   return type !== 'human' ? (settings.bot_names?.[i] || DEFAULT_BOT_NAMES[i] || `Bot ${i+1}`) : (settings.player_names?.[i] || DEFAULT_HUMAN_NAMES[i] || `Player ${i+1}`);
 }
-function setPlayerType(i,v){ settings.player_types=settings.player_types||{}; settings.player_types[i]=v; persistSettings(); renderPlayerTypes(); renderPlayerSlots(); renderPlayers(); }
+function setPlayerType(i,v){ settings.player_types=settings.player_types||{}; settings.player_types[i]=v; persistSettings(); renderPlayerTypes(); renderPlayers(); }
 function setPlayerName(i,v){ settings.player_names=settings.player_names||{}; settings.player_names[i]=v; persistSettings(); renderPlayers(); }
 function persistSettings(){ localStorage.setItem('ludo_settings', JSON.stringify(settings)); }
 
@@ -76,7 +73,7 @@ function normalizeEngineState(raw) {
 
 async function init(){
   loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls();
-  await loadTabs(); await loadStats(); renderPlayerTypes(); renderPlayerSlots(); renderPlayers(); drawBoard();
+  await loadTabs(); await loadStats(); renderPlayerTypes(); renderPlayers(); drawBoard();
 }
 function loadSettings(){ try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};} if(settings.slot_mode===undefined) settings.slot_mode='fair'; if(settings.sound_volume===undefined) settings.sound_volume=0.8; }
 function applySettingsToControls(){
@@ -89,13 +86,12 @@ function saveSettings(){
   settings={...settings,
     num_players:parseInt(document.getElementById('set-num-players')?.value||4),
     slot_mode:document.getElementById('set-slot-mode')?.value || 'fair',
-    explicit_slots: readExplicitSlots(),
     safe_squares:document.getElementById('rule-safe')?.checked ?? true,
     show_cell_numbers:document.getElementById('set-show-cell-numbers')?.checked ?? false,
     animate:document.getElementById('set-animate')?.checked ?? true,
     sound_volume: typeof getSoundVolume==='function' ? getSoundVolume() : (settings.sound_volume ?? 0.8)
   };
-  persistSettings(); renderPlayerTypes(); renderPlayerSlots(); renderPlayers(); drawBoard();
+  persistSettings(); renderPlayerTypes(); renderPlayers(); drawBoard();
 }
 function getGameRules(){ return {safe_squares: settings.safe_squares ?? true}; }
 function buildNewGamePayload(){
@@ -154,7 +150,7 @@ async function makeMove(pieceIdx,target){
 }
 
 function renderGame(){
-  if(!gameState)return; drawBoard(); renderPlayers(); renderPawnOptions(); renderMoveHistory();
+  if(!gameState)return; drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
   const phase=gameState.phase, cp=gameState.current_player, color=COLORS[playerColorName(cp,gameState.num_players)]||COLORS.blue;
   const banner=document.getElementById('turn-banner'), name=document.getElementById('turn-player-name'), instr=document.getElementById('action-instruction'), roll=document.getElementById('roll-btn');
   banner.classList.remove('idle'); banner.style.background=color; banner.querySelector('i').className=getPlayerType(cp)!=='human'?'fa-solid fa-robot':'fa-solid fa-user'; name.textContent=`${getPlayerName(cp)}'s turn`;
@@ -163,82 +159,10 @@ function renderGame(){
 }
 function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'yard'; if(pos>=52)return `home ${pos-51}`; return `cell ${((pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52)+1}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
-function renderPawnOptions(){ const card=document.getElementById('pawn-options-card'); if(!card)return; if(!gameState){card.innerHTML='<div class="move-history-empty">Start a game to inspect pawn options.</div>';return;} const p=gameState.players[gameState.current_player]; const col=COLORS[p.color]||COLORS.blue; const valid=new Map(gameState.valid_moves.map(m=>[m.piece_idx,m])); card.innerHTML=`<div class="pawn-options-turn-head" style="--player-color:${col}"><i class="fa-solid ${getPlayerType(p.index)!=='human'?'fa-robot':'fa-user'}"></i><strong>${getPlayerName(p.index)}</strong><span class="pawn-options-dice">dice ${gameState.dice||'–'}</span></div><div class="pawn-options-header pawn-options-grid compact"><span>pawn</span><span>move</span><span>remaining</span></div><div class="pawn-options-list">${p.pieces.map((pc,i)=>{const g=p.index*4+i,m=valid.get(g);return `<div class="pawn-option-row pawn-options-grid compact${m?' clickable':''}" ${m?`onclick="clickPiece(${g})"`:''}><span><strong>P${i+1}</strong></span><span>${displayCellLabel(p.index,pc.position)} → ${m?displayCellLabel(p.index,m.target):'—'}</span><span><strong>${spacesRemaining(m?m.target:pc.position,pc.finished)}</strong></span></div>`}).join('')}</div>`; }
-function renderMoveHistory(){ const list=document.getElementById('move-history-list'); if(!list)return; const h=gameState?.history||[]; list.innerHTML=h.length?h.slice().reverse().slice(0,8).map(e=>`<div class="move-history-row"><span class="move-history-dot" style="background:${COLORS[playerColorName(e.player,gameState.num_players)]}"></span><i class="fa-solid fa-user"></i><div class="move-history-text"><strong>pawn ${(e.piece%4)+1}: ${displayCellLabel(e.player,e.from)} → ${displayCellLabel(e.player,e.to)}</strong><span>dice ${e.dice??'–'}</span></div></div>`).join(''):'<div class="move-history-empty">No committed moves yet.</div>'; }
+
+// Move history rendering lives in history.js.
 function renderPlayers(){ const list=document.getElementById('players-list'); if(!list)return; const n=gameState?.num_players||parseInt(document.getElementById('set-num-players')?.value||4); const players=gameState?.players||Array.from({length:n},(_,i)=>({index:i,color:playerColorName(i,n),pieces:Array.from({length:4},()=>({in_yard:true,finished:false}))})); list.innerHTML=players.map((p,i)=>{const col=COLORS[p.color]||COLORS.blue; return `<div class="player-order-row-min${p.index===gameState?.current_player?' current':''}"><i class="fa-solid ${getPlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${getPlayerName(p.index)}</span> <span class="player-order-place">${i+1}${['st','nd','rd'][i]||'th'}</span> <span class="player-order-dot">·</span> <span class="player-order-color">${p.color}</span></div><div class="player-order-pawns">${p.pieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`}).join(''); }
-function readExplicitSlots() {
-  const np = parseInt(document.getElementById('set-num-players')?.value || settings.num_players || 4);
-  const current = settings.explicit_slots || assignSlots(np, settings.slot_mode === 'explicit' ? 'fair' : (settings.slot_mode || 'fair'));
-  return Array.from({length: np}, (_, i) => {
-    const el = document.getElementById(`player-slot-${i}`);
-    return parseInt(el?.value ?? current[i] ?? i);
-  });
-}
-
-function setExplicitSlot(i, value) {
-  const np = parseInt(document.getElementById('set-num-players')?.value || settings.num_players || 4);
-  settings.explicit_slots = settings.explicit_slots || assignSlots(np, 'fair');
-  settings.explicit_slots[i] = parseInt(value);
-  settings.slot_mode = 'explicit';
-  const mode = document.getElementById('set-slot-mode');
-  if (mode) mode.value = 'explicit';
-  persistSettings();
-  renderPlayerSlots();
-  renderPlayerTypes();
-  renderPlayers();
-  drawBoard();
-}
-
-function renderPlayerSlots() {
-  const wrap = document.getElementById('player-slots');
-  if (!wrap) return;
-  const np = parseInt(document.getElementById('set-num-players')?.value || settings.num_players || 4);
-  const mode = document.getElementById('set-slot-mode')?.value || settings.slot_mode || 'fair';
-  const slots = assignSlots(np, mode);
-  const used = new Set();
-  wrap.innerHTML = Array.from({length: np}, (_, i) => {
-    const slot = slots[i] ?? i;
-    const duplicate = used.has(slot);
-    used.add(slot);
-    const color = COLORS[PLAYER_COLORS[slot]] || COLORS.blue;
-    const options = PLAYER_COLORS.map((name, idx) => `<option value="${idx}" ${idx === slot ? 'selected' : ''}>${name}</option>`).join('');
-    return `
-      <div class="form-row player-slot-row ${duplicate ? 'slot-duplicate' : ''}">
-        <label><span class="move-history-dot" style="background:${color}"></span> ${getPlayerName(i)} color</label>
-        <select id="player-slot-${i}" onchange="setExplicitSlot(${i}, this.value)">
-          ${options}
-        </select>
-      </div>`;
-  }).join('');
-}
-
-function renderPlayerTypes(){
-  const wrap=document.getElementById('player-types');
-  if(!wrap)return;
-  const n=parseInt(document.getElementById('set-num-players')?.value||settings.num_players||4);
-  wrap.innerHTML=Array.from({length:n},(_,i)=>{
-    const type = getPlayerType(i);
-    const isHuman = type === 'human';
-    const displayName = getPlayerName(i);
-    return `<div class="player-config-row">
-      <div class="form-row">
-        <label>${DEFAULT_HUMAN_NAMES[i]}</label>
-        <select onchange="setPlayerType(${i},this.value)">
-          <option value="human" ${type==='human'?'selected':''}>Human</option>
-          <option value="random" ${type==='random'?'selected':''}>Robot</option>
-          <option value="greedy" ${type==='greedy'?'selected':''}>Greedy robot</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>${isHuman ? 'Human name' : 'Robot name'}</label>
-        ${isHuman
-          ? `<input type="text" value="${displayName}" onchange="setPlayerName(${i}, this.value)" onkeydown="if(event.key==='Enter')this.blur()">`
-          : `<input type="text" value="${displayName}" onchange="settings.bot_names=settings.bot_names||{};settings.bot_names[${i}]=this.value||DEFAULT_BOT_NAMES[${i}]||'Robot';persistSettings();renderPlayers();renderPlayerSlots();" onkeydown="if(event.key==='Enter')this.blur()">`
-        }
-      </div>
-    </div>`;
-  }).join('');
-}
+function renderPlayerTypes(){ const wrap=document.getElementById('player-types'); if(!wrap)return; const n=parseInt(document.getElementById('set-num-players')?.value||settings.num_players||4); wrap.innerHTML=Array.from({length:n},(_,i)=>`<div class="form-row"><label>${DEFAULT_HUMAN_NAMES[i]}</label><select onchange="setPlayerType(${i},this.value)"><option value="human" ${getPlayerType(i)==='human'?'selected':''}>Human</option><option value="random" ${getPlayerType(i)==='random'?'selected':''}>Robot</option></select></div>`).join(''); }
 
 async function startTraining(){try{await fetch('/api/train/start',{method:'POST'});}catch{}}
 async function stopTraining(){try{await fetch('/api/train/stop',{method:'POST'});}catch{}}

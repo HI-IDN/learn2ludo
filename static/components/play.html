@@ -7,6 +7,7 @@
       </div>
       <div style="display:flex; gap:8px;">
         <button class="btn btn-primary" onclick="newGame()"><i class="ti ti-plus"></i> New game</button>
+        <button class="btn btn-sm" id="save-game-json-btn" onclick="saveGameJson()" disabled><i class="fa-solid fa-download"></i> Save JSON</button>
           <label class="sound-volume-control" title="Sound volume">
             <i class="fa-solid fa-volume-high" id="sound-volume-icon"></i>
             <input type="range" id="sound-volume-slider" min="0" max="1" step="0.05" value="0.8" oninput="setSoundVolume(this.value, true)" onchange="setSoundVolume(this.value, true)">
@@ -22,7 +23,7 @@
       <div id="game-info">
         <div class="player-order-title">Player order</div>
         <div id="players-list"></div>
-        <div class="player-order-title current-turn-label">Current turn</div>
+        <div class="player-order-title current-action-label">Current action</div>
         <div class="dice-display">
           <div class="turn-banner idle" id="turn-banner">
             <i class="fa-solid fa-circle-info"></i>
@@ -36,7 +37,7 @@
             </button>
           </div>
         </div>
-        <div class="player-order-title pawn-options-label">Pawn options</div>
+        <div class="player-order-title pawn-options-label">Pawn features</div>
         <div class="pawn-options-card" id="pawn-options-card"><div class="move-history-empty">Start a game to inspect pawn options.</div></div>
         <div class="player-order-title move-history-label">Move history</div>
         <div class="move-history-card">

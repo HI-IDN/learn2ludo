@@ -118,29 +118,9 @@
 }
 
 
-/* Player/color configuration */
-.player-config-row {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 8px 10px;
-  margin-bottom: 8px;
-  background: var(--bg2);
+/* Current action and saved game controls */
+#save-game-json-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
-.player-config-row .form-row {
-  border-bottom: 0;
-  padding: 5px 0;
-}
-
-.player-config-row input[type="text"] {
-  width: 150px;
-}
-
-.player-slots {
-  margin-top: 10px;
-}
-
-.player-slot-row.slot-duplicate {
-  border-color: var(--danger);
-  background: #FDECEF;
-}
