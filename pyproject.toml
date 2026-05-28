@@ -1,0 +1,13 @@
+[project]
+name = "learn2ludo"
+version = "0.1.0"
+
+[project.scripts]
+playludo = "game.play:main"
+
+[tool.setuptools]
+packages = ["game"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
