@@ -223,3 +223,5 @@ __marimo__/
 
 # FontAwesome
 assets/fontawesome-free-7.2.0-web/
+# Claude Code local settings
+.claude/
