@@ -2,8 +2,9 @@
 
 let _pg = null;
 
-function showPregame() {
-  const active = typeof lobbyActiveSlots === 'function' ? lobbyActiveSlots() : [0,1,2,3];
+function showPregame(activeSlots) {
+  const active = activeSlots
+    || (typeof lobbyActiveSlots === 'function' ? lobbyActiveSlots() : [0,1,2,3]);
   const n = active.length;
 
   _pg = {
@@ -19,6 +20,7 @@ function showPregame() {
   if(typeof resetGameHistorySync==='function') resetGameHistorySync();
   document.getElementById('game-action-wrap')?.style.setProperty('display', 'none');
   _setPregameSubtitle('Determining starting player');
+  _setDiceFaceClickable(true);
   _renderPregame();
   _renderPregameHistory();
 }
@@ -28,7 +30,24 @@ function _hidePregame() {
   if (container) { container.style.display = 'none'; container.innerHTML = ''; }
   document.getElementById('game-action-wrap')?.style.removeProperty('display');
   _setPregameSubtitle('');
+  _setActionCardTop(null, 'fa-circle-info', 'Start game', true);
   _pg = null;
+}
+
+function _setActionCardTop(color, iconClass, label, idle = false) {
+  const top = document.getElementById('action-card-top');
+  const icon = document.getElementById('action-avatar-icon');
+  const name = document.getElementById('turn-player-name');
+  if (!top) return;
+  if (idle) {
+    top.classList.add('idle');
+    top.style.background = '';
+  } else {
+    top.classList.remove('idle');
+    top.style.background = color || '';
+  }
+  if (icon) icon.className = `action-avatar-icon fa-solid ${iconClass}`;
+  if (name) name.textContent = label;
 }
 
 function _setPregameSubtitle(text) {
@@ -45,16 +64,14 @@ function _renderPregame() {
   const allRolled = cursor >= competing.length;
   const currentPlayerIdx = allRolled ? -1 : competing[cursor];
 
-  // Turn banner for current roller
-  let bannerHtml = '';
+  // Drive the shared card-top header
   if (!allRolled) {
     const slot  = _pg.active[currentPlayerIdx];
     const color = COLORS[PLAYER_COLORS[slot]] || COLORS.blue;
     const name  = typeof getPlayerName === 'function' ? getPlayerName(currentPlayerIdx) : `Player ${currentPlayerIdx+1}`;
-    bannerHtml = `<div class="turn-banner" style="background:${color}">
-      <i class="fa-solid fa-dice-d6"></i>
-      <span>${name}'s roll</span>
-    </div>`;
+    _setActionCardTop(color, 'fa-dice-d6', `${name}'s roll`);
+  } else {
+    _setActionCardTop(null, 'fa-spinner fa-spin', 'Evaluating…', true);
   }
 
   const rows = Array.from({length: n}, (_, pi) => {
@@ -71,7 +88,7 @@ function _renderPregame() {
     } else if (!isCompeting) {
       diceHtml = `<span class="pg-dice-result pg-dice-out">—</span>`;
     } else {
-      diceHtml = `<span class="pg-dice-result pg-dice-waiting">&middot;</span>`;
+      diceHtml = `<span class="pg-dice-result pg-dice-waiting">·</span>`;
     }
 
     return `<div class="pg-player-row${isCurrent ? ' pg-current' : ''}${!isCompeting ? ' pg-eliminated' : ''}">
@@ -81,39 +98,44 @@ function _renderPregame() {
     </div>`;
   }).join('');
 
-  let footer;
-  if (allRolled) {
-    footer = `<div class="pg-footer-wait"><i class="fa-solid fa-spinner fa-spin"></i> Evaluating…</div>`;
-  } else {
-    footer = `<div style="margin-top:12px;display:flex;justify-content:center;">
-      <button class="btn btn-primary btn-sm" onclick="pregameRoll()">
-        <i class="fa-solid fa-dice-d6"></i> Roll
-      </button>
-    </div>`;
-  }
+  const footer = allRolled
+    ? `<div class="pg-footer-wait"><i class="fa-solid fa-spinner fa-spin"></i> Evaluating…</div>`
+    : '';
 
   container.innerHTML = `
-    ${bannerHtml}
-    <div class="action-instruction">Highest roll goes first · ties re-roll</div>
+    <div class="action-instruction">Highest roll goes first · ties re-roll · click dice to roll</div>
     <div class="pg-players">${rows}</div>
     ${footer}`;
+}
+
+function _onDiceClick() {
+  if (_pg) pregameRoll();
+  else if (typeof rollDice === 'function') rollDice();
+}
+
+function _setDiceFaceClickable(enabled) {
+  const el = document.getElementById('dice-face');
+  if (!el) return;
+  el.style.cursor = enabled ? 'pointer' : 'default';
+  el.style.opacity = enabled ? '' : '0.45';
 }
 
 function pregameRoll() {
   if (!_pg || _pg.rolling) return;
   _pg.rolling = true;
+  _setDiceFaceClickable(false);
 
   const playerIdx = _pg.competing[_pg.cursor];
-  const container = document.getElementById('pregame-container');
-  const waitEl = container?.querySelector('.pg-dice-waiting');
+  const diceEl = document.getElementById('dice-face');
   const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
   let ticks = 0;
 
   const interval = setInterval(() => {
-    if (waitEl) waitEl.textContent = faces[Math.floor(Math.random() * 6)];
+    if (diceEl) diceEl.textContent = faces[Math.floor(Math.random() * 6)];
     if (++ticks >= 8) {
       clearInterval(interval);
       const roll = Math.floor(Math.random() * 6) + 1;
+      if (diceEl) diceEl.textContent = faces[roll - 1];
       _pg.rolls[playerIdx] = roll;
       _pg.cursor++;
       _pg.rolling = false;
@@ -128,6 +150,7 @@ function pregameRoll() {
         _renderPregame();
         setTimeout(_evaluatePregame, 600);
       } else {
+        _setDiceFaceClickable(true);
         _renderPregame();
       }
     }
@@ -153,12 +176,8 @@ function _showPregameWinner(winnerIdx) {
   const color = COLORS[PLAYER_COLORS[slot]] || COLORS.blue;
   const name  = typeof getPlayerName === 'function' ? getPlayerName(winnerIdx) : `Player ${winnerIdx+1}`;
 
-  container.innerHTML = `
-    <div class="turn-banner" style="background:${color}">
-      <i class="fa-solid fa-crown"></i>
-      <span>${name} goes first!</span>
-    </div>
-    <div class="action-instruction">Starting game…</div>`;
+  _setActionCardTop(color, 'fa-crown', `${name} goes first!`);
+  container.innerHTML = `<div class="action-instruction" style="text-align:center">Starting game…</div>`;
 
   setTimeout(() => {
     _hidePregame();
@@ -176,13 +195,10 @@ function _showTieMessage(tiedPlayers, tiedValue) {
   if (!container) return;
   const names = tiedPlayers.map(i => typeof getPlayerName === 'function' ? getPlayerName(i) : `Player ${i+1}`);
 
+  _setActionCardTop(null, 'fa-equals', `Tie — ${names.join(' & ')} re-roll`, true);
   const existing = container.querySelector('.pg-players')?.outerHTML || '';
   container.innerHTML = `
-    <div class="turn-banner idle">
-      <i class="fa-solid fa-equals"></i>
-      <span>Tie on ${['⚀','⚁','⚂','⚃','⚄','⚅'][tiedValue-1]} — ${names.join(' & ')} re-roll</span>
-    </div>
-    <div class="action-instruction">Only tied players roll again</div>
+    <div class="action-instruction">Tied on ${['⚀','⚁','⚂','⚃','⚄','⚅'][tiedValue-1]} · only tied players roll again</div>
     ${existing}`;
 
   setTimeout(() => {

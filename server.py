@@ -168,6 +168,7 @@ def new_game(req: NewGameRequest):
     board_cfg = req.config.get("board", {})
     player_count = req.config.get("player_count", req.num_players)
     explicit_slots = req.config.get("explicit_slots") or list(range(player_count))
+    starting_player = int(req.config.get("starting_player", 0))
     yard_count = board_cfg.get("yard_count", 4)
     cfg = GameConfig(
         board=BoardConfig(
@@ -180,7 +181,9 @@ def new_game(req: NewGameRequest):
         player_count=player_count,
         explicit_slots=explicit_slots,
     )
-    active_game = GameSession(cfg)
+    max_yard_rolls = int(req.rules.get("empty_board_rolls", 3))
+    active_game = GameSession(cfg, max_yard_rolls=max_yard_rolls)
+    active_game.game.player = max(0, min(starting_player, player_count - 1))
     stats = load_stats()
     stats["games_played"] += 1
     save_stats(stats)

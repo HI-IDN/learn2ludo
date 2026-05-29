@@ -7,10 +7,7 @@
 @use "../base/variables" as *;
 
 // ---- Shared card base -------------------------------------------------------
-// These four elements share the same card appearance as .card but are kept
-// as separate class names so JS and templates can target them independently.
 
-.dice-display,
 .pawn-options-card,
 .move-history-card,
 .play-controls-card {
@@ -20,30 +17,62 @@
   padding: 16px;
 }
 
-// ---- Turn banner ------------------------------------------------------------
-// Coloured bar at the top of the sidebar showing whose turn it is.
-// Background colour is set inline (var(--player-color)) by JS.
+// ---- Current action card ----------------------------------------------------
+// Styled like a lobby slot: dark card, large coloured header, light body.
 
-.turn-banner {
-  border-radius: $radius;
-  padding: 10px 12px;
-  color: white;
+.action-card {
+  background: #111118;
+  border-radius: $radius-lg;
+  overflow: hidden;
+}
+
+.action-card-top {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
   align-items: center;
-  font-weight: 700;
+  justify-content: flex-end;
+  padding: 20px 16px 16px;
+  gap: 10px;
+  min-height: 110px;
+  transition: background 0.25s;
 
-  // Before the game starts no player is active.
   &.idle {
-    color: $color-text-2;
-    background: $color-bg-raised;
+    background: #2a2a3a;
   }
+}
+
+.action-card-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-avatar-icon {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.action-card-name {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.action-card-body {
+  background: $color-bg-alt;
+  padding: 16px;
 }
 
 .action-instruction {
   font-size: 13px;
   color: $color-text-2;
-  margin-top: 10px;
+  margin-bottom: 4px;
 }
 
 // ---- Dice display -----------------------------------------------------------
@@ -53,6 +82,14 @@
   text-align: center;
   line-height: 1;
   margin-top: 12px;
+  margin-bottom: 8px;
+  user-select: none;
+  transition: transform 0.1s ease, opacity 0.2s;
+
+  &[style*="pointer"] {
+    &:hover  { transform: scale(1.12); }
+    &:active { transform: scale(0.96); }
+  }
 
   // Brief tilt animation triggered by JS when the dice rolls.
   &.rolling {
@@ -120,28 +157,19 @@
 }
 
 .move-history-row {
-  grid-template-columns: auto auto 1fr;
+  grid-template-columns: auto 1fr;
 }
 
 .move-history-pregame {
   opacity: 0.65;
 }
 
-.move-history-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
+.move-history-yard-roll {
+  opacity: 0.75;
 }
 
-.move-history-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-
-  span {
-    color: $color-text-3;
-  }
+.mh-sep {
+  color: $color-text-3;
 }
 
 // ---- Pawn options picker ----------------------------------------------------

@@ -1,66 +1,40 @@
 // =============================================================================
 // Pawn glyphs
-// Font Awesome chess-pawn rendering, preview stacks, and the animated
+// Font Awesome chess-pawn rendering, preview ghost, and the animated
 // moving-pawn overlay used during piece transitions.
 // =============================================================================
 
-// No variables needed here — values are rendering constants, not theme tokens.
-
 // ---- Base pawn stroke -------------------------------------------------------
-// White stroke behind the pawn icon makes it legible on any player colour.
+// White stroke behind the solid pawn makes it legible on any player colour.
 
 .pawn-html .fa-chess-pawn {
-  -webkit-text-stroke: 1.1px #ffffff;
+  -webkit-text-stroke: 2px #ffffff;
   paint-order: stroke fill;
 }
 
-// ---- Preview stack ----------------------------------------------------------
-// Used in the pawn-options list to show a "ghost" of where a piece would land.
-// Two absolutely-positioned icons are layered: a white outline base and a
-// coloured scaled-down overlay.
+// ---- Preview ghost ----------------------------------------------------------
+// fa-regular (outline) pawn shown at the destination cell.
 
-.pawn-html.preview {
-  .preview-pawn-stack {
-    position: relative;
-    width: 1em;
-    height: 1em;
-    display: inline-block;
-  }
-
-  .preview-pawn-base,
-  .preview-pawn-overlay {
-    position: absolute;
-    inset: 0;
-  }
-
-  // Outer white silhouette — colour set via --preview-color CSS var inline.
-  .preview-pawn-base {
-    color: #ffffff;
-    -webkit-text-stroke: 1.1px var(--preview-color);
-  }
-
-  // Inner coloured icon, scaled down and re-stroked white.
-  .preview-pawn-overlay {
-    color: var(--preview-color);
-    transform: scale(0.62);
-    -webkit-text-stroke: 0.9px #ffffff;
-  }
+.pawn-html.preview .fa-chess-pawn {
+  -webkit-text-stroke: 2px #ffffff;
 }
 
 // ---- Animated moving-pawn overlay ------------------------------------------
-// An absolutely-positioned element that is translated via JS during move
-// animations. Sits above the board SVG (z-index 50) and ignores pointer events.
+// Absolutely-positioned div translated via JS during move animations.
+// fa-bounce on the icon gives a per-step bounce as it hops cell to cell.
 
 .moving-pawn-overlay {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 26px;
   height: 26px;
   z-index: 50;
   pointer-events: none;
-  transition: transform 90ms linear;
+  transition: transform 160ms linear;
 
   .fa-chess-pawn {
     font-size: 26px;
-    -webkit-text-stroke: 1.1px #ffffff;
+    -webkit-text-stroke: 2px #ffffff;
   }
 }

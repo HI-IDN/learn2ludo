@@ -24,6 +24,13 @@
           </button>
         </div>
 
+        <button class="btn auto-play-btn"
+                id="auto-play-btn"
+                onclick="toggleAutoPlay()"
+                title="When only one move is available, the game will automatically play it for you">
+          <i class="fa-solid fa-forward-step"></i> Auto play
+        </button>
+
         <label class="sound-volume-control" title="Sound volume">
           <i class="fa-solid fa-volume-high" id="sound-volume-icon"></i>
           <input type="range"
@@ -47,28 +54,26 @@
       <div class="side-section">
         <div class="player-order-title">Current action</div>
 
-        <div class="dice-display" id="dice-display">
-          <div id="pregame-container" style="display:none"></div>
-
-          <div id="game-action-wrap">
-            <div class="turn-banner idle" id="turn-banner">
-              <i class="fa-solid fa-circle-info"></i>
-              <span id="turn-player-name">Start game</span>
+        <div class="action-card" id="action-card">
+          <!-- Coloured header — updated by renderCurrentAction / pregame -->
+          <div class="action-card-top idle" id="action-card-top">
+            <div class="action-card-avatar">
+              <i class="action-avatar-icon fa-solid fa-circle-info" id="action-avatar-icon"></i>
             </div>
+            <div class="action-card-name" id="turn-player-name">Start game</div>
+          </div>
 
-            <div class="action-instruction" id="action-instruction">
-              Click <strong>New game</strong> to begin.
-            </div>
+          <!-- Body -->
+          <div class="action-card-body">
+            <!-- Shared clickable dice — always visible; dispatches to pregame or game -->
+            <div class="dice-face" id="dice-face" onclick="_onDiceClick()">⚀</div>
 
-            <div class="dice-face" id="dice-face">⚀</div>
+            <div id="pregame-container" style="display:none"></div>
 
-            <div style="margin-top:12px; display:flex; justify-content:center;">
-              <button class="btn btn-primary btn-sm"
-                      id="roll-btn"
-                      onclick="rollDice()"
-                      disabled>
-                <i class="fa-solid fa-dice-d6"></i> Roll
-              </button>
+            <div id="game-action-wrap">
+              <div class="action-instruction" id="action-instruction">
+                Click <strong>New game</strong> to begin.
+              </div>
             </div>
           </div>
         </div>

@@ -106,7 +106,7 @@ function loadSettings(){
 function applySettingsToControls(){
   const c=(id,v)=>{const e=document.getElementById(id); if(e)e.checked=v;};
   const val=(id,v)=>{const e=document.getElementById(id); if(e)e.value=v;};
-  c('rule-safe', settings.safe_squares ?? true); c('set-show-cell-numbers', settings.show_cell_numbers ?? false); c('set-animate', settings.animate ?? true); val('rule-max-sixes', settings.max_consecutive_sixes ?? 3); val('rule-empty-board-rolls', settings.empty_board_rolls ?? 3);
+  c('rule-safe', settings.safe_squares ?? true); c('set-show-cell-numbers', settings.show_cell_numbers ?? false); c('set-auto-dice', settings.auto_dice ?? false); c('set-auto-single-move', settings.auto_single_move ?? true); val('rule-max-sixes', settings.max_consecutive_sixes ?? 3); val('rule-empty-board-rolls', settings.empty_board_rolls ?? 3);
   val('set-num-players', settings.num_players ?? 4); val('board-yard-count', settings.board_yard_count ?? 4); val('board-track-size', settings.board_track_size ?? 52); val('board-safe-offset', settings.board_safe_offset ?? 7); val('board-home-length', settings.board_home_length ?? 6); val('board-pawns-per-player', settings.pawns_per_player ?? 4); c('board-stack-home', settings.stack_home_pawns ?? false);
 }
 function saveSettings(){
@@ -127,7 +127,8 @@ function saveSettings(){
     max_consecutive_sixes:Math.max(1, parseInt(document.getElementById('rule-max-sixes')?.value || 3)),
     empty_board_rolls:Math.max(1, parseInt(document.getElementById('rule-empty-board-rolls')?.value || 3)),
     show_cell_numbers:document.getElementById('set-show-cell-numbers')?.checked ?? false,
-    animate:document.getElementById('set-animate')?.checked ?? true,
+    auto_dice:document.getElementById('set-auto-dice')?.checked ?? false,
+    auto_single_move:document.getElementById('set-auto-single-move')?.checked ?? true,
     sound_volume: typeof getSoundVolume==='function' ? getSoundVolume() : (settings.sound_volume ?? 0.8)
   };
   validateBoardConfig(); persistSettings(); renderPlayers(); renderLobbySlots(); drawBoard();
@@ -235,19 +236,22 @@ function gameInProgress(){
 
 function requestNewGame(){
   gameStartingPlayer=null;
+  // Use the current game's slots so the pregame matches the Players panel.
+  // Fall back to lobby slots when there's no active game.
+  const slots = gameState?.slots ?? (typeof lobbyActiveSlots==='function' ? lobbyActiveSlots() : null);
   if(gameInProgress()){
     const ctrl = document.getElementById('new-game-control');
-    if(!ctrl) { showPregame(); return; }
+    if(!ctrl) { showPregame(slots); return; }
     ctrl.innerHTML = `
       <div class="new-game-confirm">
         <span class="new-game-confirm-msg"><i class="fa-solid fa-triangle-exclamation"></i> Abandon current game?</span>
         <div class="new-game-confirm-btns">
-          <button class="btn btn-danger btn-sm" onclick="cancelNewGame();showPregame()">Yes, new game</button>
+          <button class="btn btn-danger btn-sm" onclick="cancelNewGame();showPregame(${JSON.stringify(slots)})">Yes, new game</button>
           <button class="btn btn-sm" onclick="cancelNewGame()">Cancel</button>
         </div>
       </div>`;
   } else {
-    showPregame();
+    showPregame(slots);
   }
 }
 
@@ -278,7 +282,8 @@ function animateDice(finalValue){
   return new Promise(resolve=>{ const timer=setInterval(()=>{ face.textContent=DICE_FACES[1+Math.floor(Math.random()*6)]; if(performance.now()-start>=650){clearInterval(timer); face.textContent=DICE_FACES[finalValue]||DICE_FACES[1]; face.classList.remove('rolling'); resolve();}},55); });
 }
 async function rollDice(){
-  if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture(); if(!gameState)return; document.getElementById('roll-btn').disabled=true;
+  if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture(); if(!gameState)return;
+  const diceEl=document.getElementById('dice-face'); if(diceEl){diceEl.style.cursor='default';diceEl.style.opacity='0.45';}
   try{ const r=await fetch('/api/game/roll',{method:'POST'}); const d=await r.json(); const dice=Number(d.dice ?? d.roll ?? d.last_roll ?? d.value ?? d); await animateDice(dice); gameState=normalizeEngineState(d.game||d.state||d); if(!gameState.dice)gameState.dice=dice; }
   catch{ const dice=1+Math.floor(Math.random()*6); await animateDice(dice); gameState.dice=dice; gameState.last_roll=dice; gameState.phase='moving'; gameState.valid_moves=demoValidMoves(gameState.current_player,dice); }
   renderGame();
@@ -311,9 +316,38 @@ function toggleSection(id){
   if(el) el.classList.toggle('collapsed');
 }
 
+function toggleAutoPlay() {
+  settings.auto_single_move = !(settings.auto_single_move ?? true);
+  persistSettings();
+  _updateAutoPlayBtn();
+}
+function _updateAutoPlayBtn() {
+  const btn = document.getElementById('auto-play-btn');
+  if (!btn) return;
+  const on = settings.auto_single_move ?? true;
+  btn.classList.toggle('active', on);
+}
+
+let _autoRollTimer = null;
+function scheduleAutoRoll() {
+  clearTimeout(_autoRollTimer);
+  if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
+  if (!(settings.auto_dice ?? false)) return;
+  if (getPlayerType(gameState.current_player) !== 'human') return;
+  _autoRollTimer = setTimeout(rollDice, 900);
+}
+
 function renderGame(){
   if(!gameState)return; drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
+  _updateAutoPlayBtn();
   if(typeof scheduleBotPlay==='function') scheduleBotPlay();
+  scheduleAutoRoll();
+  // Auto-play the only legal move for human players when the setting is on
+  if((settings.auto_single_move??true) && gameState.phase==='moving' && gameState.winner===null
+      && getPlayerType(gameState.current_player)==='human' && gameState.valid_moves?.length===1){
+    const m=gameState.valid_moves[0];
+    setTimeout(()=>makeMove(m.piece_idx,m.target), 500);
+  }
 }
 function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'yard'; if(pos>=52)return `home ${pos-52}`; return `cell ${(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }

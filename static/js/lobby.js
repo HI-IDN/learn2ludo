@@ -160,5 +160,5 @@ function startFromLobby() {
   persistSettings();
   switchTab('play');
   drawBoard();
-  showPregame();
+  showPregame(active);
 }

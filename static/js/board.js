@@ -16,11 +16,45 @@ const HOME_STRETCH_GRID={red:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],green:[[7,1],
 function gridCenter(gx,gy){const c=480/15; return {x:gx*c+c/2,y:gy*c+c/2};}
 function getTargetCenter(playerIdx,target){ if(target<0)return null; if(target<52){const [gx,gy]=TRACK_GRID[absForPlayerPosition(playerIdx,target)]; return gridCenter(gx,gy);} const lane=HOME_STRETCH_GRID[playerColorName(playerIdx,gameState?.num_players||4)]||[]; const p=lane[target-52]; return p?gridCenter(p[0],p[1]):null; }
 function getYardPositions(slot){const c=480/15, o=[[[2.4,2.4],[4.2,2.4],[2.4,4.2],[4.2,4.2]],[[10.8,2.4],[12.6,2.4],[10.8,4.2],[12.6,4.2]],[[10.8,10.8],[12.6,10.8],[10.8,12.6],[12.6,12.6]],[[2.4,10.8],[4.2,10.8],[2.4,12.6],[4.2,12.6]]]; return o[slot].map(p=>({x:p[0]*c,y:p[1]*c}));}
-function pawnSvg(x,y,color,movable,g,label){const s=26;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:pointer;" onclick="clickPiece(${g})"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn"></i></div></foreignObject>`;}
-function pawnPreviewSvg(x,y,color,g,label){const s=26;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${s}px;line-height:1;"><span class="preview-pawn-stack" style="--preview-color:${color};"><i class="fa-solid fa-chess-pawn preview-pawn-base"></i><i class="fa-solid fa-chess-pawn preview-pawn-overlay"></i></span></div></foreignObject>`;}
+function pawnSvg(x,y,color,movable,g,label){const s=26;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${movable?'pointer':'default'};" onclick="clickPiece(${g})"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${movable?' fa-beat':''}"></i></div></foreignObject>`;}
+function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}
 function getMovePath(playerIdx,pawnIdx,from,to){const path=[]; const start=from<0?getYardPositions(playerSlot(playerIdx,gameState?.num_players||4))[pawnIdx]:getTargetCenter(playerIdx,from); if(start)path.push(start); if(from<0){const t=getTargetCenter(playerIdx,to); if(t)path.push(t); return path;} for(let p=from+1;p<=to;p++){const pt=getTargetCenter(playerIdx,p); if(pt)path.push(pt);} return path;}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-async function animatePawnSteps(g,from,to){ if(!(settings.animate??true))return; const wrap=document.getElementById('board-wrap'), svg=document.getElementById('ludo-board'); if(!wrap||!svg)return; const p=Math.floor(g/4), i=g%4, path=getMovePath(p,i,from,to); if(path.length<2)return; animatingPieceGlobalIdx=g; drawBoard(); const col=COLORS[playerColorName(p,gameState?.num_players||4)], overlay=document.createElement('div'); overlay.className='moving-pawn-overlay'; overlay.style.color=col; overlay.innerHTML='<i class="fa-solid fa-chess-pawn"></i>'; wrap.appendChild(overlay); try{const r=svg.getBoundingClientRect(), sx=r.width/480, sy=r.height/480; if(from<0)await sleep(350); for(const pt of path){overlay.style.transform=`translate(${pt.x*sx-13}px, ${pt.y*sy-13}px)`; if(typeof playSound==='function')playSound('move'); await sleep(120);}} finally{overlay.remove(); animatingPieceGlobalIdx=null;}}
+async function animatePawnSteps(g,from,to){
+  const wrap=document.getElementById('board-wrap'), svg=document.getElementById('ludo-board');
+  if(!wrap||!svg)return;
+  const p=Math.floor(g/4), i=g%4, path=getMovePath(p,i,from,to);
+  if(path.length<2)return;
+  animatingPieceGlobalIdx=g;
+  drawBoard();
+  const col=COLORS[playerColorName(p,gameState?.num_players||4)];
+  const overlay=document.createElement('div');
+  overlay.className='moving-pawn-overlay';
+  overlay.style.color=col;
+  overlay.innerHTML='<i class="fa-solid fa-chess-pawn fa-bounce"></i>';
+  wrap.appendChild(overlay);
+  try{
+    // Compute SVG→DOM scale and offset relative to board-wrap.
+    const svgR=svg.getBoundingClientRect(), wrapR=wrap.getBoundingClientRect();
+    const sx=svgR.width/480, sy=svgR.height/480;
+    const ox=svgR.left-wrapR.left, oy=svgR.top-wrapR.top;
+    const half=13; // half of 26px pawn size
+    const pos=(pt)=>`translate(${ox+pt.x*sx-half}px,${oy+pt.y*sy-half}px)`;
+    // Snap to starting cell with no transition so the overlay doesn't slide
+    // in from (0,0) on the first frame.
+    overlay.style.transition='none';
+    overlay.style.transform=pos(path[0]);
+    overlay.getBoundingClientRect(); // force reflow before re-enabling transition
+    overlay.style.transition='';
+    if(from<0)await sleep(350);
+    for(const pt of path.slice(1)){
+      overlay.style.transform=pos(pt);
+      if(typeof playSound==='function')playSound('move');
+      await sleep(180);
+    }
+    await sleep(60);
+  } finally{overlay.remove(); animatingPieceGlobalIdx=null;}
+}
 
 function drawBoard(){
   const svg=document.getElementById('ludo-board'); if(!svg)return;
@@ -82,17 +116,52 @@ function drawBoard(){
 
   // Pawns & move previews
   if(gameState){
+    const pawnsPerPlayer = gameState.config?.board?.pawns_per_player || 4;
     const valid=new Map(gameState.valid_moves.map(m=>[m.piece_idx,m]));
-    valid.forEach((m,g)=>{const p=Math.floor(g/4),pt=getTargetCenter(p,m.target),col=COLORS[playerColorName(p,gameState.num_players)]; if(pt)html+=pawnPreviewSvg(pt.x,pt.y,col,g,g%4+1);});
+
+    // Move previews — also grouped by destination cell
+    const previewGroups=new Map();
+    valid.forEach((m,g)=>{
+      const p=Math.floor(g/pawnsPerPlayer),pt=getTargetCenter(p,m.target),col=COLORS[playerColorName(p,gameState.num_players)];
+      if(!pt)return;
+      const key=`${Math.round(pt.x)},${Math.round(pt.y)}`;
+      if(!previewGroups.has(key))previewGroups.set(key,[]);
+      previewGroups.get(key).push({cx:pt.x,cy:pt.y,col,g});
+    });
+    previewGroups.forEach(group=>{
+      const n=group.length,step=8;
+      group.forEach((pv,idx)=>{html+=pawnPreviewSvg(pv.cx+(idx-(n-1)/2)*step,pv.cy,pv.col,pv.g);});
+    });
+
+    // Yard pawns — each slot has 4 fixed sub-positions, no grouping needed
+    // On-track pawns — collect by cell center, then spread with offset
+    const trackGroups=new Map();
     gameState.players.forEach(player=>{
       const col=COLORS[player.color]||COLORS[playerColorName(player.index,gameState.num_players)];
       const yard=getYardPositions(playerSlot(player.index,gameState.num_players));
       let yi=0;
       player.pieces.forEach((pc,i)=>{
-        const g=player.index*4+i; if(animatingPieceGlobalIdx===g)return;
+        const g=player.index*pawnsPerPlayer+i; if(animatingPieceGlobalIdx===g)return;
         const movable=valid.has(g);
-        if(pc.in_yard){const pt=yard[yi++]||yard[0]; html+=(movable?`<circle cx="${pt.x}" cy="${pt.y}" r="${c*.48}" fill="${col}" opacity=".18"/>`:'')+ pawnSvg(pt.x,pt.y,col,movable,g,i+1);}
-        else if(!pc.finished){const center=pc.position>=52?getTargetCenter(player.index,pc.position):(pc.absolute_position!=null?gridCenter(...TRACK_GRID[pc.absolute_position]):getTargetCenter(player.index,pc.position)); if(center)html+=(movable?`<circle cx="${center.x}" cy="${center.y}" r="${c*.48}" fill="${col}" opacity=".2"/>`:'')+ pawnSvg(center.x,center.y,col,movable,g,i+1);}
+        if(pc.in_yard){
+          const pt=yard[yi++]||yard[0];
+          html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1);
+        } else if(!pc.finished){
+          const center=pc.position>=52?getTargetCenter(player.index,pc.position):(pc.absolute_position!=null?gridCenter(...TRACK_GRID[pc.absolute_position]):getTargetCenter(player.index,pc.position));
+          if(!center)return;
+          const key=`${Math.round(center.x)},${Math.round(center.y)}`;
+          if(!trackGroups.has(key))trackGroups.set(key,[]);
+          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable,g,label:i+1});
+        }
+      });
+    });
+
+    // Render on-track groups — spread horizontally so stacked pawns fan out
+    const step=8;
+    trackGroups.forEach(group=>{
+      const n=group.length;
+      group.forEach((pw,idx)=>{
+        html+=pawnSvg(pw.cx+(idx-(n-1)/2)*step,pw.cy,pw.col,pw.movable,pw.g,pw.label);
       });
     });
   }

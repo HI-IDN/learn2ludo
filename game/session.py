@@ -6,27 +6,59 @@ _COLORS = ['red', 'green', 'yellow', 'blue', 'orange', 'purple']
 
 
 class GameSession:
-    def __init__(self, cfg: GameConfig):
+    def __init__(self, cfg: GameConfig, max_yard_rolls: int = 3):
         self.game = LudoGame(cfg)
         self.gp   = Gameplay(self.game)
         self.history: list = []
         self.winner = None
+        self.max_yard_rolls  = max(1, max_yard_rolls)
+        self._yard_roll_count = 0   # attempts used this turn (all pawns in yard)
 
     # ---- public API -------------------------------------------------------
 
+    def _all_in_yard(self, player_idx: int) -> bool:
+        return all(p.pos == -1 for p in self.gp.pieces if p.player == player_idx)
+
     def roll_dice(self) -> int:
-        value = self.game.roll()
-        if not self.gp.valid_moves(self.game.player):
+        value = self.game.roll()          # phase → MOVING, last_roll = value
+        valid = self.gp.valid_moves(self.game.player)
+
+        if not valid and self._all_in_yard(self.game.player):
+            self._yard_roll_count += 1
+            self.history.append({
+                "player":       self.game.player,
+                "piece":        None,
+                "from":         None,
+                "to":           None,
+                "dice":         value,
+                "type":         "yard_roll",
+                "attempt":      self._yard_roll_count,
+                "max_attempts": self.max_yard_rolls,
+            })
+            if self._yard_roll_count < self.max_yard_rolls:
+                self.game.phase = Phase.ROLLING   # stay — player rolls again
+            else:
+                self._yard_roll_count = 0
+                self.game.end_move()
+                if self.game.phase == Phase.NEXT:
+                    self.game.next()
+        elif not valid:
+            self._yard_roll_count = 0
+            self.history.append({"player": self.game.player, "dice": value, "type": "roll"})
             self.game.end_move()
             if self.game.phase == Phase.NEXT:
                 self.game.next()
+        else:
+            self._yard_roll_count = 0
+            self.history.append({"player": self.game.player, "dice": value, "type": "roll"})
+
         return value
 
     def apply_move(self, piece_idx: int, target: int) -> dict:
         pawns = self.game.config.board.pawns_per_player
-        pi   = piece_idx // pawns
-        lidx = piece_idx  % pawns
-        pc   = [p for p in self.gp.pieces if p.player == pi][lidx]
+        pi    = piece_idx // pawns
+        lidx  = piece_idx  % pawns
+        pc    = [p for p in self.gp.pieces if p.player == pi][lidx]
         from_pos = pc.pos
         self.gp.move(pc)
         self.history.append({"player": pi, "piece": piece_idx, "from": from_pos, "to": pc.pos})
@@ -84,9 +116,11 @@ class GameSession:
             "dice":           g.last_roll or 0,
             "last_roll":      g.last_roll or 0,
             "valid_moves":    vm,
-            "history":        self.history,
-            "winner":         self.winner,
-            "num_players":    n,
+            "history":          self.history,
+            "winner":           self.winner,
+            "num_players":      n,
+            "yard_roll_count":  self._yard_roll_count,
+            "max_yard_rolls":   self.max_yard_rolls,
         }
 
     # ---- helpers ----------------------------------------------------------
@@ -111,8 +145,11 @@ class GameSession:
             return []
         moves = []
         for pc in self.gp.valid_moves(g.player):
-            pi   = pc.player
-            lidx = [p for p in self.gp.pieces if p.player == pi].index(pc)
+            pi           = pc.player
+            player_pieces = [p for p in self.gp.pieces if p.player == pi]
+            # Use identity (is), not equality (==), so two pawns with the
+            # same pos (e.g. both in the yard at pos=-1) are kept distinct.
+            lidx = next(i for i, p in enumerate(player_pieces) if p is pc)
             gidx = pi * g.config.board.pawns_per_player + lidx
             tgt  = 0 if pc.pos == -1 else pc.pos + g.last_roll
             moves.append({"piece_idx": gidx, "target": tgt})

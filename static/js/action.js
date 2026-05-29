@@ -8,33 +8,38 @@ function renderCurrentAction() {
   const phase = gameState.phase;
   const cp = gameState.current_player ?? gameState.player ?? 0;
   const color = COLORS[playerColorName(cp, gameState.num_players)] || COLORS.blue;
-  const banner = document.getElementById('turn-banner');
+  const cardTop = document.getElementById('action-card-top');
+  const avatarIcon = document.getElementById('action-avatar-icon');
   const name = document.getElementById('turn-player-name');
   const instr = document.getElementById('action-instruction');
-  const roll = document.getElementById('roll-btn');
-  if (!banner || !name || !instr || !roll) return;
+  const dice = document.getElementById('dice-face');
+  if (!cardTop || !name || !instr) return;
 
-  banner.classList.remove('idle');
-  banner.style.background = color;
-  const icon = banner.querySelector('i');
-  if (icon) icon.className = getPlayerType(cp) !== 'human' ? 'fa-solid fa-robot' : 'fa-solid fa-user';
+  cardTop.classList.remove('idle');
+  cardTop.style.background = color;
+  if (avatarIcon) avatarIcon.className = `action-avatar-icon fa-solid ${getPlayerType(cp) !== 'human' ? 'fa-robot' : 'fa-user'}`;
 
   if (gameState.winner !== null && gameState.winner !== undefined) {
-    name.textContent = `${getPlayerName(gameState.winner)} wins`;
+    if (avatarIcon) avatarIcon.className = 'action-avatar-icon fa-solid fa-crown';
+    name.textContent = `${getPlayerName(gameState.winner)} wins!`;
     instr.textContent = 'Game finished.';
-    roll.disabled = true;
+    if (dice) { dice.style.cursor = 'default'; dice.style.opacity = '0.45'; }
     return;
   }
 
   name.textContent = `${getPlayerName(cp)}'s turn`;
 
-  if (phase === 'rolling') instr.textContent = 'Roll the dice.';
-  else if (phase === 'moving') instr.textContent = 'Choose a pawn to move.';
+  const canRoll = phase === 'rolling';
+  if (phase === 'rolling') {
+    const yardCount = gameState.yard_roll_count || 0;
+    const yardMax   = gameState.max_yard_rolls  || 3;
+    instr.textContent = yardCount > 0
+      ? `Try ${yardCount + 1}/${yardMax} — roll to enter.`
+      : 'Click the dice to roll.';
+  } else if (phase === 'moving') instr.textContent = 'Choose a pawn to move.';
   else if (phase === 'next') instr.textContent = 'Pass to the next player.';
   else if (phase === 'finished') instr.textContent = 'Game finished.';
   else instr.textContent = 'Waiting for next action.';
 
-  roll.disabled = phase !== 'rolling';
-  roll.style.background = roll.disabled ? '' : '#10099F';
-  roll.style.borderColor = roll.disabled ? '' : '#10099F';
+  if (dice) { dice.style.cursor = canRoll ? 'pointer' : 'default'; dice.style.opacity = canRoll ? '' : '0.45'; }
 }

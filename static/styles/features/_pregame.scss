@@ -13,21 +13,22 @@
 .pg-players {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: 4px;
+  gap: 5px;
+  margin-top: 2px;
 }
 
 .pg-player-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 10px;
+  padding: 6px 10px;
   border-radius: 8px;
-  background: var(--bg2);
+  background: $color-bg-raised;
   transition: opacity 0.3s;
 
   &.pg-current {
-    outline: 2px solid var(--accent);
+    outline: 2px solid $color-primary;
+    background: $accent-tint;
   }
 
   &.pg-eliminated {
@@ -46,6 +47,7 @@
   flex: 1;
   font-size: 13px;
   font-weight: 600;
+  color: $color-text;
 }
 
 .pg-dice-result {
@@ -55,11 +57,11 @@
   text-align: center;
 }
 
-.pg-dice-waiting { color: var(--text3); }
-.pg-dice-out     { color: var(--text3); font-size: 16px; }
+.pg-dice-waiting { color: $color-text-3; }
+.pg-dice-out     { color: $color-text-3; font-size: 16px; }
 
 .pg-footer-wait {
-  color: var(--text2);
+  color: $color-text-2;
   font-size: 13px;
   display: flex;
   align-items: center;

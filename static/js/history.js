@@ -75,7 +75,8 @@ function pushPregameRoll(playerIdx, name, color, roll, round) {
 function syncGameHistory() {
   const h = gameState?.history || [];
   const newEntries = h.slice(_lastGameHistoryLen);
-  newEntries.forEach(e => sessionHistory.unshift({type:'move', ...e}));
+  // Preserve the type the server set (roll / yard_roll / move); fall back to 'move'.
+  newEntries.forEach(e => sessionHistory.unshift({...e, type: e.type || 'move'}));
   _lastGameHistoryLen = h.length;
 }
 
@@ -87,13 +88,21 @@ function renderMoveHistory(){
   const list=document.getElementById('move-history-list'); if(!list)return;
   syncGameHistory();
 
+  const dot='<span class="mh-sep"> · </span>';
   const rows=sessionHistory.map(e=>{
     if(e.type==='pregame'){
-      const col=e.color;
-      return `<div class="move-history-row move-history-pregame"><span class="move-history-dot" style="background:${col}"></span><i class="fa-solid fa-dice-d6"></i><div class="move-history-text"><strong>${e.name}</strong><span>rolled ${e.roll}${e.round>1?` (re-roll ${e.round})`:''}  · first player</span></div></div>`;
+      const sub=`rolled ${e.roll}${e.round>1?` (re-roll ${e.round})`:''} · first player`;
+      return `<div class="move-history-row move-history-pregame"><i class="fa-solid fa-dice-d6" style="color:${e.color}"></i><span>${e.name}${dot}${sub}</span></div>`;
     }
     const col=COLORS[playerColorName(e.player,gameState?.num_players||4)];
-    return `<div class="move-history-row"><span class="move-history-dot" style="background:${col}"></span><i class="fa-solid fa-user"></i><div class="move-history-text"><strong>pawn ${(e.piece%4)+1}: ${displayCellLabel(e.player,e.from)} → ${displayCellLabel(e.player,e.to)}</strong><span>dice ${e.dice??'–'}</span></div></div>`;
+    const name=getPlayerName(e.player);
+    if(e.type==='yard_roll'){
+      return `<div class="move-history-row move-history-yard-roll"><i class="fa-solid fa-dice-d6" style="color:${col}"></i><span>${name}${dot}rolled ${e.dice} · no pawn in play (try ${e.attempt}/${e.max_attempts})</span></div>`;
+    }
+    if(e.type==='roll'){
+      return `<div class="move-history-row"><i class="fa-solid fa-dice-d6" style="color:${col}"></i><span>${name}${dot}rolled ${e.dice}</span></div>`;
+    }
+    return `<div class="move-history-row"><i class="fa-solid fa-person-walking" style="color:${col}"></i><span>${name}${dot}pawn ${(e.piece%4)+1}: ${displayCellLabel(e.player,e.from)} → ${displayCellLabel(e.player,e.to)}</span></div>`;
   });
 
   list.innerHTML=rows.length?rows.join(''):'<div class="move-history-empty">No committed moves yet.</div>';
