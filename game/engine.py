@@ -4,7 +4,6 @@ from enum import Enum
 import random
 from typing import List, Optional
 
-class SlotMode(Enum): FAIR="fair"; RANDOM="random"; FIXED="fixed"
 class Phase(Enum): ROLLING="rolling"; MOVING="moving"; NEXT="next"; FINISHED="finished"
 
 @dataclass(frozen=True)
@@ -18,7 +17,6 @@ class BoardConfig:
 class GameConfig:
     board:BoardConfig
     player_count:int
-    slot_mode:SlotMode=SlotMode.FAIR
     explicit_slots:Optional[List[int]]=None
 
 @dataclass(frozen=True)
@@ -37,15 +35,9 @@ class BoardLayout:
         safe={(i*s+board.safe_offset)%board.track_size for i in range(board.yard_count)}
         return BoardLayout(board.track_size,board.yard_count,starts,finishes,safe)
 
-def fair_slots(n,k): return [(i*(n//k))%n for i in range(k)]
-
 def assign_slots(cfg):
-    n,k=cfg.board.yard_count,cfg.player_count
-    if k>n: raise ValueError
     if cfg.explicit_slots: return cfg.explicit_slots
-    if cfg.slot_mode==SlotMode.RANDOM: return random.sample(range(n),k)
-    if cfg.slot_mode==SlotMode.FIXED: return list(range(k))
-    return fair_slots(n,k)
+    return list(range(cfg.player_count))
 
 class LudoGame:
     def __init__(self,cfg):

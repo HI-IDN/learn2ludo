@@ -62,7 +62,6 @@ class GameSession:
         return {
             "config": {
                 "player_count": n,
-                "slot_mode": g.config.slot_mode.value,
                 "board": {
                     "track_size":      g.board.track_size,
                     "yard_count":      g.board.yard_count,

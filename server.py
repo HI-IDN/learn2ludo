@@ -21,7 +21,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from game.engine import GameConfig, BoardConfig, SlotMode
+from game.engine import GameConfig, BoardConfig
 from game.session import GameSession
 from game.bots import get_bot_info, REGISTRY as BOT_REGISTRY
 from rl.environment import LudoEnv, TrainingSession, OPPONENT_POLICIES
@@ -166,9 +166,8 @@ class NewGameRequest(BaseModel):
 def new_game(req: NewGameRequest):
     global active_game
     board_cfg = req.config.get("board", {})
-    slot_mode_str = req.config.get("slot_mode", "fair")
-    slot_mode = SlotMode(slot_mode_str) if slot_mode_str in ("fair", "random", "fixed") else SlotMode.FAIR
     player_count = req.config.get("player_count", req.num_players)
+    explicit_slots = req.config.get("explicit_slots") or list(range(player_count))
     yard_count = board_cfg.get("yard_count", 4)
     cfg = GameConfig(
         board=BoardConfig(
@@ -178,7 +177,7 @@ def new_game(req: NewGameRequest):
             safe_offset=board_cfg.get("safe_offset", 7),
         ),
         player_count=player_count,
-        slot_mode=slot_mode,
+        explicit_slots=explicit_slots,
     )
     active_game = GameSession(cfg)
     stats = load_stats()
