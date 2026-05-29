@@ -1,6 +1,6 @@
 const DICE_FACES = ['', '⚀','⚁','⚂','⚃','⚄','⚅'];
 const COLORS = {red:'#AC1A2F', green:'#719500', yellow:'#F5CF47', blue:'#0098AA', purple:'#660451', orange:'#EB7125'};
-const PLAYER_COLORS = ['red','green','yellow','blue','purple','orange'];
+const PLAYER_COLORS = ['red','green','yellow','blue','orange','purple'];
 const ENGINE = {
   track_size: 52,
   yard_count: 4,
@@ -49,7 +49,7 @@ function playerSlot(playerIdx, n=gameState?.num_players || settings.num_players 
 function playerColorName(playerIdx, n){ return PLAYER_COLORS[playerSlot(playerIdx,n)] || 'blue'; }
 function absForPlayerPosition(playerIdx,pos){ return (pos + currentLayout().starts[playerSlot(playerIdx, gameState?.num_players || 4)]) % ENGINE.track_size; }
 
-const DEFAULT_HUMAN_NAMES = ['Helga','Player 2','Player 3','Player 4'];
+const DEFAULT_HUMAN_NAMES = ['Óðinn','Freyja','Loki','Þór','Sif','Týr'];
 const DEFAULT_BOT_NAMES = ['Artemis'];
 function getPlayerType(i){ return settings.player_types?.[i] || (i===0 ? 'human':'random'); }
 
@@ -110,9 +110,17 @@ function applySettingsToControls(){
   val('set-num-players', settings.num_players ?? 4); val('set-board-size', settings.board_size ?? 480); val('set-slot-mode', settings.slot_mode ?? 'fair'); val('board-max-players', settings.board_max_players ?? 4); val('board-yard-count', settings.board_yard_count ?? 4); val('board-track-size', settings.board_track_size ?? 56); val('board-safe-offset', settings.board_safe_offset ?? 7); val('board-home-length', settings.board_home_length ?? 6); val('board-pawns-per-player', settings.pawns_per_player ?? 4); c('board-stack-home', settings.stack_home_pawns ?? false); val('set-board-size', settings.board_size ?? 480);
 }
 function saveSettings(){
+  const boardCfg = readBoardConfig();
   settings={...settings,
     num_players: settings.num_players ?? 4,
     slot_mode: settings.slot_mode ?? 'fair',
+    board_max_players: boardCfg.max_players ?? settings.board_max_players ?? 4,
+    board_yard_count: boardCfg.yard_count ?? settings.board_yard_count ?? 4,
+    board_track_size: boardCfg.track_size ?? settings.board_track_size ?? 56,
+    board_safe_offset: boardCfg.safe_offset ?? settings.board_safe_offset ?? 7,
+    board_home_length: boardCfg.home_length ?? settings.board_home_length ?? 6,
+    pawns_per_player: boardCfg.pawns_per_player ?? settings.pawns_per_player ?? 4,
+    stack_home_pawns: boardCfg.stack_home_pawns ?? settings.stack_home_pawns ?? false,
     safe_squares:document.getElementById('rule-safe')?.checked ?? true,
     six_to_enter:true,
     six_extra_turn:true,
@@ -124,7 +132,7 @@ function saveSettings(){
     animate:document.getElementById('set-animate')?.checked ?? true,
     sound_volume: typeof getSoundVolume==='function' ? getSoundVolume() : (settings.sound_volume ?? 0.8)
   };
-  validateBoardConfig(); persistSettings(); renderPlayers(); drawBoard();
+  validateBoardConfig(); persistSettings(); renderPlayers(); renderLobbySlots(); drawBoard();
 }
 function getGameRules(){ return {six_to_enter:true, six_extra_turn:true, capture_enabled:true, safe_squares: settings.safe_squares ?? true, max_consecutive_sixes: settings.max_consecutive_sixes ?? 3, no_pawn_three_rolls:true, empty_board_rolls: settings.empty_board_rolls ?? 3}; }
 
@@ -140,6 +148,7 @@ function readBoardConfig() {
   const stackHome = document.getElementById('board-stack-home')?.checked ?? !!settings.stack_home_pawns;
 
   return {
+    max_players: maxPlayers,
     track_size: trackSize,
     yard_count: yardCount,
     home_length: homeLength,

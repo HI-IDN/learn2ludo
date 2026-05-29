@@ -4,14 +4,17 @@
 // Active players are stored as settings.active_slots: an ordered array of
 // slot indices (0=red,1=green,2=yellow,3=blue).
 
-const LOBBY_MAX_SLOTS = 4;
+function lobbyMaxSlots() { return settings.board_max_players ?? 4; }
 
 function lobbyActiveSlots() {
+  const max = lobbyMaxSlots();
   if (Array.isArray(settings.active_slots) && settings.active_slots.length >= 2) {
-    return settings.active_slots;
+    // Drop any slots that exceed the current max
+    const valid = settings.active_slots.filter(s => s < max);
+    if (valid.length >= 2) return valid;
   }
-  const n = settings.num_players ?? 4;
-  return Array.from({length: Math.max(2, Math.min(n, LOBBY_MAX_SLOTS))}, (_, i) => i);
+  const n = settings.num_players ?? max;
+  return Array.from({length: Math.max(2, Math.min(n, max))}, (_, i) => i);
 }
 
 function renderLobbySlots() {
@@ -20,7 +23,7 @@ function renderLobbySlots() {
 
   const active = lobbyActiveSlots();
 
-  wrap.innerHTML = Array.from({length: LOBBY_MAX_SLOTS}, (_, slotIdx) => {
+  wrap.innerHTML = Array.from({length: lobbyMaxSlots()}, (_, slotIdx) => {
     const isActive  = active.includes(slotIdx);
     const playerIdx = active.indexOf(slotIdx);
     const colorName = PLAYER_COLORS[slotIdx] || 'blue';
@@ -33,7 +36,7 @@ function renderLobbySlots() {
     return `
       <div class="lobby-slot ${isActive ? 'slot-active' : 'slot-inactive'}"
            style="--slot-color:${color}"
-           ${!isActive && active.length < LOBBY_MAX_SLOTS ? `onclick="lobbyToggleSlot(${slotIdx})"` : ''}>
+           ${!isActive && active.length < lobbyMaxSlots() ? `onclick="lobbyToggleSlot(${slotIdx})"` : ''}>
         <div class="lobby-slot-top" style="background:${color}">
           ${canRemove
             ? `<button class="lobby-slot-remove" onclick="lobbyToggleSlot(${slotIdx})" title="Remove player">
@@ -94,7 +97,7 @@ function lobbyToggleSlot(slotIdx) {
   const isActive = active.includes(slotIdx);
 
   if (isActive && active.length <= 2) return;
-  if (!isActive && active.length >= LOBBY_MAX_SLOTS) return;
+  if (!isActive && active.length >= lobbyMaxSlots()) return;
 
   const next = isActive
     ? active.filter(s => s !== slotIdx)
