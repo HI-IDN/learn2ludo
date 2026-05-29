@@ -1,0 +1,52 @@
+// =============================================================================
+// Button component
+// =============================================================================
+
+@use "../base/variables" as *;
+
+.btn {
+  border: 1px solid $border-medium;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: $color-bg-alt;
+  color: $color-text;
+  font-family: $font-sans;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+
+  &:hover:not(:disabled) {
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: #E8E8E8;
+    color: $color-text-3;
+  }
+}
+
+// ---- Variants ---------------------------------------------------------------
+
+.btn-primary {
+  background: $color-primary;
+  color: white;
+  border-color: $color-primary;
+}
+
+.btn-danger {
+  background: $color-danger;
+  color: white;
+  border-color: $color-danger;
+}
+
+// ---- Sizes ------------------------------------------------------------------
+
+.btn-sm {
+  padding: 5px 9px;
+  font-size: 12px;
+}

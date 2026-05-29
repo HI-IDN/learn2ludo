@@ -1,0 +1,58 @@
+// =============================================================================
+// Admin panel
+// Modal overlay + dialog for tab configuration and admin settings.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Overlay ----------------------------------------------------------------
+// Full-screen dimmed backdrop. Display toggled by JS (flex when visible).
+
+.admin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba($color-text, 0.35);
+  display: none;   // JS sets display:flex to show
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+// ---- Dialog -----------------------------------------------------------------
+
+.admin-dialog {
+  width: min(420px, calc(100vw - 32px));
+  background: white;
+  border-radius: $radius-lg;
+  padding: 20px;
+  border: 1px solid $border-light;
+}
+
+// ---- Tab configuration rows -------------------------------------------------
+// One row per tab in the admin panel. Three-column grid:
+// [icon] [label + description] [toggles]
+
+.tab-config-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+  margin-bottom: 8px;
+  background: $color-bg-alt;
+}
+
+// Small descriptive text under each tab name and beside each mini-toggle.
+.tab-desc,
+.mini-toggle-label {
+  color: $color-text-3;
+  font-size: 12px;
+}
+
+// Pair of toggles (enabled / default-visible) on the right of each row.
+.tab-config-toggles {
+  display: flex;
+  gap: 14px;
+}

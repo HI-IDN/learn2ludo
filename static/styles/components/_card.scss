@@ -1,0 +1,19 @@
+// =============================================================================
+// Card component
+// A simple surface with border and padding. Several feature-specific
+// card types share these base styles via the selector group below.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// .settings-card and .dice-audit-card are feature aliases that share
+// the same visual treatment. Their layout overrides live in
+// features/_settings.scss and features/_stats.scss respectively.
+.card,
+.settings-card,
+.dice-audit-card {
+  background: $color-bg-alt;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  padding: 16px;
+}

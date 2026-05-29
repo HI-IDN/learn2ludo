@@ -17,10 +17,14 @@ Open:
 ```
 static/
 ├── index.html
-├── theme.css
-├── css/
-│   ├── board.css
-│   └── controls.css
+├── styles/
+│   ├── css/
+│   │   └── main.css
+│   ├── base/
+│   ├── components/
+│   ├── features/
+│   ├── layout/
+│   └── main.scss
 ├── js/
 │   ├── app.js
 │   ├── sound.js
@@ -63,6 +67,21 @@ index.html → loader.js → components → app.js
 ## 🔄 Data Flow
 
 User → UI → backend → engine → UI update
+
+---
+
+## 🎨 CSS Compilation
+This project uses Sass (SCSS) for styling.
+### ✅ Compile and watch for changes
+Run the following command from the `static` directory:
+
+    npx sass styles/main.scss styles/css/main.css
+
+### 📁 What this does
+
+Compiles:
+    
+    styles/main.scss → styles/css/main.css
 
 ---
 

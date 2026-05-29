@@ -1,0 +1,37 @@
+// =============================================================================
+// main.scss — entry point
+//
+// Import order matters:
+//   1. base/     — tokens and reset; no selectors that depend on anything else
+//   2. layout/   — page-level grids; may reference base tokens
+//   3. components/ — reusable UI pieces; may reference base tokens
+//   4. features/   — page-specific and game-specific styles; may reference all above
+// =============================================================================
+
+// ---- 1. Base ----------------------------------------------------------------
+
+@use "base/variables" as *;   // $tokens — imported first so all partials can use them
+@use "base/reset";            // *, body, h1/h2/p, input/select
+
+// ---- 2. Layout --------------------------------------------------------------
+
+@use "layout/app";            // header, nav, .tab-btn, main, .panel
+@use "layout/play";           // #board-container, #play-layout, #side-panel, responsive
+
+// ---- 3. Components ----------------------------------------------------------
+
+@use "components/button";     // .btn, .btn-primary, .btn-danger, .btn-sm
+@use "components/card";       // .card, .settings-card, .dice-audit-card
+@use "components/toggle";     // .toggle, .toggle-slider
+@use "components/badge";      // .badge, .badge-purple
+@use "components/alert";      // .alert, .alert-error, .alert-success
+@use "components/controls";   // .sound-volume-control, .player-order-*, .component-load-error
+@use "components/admin";      // .admin-overlay, .admin-dialog, .tab-config-*
+
+// ---- 4. Features ------------------------------------------------------------
+
+@use "features/board";        // .logo-dot, #board-wrap, .board-svg
+@use "features/pawns";        // .pawn-html, .moving-pawn-overlay, preview stack
+@use "features/game-ui";      // .turn-banner, .dice-face, .move-history-*, .pawn-options-*
+@use "features/settings";     // .settings-grid, .train-layout, .rule-row, .form-row
+@use "features/stats";        // .stats-row, .stat-card, .dice-audit-*, .progress-bar-*, .mini-chart

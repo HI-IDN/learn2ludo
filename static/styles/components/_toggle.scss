@@ -1,0 +1,55 @@
+// =============================================================================
+// Toggle switch component
+// A checkbox styled as a pill-shaped on/off switch.
+//
+// Markup pattern:
+//   <label class="toggle">
+//     <input type="checkbox">
+//     <span class="toggle-slider"></span>
+//   </label>
+// =============================================================================
+
+@use "../base/variables" as *;
+
+.toggle {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  display: inline-block;
+  flex: 0 0 auto;   // never shrink inside a flex row
+
+  // Hide the real checkbox; the slider provides all visual feedback.
+  input {
+    display: none;
+  }
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: $border-medium;   // unchecked track colour
+  border-radius: 999px;
+  transition: 0.2s;
+
+  // The sliding knob.
+  &::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    top: 3px;
+    left: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+}
+
+// Checked state — track turns primary colour and knob slides right.
+.toggle input:checked + .toggle-slider {
+  background: $color-primary;
+}
+
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+}

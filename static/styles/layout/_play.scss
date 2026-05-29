@@ -1,0 +1,104 @@
+// =============================================================================
+// Play page layout
+// The two-column board + sidebar layout and its immediate children.
+// Inner component styles (dice, move list, etc.) live in features/_game-ui.scss.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Outer two-column grid --------------------------------------------------
+// Left column: board. Right column: game info sidebar (fixed 360px).
+
+#board-container {
+  display: grid;
+  grid-template-columns: minmax(620px, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+.board-column {
+  min-width: 0;   // prevent grid blowout when board content is wide
+}
+
+// ---- Board wrapper ----------------------------------------------------------
+
+#board-wrap {
+  background: $color-bg-alt;
+  border-radius: 24px;
+  border: 1px solid $border-light;
+  padding: 12px;
+  overflow: auto;
+}
+
+.board-svg {
+  width: 100%;
+  min-width: 720px;
+  height: auto;
+  display: block;
+}
+
+// ---- Game info sidebar ------------------------------------------------------
+
+#game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ---- Section label used above lists in the sidebar -------------------------
+
+.player-order-title,
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: $color-text-2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+// ---- Minimal side-panel layout (simpler play view) -------------------------
+
+#play-layout {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+}
+
+#board-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#side-panel {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-section {
+  margin-bottom: 14px;
+
+  &.grow {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  &.controls {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.side-footer {
+  margin-top: auto;
+}
+
+// ---- Responsive collapse ----------------------------------------------------
+
+@media (max-width: 1100px) {
+  #board-container {
+    grid-template-columns: 1fr;
+  }
+}

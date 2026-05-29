@@ -1,0 +1,44 @@
+// =============================================================================
+// Variables
+// All design tokens in one place. @use this file in every partial that
+// needs a value — never hardcode hex or px literals in other files.
+// =============================================================================
+
+// ---- Colours ----------------------------------------------------------------
+
+$color-primary:   #10099F;
+$color-teal:      #0098AA;
+$color-green:     #719500;
+$color-yellow:    #F5CF47;
+$color-danger:    #AC1A2F;
+
+// Backgrounds
+$color-bg:        #F5F5F5;   // page background
+$color-bg-alt:    #FFFFFF;   // card / surface background
+$color-bg-raised: #F0F0F0;   // slightly elevated surface (idle states, etc.)
+
+// Text
+$color-text:      #262626;   // primary body text
+$color-text-2:    #5F6673;   // secondary / label text
+$color-text-3:    #8A91A0;   // tertiary / placeholder text
+
+// Borders
+$border-light:    #E2E5EE;   // default card/panel border
+$border-medium:   #D4D8E5;   // input and interactive borders
+
+// ---- Typography -------------------------------------------------------------
+
+$font-sans: "Jost", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$font-mono: "DM Mono", monospace;
+
+// ---- Shape ------------------------------------------------------------------
+
+$radius:    10px;
+$radius-lg: 16px;
+
+// ---- Misc accent tints (not in :root but used by components) ----------------
+
+$accent-tint:        #F0F0FF;   // primary colour at ~6% opacity on white
+$accent-tint-border: #D9D7FF;   // primary colour at ~25% opacity on white
+$danger-tint:        #FDECEF;
+$success-tint:       #EEF7E5;

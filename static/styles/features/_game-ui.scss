@@ -1,0 +1,219 @@
+// =============================================================================
+// Game UI — in-play components
+// Everything shown during an active game: the turn banner, dice display,
+// play controls bar, move history list, and pawn-options picker.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Shared card base -------------------------------------------------------
+// These four elements share the same card appearance as .card but are kept
+// as separate class names so JS and templates can target them independently.
+
+.dice-display,
+.pawn-options-card,
+.move-history-card,
+.play-controls-card {
+  background: $color-bg-alt;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  padding: 16px;
+}
+
+// ---- Turn banner ------------------------------------------------------------
+// Coloured bar at the top of the sidebar showing whose turn it is.
+// Background colour is set inline (var(--player-color)) by JS.
+
+.turn-banner {
+  border-radius: $radius;
+  padding: 10px 12px;
+  color: white;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 700;
+
+  // Before the game starts no player is active.
+  &.idle {
+    color: $color-text-2;
+    background: $color-bg-raised;
+  }
+}
+
+.action-instruction {
+  font-size: 13px;
+  color: $color-text-2;
+  margin-top: 10px;
+}
+
+// ---- Dice display -----------------------------------------------------------
+
+.dice-face {
+  font-size: 58px;
+  text-align: center;
+  line-height: 1;
+  margin-top: 12px;
+
+  // Brief tilt animation triggered by JS when the dice rolls.
+  &.rolling {
+    transform: rotate(8deg);
+  }
+}
+
+// ---- Play controls bar ------------------------------------------------------
+// Row of speed buttons, labels, and separators beneath the dice.
+
+.play-controls-card {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.play-control-label,
+.play-control-note {
+  font-size: 12px;
+  color: $color-text-2;
+}
+
+.play-control-separator {
+  width: 1px;
+  height: 24px;
+  background: $border-light;
+}
+
+.play-speed-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+// ---- Shared list container --------------------------------------------------
+
+.move-history-list,
+.pawn-options-list,
+#players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// ---- Move history -----------------------------------------------------------
+
+.move-history-empty {
+  color: $color-text-3;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+// Base grid shared by move-history rows and pawn-option rows.
+.move-history-row,
+.pawn-option-row {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: $radius;
+  border: 1px solid transparent;
+  font-size: 12px;
+}
+
+.move-history-row {
+  grid-template-columns: auto auto 1fr;
+}
+
+.move-history-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.move-history-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  span {
+    color: $color-text-3;
+  }
+}
+
+// ---- Pawn options picker ----------------------------------------------------
+
+.pawn-options-turn-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: $radius;
+  // Tinted with the active player's colour — set via inline CSS var.
+  background: color-mix(in srgb, var(--player-color) 10%, white);
+  border: 1px solid color-mix(in srgb, var(--player-color) 28%, #{$border-light});
+  margin-bottom: 10px;
+}
+
+.pawn-options-dice {
+  margin-left: auto;
+  font-weight: 700;
+  color: $color-text-2;
+}
+
+// Full-width 6-column grid (default view).
+.pawn-options-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.8fr 0.7fr 1.1fr 1.1fr 0.9fr;
+  gap: 8px;
+  align-items: center;
+
+  // Compact 3-column variant for narrower sidebars.
+  &.compact {
+    grid-template-columns: 0.7fr 1.6fr 0.7fr;
+  }
+}
+
+.pawn-options-header {
+  color: $color-text-3;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+// Individual pawn option row.
+.pawn-option-row {
+  background: #fafafa;
+  border-color: $border-light;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      border-color: $color-primary;
+      background: $accent-tint;
+    }
+  }
+
+  // JS adds .selected when the player has tapped a row but not confirmed.
+  &.selected {
+    border-color: $color-primary;
+    background: $accent-tint;
+  }
+}
+
+.pawn-option-piece,
+.pawn-option-icons {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pawn-option-move {
+  color: $color-text-2;
+  font-family: $font-mono;
+}

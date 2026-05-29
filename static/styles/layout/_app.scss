@@ -1,0 +1,87 @@
+// =============================================================================
+// App shell
+// The persistent chrome that wraps every page: header, nav tabs, main
+// content area, and the panel show/hide mechanism.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Header -----------------------------------------------------------------
+
+header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 24px;
+  background: $color-bg-alt;
+  border-bottom: 1px solid $border-light;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+// ---- Logo -------------------------------------------------------------------
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.logo-img {
+  width: 28px;
+  height: 28px;
+}
+
+// ---- Navigation tabs --------------------------------------------------------
+
+nav {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: $color-text-2;
+  padding: 8px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: $font-sans;
+  font-weight: 600;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+
+  &:hover,
+  &.active {
+    color: $color-primary;
+    background: $accent-tint;
+    border-color: $accent-tint-border;
+  }
+}
+
+// ---- Main content area ------------------------------------------------------
+
+main {
+  padding: 24px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+// ---- Panel visibility -------------------------------------------------------
+// JS adds/removes .active to switch between pages without a full navigation.
+
+.panel {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}

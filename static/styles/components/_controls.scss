@@ -1,0 +1,93 @@
+// =============================================================================
+// Controls
+// Sound volume slider and player-order sidebar panel.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Sound volume control ---------------------------------------------------
+
+.sound-volume-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border: 1px solid $border-medium;
+  border-radius: 999px;
+  background: $color-bg-alt;
+  color: $color-text-2;
+
+  input[type="range"] {
+    width: 110px;
+    accent-color: $color-primary;
+  }
+}
+
+// ---- Component load error ---------------------------------------------------
+// Shown when a lazy-loaded UI component fails to fetch.
+
+.component-load-error {
+  border: 1px solid $border-medium;
+  border-radius: $radius;
+  padding: 12px;
+  color: $color-danger;
+  background: white;
+}
+
+// ---- Player order mini-panel ------------------------------------------------
+// Compact list of players shown in the game sidebar during play.
+
+.player-order-row-min {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+
+  &.current {
+    background: rgba($color-primary, 0.04);
+    border-radius: $radius;
+  }
+}
+
+.player-order-name {
+  font-weight: 700;
+}
+
+.player-order-place,
+.player-order-dot,
+.player-order-color {
+  color: $color-text-2;
+  font-size: 13px;
+}
+
+.player-order-pawns {
+  display: flex;
+  gap: 5px;
+  justify-self: end;
+}
+
+// Each pawn pip is a small circle that fills as the piece progresses.
+.player-order-pawn {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid var(--player-color);   // set inline per player
+  background: transparent;
+
+  &.active {
+    // Half-filled: piece is on the board but not home yet.
+    background: linear-gradient(90deg, var(--player-color) 50%, transparent 50%);
+  }
+
+  &.done {
+    background: var(--player-color);
+  }
+}
+
+// ---- Save game button -------------------------------------------------------
+
+#save-game-json-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

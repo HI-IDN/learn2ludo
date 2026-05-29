@@ -1,0 +1,62 @@
+// =============================================================================
+// Settings & Training pages
+// Grid layouts and form-row patterns shared by the settings and train panels.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Page grids -------------------------------------------------------------
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.train-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 16px;
+}
+
+// Collapse to single column on narrow viewports.
+@media (max-width: 1100px) {
+  .train-layout,
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ---- Rule / form rows -------------------------------------------------------
+// Horizontal rows with a label on the left and a control on the right,
+// separated by a bottom border. Used in settings cards and the train panel.
+
+.rule-row,
+.form-row,
+.train-metric {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid $border-light;
+}
+
+// No divider on the last item in each group.
+.rule-row:last-child,
+.form-row:last-child {
+  border-bottom: none;
+}
+
+// ---- Rule row label text ----------------------------------------------------
+
+.rule-name {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.rule-desc {
+  font-size: 12px;
+  color: $color-text-3;
+  margin-top: 2px;
+}

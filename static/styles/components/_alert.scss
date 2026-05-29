@@ -1,0 +1,34 @@
+// =============================================================================
+// Alert component
+// Inline feedback messages. Hidden by default; JS adds .show to reveal.
+//
+// Usage:
+//   <div class="alert alert-error show">Something went wrong.</div>
+//   <div class="alert alert-success show">Saved!</div>
+// =============================================================================
+
+@use "../base/variables" as *;
+
+.alert {
+  display: none;
+  border-radius: $radius;
+  padding: 10px;
+  font-size: 13px;
+  margin-bottom: 10px;
+
+  &.show {
+    display: block;
+  }
+}
+
+// ---- Colour variants --------------------------------------------------------
+
+.alert-error {
+  background: $danger-tint;
+  color: $color-danger;
+}
+
+.alert-success {
+  background: $success-tint;
+  color: $color-green;
+}

@@ -1,0 +1,84 @@
+// =============================================================================
+// Stats page
+// Overview stat cards, dice audit panel, progress bar, and mini chart.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Stat overview row ------------------------------------------------------
+// Three equal-width KPI cards across the top of the stats page.
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.stat-card {
+  background: $color-bg-alt;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  padding: 16px;
+}
+
+.stat-label {
+  color: $color-text-3;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+// ---- Dice audit card --------------------------------------------------------
+// Expandable panel below the stat cards showing per-face roll distribution.
+
+.dice-audit-card {
+  margin-top: 16px;
+  // Base card styles (.dice-audit-card is in the .card group in _card.scss)
+}
+
+.dice-audit-head,
+.dice-audit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dice-audit-sub {
+  color: $color-text-3;
+  font-size: 13px;
+}
+
+.dice-audit-summary,
+.dice-audit-chart,
+.dice-audit-breakdown {
+  margin-top: 12px;
+}
+
+// ---- Progress bar -----------------------------------------------------------
+// Used in the training panel to show episode completion.
+
+.progress-bar-wrap {
+  height: 10px;
+  background: $color-bg-raised;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: $color-primary;
+}
+
+// ---- Mini chart -------------------------------------------------------------
+// Container for a small inline bar chart (rendered via JS / canvas / SVG).
+
+.mini-chart {
+  min-height: 120px;
+}

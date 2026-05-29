@@ -1,0 +1,24 @@
+// =============================================================================
+// Board feature
+// SVG board wrapper dimensions and the logo-dot suppression rule.
+// Pawn glyph styles live in _pawns.scss.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// The logo-dot element exists in some build variants; hide it in this one.
+.logo-dot {
+  display: none !important;
+}
+
+// #board-wrap and .board-svg layout overrides for the full play page.
+// The base #board-wrap card styling is in layout/_play.scss;
+// these rules extend it for the board-specific context.
+#board-wrap {
+  width: 100%;
+}
+
+.board-svg {
+  width: 100%;
+  height: auto;
+}

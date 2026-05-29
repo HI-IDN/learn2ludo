@@ -1,0 +1,38 @@
+// =============================================================================
+// Reset & base element styles
+// Minimal reset plus body defaults. No class selectors here.
+// =============================================================================
+
+@use "../base/variables" as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: $font-sans;
+  color: $color-text;
+  background: $color-bg;
+}
+
+// Zero out default margins on common typographic elements so layout
+// components control spacing explicitly.
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+// Base form element styling. Component-level overrides live in _forms.scss.
+input,
+select {
+  border: 1px solid $border-medium;
+  border-radius: $radius;
+  padding: 8px 10px;
+  font-family: $font-sans;
+  background: white;
+  color: $color-text;
+}
