@@ -155,5 +155,6 @@ function startFromLobby() {
   settings.num_players = active.length;
   persistSettings();
   switchTab('play');
-  newGame();
+  drawBoard();
+  showPregame();
 }

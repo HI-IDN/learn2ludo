@@ -60,6 +60,14 @@
   text-transform: uppercase;
 }
 
+.players-subtitle {
+  font-size: 11px;
+  font-weight: 400;
+  color: $color-text-3;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 // ---- Minimal side-panel layout (simpler play view) -------------------------
 
 #play-layout {

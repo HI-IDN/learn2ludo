@@ -10,6 +10,7 @@ const ENGINE = {
 
 let settings = {};
 let gameState = null;
+let gameStartingPlayer = null; // set when first player is determined
 let tabConfig = [];
 let adminToken = null;
 let animatingPieceGlobalIdx = null;
@@ -17,7 +18,7 @@ let animatingPieceGlobalIdx = null;
 function boardLayout(trackSize=52, yardCount=4) {
   const s = Math.floor(trackSize / yardCount);
   const starts = Array.from({length: yardCount}, (_, i) => i * s);
-  const finishes = starts.map(x => (x - 1 + trackSize) % trackSize);
+  const finishes = starts.map(x => (x - 2 + trackSize) % trackSize);
   const safeOffset = settings.board_safe_offset ?? 7;
   const safe_havens = new Set([
     ...starts,
@@ -232,6 +233,7 @@ function gameInProgress(){
 }
 
 function requestNewGame(){
+  gameStartingPlayer=null;
   if(gameInProgress()){
     const ctrl = document.getElementById('new-game-control');
     if(!ctrl) { newGame(); return; }
@@ -253,11 +255,13 @@ function cancelNewGame(){
   if(ctrl) ctrl.innerHTML = `<button class="btn btn-primary" onclick="requestNewGame()"><i class="ti ti-plus"></i> New game</button>`;
 }
 
-async function newGame(){
+async function newGame(startingPlayer=0){
+  gameStartingPlayer=startingPlayer;
   cancelNewGame();
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture();
   if(typeof resetBotPlaying==='function') resetBotPlaying();
   const payload=buildNewGamePayload();
+  payload.config.starting_player=startingPlayer;
   try{
     const r=await fetch('/api/game/new',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!r.ok) throw new Error(r.status);
@@ -309,7 +313,27 @@ function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'yard'; if(
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
 
 // Move history rendering lives in history.js.
-function renderPlayers(){ const list=document.getElementById('players-list'); if(!list)return; const n=gameState?.num_players||parseInt(document.getElementById('set-num-players')?.value||4); const players=gameState?.players||Array.from({length:n},(_,i)=>({index:i,color:playerColorName(i,n),pieces:Array.from({length:(gameState?.config?.board?.pawns_per_player || 4)},()=>({in_yard:true,finished:false}))})); list.innerHTML=players.map((p,i)=>{const col=COLORS[p.color]||COLORS.blue; return `<div class="player-order-row-min${p.index===gameState?.current_player?' current':''}"><i class="fa-solid ${getPlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${getPlayerName(p.index)}</span> <span class="player-order-place">${i+1}${['st','nd','rd'][i]||'th'}</span> <span class="player-order-dot">·</span> <span class="player-order-color">${p.color}</span></div><div class="player-order-pawns">${p.pieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`}).join(''); }
+function renderPlayers(){
+  const list=document.getElementById('players-list'); if(!list)return;
+  const lobbyN=typeof lobbyActiveSlots==='function'?lobbyActiveSlots().length:null;
+  const n=gameState?.num_players||lobbyN||parseInt(document.getElementById('set-num-players')?.value||4);
+  const players=gameState?.players||Array.from({length:n},(_,i)=>({index:i,color:playerColorName(i,n),pieces:Array.from({length:(gameState?.config?.board?.pawns_per_player||4)},()=>({in_yard:true,finished:false}))}));
+  // Always show in slot/color order
+  const sorted=[...players].sort((a,b)=>playerSlot(a.index,n)-playerSlot(b.index,n));
+  const ordinals=['1st','2nd','3rd','4th','5th','6th'];
+  list.innerHTML=sorted.map((p)=>{
+    const col=COLORS[p.color]||COLORS.blue;
+    const turnPos=gameStartingPlayer!=null?((p.index-gameStartingPlayer+n)%n):null;
+    const ordinal=turnPos!=null?`<span class="player-order-place"> · ${ordinals[turnPos]||turnPos+1+'th'}</span>`:'';
+    return `<div class="player-order-row-min${p.index===gameState?.current_player?' current':''}"><i class="fa-solid ${getPlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${getPlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}</div><div class="player-order-pawns">${p.pieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
+  }).join('');
+  // Round subtitle
+  const sub=document.getElementById('players-subtitle');
+  if(sub&&gameState&&gameState.phase!=='rolling'||gameState?.history?.length){
+    const round=gameState?Math.floor((gameState.history?.length||0)/n)+1:null;
+    if(sub&&round) sub.textContent=`· Round ${round}`;
+  }
+}
 function renderPlayerSlots() {
   const wrap = document.getElementById('player-slots');
   if (!wrap) return;
