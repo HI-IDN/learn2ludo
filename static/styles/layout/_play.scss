@@ -27,13 +27,17 @@
   border-radius: 24px;
   border: 1px solid $border-light;
   padding: 12px;
-  overflow: auto;
+  overflow: hidden;
+  aspect-ratio: 1;
+  max-height: calc(100vh - 100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .board-svg {
   width: 100%;
-  min-width: 720px;
-  height: auto;
+  height: 100%;
   display: block;
 }
 
@@ -61,20 +65,25 @@
 #play-layout {
   display: flex;
   gap: 20px;
-  height: 100%;
+  height: calc(100vh - 80px);
+  overflow: hidden;
 }
 
 #board-area {
-  flex: 1;
+  flex: 0 0 auto;
+  width: calc(100vh - 100px);
+  max-width: calc(100% - 300px);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 #side-panel {
-  width: 280px;
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .side-section {

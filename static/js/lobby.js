@@ -147,6 +147,7 @@ function lobbySetName(slotIdx, v) {
   settings.player_names = settings.player_names || {};
   settings.player_names[playerIdx] = v;
   persistSettings();
+  if (typeof renderPlayers === 'function') renderPlayers();
 }
 
 function startFromLobby() {

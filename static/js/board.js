@@ -23,14 +23,78 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 async function animatePawnSteps(g,from,to){ if(!(settings.animate??true))return; const wrap=document.getElementById('board-wrap'), svg=document.getElementById('ludo-board'); if(!wrap||!svg)return; const p=Math.floor(g/4), i=g%4, path=getMovePath(p,i,from,to); if(path.length<2)return; animatingPieceGlobalIdx=g; drawBoard(); const col=COLORS[playerColorName(p,gameState?.num_players||4)], overlay=document.createElement('div'); overlay.className='moving-pawn-overlay'; overlay.style.color=col; overlay.innerHTML='<i class="fa-solid fa-chess-pawn"></i>'; wrap.appendChild(overlay); try{const r=svg.getBoundingClientRect(), sx=r.width/480, sy=r.height/480; if(from<0)await sleep(350); for(const pt of path){overlay.style.transform=`translate(${pt.x*sx-13}px, ${pt.y*sy-13}px)`; if(typeof playSound==='function')playSound('move'); await sleep(120);}} finally{overlay.remove(); animatingPieceGlobalIdx=null;}}
 
 function drawBoard(){
-  const svg=document.getElementById('ludo-board'); if(!svg)return; const S=480, cell=S/15, layout=currentLayout(); let html=`<rect width="${S}" height="${S}" fill="var(--bg2)" rx="12"/>`;
-  [[0,0,COLORS.red],[9*cell,0,COLORS.green],[9*cell,9*cell,COLORS.yellow],[0,9*cell,COLORS.blue]].forEach(([x,y,col])=>{html+=`<rect x="${x+cell*.15}" y="${y+cell*.15}" width="${cell*5.7}" height="${cell*5.7}" fill="${col}" opacity=".92" rx="8"/>`;});
-  TRACK_GRID.forEach(([gx,gy])=>html+=`<rect x="${gx*cell+.5}" y="${gy*cell+.5}" width="${cell-1}" height="${cell-1}" fill="none" stroke="rgba(16,9,159,.10)" stroke-width=".5" rx="2"/>`);
-  if(settings.safe_squares!==false) Array.from(layout.safe_havens).forEach(abs=>{const [gx,gy]=TRACK_GRID[abs]; html+=`<rect x="${gx*cell+1}" y="${gy*cell+1}" width="${cell-2}" height="${cell-2}" fill="#660451" opacity=".88" rx="3"/><foreignObject x="${gx*cell+cell*.16}" y="${gy*cell+cell*.12}" width="${cell*.68}" height="${cell*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;});
-  layout.starts.forEach((abs,slot)=>{const [gx,gy]=TRACK_GRID[abs], col=COLORS[PLAYER_COLORS[slot]]; html+=`<rect x="${gx*cell+1}" y="${gy*cell+1}" width="${cell-2}" height="${cell-2}" fill="${col}" opacity=".88" rx="3"/>`;});
-  layout.finishes.forEach((abs,slot)=>{const [gx,gy]=TRACK_GRID[abs], col=COLORS[PLAYER_COLORS[slot]], icon=['fa-caret-right','fa-caret-down','fa-caret-left','fa-caret-up'][slot]; html+=`<foreignObject x="${gx*cell+cell*.18}" y="${gy*cell+cell*.18}" width="${cell*.64}" height="${cell*.64}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:${col};font-size:17px;"><i class="fa-solid ${icon}"></i></div></foreignObject>`;});
-  Object.entries(HOME_STRETCH_GRID).forEach(([name,cells])=>cells.forEach(([gx,gy])=>html+=`<rect x="${gx*cell+1}" y="${gy*cell+1}" width="${cell-2}" height="${cell-2}" fill="${COLORS[name]}" opacity=".92" rx="2"/>`));
-  html+=`<rect x="${6*cell}" y="${6*cell}" width="${3*cell}" height="${3*cell}" fill="var(--bg2)" stroke="rgba(16,9,159,.3)" rx="4"/>`;
-  if(gameState){ const valid=new Map(gameState.valid_moves.map(m=>[m.piece_idx,m])); valid.forEach((m,g)=>{const p=Math.floor(g/4), c=getTargetCenter(p,m.target), col=COLORS[playerColorName(p,gameState.num_players)]; if(c)html+=pawnPreviewSvg(c.x,c.y,col,g,g%4+1);}); gameState.players.forEach(player=>{const col=COLORS[player.color]||COLORS[playerColorName(player.index,gameState.num_players)], yard=getYardPositions(playerSlot(player.index,gameState.num_players)); let yi=0; player.pieces.forEach((pc,i)=>{const g=player.index*4+i; if(animatingPieceGlobalIdx===g)return; const movable=valid.has(g); if(pc.in_yard){const pt=yard[yi++]||yard[0]; html+=(movable?`<circle cx="${pt.x}" cy="${pt.y}" r="${cell*.48}" fill="${col}" opacity=".18"/>`:'')+pawnSvg(pt.x,pt.y,col,movable,g,i+1);} else if(!pc.finished){const center=pc.position>=52?getTargetCenter(player.index,pc.position):(pc.absolute_position!=null?gridCenter(...TRACK_GRID[pc.absolute_position]):getTargetCenter(player.index,pc.position)); if(center)html+=(movable?`<circle cx="${center.x}" cy="${center.y}" r="${cell*.48}" fill="${col}" opacity=".2"/>`:'')+pawnSvg(center.x,center.y,col,movable,g,i+1);}});});}
+  const svg=document.getElementById('ludo-board'); if(!svg)return;
+  const S=480, c=S/15, layout=currentLayout();
+
+  // Background: white
+  let html=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
+
+  // Yard blocks (4 corners) + logo overlay
+  [[0,0,COLORS.red],[9*c,0,COLORS.green],[9*c,9*c,COLORS.yellow],[0,9*c,COLORS.blue]]
+    .forEach(([x,y,col])=>{
+      html+=`<rect x="${x+c*.15}" y="${y+c*.15}" width="${c*5.7}" height="${c*5.7}" fill="${col}" opacity=".92" rx="8"/>`;
+      const logoSize=c*3.2, logoX=x+c*1.4, logoY=y+c*1.4;
+      html+=`<image href="/static/logo.svg" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" opacity="0.18" style="pointer-events:none;"/>`;
+    });
+
+  // Track cells
+  TRACK_GRID.forEach(([gx,gy])=>html+=`<rect x="${gx*c+.5}" y="${gy*c+.5}" width="${c-1}" height="${c-1}" fill="#fff" stroke="rgba(0,0,0,.12)" stroke-width=".5" rx="2"/>`);
+
+  // Safe havens — medium grey with white shield
+  if(settings.safe_squares!==false) Array.from(layout.safe_havens).forEach(abs=>{
+    const [gx,gy]=TRACK_GRID[abs];
+    html+=`<rect x="${gx*c+1}" y="${gy*c+1}" width="${c-2}" height="${c-2}" fill="#C8C8C8" rx="3"/>`;
+    html+=`<foreignObject x="${gx*c+c*.16}" y="${gy*c+c*.12}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;
+  });
+
+  // Start squares — coloured cell with white shield-heart
+  layout.starts.forEach((abs,slot)=>{const [gx,gy]=TRACK_GRID[abs],col=COLORS[PLAYER_COLORS[slot]]; html+=`<rect x="${gx*c+1}" y="${gy*c+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".88" rx="3"/><foreignObject x="${gx*c+c*.16}" y="${gy*c+c*.12}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;});
+
+  // Finish arrows — white cell with coloured arrow
+  layout.finishes.forEach((abs,slot)=>{const [gx,gy]=TRACK_GRID[abs],col=COLORS[PLAYER_COLORS[slot]],icon=['fa-caret-right','fa-caret-down','fa-caret-left','fa-caret-up'][slot]; html+=`<rect x="${gx*c+1}" y="${gy*c+1}" width="${c-2}" height="${c-2}" fill="#fff" rx="3"/><foreignObject x="${gx*c+c*.18}" y="${gy*c+c*.18}" width="${c*.64}" height="${c*.64}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:${col};font-size:17px;"><i class="fa-solid ${icon}"></i></div></foreignObject>`;});
+
+  // Home stretch lanes
+  Object.entries(HOME_STRETCH_GRID).forEach(([name,cells])=>cells.forEach(([gx,gy])=>html+=`<rect x="${gx*c+1}" y="${gy*c+1}" width="${c-2}" height="${c-2}" fill="${COLORS[name]}" opacity=".92" rx="2"/>`));
+
+  // Home center — 4 coloured triangles meeting in the middle
+  const cx=7.5*c, cy=7.5*c, tl=[6*c,6*c], tr=[9*c,6*c], br=[9*c,9*c], bl=[6*c,9*c];
+  [
+    [COLORS.red,   `${tl[0]},${tl[1]} ${bl[0]},${bl[1]} ${cx},${cy}`],
+    [COLORS.green, `${tl[0]},${tl[1]} ${tr[0]},${tr[1]} ${cx},${cy}`],
+    [COLORS.yellow,`${tr[0]},${tr[1]} ${br[0]},${br[1]} ${cx},${cy}`],
+    [COLORS.blue,  `${bl[0]},${bl[1]} ${br[0]},${br[1]} ${cx},${cy}`],
+  ].forEach(([col,pts])=>html+=`<polygon points="${pts}" fill="${col}"/>`);
+
+  // Cell index labels — drawn last so they appear over special cells
+  if(settings.show_cell_numbers){
+    const coloredAbs=new Set([...Array.from(layout.safe_havens),...layout.starts]);
+    TRACK_GRID.forEach(([gx,gy],idx)=>{
+      const onColor=coloredAbs.has(idx);
+      html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${idx}</text>`;
+    });
+    // Home stretch labels (positions 52–57 per player lane)
+    Object.values(HOME_STRETCH_GRID).forEach(cells=>{
+      cells.forEach(([gx,gy],i)=>{
+        html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="#fff" opacity="0.9">${52+i}</text>`;
+      });
+    });
+  }
+
+  // Pawns & move previews
+  if(gameState){
+    const valid=new Map(gameState.valid_moves.map(m=>[m.piece_idx,m]));
+    valid.forEach((m,g)=>{const p=Math.floor(g/4),pt=getTargetCenter(p,m.target),col=COLORS[playerColorName(p,gameState.num_players)]; if(pt)html+=pawnPreviewSvg(pt.x,pt.y,col,g,g%4+1);});
+    gameState.players.forEach(player=>{
+      const col=COLORS[player.color]||COLORS[playerColorName(player.index,gameState.num_players)];
+      const yard=getYardPositions(playerSlot(player.index,gameState.num_players));
+      let yi=0;
+      player.pieces.forEach((pc,i)=>{
+        const g=player.index*4+i; if(animatingPieceGlobalIdx===g)return;
+        const movable=valid.has(g);
+        if(pc.in_yard){const pt=yard[yi++]||yard[0]; html+=(movable?`<circle cx="${pt.x}" cy="${pt.y}" r="${c*.48}" fill="${col}" opacity=".18"/>`:'')+ pawnSvg(pt.x,pt.y,col,movable,g,i+1);}
+        else if(!pc.finished){const center=pc.position>=52?getTargetCenter(player.index,pc.position):(pc.absolute_position!=null?gridCenter(...TRACK_GRID[pc.absolute_position]):getTargetCenter(player.index,pc.position)); if(center)html+=(movable?`<circle cx="${center.x}" cy="${center.y}" r="${c*.48}" fill="${col}" opacity=".2"/>`:'')+ pawnSvg(center.x,center.y,col,movable,g,i+1);}
+      });
+    });
+  }
   svg.innerHTML=html;
 }

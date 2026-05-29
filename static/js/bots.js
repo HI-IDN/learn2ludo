@@ -113,6 +113,7 @@ function botSection(title, subtitle, bots, allowEmpty = false) {
 // ---- Auto-play loop --------------------------------------------------------
 
 let _botPlaying = false;
+function resetBotPlaying() { _botPlaying = false; }
 
 function scheduleBotPlay() {
   if (_botPlaying) return;

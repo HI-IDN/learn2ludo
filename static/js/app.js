@@ -14,7 +14,7 @@ let tabConfig = [];
 let adminToken = null;
 let animatingPieceGlobalIdx = null;
 
-function boardLayout(trackSize=56, yardCount=4) {
+function boardLayout(trackSize=52, yardCount=4) {
   const s = Math.floor(trackSize / yardCount);
   const starts = Array.from({length: yardCount}, (_, i) => i * s);
   const finishes = starts.map(x => (x - 1 + trackSize) % trackSize);
@@ -23,7 +23,7 @@ function boardLayout(trackSize=56, yardCount=4) {
     ...starts,
     ...starts.map(start => (start + safeOffset) % trackSize)
   ]);
-  return {max_players: maxPlayers,
+  return {max_players: yardCount,
     track_size: trackSize, yard_count: yardCount, starts, finishes, safe_havens};
 }
 function fairSlots(n,k){ return Array.from({length:k}, (_,i)=>(i*Math.floor(n/k))%n); }
@@ -68,7 +68,14 @@ function botDisplayName(i) {
 
 function getPlayerName(i){
   const type=getPlayerType(i);
-  if (type !== 'human') return settings.bot_names?.[i] || botDisplayName(i);
+  if (type !== 'human') {
+    const botId = settings.bot_ids?.[i];
+    if (botId && typeof getBotRegistry === 'function') {
+      const bot = getBotRegistry().find(b => b.id === botId);
+      if (bot) return bot.name;
+    }
+    return settings.bot_names?.[i] || 'Bot';
+  }
   return settings.player_names?.[i] || DEFAULT_HUMAN_NAMES[i] || `Player ${i+1}`;
 }
 function setPlayerType(i,v){ settings.player_types=settings.player_types||{}; settings.player_types[i]=v; syncPlayerCountOptions(); validateBoardConfig(); persistSettings(); renderPlayerTypes(); renderPlayerSlots(); renderPlayers(); }
@@ -84,7 +91,7 @@ function normalizeEngineState(raw) {
   const layout = state.board || boardLayout(cfg.board?.track_size || 52, cfg.board?.yard_count || 4);
   const players = state.players || Array.from({length: playerCount}, (_, p) => ({
     index:p, color:PLAYER_COLORS[slots[p]],
-    pieces:Array.from({length:(state.config?.board?.pawns_per_player || 4)}, (_,i)=>({index:i, position:-1, finished:false, in_yard:true, absolute_position:null}))
+    pieces:Array.from({length:(gameState?.config?.board?.pawns_per_player || 4)}, (_,i)=>({index:i, position:-1, finished:false, in_yard:true, absolute_position:null}))
   }));
   return {
     ...state,
@@ -102,7 +109,13 @@ function normalizeEngineState(raw) {
 async function init(){
   loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); drawBoard();
 }
-function loadSettings(){ try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};} if(settings.slot_mode===undefined) settings.slot_mode='fair'; if(settings.sound_volume===undefined) settings.sound_volume=0.8; }
+function loadSettings(){
+  try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
+  if(settings.slot_mode===undefined) settings.slot_mode='fair';
+  if(settings.sound_volume===undefined) settings.sound_volume=0.8;
+  // TRACK_GRID only supports 52 cells — reset any stale value
+  if(settings.board_track_size && settings.board_track_size !== 52) settings.board_track_size=52;
+}
 function applySettingsToControls(){
   const c=(id,v)=>{const e=document.getElementById(id); if(e)e.checked=v;};
   const val=(id,v)=>{const e=document.getElementById(id); if(e)e.value=v;};
@@ -116,7 +129,7 @@ function saveSettings(){
     slot_mode: settings.slot_mode ?? 'fair',
     board_max_players: boardCfg.max_players ?? settings.board_max_players ?? 4,
     board_yard_count: boardCfg.yard_count ?? settings.board_yard_count ?? 4,
-    board_track_size: boardCfg.track_size ?? settings.board_track_size ?? 56,
+    board_track_size: boardCfg.track_size ?? settings.board_track_size ?? 52,
     board_safe_offset: boardCfg.safe_offset ?? settings.board_safe_offset ?? 7,
     board_home_length: boardCfg.home_length ?? settings.board_home_length ?? 6,
     pawns_per_player: boardCfg.pawns_per_player ?? settings.pawns_per_player ?? 4,
@@ -139,9 +152,7 @@ function getGameRules(){ return {six_to_enter:true, six_extra_turn:true, capture
 function readBoardConfig() {
   const maxPlayers = Math.max(2, Math.min(6, parseInt(document.getElementById('board-max-players')?.value || settings.board_max_players || 4)));
   const yardCount = Math.max(maxPlayers, Math.min(6, parseInt(document.getElementById('board-yard-count')?.value || settings.board_yard_count || 4)));
-  let trackSize = Math.max(yardCount, parseInt(document.getElementById('board-track-size')?.value || settings.board_track_size || 56));
-  trackSize = trackSize - (trackSize % yardCount);
-  if (trackSize < yardCount) trackSize = yardCount;
+  let trackSize = 52; // TRACK_GRID is fixed at 52 cells
   const pawns = Math.max(1, parseInt(document.getElementById('board-pawns-per-player')?.value || settings.pawns_per_player || 4));
   const homeLength = Math.max(pawns, parseInt(document.getElementById('board-home-length')?.value || settings.board_home_length || 6));
   const safeOffset = Math.max(1, parseInt(document.getElementById('board-safe-offset')?.value || settings.board_safe_offset || 7));
@@ -265,9 +276,15 @@ function cancelNewGame(){
 async function newGame(){
   cancelNewGame();
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture();
-  saveSettings(); const payload=buildNewGamePayload();
-  try{ const r=await fetch('/api/game/new',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); gameState=normalizeEngineState(await r.json()); }
-  catch{ gameState=makeDemoState(payload.config.player_count,payload.config.slot_mode); }
+  if(typeof resetBotPlaying==='function') resetBotPlaying();
+  const payload=buildNewGamePayload();
+  try{
+    const r=await fetch('/api/game/new',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!r.ok) throw new Error(r.status);
+    gameState=normalizeEngineState(await r.json());
+  } catch(e){
+    gameState=makeDemoState(payload?.config?.player_count ?? 2, payload?.config?.slot_mode ?? 'fair');
+  }
   renderGame();
 }
 function makeDemoState(n=4,slotMode='fair'){ const slots=assignSlots(n,slotMode); return normalizeEngineState({config:{player_count:n,slot_mode:slotMode,board:{track_size:52,yard_count:4,home_length:6}}, slots, phase:'rolling', player:0}); }
@@ -306,18 +323,13 @@ async function makeMove(pieceIdx,target){
 
 function renderGame(){
   if(!gameState)return; drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
-  const phase=gameState.phase, cp=gameState.current_player, color=COLORS[playerColorName(cp,gameState.num_players)]||COLORS.blue;
-  const banner=document.getElementById('turn-banner'), name=document.getElementById('turn-player-name'), instr=document.getElementById('action-instruction'), roll=document.getElementById('roll-btn');
-  banner.classList.remove('idle'); banner.style.background=color; banner.querySelector('i').className=getPlayerType(cp)!=='human'?'fa-solid fa-robot':'fa-solid fa-user'; name.textContent=`${getPlayerName(cp)}'s turn`;
-  instr.textContent=phase==='rolling'?'Roll the dice.':phase==='moving'?'Choose one of the highlighted pawns to move.':phase==='next'?'Ending turn.':'Game finished.';
-  roll.disabled=phase!=='rolling' || gameState.winner!==null; roll.style.background=roll.disabled?'':'#10099F'; roll.style.borderColor=roll.disabled?'':'#10099F';
   if(typeof scheduleBotPlay==='function') scheduleBotPlay();
 }
 function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'yard'; if(pos>=52)return `home ${pos-51}`; return `cell ${((pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52)+1}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
 
 // Move history rendering lives in history.js.
-function renderPlayers(){ const list=document.getElementById('players-list'); if(!list)return; const n=gameState?.num_players||parseInt(document.getElementById('set-num-players')?.value||4); const players=gameState?.players||Array.from({length:n},(_,i)=>({index:i,color:playerColorName(i,n),pieces:Array.from({length:(state.config?.board?.pawns_per_player || 4)},()=>({in_yard:true,finished:false}))})); list.innerHTML=players.map((p,i)=>{const col=COLORS[p.color]||COLORS.blue; return `<div class="player-order-row-min${p.index===gameState?.current_player?' current':''}"><i class="fa-solid ${getPlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${getPlayerName(p.index)}</span> <span class="player-order-place">${i+1}${['st','nd','rd'][i]||'th'}</span> <span class="player-order-dot">·</span> <span class="player-order-color">${p.color}</span></div><div class="player-order-pawns">${p.pieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`}).join(''); }
+function renderPlayers(){ const list=document.getElementById('players-list'); if(!list)return; const n=gameState?.num_players||parseInt(document.getElementById('set-num-players')?.value||4); const players=gameState?.players||Array.from({length:n},(_,i)=>({index:i,color:playerColorName(i,n),pieces:Array.from({length:(gameState?.config?.board?.pawns_per_player || 4)},()=>({in_yard:true,finished:false}))})); list.innerHTML=players.map((p,i)=>{const col=COLORS[p.color]||COLORS.blue; return `<div class="player-order-row-min${p.index===gameState?.current_player?' current':''}"><i class="fa-solid ${getPlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${getPlayerName(p.index)}</span> <span class="player-order-place">${i+1}${['st','nd','rd'][i]||'th'}</span> <span class="player-order-dot">·</span> <span class="player-order-color">${p.color}</span></div><div class="player-order-pawns">${p.pieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`}).join(''); }
 function renderPlayerSlots() {
   const wrap = document.getElementById('player-slots');
   if (!wrap) return;

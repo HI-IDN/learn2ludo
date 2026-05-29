@@ -12,6 +12,7 @@ class BoardConfig:
     track_size:int
     yard_count:int
     home_length:int=6
+    safe_offset:int=7
 
 @dataclass
 class GameConfig:
@@ -32,8 +33,8 @@ class BoardLayout:
     def generate(board:BoardConfig):
         s=board.track_size//board.yard_count
         starts=[i*s for i in range(board.yard_count)]
-        finishes=[(x-1)%board.track_size for x in starts]
-        safe={(i*s+s//2)%board.track_size for i in range(board.yard_count)}
+        finishes=[(x-2)%board.track_size for x in starts]
+        safe={(i*s+board.safe_offset)%board.track_size for i in range(board.yard_count)}
         return BoardLayout(board.track_size,board.yard_count,starts,finishes,safe)
 
 def fair_slots(n,k): return [(i*(n//k))%n for i in range(k)]
