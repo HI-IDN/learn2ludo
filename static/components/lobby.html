@@ -1,0 +1,25 @@
+<!-- LOBBY — Player select screen shown before Play -->
+<div class="panel" id="panel-lobby">
+  <div class="lobby-wrap">
+
+    <div class="lobby-header">
+      <div class="lobby-title">
+        <span class="lobby-title-main">Player Setup</span>
+        <span class="lobby-title-sub">Click a slot to activate or deactivate it</span>
+      </div>
+    </div>
+
+    <div class="lobby-slots" id="lobby-slots">
+      <!-- injected by renderLobbySlots() -->
+    </div>
+
+    <div class="lobby-footer">
+      <button class="lobby-play-btn" onclick="startFromLobby()">
+        <i class="fa-solid fa-play"></i>
+        Start Game
+      </button>
+      <div id="lobby-hint"></div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,280 @@
+// =============================================================================
+// Lobby — game-console-style player select screen
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Page wrapper -----------------------------------------------------------
+
+.lobby-wrap {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px 0;
+}
+
+// ---- Header -----------------------------------------------------------------
+
+.lobby-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.lobby-title-main {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: $color-text;
+}
+
+.lobby-title-sub {
+  display: block;
+  font-size: 13px;
+  color: $color-text-2;
+  margin-top: 2px;
+}
+
+// ---- Slot grid --------------------------------------------------------------
+
+.lobby-slots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+// ---- Individual slot card ---------------------------------------------------
+
+.lobby-slot {
+  background: #111118;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.2s, transform 0.15s;
+
+  &.slot-inactive {
+    opacity: 0.35;
+    cursor: pointer;
+    &:hover { opacity: 0.75; transform: translateY(-2px); }
+  }
+}
+
+// Coloured top block
+.lobby-slot-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 20px 16px 14px;
+  gap: 10px;
+  position: relative;
+  min-height: 110px;
+}
+
+// × remove button
+.lobby-slot-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.3);
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: rgba(0,0,0,0.6); color: #fff; }
+}
+
+.lobby-slot-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lobby-avatar-icon {
+  font-size: 26px;
+  color: rgba(255,255,255,0.9);
+}
+
+.lobby-slot-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+
+// ---- Slot body — active controls --------------------------------------------
+
+.lobby-slot-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+// Inactive "add player" body
+.lobby-slot-add {
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #555;
+  font-size: 13px;
+  gap: 6px;
+  min-height: 80px;
+
+  i { font-size: 18px; }
+}
+
+// Human / Bot pill toggle
+.lobby-type-toggle {
+  display: flex;
+  background: #1a1a28;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.lobby-type-btn {
+  flex: 1;
+  padding: 7px 4px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: $font-sans;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.15s;
+
+  i { font-size: 12px; }
+  &:hover { color: #aaa; }
+
+  &.active {
+    background: var(--slot-color, $color-primary);
+    color: #fff;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.3);
+  }
+}
+
+// Name input
+.lobby-name-wrap { position: relative; }
+
+.lobby-name-input {
+  width: 100%;
+  background: #1a1a28;
+  border: 1.5px solid #2a2a3a;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 9px 32px 9px 12px;
+  font-family: $font-sans;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+
+  &::placeholder { color: #444; font-weight: 400; }
+
+  &:focus {
+    border-color: var(--slot-color, $color-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--slot-color, $color-primary) 20%, transparent);
+  }
+
+  &:disabled { opacity: 0.35; cursor: not-allowed; }
+}
+
+.lobby-name-edit-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #444;
+  pointer-events: none;
+}
+
+// ---- Footer -----------------------------------------------------------------
+
+.lobby-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.lobby-play-btn {
+  padding: 16px 64px;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: $font-sans;
+  border: none;
+  border-radius: 999px;
+  background: $color-primary;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 24px rgba(16, 9, 159, 0.4);
+  transition: transform 0.12s, box-shadow 0.12s, background 0.15s;
+
+  &:hover {
+    background: #1a10cc;
+    box-shadow: 0 6px 32px rgba(16, 9, 159, 0.6);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 12px rgba(16, 9, 159, 0.4);
+  }
+}
+
+// ---- 2p hint (rendered below Start Game) ------------------------------------
+
+.lobby-hint {
+  font-size: 13px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+
+  i { color: #F5CF47; flex-shrink: 0; }
+  strong { color: #ccc; }
+}
+
+// ---- Responsive -------------------------------------------------------------
+
+@media (max-width: 800px) {
+  .lobby-slots { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 420px) {
+  .lobby-slots { grid-template-columns: 1fr 1fr; }
+  .lobby-play-btn { padding: 14px 40px; font-size: 16px; }
+}

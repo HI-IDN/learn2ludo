@@ -8,32 +8,22 @@
       <div class="settings-card">
         <h2>Game rules</h2>
         <div class="rule-row">
-          <div><div class="rule-name">Six to enter</div><div class="rule-desc">Pieces need a 6 to leave yard</div></div>
-          <label class="toggle"><input type="checkbox" id="rule-six-enter" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          <div>
+            <div class="rule-name">Consecutive sixes before turn ends</div>
+            <div class="rule-desc">A player may move this many rolled sixes; after that, they do not roll again</div>
+          </div>
+          <input type="number" id="rule-max-sixes" min="1" value="3" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
         </div>
         <div class="rule-row">
-          <div><div class="rule-name">Six = extra turn</div><div class="rule-desc">Rolling 6 grants another roll</div></div>
-          <label class="toggle"><input type="checkbox" id="rule-six-extra" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
-        </div>
-        <div class="rule-row">
-          <div><div class="rule-name">Captures enabled</div><div class="rule-desc">Landing on opponent sends them home</div></div>
-          <label class="toggle"><input type="checkbox" id="rule-capture" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          <div>
+            <div class="rule-name">Roll attempts from empty board</div>
+            <div class="rule-desc">If a player has no pawn in play, allow this many rolls to enter; recommended: 3</div>
+          </div>
+          <input type="number" id="rule-empty-board-rolls" min="1" value="3" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
         </div>
         <div class="rule-row">
           <div><div class="rule-name">Safe squares</div><div class="rule-desc">Marked squares protect from capture</div></div>
           <label class="toggle"><input type="checkbox" id="rule-safe" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
-        </div>
-        <div class="rule-row">
-          <div><div class="rule-name">Max consecutive sixes</div><div class="rule-desc">3 sixes in a row = forfeit turn</div></div>
-          <select id="rule-max-sixes" onchange="saveSettings()" style="width:64px; padding:4px 8px; font-size:12px;">
-            <option value="2">2</option>
-            <option value="3" selected>3</option>
-            <option value="99">∞</option>
-          </select>
-        </div>
-        <div class="rule-row">
-          <div><div class="rule-name">Three rolls from empty board</div><div class="rule-desc">If a player has no pawn in play, they may roll up to 3 times to enter</div></div>
-          <label class="toggle"><input type="checkbox" id="rule-no-pawn-three-rolls" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
         </div>
         <div class="rule-row">
           <div><div class="rule-name">Equal number of rounds</div><div class="rule-desc">After a player wins, continue until the first player would start the next round.</div></div>
@@ -45,27 +35,40 @@
         </div>
       </div>
       <div class="settings-card">
-        <h2>Players</h2>
+        <h2>Board configuration</h2>
         <div class="form-row">
-          <label>Number of players</label>
-          <select id="set-num-players" onchange="saveSettings()">
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4" selected>4</option>
-          </select>
+          <label>Maximum players</label>
+          <input type="number" id="board-max-players" min="2" max="6" value="4" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
         </div>
         <div class="form-row">
-          <label>Slot mode</label>
-          <select id="set-slot-mode" onchange="saveSettings()">
-            <option value="fair" selected>Fair</option>
-            <option value="fixed">Fixed</option>
-            <option value="random">Random</option>
-          </select>
+          <label>Number of yards</label>
+          <input type="number" id="board-yard-count" min="2" max="6" value="4" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
         </div>
-        <div style="margin-top:16px;">
-          <p style="font-size:12px; color:var(--text2); margin-bottom:12px;">Player types</p>
-          <div id="player-types"></div>
+        <div class="form-row">
+          <label>Track length</label>
+          <input type="number" id="board-track-size" min="8" step="4" value="56" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
         </div>
+        <div class="form-row">
+          <label>Safe haven offset</label>
+          <input type="number" id="board-safe-offset" min="1" value="7" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+        </div>
+        <div class="rule-desc board-config-note">Safe havens include player starts and offset cells.</div>
+        <div class="form-row">
+          <label>Home stretch length</label>
+          <input type="number" id="board-home-length" min="4" value="6" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+        </div>
+        <div class="form-row">
+          <label>Pawns per player</label>
+          <input type="number" id="board-pawns-per-player" min="1" max="8" value="4" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+        </div>
+        <div class="rule-row">
+          <div>
+            <div class="rule-name">Stack pawns in home stretch</div>
+            <div class="rule-desc">First pawn takes the last space; next pawns fill the spaces before it</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="board-stack-home" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+        </div>
+        <div id="board-config-warning" class="board-config-warning"></div>
       </div>
       <div class="settings-card">
         <h2>Display</h2>
@@ -74,12 +77,8 @@
           <label class="toggle"><input type="checkbox" id="set-show-moves" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
         </div>
         <div class="rule-row">
-          <div><div class="rule-name">Show cell numbers</div><div class="rule-desc">Annotate the main track cells 0–51 for debugging and teaching</div></div>
+          <div><div class="rule-name">Show board indices</div><div class="rule-desc">Label the main track positions for debugging and teaching</div></div>
           <label class="toggle"><input type="checkbox" id="set-show-cell-numbers" onchange="saveSettings()"><span class="toggle-slider"></span></label>
-        </div>
-        <div class="rule-row">
-          <div><div class="rule-name">Auto-roll for bots</div><div class="rule-desc">Skip manual roll for bot turns</div></div>
-          <label class="toggle"><input type="checkbox" id="set-auto-roll" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
         </div>
         <div class="rule-row">
           <div><div class="rule-name">Auto-roll dice</div><div class="rule-desc">Roll automatically for every player after a short pause</div></div>

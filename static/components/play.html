@@ -1,50 +1,103 @@
 <!-- PLAY -->
-  <div class="panel" id="panel-play">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
-      <div>
-        <h1 style="font-size:22px; font-weight:700;">Play</h1>
-        <p style="font-size:13px; color:var(--text2); margin-top:4px;">Click <strong>New game</strong>, then roll. Solid pawns are pieces in play. Movable pieces hover; regular pawns preview possible landing squares.</p>
-      </div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-primary" onclick="newGame()"><i class="ti ti-plus"></i> New game</button>
-        <button class="btn btn-sm" id="save-game-json-btn" onclick="saveGameJson()" disabled><i class="fa-solid fa-download"></i> Save JSON</button>
-          <label class="sound-volume-control" title="Sound volume">
-            <i class="fa-solid fa-volume-high" id="sound-volume-icon"></i>
-            <input type="range" id="sound-volume-slider" min="0" max="1" step="0.05" value="0.8" oninput="setSoundVolume(this.value, true)" onchange="setSoundVolume(this.value, true)">
-          </label>
-      </div>
-    </div>
-    <div id="board-container">
+<div class="panel" id="panel-play">
+
+  <!-- MAIN LAYOUT -->
+  <div id="play-layout">
+
+    <!-- LEFT: BOARD -->
+    <div id="board-area">
       <div id="board-wrap">
         <svg id="ludo-board" class="board-svg" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
           <!-- drawn by JS -->
         </svg>
       </div>
-      <div id="game-info">
+    </div>
+
+    <!-- RIGHT: SIDE PANEL -->
+    <div id="side-panel">
+
+      <!-- TOP CONTROLS -->
+      <div class="side-section controls">
+        <div id="new-game-control">
+          <button class="btn btn-primary" onclick="requestNewGame()">
+            <i class="ti ti-plus"></i> New game
+          </button>
+        </div>
+
+        <label class="sound-volume-control" title="Sound volume">
+          <i class="fa-solid fa-volume-high" id="sound-volume-icon"></i>
+          <input type="range"
+                 id="sound-volume-slider"
+                 min="0"
+                 max="1"
+                 step="0.05"
+                 value="0.8"
+                 oninput="setSoundVolume(this.value, true)"
+                 onchange="setSoundVolume(this.value, true)">
+        </label>
+      </div>
+
+      <!-- PLAYER ORDER -->
+      <div class="side-section">
         <div class="player-order-title">Player order</div>
         <div id="players-list"></div>
-        <div class="player-order-title current-action-label">Current action</div>
+      </div>
+
+      <!-- CURRENT ACTION -->
+      <div class="side-section">
+        <div class="player-order-title">Current action</div>
+
         <div class="dice-display">
           <div class="turn-banner idle" id="turn-banner">
             <i class="fa-solid fa-circle-info"></i>
-            <span id="turn-player-name">New game</span>
+            <span id="turn-player-name">Start game</span>
           </div>
-          <div class="action-instruction" id="action-instruction">Press <strong>New game</strong> to start.</div>
+
+          <div class="action-instruction" id="action-instruction">
+            Click <strong>New game</strong> to begin.
+          </div>
+
           <div class="dice-face" id="dice-face">⚀</div>
-          <div style="margin-top:12px; display:flex; gap:8px; justify-content:center;">
-            <button class="btn btn-primary btn-sm" id="roll-btn" onclick="rollDice()" disabled>
+
+          <div style="margin-top:12px; display:flex; justify-content:center;">
+            <button class="btn btn-primary btn-sm"
+                    id="roll-btn"
+                    onclick="rollDice()"
+                    disabled>
               <i class="fa-solid fa-dice-d6"></i> Roll
             </button>
           </div>
         </div>
-        <div class="player-order-title pawn-options-label">Pawn features</div>
-        <div class="pawn-options-card" id="pawn-options-card"><div class="move-history-empty">Start a game to inspect pawn options.</div></div>
-        <div class="player-order-title move-history-label">Move history</div>
+      </div>
+
+      <!-- PAWN FEATURES -->
+      <div class="side-section">
+        <div class="player-order-title">Pawn features</div>
+        <div class="pawn-options-card" id="pawn-options-card">
+          <div class="move-history-empty">Start a game to inspect pawn options.</div>
+        </div>
+      </div>
+
+      <!-- MOVE HISTORY -->
+      <div class="side-section grow">
+        <div class="player-order-title">Move history</div>
         <div class="move-history-card">
           <div id="move-history-list" class="move-history-list">
             <div class="move-history-empty">No committed moves yet.</div>
           </div>
         </div>
       </div>
+
+      <!-- SAVE BUTTON (BOTTOM STICKY) -->
+      <div class="side-footer">
+        <button class="btn btn-sm"
+                id="save-game-json-btn"
+                onclick="saveGameJson()"
+                disabled>
+          <i class="fa-solid fa-download"></i> Save JSON
+        </button>
+      </div>
+
     </div>
   </div>
+</div>

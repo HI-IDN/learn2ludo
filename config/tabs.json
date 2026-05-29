@@ -1,6 +1,15 @@
 {
   "tabs": [
     {
+      "id": "lobby",
+      "label": "Players",
+      "icon": "ti-users",
+      "enabled": true,
+      "default_visible": true,
+      "order": 0,
+      "description": "Player setup and game start"
+    },
+    {
       "id": "play",
       "label": "Play",
       "icon": "ti-dice",
