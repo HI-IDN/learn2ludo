@@ -106,7 +106,7 @@ function loadSettings(){
 function applySettingsToControls(){
   const c=(id,v)=>{const e=document.getElementById(id); if(e)e.checked=v;};
   const val=(id,v)=>{const e=document.getElementById(id); if(e)e.value=v;};
-  c('rule-safe', settings.safe_squares ?? true); c('set-show-cell-numbers', settings.show_cell_numbers ?? false); c('set-auto-dice', settings.auto_dice ?? false); c('set-auto-single-move', settings.auto_single_move ?? true); val('rule-max-sixes', settings.max_consecutive_sixes ?? 3); val('rule-empty-board-rolls', settings.empty_board_rolls ?? 3);
+  c('rule-safe', settings.safe_squares ?? true); c('set-show-cell-numbers', settings.show_cell_numbers ?? false); val('rule-max-sixes', settings.max_consecutive_sixes ?? 3); val('rule-empty-board-rolls', settings.empty_board_rolls ?? 3);
   val('set-num-players', settings.num_players ?? 4); val('board-yard-count', settings.board_yard_count ?? 4); val('board-track-size', settings.board_track_size ?? 52); val('board-safe-offset', settings.board_safe_offset ?? 7); val('board-home-length', settings.board_home_length ?? 6); val('board-pawns-per-player', settings.pawns_per_player ?? 4); c('board-stack-home', settings.stack_home_pawns ?? false);
 }
 function saveSettings(){
@@ -127,8 +127,7 @@ function saveSettings(){
     max_consecutive_sixes:Math.max(1, parseInt(document.getElementById('rule-max-sixes')?.value || 3)),
     empty_board_rolls:Math.max(1, parseInt(document.getElementById('rule-empty-board-rolls')?.value || 3)),
     show_cell_numbers:document.getElementById('set-show-cell-numbers')?.checked ?? false,
-    auto_dice:document.getElementById('set-auto-dice')?.checked ?? false,
-    auto_single_move:document.getElementById('set-auto-single-move')?.checked ?? true,
+
     sound_volume: typeof getSoundVolume==='function' ? getSoundVolume() : (settings.sound_volume ?? 0.8)
   };
   validateBoardConfig(); persistSettings(); renderPlayers(); renderLobbySlots(); drawBoard();
@@ -316,25 +315,35 @@ function toggleSection(id){
   if(el) el.classList.toggle('collapsed');
 }
 
+const _AUTO_SPEEDS = ['off', 'normal', 'fast'];
+const _AUTO_DELAY  = { normal: { roll: 900, move: 600 }, fast: { roll: 200, move: 150 } };
 function toggleAutoPlay() {
-  settings.auto_single_move = !(settings.auto_single_move ?? true);
+  const cur = settings.auto_play_speed || 'off';
+  settings.auto_play_speed = _AUTO_SPEEDS[(_AUTO_SPEEDS.indexOf(cur) + 1) % _AUTO_SPEEDS.length];
   persistSettings();
   _updateAutoPlayBtn();
+  scheduleAutoRoll();
 }
 function _updateAutoPlayBtn() {
   const btn = document.getElementById('auto-play-btn');
   if (!btn) return;
-  const on = settings.auto_single_move ?? true;
-  btn.classList.toggle('active', on);
+  const speed = settings.auto_play_speed || 'off';
+  const off = speed === 'off';
+  btn.classList.toggle('active', !off);
+  btn.classList.toggle('fast', speed === 'fast');
+  const icons = { off: 'fa-pause', normal: 'fa-play', fast: 'fa-forward' };
+  const labels = { off: 'Auto play', normal: 'Normal', fast: 'Fast' };
+  btn.innerHTML = `<i class="fa-solid ${icons[speed]}"></i> ${labels[speed]}`;
 }
 
 let _autoRollTimer = null;
 function scheduleAutoRoll() {
   clearTimeout(_autoRollTimer);
+  const speed = settings.auto_play_speed || 'off';
+  if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
-  if (!(settings.auto_dice ?? false)) return;
   if (getPlayerType(gameState.current_player) !== 'human') return;
-  _autoRollTimer = setTimeout(rollDice, 900);
+  _autoRollTimer = setTimeout(rollDice, _AUTO_DELAY[speed].roll);
 }
 
 function renderGame(){
@@ -342,11 +351,12 @@ function renderGame(){
   _updateAutoPlayBtn();
   if(typeof scheduleBotPlay==='function') scheduleBotPlay();
   scheduleAutoRoll();
-  // Auto-play the only legal move for human players when the setting is on
-  if((settings.auto_single_move??true) && gameState.phase==='moving' && gameState.winner===null
+  // Auto-play the only legal move for human players when auto-play speed is active
+  const _apSpeed = settings.auto_play_speed || 'off';
+  if(_apSpeed !== 'off' && gameState.phase==='moving' && gameState.winner===null
       && getPlayerType(gameState.current_player)==='human' && gameState.valid_moves?.length===1){
     const m=gameState.valid_moves[0];
-    setTimeout(()=>makeMove(m.piece_idx,m.target), 500);
+    setTimeout(()=>makeMove(m.piece_idx,m.target), _AUTO_DELAY[_apSpeed].move);
   }
 }
 function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'yard'; if(pos>=52)return `home ${pos-52}`; return `cell ${(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52}`; }

@@ -23,6 +23,7 @@ function showPregame(activeSlots) {
   _setDiceFaceClickable(true);
   _renderPregame();
   _renderPregameHistory();
+  _scheduleAutoPreRoll();
 }
 
 function _hidePregame() {
@@ -98,14 +99,9 @@ function _renderPregame() {
     </div>`;
   }).join('');
 
-  const footer = allRolled
-    ? `<div class="pg-footer-wait"><i class="fa-solid fa-spinner fa-spin"></i> Evaluating…</div>`
-    : '';
-
   container.innerHTML = `
     <div class="action-instruction">Highest roll goes first · ties re-roll · click dice to roll</div>
-    <div class="pg-players">${rows}</div>
-    ${footer}`;
+    <div class="pg-players">${rows}</div>`;
 }
 
 function _onDiceClick() {
@@ -152,6 +148,7 @@ function pregameRoll() {
       } else {
         _setDiceFaceClickable(true);
         _renderPregame();
+        _scheduleAutoPreRoll();
       }
     }
   }, 60);
@@ -189,6 +186,20 @@ function _renderPregameHistory() {
   if (typeof renderMoveHistory === 'function') renderMoveHistory();
 }
 
+let _pgAutoTimer = null;
+function _scheduleAutoPreRoll() {
+  clearTimeout(_pgAutoTimer);
+  const speed = (typeof settings !== 'undefined' && settings.auto_play_speed) || 'off';
+  if (speed === 'off' || !_pg) return;
+  const delay = speed === 'fast' ? 200 : 900;
+  _pgAutoTimer = setTimeout(() => { if (_pg && !_pg.rolling) pregameRoll(); }, delay);
+}
+
+// Kick off auto-roll when pregame first starts (first player's roll)
+function _maybeTriggerAutoPreRoll() {
+  _scheduleAutoPreRoll();
+}
+
 
 function _showTieMessage(tiedPlayers, tiedValue) {
   const container = document.getElementById('pregame-container');
@@ -208,5 +219,6 @@ function _showTieMessage(tiedPlayers, tiedValue) {
     _pg.rolling = false;
     _pg.round++;
     _renderPregame();
+    _scheduleAutoPreRoll();
   }, 1600);
 }

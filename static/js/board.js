@@ -116,25 +116,12 @@ function drawBoard(){
 
   // Pawns & move previews
   if(gameState){
-    const pawnsPerPlayer = gameState.config?.board?.pawns_per_player || 4;
+    const pawnsPerPlayer=gameState.config?.board?.pawns_per_player||4;
     const valid=new Map(gameState.valid_moves.map(m=>[m.piece_idx,m]));
+    const step=8;
 
-    // Move previews — also grouped by destination cell
-    const previewGroups=new Map();
-    valid.forEach((m,g)=>{
-      const p=Math.floor(g/pawnsPerPlayer),pt=getTargetCenter(p,m.target),col=COLORS[playerColorName(p,gameState.num_players)];
-      if(!pt)return;
-      const key=`${Math.round(pt.x)},${Math.round(pt.y)}`;
-      if(!previewGroups.has(key))previewGroups.set(key,[]);
-      previewGroups.get(key).push({cx:pt.x,cy:pt.y,col,g});
-    });
-    previewGroups.forEach(group=>{
-      const n=group.length,step=8;
-      group.forEach((pv,idx)=>{html+=pawnPreviewSvg(pv.cx+(idx-(n-1)/2)*step,pv.cy,pv.col,pv.g);});
-    });
-
-    // Yard pawns — each slot has 4 fixed sub-positions, no grouping needed
-    // On-track pawns — collect by cell center, then spread with offset
+    // 1. Build on-track groups first (no rendering yet) and render yard pawns.
+    //    Preview offsets need to know how many real pawns already sit at each cell.
     const trackGroups=new Map();
     gameState.players.forEach(player=>{
       const col=COLORS[player.color]||COLORS[playerColorName(player.index,gameState.num_players)];
@@ -151,13 +138,40 @@ function drawBoard(){
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
-          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable,g,label:i+1});
+          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable,g,label:i+1,player:player.index});
         }
       });
     });
 
-    // Render on-track groups — spread horizontally so stacked pawns fan out
-    const step=8;
+    // 2. Build preview groups — offset behind existing pawns at destination.
+    //    Mark if landing here would form (or reinforce) a blockade.
+    const previewGroups=new Map();
+    valid.forEach((m,g)=>{
+      const p=Math.floor(g/pawnsPerPlayer),pt=getTargetCenter(p,m.target),col=COLORS[playerColorName(p,gameState.num_players)];
+      if(!pt)return;
+      const key=`${Math.round(pt.x)},${Math.round(pt.y)}`;
+      const existing=trackGroups.get(key)||[];
+      const friendlyAtDest=existing.filter(pw=>pw.player===p).length;
+      const wouldBlockade=friendlyAtDest>=1;
+      if(!previewGroups.has(key))previewGroups.set(key,{existingCount:existing.length,previews:[]});
+      previewGroups.get(key).previews.push({cx:pt.x,cy:pt.y,col,g,wouldBlockade});
+    });
+
+    // 3. Render previews underneath real pawns.
+    previewGroups.forEach(({existingCount,previews})=>{
+      const total=existingCount+previews.length;
+      previews.forEach((pv,idx)=>{
+        const ox=(existingCount+idx-(total-1)/2)*step;
+        html+=pawnPreviewSvg(pv.cx+ox,pv.cy,pv.col,pv.g);
+        if(pv.wouldBlockade){
+          // Small shield above the preview to signal a blockade would form
+          const s=12;
+          html+=`<foreignObject x="${pv.cx+ox-s/2}" y="${pv.cy-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${pv.col};font-size:${s}px;line-height:1;filter:drop-shadow(0 0 2px rgba(0,0,0,.4));"><i class="fa-solid fa-shield"></i></div></foreignObject>`;
+        }
+      });
+    });
+
+    // 4. Render on-track groups on top of previews.
     trackGroups.forEach(group=>{
       const n=group.length;
       group.forEach((pw,idx)=>{

@@ -45,6 +45,13 @@ class GameSession:
         elif not valid:
             self._yard_roll_count = 0
             self.history.append({"player": self.game.player, "dice": value, "type": "roll"})
+            blocker = self.gp.find_blocker(self.game.player)
+            if blocker is not None:
+                self.history.append({
+                    "type":       "blocked",
+                    "player":     self.game.player,
+                    "blocked_by": blocker,
+                })
             self.game.end_move()
             if self.game.phase == Phase.NEXT:
                 self.game.next()
@@ -55,13 +62,28 @@ class GameSession:
         return value
 
     def apply_move(self, piece_idx: int, target: int) -> dict:
-        pawns = self.game.config.board.pawns_per_player
-        pi    = piece_idx // pawns
-        lidx  = piece_idx  % pawns
-        pc    = [p for p in self.gp.pieces if p.player == pi][lidx]
+        pawns    = self.game.config.board.pawns_per_player
+        pi       = piece_idx // pawns
+        lidx     = piece_idx  % pawns
+        pc       = [p for p in self.gp.pieces if p.player == pi][lidx]
         from_pos = pc.pos
-        self.gp.move(pc)
+        captured = self.gp.move(pc)
         self.history.append({"player": pi, "piece": piece_idx, "from": from_pos, "to": pc.pos})
+
+        # Log each capture as a separate history event
+        for cap in captured:
+            cap_pieces = [p for p in self.gp.pieces if p.player == cap.player]
+            cap_lidx   = next(i for i, p in enumerate(cap_pieces) if p is cap)
+            cap_gidx   = cap.player * pawns + cap_lidx
+            cap_slot   = self.game.slots[pi]
+            abs_cell   = (pc.pos + self.game.board.starts[cap_slot]) % self.game.board.track_size
+            self.history.append({
+                "type":             "capture",
+                "captured_player":  cap.player,
+                "captured_piece":   cap_gidx,
+                "by_player":        pi,
+                "cell":             abs_cell,
+            })
         w = self.gp.has_winner()
         if w is not None:
             self.winner = w

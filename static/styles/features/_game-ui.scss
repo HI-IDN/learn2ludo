@@ -168,6 +168,16 @@
   opacity: 0.75;
 }
 
+.move-history-capture {
+  background: color-mix(in srgb, #ff4444 6%, transparent);
+  border-radius: $radius;
+}
+
+.move-history-blocked {
+  opacity: 0.75;
+  font-style: italic;
+}
+
 .mh-sep {
   color: $color-text-3;
 }
