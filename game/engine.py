@@ -12,6 +12,7 @@ class BoardConfig:
     yard_count:int
     home_length:int=6
     safe_offset:int=7
+    pawns_per_player:int=4
 
 @dataclass
 class GameConfig:

@@ -36,30 +36,39 @@
       </div>
       <div class="settings-card">
         <h2>Board configuration</h2>
-        <div class="form-row">
-          <label>Maximum players</label>
-          <input type="number" id="board-max-players" min="2" max="6" value="4" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
-        </div>
-        <div class="form-row">
-          <label>Number of yards</label>
+        <div class="rule-row">
+          <div>
+            <div class="rule-name">Number of yards</div>
+            <div class="rule-desc">One yard per player; also sets the maximum number of players</div>
+          </div>
           <input type="number" id="board-yard-count" min="2" max="6" value="4" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
         </div>
-        <div class="form-row">
-          <label>Track length <span style="font-size:11px;color:var(--text3)">(fixed at 52)</span></label>
+        <div class="rule-row">
+          <div>
+            <div class="rule-name">Track length <span style="font-size:11px;color:var(--text3)">(fixed at 52)</span></div>
+            <div class="rule-desc">Must be divisible by number of yards</div>
+          </div>
           <input type="number" id="board-track-size" value="52" disabled style="width:72px; padding:4px 8px; font-size:12px; opacity:0.5;">
         </div>
-        <div class="form-row">
-          <label>Safe haven offset</label>
+        <div class="rule-row">
+          <div>
+            <div class="rule-name">Safe haven offset</div>
+            <div class="rule-desc">Safe havens include player starts and offset cells</div>
+          </div>
           <input type="number" id="board-safe-offset" min="1" value="7" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
         </div>
-        <div class="rule-desc board-config-note">Safe havens include player starts and offset cells.</div>
-        <div class="form-row">
-          <label>Home stretch length</label>
-          <input type="number" id="board-home-length" min="4" value="6" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+        <div class="rule-row">
+          <div>
+            <div class="rule-name">Home stretch length <span style="font-size:11px;color:var(--text3)">(fixed at 6)</span></div>
+          </div>
+          <input type="number" id="board-home-length" value="6" disabled style="width:72px; padding:4px 8px; font-size:12px; opacity:0.5;">
         </div>
-        <div class="form-row">
-          <label>Pawns per player</label>
-          <input type="number" id="board-pawns-per-player" min="1" max="8" value="4" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+        <div class="rule-row">
+          <div>
+            <div class="rule-name">Pawns per player</div>
+            <div class="rule-desc">Number of pieces each player controls</div>
+          </div>
+          <input type="number" id="board-pawns-per-player" min="1" max="4" value="4" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
         </div>
         <div class="rule-row">
           <div>

@@ -175,6 +175,7 @@ def new_game(req: NewGameRequest):
             yard_count=yard_count,
             home_length=board_cfg.get("home_length", 6),
             safe_offset=board_cfg.get("safe_offset", 7),
+            pawns_per_player=board_cfg.get("pawns_per_player", 4),
         ),
         player_count=player_count,
         explicit_slots=explicit_slots,

@@ -4,7 +4,7 @@
 // Active players are stored as settings.active_slots: an ordered array of
 // slot indices (0=red,1=green,2=yellow,3=blue).
 
-function lobbyMaxSlots() { return settings.board_max_players ?? 4; }
+function lobbyMaxSlots() { return settings.board_yard_count ?? 4; }
 
 function lobbyActiveSlots() {
   const max = lobbyMaxSlots();

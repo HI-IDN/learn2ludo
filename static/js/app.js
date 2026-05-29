@@ -23,8 +23,7 @@ function boardLayout(trackSize=52, yardCount=4) {
     ...starts,
     ...starts.map(start => (start + safeOffset) % trackSize)
   ]);
-  return {max_players: yardCount,
-    track_size: trackSize, yard_count: yardCount, starts, finishes, safe_havens};
+  return {track_size: trackSize, yard_count: yardCount, starts, finishes, safe_havens};
 }
 function currentLayout(){ return gameState?.board || boardLayout(); }
 
@@ -98,20 +97,20 @@ async function init(){
 function loadSettings(){
   try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
   if(settings.sound_volume===undefined) settings.sound_volume=0.8;
-  // TRACK_GRID only supports 52 cells — reset any stale value
+  // TRACK_GRID fixed at 52, HOME_STRETCH_GRID fixed at 6 — reset stale values
   if(settings.board_track_size && settings.board_track_size !== 52) settings.board_track_size=52;
+  if(settings.board_home_length && settings.board_home_length !== 6) settings.board_home_length=6;
 }
 function applySettingsToControls(){
   const c=(id,v)=>{const e=document.getElementById(id); if(e)e.checked=v;};
   const val=(id,v)=>{const e=document.getElementById(id); if(e)e.value=v;};
   c('rule-safe', settings.safe_squares ?? true); c('set-show-cell-numbers', settings.show_cell_numbers ?? false); c('set-animate', settings.animate ?? true); val('rule-max-sixes', settings.max_consecutive_sixes ?? 3); val('rule-empty-board-rolls', settings.empty_board_rolls ?? 3);
-  val('set-num-players', settings.num_players ?? 4); val('set-board-size', settings.board_size ?? 480); val('board-max-players', settings.board_max_players ?? 4); val('board-yard-count', settings.board_yard_count ?? 4); val('board-track-size', settings.board_track_size ?? 56); val('board-safe-offset', settings.board_safe_offset ?? 7); val('board-home-length', settings.board_home_length ?? 6); val('board-pawns-per-player', settings.pawns_per_player ?? 4); c('board-stack-home', settings.stack_home_pawns ?? false); val('set-board-size', settings.board_size ?? 480);
+  val('set-num-players', settings.num_players ?? 4); val('board-yard-count', settings.board_yard_count ?? 4); val('board-track-size', settings.board_track_size ?? 52); val('board-safe-offset', settings.board_safe_offset ?? 7); val('board-home-length', settings.board_home_length ?? 6); val('board-pawns-per-player', settings.pawns_per_player ?? 4); c('board-stack-home', settings.stack_home_pawns ?? false);
 }
 function saveSettings(){
   const boardCfg = readBoardConfig();
   settings={...settings,
     num_players: settings.num_players ?? 4,
-    board_max_players: boardCfg.max_players ?? settings.board_max_players ?? 4,
     board_yard_count: boardCfg.yard_count ?? settings.board_yard_count ?? 4,
     board_track_size: boardCfg.track_size ?? settings.board_track_size ?? 52,
     board_safe_offset: boardCfg.safe_offset ?? settings.board_safe_offset ?? 7,
@@ -134,16 +133,14 @@ function saveSettings(){
 function getGameRules(){ return {six_to_enter:true, six_extra_turn:true, capture_enabled:true, safe_squares: settings.safe_squares ?? true, max_consecutive_sixes: settings.max_consecutive_sixes ?? 3, no_pawn_three_rolls:true, empty_board_rolls: settings.empty_board_rolls ?? 3}; }
 
 function readBoardConfig() {
-  const maxPlayers = Math.max(2, Math.min(6, parseInt(document.getElementById('board-max-players')?.value || settings.board_max_players || 4)));
-  const yardCount = Math.max(maxPlayers, Math.min(6, parseInt(document.getElementById('board-yard-count')?.value || settings.board_yard_count || 4)));
-  let trackSize = 52; // TRACK_GRID is fixed at 52 cells
-  const pawns = Math.max(1, parseInt(document.getElementById('board-pawns-per-player')?.value || settings.pawns_per_player || 4));
-  const homeLength = Math.max(pawns, parseInt(document.getElementById('board-home-length')?.value || settings.board_home_length || 6));
+  const yardCount = Math.max(2, Math.min(6, parseInt(document.getElementById('board-yard-count')?.value || settings.board_yard_count || 4)));
+  const trackSize = 52; // TRACK_GRID is fixed at 52 cells
+  const homeLength = 6; // HOME_STRETCH_GRID is fixed at 6 cells
+  const pawns = Math.max(1, Math.min(4, parseInt(document.getElementById('board-pawns-per-player')?.value || settings.pawns_per_player || 4)));
   const safeOffset = Math.max(1, parseInt(document.getElementById('board-safe-offset')?.value || settings.board_safe_offset || 7));
   const stackHome = document.getElementById('board-stack-home')?.checked ?? !!settings.stack_home_pawns;
 
   return {
-    max_players: maxPlayers,
     track_size: trackSize,
     yard_count: yardCount,
     home_length: homeLength,
@@ -157,7 +154,7 @@ function readBoardConfig() {
 function syncPlayerCountOptions() {
   const select = document.getElementById('set-num-players');
   if (!select) return;
-  const maxPlayers = readBoardConfig().max_players || 4;
+  const maxPlayers = readBoardConfig().yard_count || 4;
   const current = Math.min(parseInt(select.value || settings.num_players || 4), maxPlayers);
   select.innerHTML = Array.from({length: maxPlayers - 1}, (_, i) => i + 2)
     .map(n => `<option value="${n}" ${n === current ? 'selected' : ''}>${n}</option>`).join('');
@@ -195,7 +192,6 @@ function buildNewGamePayload(){
     rules:getGameRules(),
     config:{
       board:{
-        max_players:boardCfg.max_players,
         track_size:boardCfg.track_size,
         yard_count:boardCfg.yard_count,
         home_length:boardCfg.home_length,

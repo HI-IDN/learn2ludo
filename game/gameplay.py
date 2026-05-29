@@ -14,7 +14,7 @@ class Gameplay:
         self.game=game
         self.track=game.board.track_size
         self.home_len=game.config.board.home_length
-        self.pieces=[Piece(p) for p in range(game.config.player_count) for _ in range(4)]
+        self.pieces=[Piece(p) for p in range(game.config.player_count) for _ in range(game.config.board.pawns_per_player)]
 
     # ---------- VALID MOVES ----------
     def valid_moves(self,player):

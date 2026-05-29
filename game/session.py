@@ -3,7 +3,6 @@ from game.engine import LudoGame, GameConfig, BoardConfig, Phase
 from game.gameplay import Gameplay, Piece
 
 _COLORS = ['red', 'green', 'yellow', 'blue', 'orange', 'purple']
-_PAWNS = 4
 
 
 class GameSession:
@@ -24,8 +23,9 @@ class GameSession:
         return value
 
     def apply_move(self, piece_idx: int, target: int) -> dict:
-        pi   = piece_idx // _PAWNS
-        lidx = piece_idx  % _PAWNS
+        pawns = self.game.config.board.pawns_per_player
+        pi   = piece_idx // pawns
+        lidx = piece_idx  % pawns
         pc   = [p for p in self.gp.pieces if p.player == pi][lidx]
         from_pos = pc.pos
         self.gp.move(pc)
@@ -67,7 +67,7 @@ class GameSession:
                     "yard_count":      g.board.yard_count,
                     "home_length":     g.config.board.home_length,
                     "safe_offset":     g.config.board.safe_offset,
-                    "pawns_per_player": _PAWNS,
+                    "pawns_per_player": g.config.board.pawns_per_player,
                 },
             },
             "slots":          list(g.slots),
@@ -113,7 +113,7 @@ class GameSession:
         for pc in self.gp.valid_moves(g.player):
             pi   = pc.player
             lidx = [p for p in self.gp.pieces if p.player == pi].index(pc)
-            gidx = pi * _PAWNS + lidx
+            gidx = pi * g.config.board.pawns_per_player + lidx
             tgt  = 0 if pc.pos == -1 else pc.pos + g.last_roll
             moves.append({"piece_idx": gidx, "target": tgt})
         return moves
