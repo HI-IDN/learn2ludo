@@ -100,12 +100,51 @@
   &.grow {
     flex: 1;
     overflow-y: auto;
+    min-height: 0;
   }
 
   &.controls {
     display: flex;
     justify-content: space-between;
   }
+}
+
+// ---- Collapsible sections ---------------------------------------------------
+
+.collapsible-section {
+  &.grow { min-height: 0; }
+}
+
+.collapsible-header {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  padding-bottom: 6px;
+
+  &:hover .collapsible-chevron { opacity: 1; }
+}
+
+.collapsible-chevron {
+  font-size: 10px;
+  color: $color-text-3;
+  opacity: 0.6;
+  transition: transform 0.2s ease, opacity 0.2s;
+}
+
+.collapsible-body {
+  overflow: hidden;
+  transition: max-height 0.25s ease, opacity 0.2s;
+  max-height: 800px;
+  opacity: 1;
+}
+
+.collapsible-section.collapsed {
+  .collapsible-chevron { transform: rotate(-90deg); }
+  .collapsible-body { max-height: 0; opacity: 0; pointer-events: none; }
+  &.grow { flex: 0; }
 }
 
 .side-footer {

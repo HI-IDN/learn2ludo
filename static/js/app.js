@@ -56,9 +56,10 @@ function botDisplayName(i) {
 function getPlayerName(i){
   const type=getPlayerType(i);
   if (type !== 'human') {
-    const botId = settings.bot_ids?.[i];
-    if (botId && typeof getBotRegistry === 'function') {
-      const bot = getBotRegistry().find(b => b.id === botId);
+    const registry=typeof getBotRegistry==='function'?getBotRegistry():[];
+    const botId=settings.bot_ids?.[i] ?? registry[0]?.id;
+    if (botId) {
+      const bot=registry.find(b=>b.id===botId);
       if (bot) return bot.name;
     }
     return settings.bot_names?.[i] || 'Bot';
@@ -229,24 +230,24 @@ function updateTabConfig(){}
 async function saveTabConfig(){}
 
 function gameInProgress(){
-  return gameState && gameState.winner === null && (gameState.history?.length ?? 0) > 0;
+  return gameState && gameState.winner === null;
 }
 
 function requestNewGame(){
   gameStartingPlayer=null;
   if(gameInProgress()){
     const ctrl = document.getElementById('new-game-control');
-    if(!ctrl) { newGame(); return; }
+    if(!ctrl) { showPregame(); return; }
     ctrl.innerHTML = `
       <div class="new-game-confirm">
         <span class="new-game-confirm-msg"><i class="fa-solid fa-triangle-exclamation"></i> Abandon current game?</span>
         <div class="new-game-confirm-btns">
-          <button class="btn btn-danger btn-sm" onclick="newGame()">Yes, start new</button>
+          <button class="btn btn-danger btn-sm" onclick="cancelNewGame();showPregame()">Yes, new game</button>
           <button class="btn btn-sm" onclick="cancelNewGame()">Cancel</button>
         </div>
       </div>`;
   } else {
-    newGame();
+    showPregame();
   }
 }
 
@@ -305,11 +306,16 @@ async function makeMove(pieceIdx,target){
   renderGame();
 }
 
+function toggleSection(id){
+  const el=document.getElementById(id);
+  if(el) el.classList.toggle('collapsed');
+}
+
 function renderGame(){
   if(!gameState)return; drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
   if(typeof scheduleBotPlay==='function') scheduleBotPlay();
 }
-function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'yard'; if(pos>=52)return `home ${pos-51}`; return `cell ${((pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52)+1}`; }
+function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'yard'; if(pos>=52)return `home ${pos-52}`; return `cell ${(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
 
 // Move history rendering lives in history.js.

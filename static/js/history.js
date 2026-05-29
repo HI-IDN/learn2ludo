@@ -63,4 +63,38 @@ function updateSaveGameButton() {
   if (btn) btn.disabled = !gameState;
 }
 
-function renderMoveHistory(){ const list=document.getElementById('move-history-list'); if(!list)return; const h=gameState?.history||[]; list.innerHTML=h.length?h.slice().reverse().slice(0,8).map(e=>`<div class="move-history-row"><span class="move-history-dot" style="background:${COLORS[playerColorName(e.player,gameState.num_players)]}"></span><i class="fa-solid fa-user"></i><div class="move-history-text"><strong>pawn ${(e.piece%4)+1}: ${displayCellLabel(e.player,e.from)} → ${displayCellLabel(e.player,e.to)}</strong><span>dice ${e.dice??'–'}</span></div></div>`).join(''):'<div class="move-history-empty">No committed moves yet.</div>'; }
+// Persistent session history — never cleared, accumulates across games.
+// Each entry: {type:'move'|'pregame', ...fields}
+const sessionHistory = [];
+let _lastGameHistoryLen = 0;
+
+function pushPregameRoll(playerIdx, name, color, roll, round) {
+  sessionHistory.unshift({type:'pregame', playerIdx, name, color, roll, round});
+}
+
+function syncGameHistory() {
+  const h = gameState?.history || [];
+  const newEntries = h.slice(_lastGameHistoryLen);
+  newEntries.forEach(e => sessionHistory.unshift({type:'move', ...e}));
+  _lastGameHistoryLen = h.length;
+}
+
+function resetGameHistorySync() {
+  _lastGameHistoryLen = 0;
+}
+
+function renderMoveHistory(){
+  const list=document.getElementById('move-history-list'); if(!list)return;
+  syncGameHistory();
+
+  const rows=sessionHistory.map(e=>{
+    if(e.type==='pregame'){
+      const col=e.color;
+      return `<div class="move-history-row move-history-pregame"><span class="move-history-dot" style="background:${col}"></span><i class="fa-solid fa-dice-d6"></i><div class="move-history-text"><strong>${e.name}</strong><span>rolled ${e.roll}${e.round>1?` (re-roll ${e.round})`:''}  · first player</span></div></div>`;
+    }
+    const col=COLORS[playerColorName(e.player,gameState?.num_players||4)];
+    return `<div class="move-history-row"><span class="move-history-dot" style="background:${col}"></span><i class="fa-solid fa-user"></i><div class="move-history-text"><strong>pawn ${(e.piece%4)+1}: ${displayCellLabel(e.player,e.from)} → ${displayCellLabel(e.player,e.to)}</strong><span>dice ${e.dice??'–'}</span></div></div>`;
+  });
+
+  list.innerHTML=rows.length?rows.join(''):'<div class="move-history-empty">No committed moves yet.</div>';
+}

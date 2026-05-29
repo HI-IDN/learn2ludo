@@ -127,8 +127,12 @@ function lobbySetType(slotIdx, type) {
   const playerIdx = lobbyActiveSlots().indexOf(slotIdx);
   if (playerIdx === -1) return;
   settings.player_types = settings.player_types || {};
-  // store 'human' or 'random' (engine key) — 'bot' maps to 'random'
   settings.player_types[playerIdx] = type === 'human' ? 'human' : 'random';
+  // persist default bot id so getPlayerName doesn't fall back to "Bot"
+  if (type !== 'human' && !settings.bot_ids?.[playerIdx]) {
+    const bots = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+    if (bots.length) { settings.bot_ids = settings.bot_ids || {}; settings.bot_ids[playerIdx] = bots[0].id; }
+  }
   persistSettings();
   renderLobbySlots();
 }

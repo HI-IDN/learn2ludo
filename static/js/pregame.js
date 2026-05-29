@@ -13,11 +13,14 @@ function showPregame() {
     competing: Array.from({length: n}, (_, i) => i),
     cursor: 0,
     rolling: false,
+    round: 1,
   };
 
+  if(typeof resetGameHistorySync==='function') resetGameHistorySync();
   document.getElementById('game-action-wrap')?.style.setProperty('display', 'none');
   _setPregameSubtitle('Determining starting player');
   _renderPregame();
+  _renderPregameHistory();
 }
 
 function _hidePregame() {
@@ -115,6 +118,11 @@ function pregameRoll() {
       _pg.cursor++;
       _pg.rolling = false;
       if (typeof playSound === 'function') playSound('move');
+      const slot = _pg.active[playerIdx];
+      const name = typeof getPlayerName === 'function' ? getPlayerName(playerIdx) : `Player ${playerIdx+1}`;
+      const color = COLORS[PLAYER_COLORS[slot]] || COLORS.blue;
+      if(typeof pushPregameRoll === 'function') pushPregameRoll(playerIdx, name, color, roll, _pg.round);
+      _renderPregameHistory();
 
       if (_pg.cursor >= _pg.competing.length) {
         _renderPregame();
@@ -158,6 +166,11 @@ function _showPregameWinner(winnerIdx) {
   }, 1800);
 }
 
+function _renderPregameHistory() {
+  if (typeof renderMoveHistory === 'function') renderMoveHistory();
+}
+
+
 function _showTieMessage(tiedPlayers, tiedValue) {
   const container = document.getElementById('pregame-container');
   if (!container) return;
@@ -177,6 +190,7 @@ function _showTieMessage(tiedPlayers, tiedValue) {
     _pg.competing = tiedPlayers;
     _pg.cursor = 0;
     _pg.rolling = false;
+    _pg.round++;
     _renderPregame();
   }, 1600);
 }

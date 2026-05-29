@@ -75,19 +75,29 @@
       </div>
 
       <!-- PAWN FEATURES -->
-      <div class="side-section">
-        <div class="player-order-title">Pawn features</div>
-        <div class="pawn-options-card" id="pawn-options-card">
-          <div class="move-history-empty">Start a game to inspect pawn options.</div>
+      <div class="side-section collapsible-section collapsed" id="section-pawn-features">
+        <button class="collapsible-header" onclick="toggleSection('section-pawn-features')">
+          <span class="player-order-title">Pawn features</span>
+          <i class="fa-solid fa-chevron-down collapsible-chevron"></i>
+        </button>
+        <div class="collapsible-body">
+          <div class="pawn-options-card" id="pawn-options-card">
+            <div class="move-history-empty">Start a game to inspect pawn options.</div>
+          </div>
         </div>
       </div>
 
       <!-- MOVE HISTORY -->
-      <div class="side-section grow">
-        <div class="player-order-title">Move history</div>
-        <div class="move-history-card">
-          <div id="move-history-list" class="move-history-list">
-            <div class="move-history-empty">No committed moves yet.</div>
+      <div class="side-section collapsible-section grow" id="section-move-history">
+        <button class="collapsible-header" onclick="toggleSection('section-move-history')">
+          <span class="player-order-title">History</span>
+          <i class="fa-solid fa-chevron-down collapsible-chevron"></i>
+        </button>
+        <div class="collapsible-body">
+          <div class="move-history-card">
+            <div id="move-history-list" class="move-history-list">
+              <div class="move-history-empty">No committed moves yet.</div>
+            </div>
           </div>
         </div>
       </div>
