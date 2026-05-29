@@ -179,6 +179,24 @@
   }
 }
 
+// Bot selector dropdown
+.lobby-bot-select {
+  width: 100%;
+  background: #1a1a28;
+  border: 1.5px solid #2a2a3a;
+  border-radius: 8px;
+  color: #ccc;
+  font-size: 12px;
+  font-family: $font-sans;
+  padding: 7px 10px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+
+  option { background: #1a1a28; }
+  &:focus { border-color: var(--slot-color, $color-primary); }
+}
+
 // Name input
 .lobby-name-wrap { position: relative; }
 

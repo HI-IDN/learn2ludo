@@ -100,7 +100,7 @@ function normalizeEngineState(raw) {
 
 
 async function init(){
-  loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); renderPlayers(); renderLobbySlots(); drawBoard();
+  loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); drawBoard();
 }
 function loadSettings(){ try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};} if(settings.slot_mode===undefined) settings.slot_mode='fair'; if(settings.sound_volume===undefined) settings.sound_volume=0.8; }
 function applySettingsToControls(){
@@ -229,7 +229,7 @@ async function loadTabs(){
 }
 function getVisibleTabs(){ return tabConfig.filter(t=>t.enabled).sort((a,b)=>a.order-b.order); }
 function renderTabs(){ const nav=document.getElementById('tab-nav'); nav.innerHTML=''; getVisibleTabs().forEach(t=>{ const b=document.createElement('button'); b.className='tab-btn'; b.id='tab-btn-'+t.id; b.innerHTML=`<i class="ti ${t.icon}"></i>${t.label}`; b.onclick=()=>switchTab(t.id); nav.appendChild(b); }); switchTab(getVisibleTabs()[0]?.id || 'play'); }
-function switchTab(id){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tab-btn-'+id)?.classList.add('active'); document.getElementById('panel-'+id)?.classList.add('active'); if(id==='stats')loadStats(); if(id==='lobby')renderLobbySlots(); }
+function switchTab(id){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tab-btn-'+id)?.classList.add('active'); document.getElementById('panel-'+id)?.classList.add('active'); if(id==='stats')loadStats(); if(id==='lobby')renderLobbySlots(); if(id==='bots')renderBotsPage(); }
 async function doAdminLogin(){adminToken='dev';}
 async function doOverlayLogin(){adminToken='dev'; closeOverlay(); switchTab('admin');}
 function closeOverlay(){ const o=document.getElementById('admin-overlay'); if(o)o.style.display='none'; }
@@ -311,6 +311,7 @@ function renderGame(){
   banner.classList.remove('idle'); banner.style.background=color; banner.querySelector('i').className=getPlayerType(cp)!=='human'?'fa-solid fa-robot':'fa-solid fa-user'; name.textContent=`${getPlayerName(cp)}'s turn`;
   instr.textContent=phase==='rolling'?'Roll the dice.':phase==='moving'?'Choose one of the highlighted pawns to move.':phase==='next'?'Ending turn.':'Game finished.';
   roll.disabled=phase!=='rolling' || gameState.winner!==null; roll.style.background=roll.disabled?'':'#10099F'; roll.style.borderColor=roll.disabled?'':'#10099F';
+  if(typeof scheduleBotPlay==='function') scheduleBotPlay();
 }
 function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'yard'; if(pos>=52)return `home ${pos-51}`; return `cell ${((pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52)+1}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }

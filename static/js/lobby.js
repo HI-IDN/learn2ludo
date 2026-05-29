@@ -56,13 +56,14 @@ function renderLobbySlots() {
               <i class="fa-solid fa-user"></i> Human
             </button>
             <button class="lobby-type-btn${!isHuman ? ' active' : ''}"
-              onclick="lobbySetType(${slotIdx},'random')">
+              onclick="lobbySetType(${slotIdx},'bot')">
               <i class="fa-solid fa-robot"></i> Bot
             </button>
           </div>
+          ${!isHuman ? lobbyBotSelect(slotIdx, playerIdx) : ''}
           <div class="lobby-name-wrap">
             <input class="lobby-name-input" type="text"
-              placeholder="${isHuman ? 'Enter name…' : botDisplayName(playerIdx)}"
+              placeholder="${isHuman ? 'Enter name…' : ''}"
               value="${isHuman ? name : ''}"
               ${isHuman ? '' : 'disabled'}
               oninput="lobbySetName(${slotIdx}, this.value)"
@@ -109,13 +110,35 @@ function lobbyToggleSlot(slotIdx) {
   renderLobbySlots();
 }
 
+function lobbyBotSelect(slotIdx, playerIdx) {
+  const bots = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+  const current = settings.bot_ids?.[playerIdx] ?? (bots[0]?.id || 'eris');
+  const options = bots.map(b =>
+    `<option value="${b.id}" ${b.id === current ? 'selected' : ''}>${b.name}</option>`
+  ).join('');
+  return `<select class="lobby-bot-select"
+    onchange="lobbySetBotId(${slotIdx}, this.value)"
+    onclick="event.stopPropagation()">
+    ${options}
+  </select>`;
+}
+
 function lobbySetType(slotIdx, type) {
   const playerIdx = lobbyActiveSlots().indexOf(slotIdx);
   if (playerIdx === -1) return;
   settings.player_types = settings.player_types || {};
-  settings.player_types[playerIdx] = type;
+  // store 'human' or 'random' (engine key) — 'bot' maps to 'random'
+  settings.player_types[playerIdx] = type === 'human' ? 'human' : 'random';
   persistSettings();
   renderLobbySlots();
+}
+
+function lobbySetBotId(slotIdx, botId) {
+  const playerIdx = lobbyActiveSlots().indexOf(slotIdx);
+  if (playerIdx === -1) return;
+  settings.bot_ids = settings.bot_ids || {};
+  settings.bot_ids[playerIdx] = botId;
+  persistSettings();
 }
 
 function lobbySetName(slotIdx, v) {

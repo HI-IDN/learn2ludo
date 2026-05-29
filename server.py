@@ -22,6 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from game.engine import LudoGame
+from game.bots import get_bot_info, REGISTRY as BOT_REGISTRY
 from rl.environment import LudoEnv, TrainingSession, OPPONENT_POLICIES
 
 app = FastAPI(title="Ludo RL")
@@ -124,6 +125,31 @@ def update_tabs(body: TabUpdate):
     cfg["tabs"] = body.tabs
     save_config(cfg)
     return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# Bots API
+# ---------------------------------------------------------------------------
+@app.get("/api/bots")
+def list_bots():
+    return {"bots": get_bot_info()}
+
+
+class BotMoveRequest(BaseModel):
+    bot_id: str
+    valid_moves: list
+    game_state: dict = {}
+
+
+@app.post("/api/game/bot-move")
+def bot_move(req: BotMoveRequest):
+    bot = BOT_REGISTRY.get(req.bot_id)
+    if not bot:
+        raise HTTPException(status_code=404, detail=f"Unknown bot: {req.bot_id}")
+    move = bot.choose_move(req.valid_moves, req.game_state or None)
+    if move is None:
+        raise HTTPException(status_code=400, detail="No valid moves")
+    return move
 
 
 # ---------------------------------------------------------------------------

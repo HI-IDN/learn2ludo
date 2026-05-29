@@ -36,3 +36,4 @@
 @use "features/settings";     // .settings-grid, .train-layout, .rule-row, .form-row
 @use "features/stats";        // .stats-row, .stat-card, .dice-audit-*, .progress-bar-*, .mini-chart
 @use "features/lobby";        // .lobby-wrap, .lobby-slot, .lobby-play-btn
+@use "features/bots";         // .bots-sections, .bot-card, .bot-empty

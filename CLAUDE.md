@@ -55,6 +55,13 @@ static/styles/
   main.scss     — imports everything in order: base → layout → components → features
 ```
 
+## Adding a new bot
+
+1. Subclass `BotPolicy` in `game/bots.py` (or a separate file) and implement `choose_move(valid_moves, game_state)`.
+2. Call `register(MyBot())` so it appears in `/api/bots` and `/api/game/bot-move`.
+3. RL bots load their model weights in `__init__`; `choose_move` runs inference.
+4. No JS changes needed — `bots.js` calls `/api/game/bot-move` for all bot types.
+
 ## Tab / panel convention
 
 Each tab has a matching `panel-<id>` div loaded as a component from `static/components/<id>.html`.
