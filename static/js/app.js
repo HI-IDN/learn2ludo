@@ -288,7 +288,7 @@ async function rollDice(){
   renderGame();
 }
 function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,target:0}); } else { const t=pc.position+dice; if(t<=57)moves.push({piece_idx:g,target:t}); }}); return moves; }
-async function clickPiece(globalIdx){ const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(m) await makeMove(globalIdx,m.target); }
+async function clickPiece(globalIdx){ if(window._botChosenMove&&window._botChosenMove.piece_idx!==globalIdx)return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(m) await makeMove(globalIdx,m.target); }
 async function makeMove(pieceIdx,target){
   const p=Math.floor(pieceIdx/(gameState?.config?.board?.pawns_per_player || 4)), i=pieceIdx%(gameState?.config?.board?.pawns_per_player || 4), pawn=gameState.players[p].pieces[i], from=pawn.position;
   await animatePawnSteps(pieceIdx,from,target);
@@ -359,7 +359,7 @@ function renderGame(){
     setTimeout(()=>makeMove(m.piece_idx,m.target), _AUTO_DELAY[_apSpeed].move);
   }
 }
-function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; if(pos>=52)return `H${pos-51}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52; return `T${abs+1}`; }
+function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; if(pos>=52)return `H${pos-51}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52; return `T${abs}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
 
 // Move history rendering lives in history.js.

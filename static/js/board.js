@@ -16,7 +16,14 @@ const HOME_STRETCH_GRID={red:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],green:[[7,1],
 function gridCenter(gx,gy){const c=480/15; return {x:gx*c+c/2,y:gy*c+c/2};}
 function getTargetCenter(playerIdx,target){ if(target<0)return null; if(target<52){const [gx,gy]=TRACK_GRID[absForPlayerPosition(playerIdx,target)]; return gridCenter(gx,gy);} const lane=HOME_STRETCH_GRID[playerColorName(playerIdx,gameState?.num_players||4)]||[]; const p=lane[target-52]; return p?gridCenter(p[0],p[1]):null; }
 function getYardPositions(slot){const c=480/15, o=[[[2.4,2.4],[4.2,2.4],[2.4,4.2],[4.2,4.2]],[[10.8,2.4],[12.6,2.4],[10.8,4.2],[12.6,4.2]],[[10.8,10.8],[12.6,10.8],[10.8,12.6],[12.6,12.6]],[[2.4,10.8],[4.2,10.8],[2.4,12.6],[4.2,12.6]]]; return o[slot].map(p=>({x:p[0]*c,y:p[1]*c}));}
-function pawnSvg(x,y,color,movable,g,label){const s=26;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${movable?'pointer':'default'};" onclick="clickPiece(${g})"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${movable?' fa-beat':''}"></i></div></foreignObject>`;}
+function pawnSvg(x,y,color,movable,g,label,chosen){
+  const s=26;
+  const botPending=!!window._botChosenMove;
+  const isChosen=botPending&&chosen;
+  const clickable=movable&&(!botPending||isChosen);
+  const anim=movable?(isChosen?'fa-shake':'fa-beat'):'';
+  return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${clickable?'pointer':'default'};" onclick="clickPiece(${g})"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${anim?' '+anim:''}"></i></div></foreignObject>`;
+}
 function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}
 function getMovePath(playerIdx,pawnIdx,from,to){const path=[]; const start=from<0?getYardPositions(playerSlot(playerIdx,gameState?.num_players||4))[pawnIdx]:getTargetCenter(playerIdx,from); if(start)path.push(start); if(from<0){const t=getTargetCenter(playerIdx,to); if(t)path.push(t); return path;} for(let p=from+1;p<=to;p++){const pt=getTargetCenter(playerIdx,p); if(pt)path.push(pt);} return path;}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
@@ -131,7 +138,7 @@ function drawBoard(){
         const movable=valid.has(g);
         if(pc.in_yard){
           const pt=yard[yi++]||yard[0];
-          html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1);
+          html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,window._botChosenMove?.piece_idx===g);
         } else if(!pc.finished){
           const center=pc.position>=52?getTargetCenter(player.index,pc.position):(pc.absolute_position!=null?gridCenter(...TRACK_GRID[pc.absolute_position]):getTargetCenter(player.index,pc.position));
           if(!center)return;
@@ -182,7 +189,7 @@ function drawBoard(){
     trackGroups.forEach(group=>{
       const n=group.length;
       group.forEach((pw,idx)=>{
-        html+=pawnSvg(pw.cx+(idx-(n-1)/2)*step,pw.cy,pw.col,pw.movable,pw.g,pw.label);
+        html+=pawnSvg(pw.cx+(idx-(n-1)/2)*step,pw.cy,pw.col,pw.movable,pw.g,pw.label,window._botChosenMove?.piece_idx===pw.g);
       });
     });
   }

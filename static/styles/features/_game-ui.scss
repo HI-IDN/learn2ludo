@@ -182,6 +182,18 @@
   color: $color-text-3;
 }
 
+.mh-movable {
+  display: inline-block;
+  font-size: 0.78em;
+  font-weight: 500;
+  color: var(--movable-color, inherit);
+  opacity: 0.85;
+  background: color-mix(in srgb, var(--movable-color, currentColor) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--movable-color, currentColor) 30%, transparent);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
 // ---- Pawn options picker ----------------------------------------------------
 
 .pawn-options-turn-head {

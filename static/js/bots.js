@@ -117,16 +117,19 @@ function resetBotPlaying() { _botPlaying = false; }
 
 function scheduleBotPlay() {
   if (_botPlaying) return;
+  const speed = settings.auto_play_speed || 'off';
+  if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
   if (getPlayerType(gameState.current_player) === 'human') return;
   _botPlaying = true;
-  setTimeout(botTakeTurn, 700);
+  setTimeout(botTakeTurn, _AUTO_DELAY[speed].roll);
 }
 
 async function botTakeTurn() {
   try {
+    const speed = settings.auto_play_speed || 'off';
     const cp = gameState?.current_player;
-    if (!gameState || gameState.phase !== 'rolling' || getPlayerType(cp) === 'human') return;
+    if (!gameState || gameState.phase !== 'rolling' || getPlayerType(cp) === 'human' || speed === 'off') return;
 
     await rollDice();
 
@@ -134,7 +137,10 @@ async function botTakeTurn() {
       const botId = settings.bot_ids?.[cp] ?? 'eris';
       const move  = await runBotPolicy(botId, gameState.valid_moves);
       if (move) {
-        await new Promise(r => setTimeout(r, 500));
+        window._botChosenMove = move;
+        renderGame();
+        await new Promise(r => setTimeout(r, _AUTO_DELAY[speed].move));
+        window._botChosenMove = null;
         await makeMove(move.piece_idx, move.target);
       }
     }

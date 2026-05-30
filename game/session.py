@@ -66,7 +66,8 @@ class GameSession:
                 self._next_turn()
         else:
             self._yard_roll_count = 0
-            self.history.append({"player": self.game.player, "dice": value, "type": "roll"})
+            self.history.append({"player": self.game.player, "dice": value, "type": "roll",
+                                  "valid_moves": self._valid_moves_list()})
 
         return value
 
@@ -98,14 +99,14 @@ class GameSession:
             self.winner = w
             self.game.phase = Phase.FINISHED
         elif self.game.phase == Phase.NEXT:
-            self.game.next()
+            self._next_turn()
         return {}
 
     def skip_turn(self):
         if self.game.phase == Phase.MOVING:
             self.game.end_move()
         if self.game.phase == Phase.NEXT:
-            self.game.next()
+            self._next_turn()
 
     def to_dict(self) -> dict:
         g   = self.game
@@ -184,5 +185,5 @@ class GameSession:
             lidx = next(i for i, p in enumerate(player_pieces) if p is pc)
             gidx = pi * g.config.board.pawns_per_player + lidx
             tgt  = 0 if pc.pos == -1 else pc.pos + g.last_roll
-            moves.append({"piece_idx": gidx, "target": tgt})
+            moves.append({"piece_idx": gidx, "from": pc.pos, "target": tgt})
         return moves
