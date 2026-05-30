@@ -22,6 +22,7 @@ function compactGameState() {
     current_player: gameState.current_player,
     dice: gameState.dice || gameState.last_roll || null,
     winner: gameState.winner ?? null,
+    winners: gameState.winners ?? [],
     players: (gameState.players || []).map(p => ({
       index: p.index,
       type: typeof getPlayerType === 'function' ? getPlayerType(p.index) : 'unknown',

@@ -182,7 +182,8 @@ def new_game(req: NewGameRequest):
         explicit_slots=explicit_slots,
     )
     max_yard_rolls = int(req.rules.get("empty_board_rolls", 3))
-    active_game = GameSession(cfg, max_yard_rolls=max_yard_rolls, starting_player=starting_player)
+    equal_rounds   = bool(req.rules.get("equal_rounds", False))
+    active_game = GameSession(cfg, max_yard_rolls=max_yard_rolls, starting_player=starting_player, equal_rounds=equal_rounds)
     stats = load_stats()
     stats["games_played"] += 1
     save_stats(stats)

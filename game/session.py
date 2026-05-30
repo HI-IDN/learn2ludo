@@ -6,14 +6,17 @@ _COLORS = ['red', 'green', 'yellow', 'blue', 'orange', 'purple']
 
 
 class GameSession:
-    def __init__(self, cfg: GameConfig, max_yard_rolls: int = 3, starting_player: int = 0):
+    def __init__(self, cfg: GameConfig, max_yard_rolls: int = 3, starting_player: int = 0, equal_rounds: bool = False):
         self.game = LudoGame(cfg)
         self.game.player = max(0, min(starting_player, cfg.player_count - 1))
         self.gp   = Gameplay(self.game)
         self.history: list = []
-        self.winner = None
+        self.winner  = None
+        self.winners: list = []
+        self.equal_rounds         = equal_rounds
+        self._finishing_round_player = None  # first finisher in equal-rounds mode
         self.max_yard_rolls   = max(1, max_yard_rolls)
-        self._yard_roll_count = 0   # attempts used this turn (all pawns in yard)
+        self._yard_roll_count = 0
         self.starting_player  = self.game.player
         self.round_count      = 1
 
@@ -22,6 +25,12 @@ class GameSession:
         self.game.next()
         if self.game.player == self.starting_player:
             self.round_count += 1
+        # Equal-rounds: when play returns to the first finisher the round is over.
+        if self._finishing_round_player is not None and self.game.player == self._finishing_round_player:
+            self.winners = [p for p in range(self.game.config.player_count)
+                            if all(pc.finished for pc in self.gp.pieces if pc.player == p)]
+            self.winner = self.winners[0] if self.winners else self._finishing_round_player
+            self.game.phase = Phase.FINISHED
 
     # ---- public API -------------------------------------------------------
 
@@ -107,10 +116,15 @@ class GameSession:
                 "cell":             abs_cell,
             })
         w = self.gp.has_winner()
-        if w is not None:
-            self.winner = w
-            self.game.phase = Phase.FINISHED
-        elif self.game.phase == Phase.NEXT:
+        if w is not None and self._finishing_round_player is None:
+            if self.equal_rounds:
+                self._finishing_round_player = w
+            else:
+                self.winners = [w]
+                self.winner  = w
+                self.game.phase = Phase.FINISHED
+                return {}
+        if self.game.phase == Phase.NEXT:
             self._next_turn()
         return {}
 
@@ -162,6 +176,7 @@ class GameSession:
             "valid_moves":    vm,
             "history":          self.history,
             "winner":           self.winner,
+            "winners":          self.winners,
             "num_players":      n,
             "round_count":      self.round_count,
             "yard_roll_count":  self._yard_roll_count,

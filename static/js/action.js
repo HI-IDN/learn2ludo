@@ -19,9 +19,11 @@ function renderCurrentAction() {
   cardTop.style.background = color;
   if (avatarIcon) avatarIcon.className = `action-avatar-icon fa-solid ${getPlayerType(cp) !== 'human' ? 'fa-robot' : 'fa-user'}`;
 
-  if (gameState.winner !== null && gameState.winner !== undefined) {
+  const _winners = gameState.winners?.length ? gameState.winners : (gameState.winner != null ? [gameState.winner] : []);
+  if (_winners.length) {
     if (avatarIcon) avatarIcon.className = 'action-avatar-icon fa-solid fa-crown';
-    name.textContent = `${getPlayerName(gameState.winner)} wins!`;
+    const names = _winners.map(w => getPlayerName(w));
+    name.textContent = names.join(' & ') + (_winners.length > 1 ? ' win!' : ' wins!');
     if (!cardTop.dataset.winSoundPlayed) {
       cardTop.dataset.winSoundPlayed = '1';
       if (typeof playSound === 'function') playSound('win');
