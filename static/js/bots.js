@@ -123,6 +123,7 @@ function resetBotState() {
 
 function scheduleBotPlay(overrideDelay) {
   clearTimeout(_botTimer);
+  if (typeof _pg !== 'undefined' && _pg) return; // pregame drives its own rolls
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;

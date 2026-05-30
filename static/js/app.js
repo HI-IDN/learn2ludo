@@ -369,8 +369,7 @@ function toggleAutoPlay() {
   else _updateAutoPlayBtn();
 }
 function _kickAutoPlay() {
-  // When switching from pause → play, fire the first action with a short delay
-  // instead of the full inter-turn delay so the transition feels immediate.
+  if (typeof _pg !== 'undefined' && _pg) return; // pregame handles its own rolls
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
@@ -396,6 +395,7 @@ function _updateAutoPlayBtn() {
 let _autoRollTimer = null;
 function scheduleAutoRoll() {
   clearTimeout(_autoRollTimer);
+  if (typeof _pg !== 'undefined' && _pg) return; // pregame drives its own rolls
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;

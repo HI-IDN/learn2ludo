@@ -131,32 +131,40 @@ function pregameRoll() {
   const playerIdx = _pg.competing[_pg.cursor];
   const diceEl = document.getElementById('dice-face');
   const faces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
-  let ticks = 0;
+  const isFast = (typeof settings !== 'undefined' && settings.auto_play_speed) === 'fast';
 
+  function _settle(roll) {
+    if (diceEl) diceEl.textContent = faces[roll - 1];
+    _pg.rolls[playerIdx] = roll;
+    _pg.cursor++;
+    _pg.rolling = false;
+    if (typeof playSound === 'function') playSound('move');
+    const slot = _pg.active[playerIdx];
+    const name = typeof getPlayerName === 'function' ? getPlayerName(playerIdx) : `Player ${playerIdx+1}`;
+    const color = COLORS[PLAYER_COLORS[slot]] || COLORS.blue;
+    if(typeof pushPregameRoll === 'function') pushPregameRoll(playerIdx, name, color, roll, _pg.round);
+    _renderPregameHistory();
+    if (_pg.cursor >= _pg.competing.length) {
+      _renderPregame();
+      setTimeout(_evaluatePregame, isFast ? 150 : 600);
+    } else {
+      _setDiceFaceClickable(true);
+      _renderPregame();
+      _scheduleAutoPreRoll();
+    }
+  }
+
+  if (isFast) {
+    _settle(Math.floor(Math.random() * 6) + 1);
+    return;
+  }
+
+  let ticks = 0;
   const interval = setInterval(() => {
     if (diceEl) diceEl.textContent = faces[Math.floor(Math.random() * 6)];
     if (++ticks >= 8) {
       clearInterval(interval);
-      const roll = Math.floor(Math.random() * 6) + 1;
-      if (diceEl) diceEl.textContent = faces[roll - 1];
-      _pg.rolls[playerIdx] = roll;
-      _pg.cursor++;
-      _pg.rolling = false;
-      if (typeof playSound === 'function') playSound('move');
-      const slot = _pg.active[playerIdx];
-      const name = typeof getPlayerName === 'function' ? getPlayerName(playerIdx) : `Player ${playerIdx+1}`;
-      const color = COLORS[PLAYER_COLORS[slot]] || COLORS.blue;
-      if(typeof pushPregameRoll === 'function') pushPregameRoll(playerIdx, name, color, roll, _pg.round);
-      _renderPregameHistory();
-
-      if (_pg.cursor >= _pg.competing.length) {
-        _renderPregame();
-        setTimeout(_evaluatePregame, 600);
-      } else {
-        _setDiceFaceClickable(true);
-        _renderPregame();
-        _scheduleAutoPreRoll();
-      }
+      _settle(Math.floor(Math.random() * 6) + 1);
     }
   }, 60);
 }
