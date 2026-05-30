@@ -18,8 +18,15 @@ function showPregame(activeSlots) {
   };
 
   if(typeof resetGameHistorySync==='function') resetGameHistorySync();
+  // Start the wall-clock and show the board with all pawns in yard immediately.
+  if(typeof _startGameClock==='function') _startGameClock();
+  if(typeof makeDemoState==='function'){
+    gameState=makeDemoState(n, active);
+    if(typeof drawBoard==='function') drawBoard();
+  }
   document.getElementById('game-action-wrap')?.style.setProperty('display', 'none');
   _setPregameSubtitle('Determining starting player');
+  if(typeof renderPlayers==='function') renderPlayers();
   _setDiceFaceClickable(true);
   _renderPregame();
   _renderPregameHistory();

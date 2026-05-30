@@ -275,6 +275,21 @@ function startElapsedTimer(){
   clearInterval(_elapsedTimer);
   _elapsedTimer=setInterval(()=>renderPlayers(),1000);
 }
+function _startGameClock(){
+  // Start the wall-clock only (no per-player turn tracking yet — used during pregame).
+  _gameStartTime=Date.now();
+  _playerTimes={};
+  _turnStartTime=null;
+  _lastTurnPlayer=null;
+  clearInterval(_elapsedTimer);
+  _elapsedTimer=setInterval(()=>renderPlayers(),1000);
+}
+function _startTurnTracking(){
+  // Begin per-player turn timing; preserves _gameStartTime set by _startGameClock.
+  _playerTimes={};
+  _turnStartTime=Date.now();
+  _lastTurnPlayer=null;
+}
 function stopElapsedTimer(){
   clearInterval(_elapsedTimer); _elapsedTimer=null;
   if(_turnStartTime!=null&&_lastTurnPlayer!=null){
@@ -299,7 +314,7 @@ async function newGame(startingPlayer=0){
   } catch(e){
     gameState=makeDemoState(payload?.config?.player_count ?? 2, payload?.config?.explicit_slots);
   }
-  startElapsedTimer();
+  if(_gameStartTime) _startTurnTracking(); else startElapsedTimer();
   renderGame();
 }
 function makeDemoState(n=4,explicit_slots=null){ const slots=explicit_slots||Array.from({length:n},(_,i)=>i); return normalizeEngineState({config:{player_count:n,board:{track_size:52,yard_count:4,home_length:6}}, slots, phase:'rolling', player:0}); }
@@ -409,8 +424,9 @@ function renderPlayers(){
   const ordinals=['1st','2nd','3rd','4th','5th','6th'];
   list.innerHTML=sorted.map((p)=>{
     const col=COLORS[p.color]||COLORS.blue;
-    const turnPos=gameStartingPlayer!=null?((p.index-gameStartingPlayer+n)%n):null;
-    const ordinal=turnPos!=null?`<span class="player-order-place"> · ${ordinals[turnPos]||turnPos+1+'th'}</span>`:'';
+    const inPregame=typeof _pg!=='undefined'&&_pg!==null;
+    const turnPos=!inPregame&&gameStartingPlayer!=null?((p.index-gameStartingPlayer+n)%n):null;
+    const ordinal=inPregame?`<span class="player-order-place"> · ?</span>`:(turnPos!=null?`<span class="player-order-place"> · ${ordinals[turnPos]||turnPos+1+'th'}</span>`:'');
     const isCurrent=p.index===gameState?.current_player;
     const liveMs=(_playerTimes[p.index]||0)+(_gameStartTime&&isCurrent&&_turnStartTime?Date.now()-_turnStartTime:0);
     const timeStr=_gameStartTime?`<span class="player-order-dot"> · </span><span class="player-order-time">${_formatPlayerTime(liveMs)}</span>`:'';
