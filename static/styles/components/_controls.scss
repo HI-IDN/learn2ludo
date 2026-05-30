@@ -61,6 +61,12 @@
   font-size: 13px;
 }
 
+.player-order-time {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: $color-text-2;
+}
+
 .player-order-pawns {
   display: flex;
   gap: 5px;

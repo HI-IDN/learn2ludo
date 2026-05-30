@@ -36,7 +36,7 @@ function renderCurrentAction() {
   }
   delete cardTop.dataset.winSoundPlayed;
 
-  name.innerHTML = `${getPlayerName(cp)}'s turn <span id="game-elapsed" class="action-elapsed"></span>`;
+  name.textContent = `${getPlayerName(cp)}'s turn`;
 
   const canRoll = phase === 'rolling';
   if (phase === 'rolling') {

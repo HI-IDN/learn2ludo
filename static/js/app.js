@@ -263,13 +263,27 @@ function cancelNewGame(){
 
 let _gameStartTime=null;
 let _elapsedTimer=null;
+let _playerTimes={};       // accumulated ms per player index
+let _turnStartTime=null;   // when the current player's turn began
+let _lastTurnPlayer=null;  // player index we last accumulated for
+
 function startElapsedTimer(){
   _gameStartTime=Date.now();
+  _playerTimes={};
+  _turnStartTime=Date.now();
+  _lastTurnPlayer=null;
   clearInterval(_elapsedTimer);
-  _elapsedTimer=setInterval(()=>{ const el=document.getElementById('game-elapsed'); if(el) el.textContent=_formatElapsed(); },1000);
+  _elapsedTimer=setInterval(()=>renderPlayers(),1000);
 }
-function stopElapsedTimer(){ clearInterval(_elapsedTimer); _elapsedTimer=null; }
+function stopElapsedTimer(){
+  clearInterval(_elapsedTimer); _elapsedTimer=null;
+  if(_turnStartTime!=null&&_lastTurnPlayer!=null){
+    _playerTimes[_lastTurnPlayer]=(_playerTimes[_lastTurnPlayer]||0)+(Date.now()-_turnStartTime);
+    _turnStartTime=null;
+  }
+}
 function _formatElapsed(){ const s=Math.floor((Date.now()-(_gameStartTime||Date.now()))/1000); const m=Math.floor(s/60); return `${m}:${String(s%60).padStart(2,'0')}`; }
+function _formatPlayerTime(ms){ if(!ms)return '0:00'; const s=Math.floor(ms/1000); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
 
 async function newGame(startingPlayer=0){
   gameStartingPlayer=startingPlayer;
@@ -360,7 +374,15 @@ function scheduleAutoRoll() {
 }
 
 function renderGame(){
-  if(!gameState)return; drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
+  if(!gameState)return;
+  // Accumulate per-player turn time when the active player changes.
+  const _cp=gameState.current_player;
+  if(_turnStartTime!=null&&_lastTurnPlayer!=null&&_cp!==_lastTurnPlayer){
+    _playerTimes[_lastTurnPlayer]=(_playerTimes[_lastTurnPlayer]||0)+(Date.now()-_turnStartTime);
+    _turnStartTime=Date.now();
+  }
+  if(_lastTurnPlayer!==_cp) _lastTurnPlayer=_cp;
+  drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
   _updateAutoPlayBtn();
   if(typeof scheduleBotPlay==='function') scheduleBotPlay();
   if(typeof suggestBotMove==='function') suggestBotMove();
@@ -389,7 +411,11 @@ function renderPlayers(){
     const col=COLORS[p.color]||COLORS.blue;
     const turnPos=gameStartingPlayer!=null?((p.index-gameStartingPlayer+n)%n):null;
     const ordinal=turnPos!=null?`<span class="player-order-place"> · ${ordinals[turnPos]||turnPos+1+'th'}</span>`:'';
-    return `<div class="player-order-row-min${p.index===gameState?.current_player?' current':''}"><i class="fa-solid ${getPlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${getPlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}</div><div class="player-order-pawns">${p.pieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
+    const isCurrent=p.index===gameState?.current_player;
+    const liveMs=(_playerTimes[p.index]||0)+(_gameStartTime&&isCurrent&&_turnStartTime?Date.now()-_turnStartTime:0);
+    const timeStr=_gameStartTime?`<span class="player-order-dot"> · </span><span class="player-order-time">${_formatPlayerTime(liveMs)}</span>`:'';
+    const sortedPieces=[...p.pieces].sort((a,b)=>{const r=q=>q.finished?2:!q.in_yard?1:0;return r(b)-r(a);});
+    return `<div class="player-order-row-min${isCurrent?' current':''}"><i class="fa-solid ${getPlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${getPlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}${timeStr}</div><div class="player-order-pawns">${sortedPieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
   }).join('');
   // Round subtitle
   const sub=document.getElementById('players-subtitle');
