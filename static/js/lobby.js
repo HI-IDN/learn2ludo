@@ -4,7 +4,35 @@
 // Active players are stored as settings.active_slots: an ordered array of
 // slot indices (0=red,1=green,2=yellow,3=blue).
 
+const YARD_SHAPES = {2:'line', 3:'triangle', 4:'cross', 5:'pentagon', 6:'hexagon'};
+
 function lobbyMaxSlots() { return settings.board_yard_count ?? 4; }
+
+function lobbyChangeYards(delta) {
+  const current = settings.board_yard_count ?? 4;
+  const next = Math.max(2, Math.min(6, current + delta));
+  if (next === current) return;
+  settings.board_yard_count = next;
+  // Drop any active slots that exceed new max
+  if (Array.isArray(settings.active_slots))
+    settings.active_slots = settings.active_slots.filter(s => s < next);
+  if ((settings.num_players ?? next) > next) settings.num_players = next;
+  persistSettings();
+  // Sync the hidden settings input so readBoardConfig() stays consistent
+  const el = document.getElementById('board-yard-count');
+  if (el) el.value = next;
+  if (typeof invalidateBoardGeometry === 'function') invalidateBoardGeometry();
+  renderLobbySlots();
+  drawBoard();
+}
+
+function renderLobbyYardControl() {
+  const n = settings.board_yard_count ?? 4;
+  const disp = document.getElementById('lobby-yard-display');
+  const shape = document.getElementById('lobby-yard-shape');
+  if (disp) disp.textContent = n;
+  if (shape) shape.textContent = YARD_SHAPES[n] ?? n + '-gon';
+}
 
 function lobbyActiveSlots() {
   const max = lobbyMaxSlots();
@@ -79,6 +107,7 @@ function renderLobbySlots() {
   }).join('');
 
   renderLobbyHint(active);
+  renderLobbyYardControl();
 }
 
 function renderLobbyHint(active) {

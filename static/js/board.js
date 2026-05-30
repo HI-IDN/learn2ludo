@@ -55,6 +55,7 @@ const HOME_STRETCH_GRID={red:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],green:[[7,1],
 function gridCenter(gx,gy){const c=480/15; return {x:gx*c+c/2,y:gy*c+c/2};}
 
 let _geo=null, _geoKey=null;
+function invalidateBoardGeometry(){ _geo=null; _geoKey=null; }
 function currentGeometry(){
   const layout=currentLayout();
   const n=gameState?.config?.board?.home_length??settings.board_home_length??6;
