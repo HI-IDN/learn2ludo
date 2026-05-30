@@ -6,13 +6,22 @@ _COLORS = ['red', 'green', 'yellow', 'blue', 'orange', 'purple']
 
 
 class GameSession:
-    def __init__(self, cfg: GameConfig, max_yard_rolls: int = 3):
+    def __init__(self, cfg: GameConfig, max_yard_rolls: int = 3, starting_player: int = 0):
         self.game = LudoGame(cfg)
+        self.game.player = max(0, min(starting_player, cfg.player_count - 1))
         self.gp   = Gameplay(self.game)
         self.history: list = []
         self.winner = None
-        self.max_yard_rolls  = max(1, max_yard_rolls)
+        self.max_yard_rolls   = max(1, max_yard_rolls)
         self._yard_roll_count = 0   # attempts used this turn (all pawns in yard)
+        self.starting_player  = self.game.player
+        self.round_count      = 1
+
+    def _next_turn(self):
+        """Advance to the next player and increment round when starting player comes back."""
+        self.game.next()
+        if self.game.player == self.starting_player:
+            self.round_count += 1
 
     # ---- public API -------------------------------------------------------
 
@@ -41,7 +50,7 @@ class GameSession:
                 self._yard_roll_count = 0
                 self.game.end_move()
                 if self.game.phase == Phase.NEXT:
-                    self.game.next()
+                    self._next_turn()
         elif not valid:
             self._yard_roll_count = 0
             self.history.append({"player": self.game.player, "dice": value, "type": "roll"})
@@ -54,7 +63,7 @@ class GameSession:
                 })
             self.game.end_move()
             if self.game.phase == Phase.NEXT:
-                self.game.next()
+                self._next_turn()
         else:
             self._yard_roll_count = 0
             self.history.append({"player": self.game.player, "dice": value, "type": "roll"})
@@ -141,6 +150,7 @@ class GameSession:
             "history":          self.history,
             "winner":           self.winner,
             "num_players":      n,
+            "round_count":      self.round_count,
             "yard_roll_count":  self._yard_roll_count,
             "max_yard_rolls":   self.max_yard_rolls,
         }

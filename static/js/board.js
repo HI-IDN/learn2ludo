@@ -40,15 +40,14 @@ async function animatePawnSteps(g,from,to){
     const ox=svgR.left-wrapR.left, oy=svgR.top-wrapR.top;
     const half=13; // half of 26px pawn size
     const pos=(pt)=>`translate(${ox+pt.x*sx-half}px,${oy+pt.y*sy-half}px)`;
-    // Snap to starting cell with no transition so the overlay doesn't slide
-    // in from (0,0) on the first frame.
-    overlay.style.transition='none';
+    // Place at starting cell, then hop cell-by-cell with no CSS transition.
+    // (CSS transition was removed — it caused mid-flight jumps when transforms
+    // were updated faster than the transition could complete.)
     overlay.style.transform=pos(path[0]);
-    overlay.getBoundingClientRect(); // force reflow before re-enabling transition
-    overlay.style.transition='';
     if(from<0)await sleep(350);
     for(const pt of path.slice(1)){
       overlay.style.transform=pos(pt);
+      overlay.getBoundingClientRect(); // force repaint so the new position is visible
       if(typeof playSound==='function')playSound('move');
       await sleep(180);
     }
@@ -143,29 +142,37 @@ function drawBoard(){
       });
     });
 
-    // 2. Build preview groups — offset behind existing pawns at destination.
-    //    Mark if landing here would form (or reinforce) a blockade.
+    // 2. Build preview groups — offset behind existing FRIENDLY pawns at destination.
+    //    Opponent pawns are captured on landing, so previews overlap them instead of fanning out.
     const previewGroups=new Map();
     valid.forEach((m,g)=>{
       const p=Math.floor(g/pawnsPerPlayer),pt=getTargetCenter(p,m.target),col=COLORS[playerColorName(p,gameState.num_players)];
       if(!pt)return;
       const key=`${Math.round(pt.x)},${Math.round(pt.y)}`;
       const existing=trackGroups.get(key)||[];
-      const friendlyAtDest=existing.filter(pw=>pw.player===p).length;
-      const wouldBlockade=friendlyAtDest>=1;
-      if(!previewGroups.has(key))previewGroups.set(key,{existingCount:existing.length,previews:[]});
-      previewGroups.get(key).previews.push({cx:pt.x,cy:pt.y,col,g,wouldBlockade});
+      const friendlyCount=existing.filter(pw=>pw.player===p).length;
+      const wouldCapture=existing.some(pw=>pw.player!==p);
+      const destAbs=m.target<52?absForPlayerPosition(p,m.target):null;
+      const destSafe=destAbs!=null&&(currentLayout().safe_havens||[]).includes(destAbs);
+      const wouldBlockade=friendlyCount>=1&&!destSafe;
+      // Only fan out relative to friendly pawns — opponents get captured, not stacked
+      if(!previewGroups.has(key))previewGroups.set(key,{friendlyCount,previews:[]});
+      previewGroups.get(key).previews.push({cx:pt.x,cy:pt.y,col,g,wouldBlockade,wouldCapture});
     });
 
     // 3. Render previews underneath real pawns.
-    previewGroups.forEach(({existingCount,previews})=>{
-      const total=existingCount+previews.length;
+    //    Fan out relative to friendly pawns only; captures overlap the opponent.
+    previewGroups.forEach(({friendlyCount,previews})=>{
+      const total=friendlyCount+previews.length;
       previews.forEach((pv,idx)=>{
-        const ox=(existingCount+idx-(total-1)/2)*step;
+        const ox=(friendlyCount+idx-(total-1)/2)*step;
         html+=pawnPreviewSvg(pv.cx+ox,pv.cy,pv.col,pv.g);
-        if(pv.wouldBlockade){
-          // Small shield above the preview to signal a blockade would form
-          const s=12;
+        const s=12;
+        if(pv.wouldCapture){
+          // Flame above preview to signal a capture
+          html+=`<foreignObject x="${pv.cx+ox-s/2}" y="${pv.cy-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#e85;font-size:${s}px;line-height:1;filter:drop-shadow(0 0 2px rgba(0,0,0,.4));"><i class="fa-solid fa-fire"></i></div></foreignObject>`;
+        } else if(pv.wouldBlockade){
+          // Shield above preview to signal a blockade would form
           html+=`<foreignObject x="${pv.cx+ox-s/2}" y="${pv.cy-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${pv.col};font-size:${s}px;line-height:1;filter:drop-shadow(0 0 2px rgba(0,0,0,.4));"><i class="fa-solid fa-shield"></i></div></foreignObject>`;
         }
       });

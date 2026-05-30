@@ -88,6 +88,8 @@ class Gameplay:
         slot=self.game.slots[player]
         for step in range(start+1,end+1):
             step_abs=(step+self.game.board.starts[slot])%self.track
+            if step_abs in self.game.board.safe_havens:
+                continue  # safe havens neutralise blockades
             opp=[x for x in self.pieces if x.player!=player and x.pos>=0 and x.pos<self.track and self._abs(x)==step_abs]
             if len(opp)>=2:
                 return True
@@ -109,6 +111,8 @@ class Gameplay:
                 steps=range(pc.pos+1,target+1)
             for step in steps:
                 step_abs=(step+self.game.board.starts[slot])%self.track
+                if step_abs in self.game.board.safe_havens:
+                    continue  # safe havens neutralise blockades
                 for opp in range(self.game.config.player_count):
                     if opp==player: continue
                     cnt=sum(1 for p in self.pieces if p.player==opp and p.pos>=0 and p.pos<self.track and self._abs(p)==step_abs)

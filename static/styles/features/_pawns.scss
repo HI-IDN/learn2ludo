@@ -31,7 +31,7 @@
   height: 26px;
   z-index: 50;
   pointer-events: none;
-  transition: transform 160ms linear;
+  /* No CSS transition — JS sleep() handles the per-cell timing */
 
   .fa-chess-pawn {
     font-size: 26px;
