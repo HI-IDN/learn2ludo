@@ -53,7 +53,7 @@ function buildBoardGeometry(yardCount, homeLength, S) {
 const TRACK_GRID=[[1,6],[2,6],[3,6],[4,6],[5,6],[6,5],[6,4],[6,3],[6,2],[6,1],[6,0],[7,0],[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[9,6],[10,6],[11,6],[12,6],[13,6],[14,6],[14,7],[14,8],[13,8],[12,8],[11,8],[10,8],[9,8],[8,9],[8,10],[8,11],[8,12],[8,13],[8,14],[7,14],[6,14],[6,13],[6,12],[6,11],[6,10],[6,9],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],[0,7],[0,6]];
 const HOME_STRETCH_GRID={red:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],green:[[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],yellow:[[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]],blue:[[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]]};
 function gridCenter(gx,gy){const c=480/15; return {x:gx*c+c/2,y:gy*c+c/2};}
-function getTargetCenter(playerIdx,target){ if(target<0)return null; if(target<52){const [gx,gy]=TRACK_GRID[absForPlayerPosition(playerIdx,target)]; return gridCenter(gx,gy);} const lane=HOME_STRETCH_GRID[playerColorName(playerIdx,gameState?.num_players||4)]||[]; const p=lane[target-52]; return p?gridCenter(p[0],p[1]):null; }
+function getTargetCenter(playerIdx,target){ if(target<0)return null; const ts=currentLayout().track_size||52; if(target<ts){const [gx,gy]=TRACK_GRID[absForPlayerPosition(playerIdx,target)]; return gridCenter(gx,gy);} const lane=HOME_STRETCH_GRID[playerColorName(playerIdx,gameState?.num_players||4)]||[]; const p=lane[target-ts]; return p?gridCenter(p[0],p[1]):null; }
 function getYardPositions(slot){const c=480/15, o=[[[2.4,2.4],[4.2,2.4],[2.4,4.2],[4.2,4.2]],[[10.8,2.4],[12.6,2.4],[10.8,4.2],[12.6,4.2]],[[10.8,10.8],[12.6,10.8],[10.8,12.6],[12.6,12.6]],[[2.4,10.8],[4.2,10.8],[2.4,12.6],[4.2,12.6]]]; return o[slot].map(p=>({x:p[0]*c,y:p[1]*c}));}
 let _boardFrills=true; // set before each render; false in fast mode unless human has >1 choice
 function pawnSvg(x,y,color,movable,g,label,chosen){
@@ -144,7 +144,7 @@ function drawBoard(){
     const coloredAbs=new Set([...Array.from(layout.safe_havens),...layout.starts]);
     TRACK_GRID.forEach(([gx,gy],idx)=>{
       const onColor=coloredAbs.has(idx);
-      html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${(idx+1)%52}</text>`;
+      html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${(idx+1)%(layout.track_size||52)}</text>`;
     });
     // Home stretch labels (positions 52–57 per player lane)
     Object.values(HOME_STRETCH_GRID).forEach(cells=>{
@@ -186,7 +186,7 @@ function drawBoard(){
           trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable:false,g,label:i+1,player:player.index,absPos:null});
         } else {
           const absPos=pc.absolute_position!=null?pc.absolute_position:null;
-          const center=pc.position>=52?getTargetCenter(player.index,pc.position):(absPos!=null?gridCenter(...TRACK_GRID[absPos]):getTargetCenter(player.index,pc.position));
+          const _ts=currentLayout().track_size||52; const center=pc.position>=_ts?getTargetCenter(player.index,pc.position):(absPos!=null?gridCenter(...TRACK_GRID[absPos]):getTargetCenter(player.index,pc.position));
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
@@ -204,12 +204,12 @@ function drawBoard(){
       const key=`${Math.round(pt.x)},${Math.round(pt.y)}`;
       const existing=trackGroups.get(key)||[];
       const friendlyCount=existing.filter(pw=>pw.player===p).length;
-      const destAbs=m.target<52?absForPlayerPosition(p,m.target):null;
+      const destAbs=m.target<(currentLayout().track_size||52)?absForPlayerPosition(p,m.target):null;
       const destSafe=destAbs!=null&&safeSet.has(destAbs);
       const hasOpponent=existing.some(pw=>pw.player!==p);
       const wouldCapture=!destSafe&&hasOpponent;
       const opponentOnSafe=destSafe&&hasOpponent;
-      const wouldBlockade=m.target<52&&friendlyCount>=1&&!destSafe;
+      const wouldBlockade=m.target<(currentLayout().track_size||52)&&friendlyCount>=1&&!destSafe;
       if(!previewGroups.has(key))previewGroups.set(key,{friendlyCount,previews:[]});
       previewGroups.get(key).previews.push({cx:pt.x,cy:pt.y,col,g,player:p,destSafe,wouldBlockade,wouldCapture,opponentOnSafe});
     });

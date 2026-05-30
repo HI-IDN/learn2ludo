@@ -2,7 +2,7 @@ const DICE_FACES = ['', '⚀','⚁','⚂','⚃','⚄','⚅'];
 const COLORS = {red:'#AC1A2F', green:'#719500', yellow:'#F5CF47', blue:'#0098AA', purple:'#660451', orange:'#EB7125'};
 const PLAYER_COLORS = ['red','green','yellow','blue','orange','purple'];
 const ENGINE = {
-  track_size: 52,
+  get track_size(){ return currentLayout()?.track_size ?? 52; },
   yard_count: 4,
   home_length: 6,
   phases: {ROLLING:'rolling', MOVING:'moving', NEXT:'next', FINISHED:'finished'}
@@ -82,7 +82,7 @@ function normalizeEngineState(raw) {
   }));
   return {
     ...state,
-    config:{board:{track_size:52,yard_count:4,home_length:6}, player_count:playerCount},
+    config:{board:{track_size:cfg.board?.track_size||52,yard_count:cfg.board?.yard_count||4,home_length:cfg.board?.home_length||6}, player_count:playerCount},
     board:layout, slots, num_players:playerCount,
     current_player: state.current_player ?? state.player ?? 0,
     dice: state.dice ?? state.last_roll ?? 0,
@@ -100,9 +100,6 @@ function loadSettings(){
   try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
   settings.auto_play_speed='off';
   if(settings.sound_volume===undefined) settings.sound_volume=0.8;
-  // TRACK_GRID fixed at 52, HOME_STRETCH_GRID fixed at 6 — reset stale values
-  if(settings.board_track_size && settings.board_track_size !== 52) settings.board_track_size=52;
-  if(settings.board_home_length && settings.board_home_length !== 6) settings.board_home_length=6;
 }
 function applySettingsToControls(){
   const c=(id,v)=>{const e=document.getElementById(id); if(e)e.checked=v;};
@@ -138,8 +135,8 @@ function getGameRules(){ return {six_to_enter:true, six_extra_turn:true, capture
 
 function readBoardConfig() {
   const yardCount = Math.max(2, Math.min(6, parseInt(document.getElementById('board-yard-count')?.value || settings.board_yard_count || 4)));
-  const trackSize = 52; // TRACK_GRID is fixed at 52 cells
-  const homeLength = 6; // HOME_STRETCH_GRID is fixed at 6 cells
+  const homeLength = Math.max(2, parseInt(document.getElementById('board-home-length')?.value || settings.board_home_length || 6));
+  const trackSize = yardCount * (2 * homeLength + 1);
   const pawns = Math.max(1, Math.min(4, parseInt(document.getElementById('board-pawns-per-player')?.value || settings.pawns_per_player || 4)));
   const safeOffset = Math.max(1, parseInt(document.getElementById('board-safe-offset')?.value || settings.board_safe_offset || 7));
   const stackHome = document.getElementById('board-stack-home')?.checked ?? !!settings.stack_home_pawns;
@@ -317,7 +314,7 @@ async function newGame(startingPlayer=0){
   if(_gameStartTime) _startTurnTracking(); else startElapsedTimer();
   renderGame();
 }
-function makeDemoState(n=4,explicit_slots=null){ const slots=explicit_slots||Array.from({length:n},(_,i)=>i); return normalizeEngineState({config:{player_count:n,board:{track_size:52,yard_count:4,home_length:6}}, slots, phase:'rolling', player:0}); }
+function makeDemoState(n=4,explicit_slots=null){ const slots=explicit_slots||Array.from({length:n},(_,i)=>i); const hl=settings.board_home_length||6; const ts=n*(2*hl+1); return normalizeEngineState({config:{player_count:n,board:{track_size:ts,yard_count:n,home_length:hl}}, slots, phase:'rolling', player:0}); }
 function animateDice(finalValue){
   const face=document.getElementById('dice-face');
   if((settings?.auto_play_speed||'off')==='fast'){ face.textContent=DICE_FACES[finalValue]||DICE_FACES[1]; return Promise.resolve(); }
@@ -337,7 +334,7 @@ async function makeMove(pieceIdx,target){ window._botChosenMove=null;
   const p=Math.floor(pieceIdx/(gameState?.config?.board?.pawns_per_player || 4)), i=pieceIdx%(gameState?.config?.board?.pawns_per_player || 4), pawn=gameState.players[p].pieces[i], from=pawn.position;
   await animatePawnSteps(pieceIdx,from,target);
   try{ const r=await fetch('/api/game/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piece_idx:pieceIdx,target,target_position:target})}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
-  catch{ pawn.position=target; pawn.in_yard=false; pawn.finished=target>=57; pawn.absolute_position=target<52?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{}}); if(gameState.dice===6){
+  catch{ const _ts=currentLayout().track_size; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=57; pawn.absolute_position=target<_ts?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{}}); if(gameState.dice===6){
       gameState.consecutive_sixes = (gameState.consecutive_sixes || 0) + 1;
       if (gameState.consecutive_sixes >= (settings.max_consecutive_sixes ?? 3)) {
         gameState.consecutive_sixes = 0;
@@ -425,7 +422,7 @@ function renderGame(){
     setTimeout(()=>makeMove(m.piece_idx,m.target), _AUTO_DELAY[_apSpeed].move);
   }
 }
-function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; if(pos>=52)return `H${pos-51}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52; return `T${abs+1}`; }
+function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; if(pos>=ts)return `H${pos-ts+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs+1}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
 
 // Move history rendering lives in history.js.
