@@ -53,7 +53,24 @@ function buildBoardGeometry(yardCount, homeLength, S) {
 const TRACK_GRID=[[1,6],[2,6],[3,6],[4,6],[5,6],[6,5],[6,4],[6,3],[6,2],[6,1],[6,0],[7,0],[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[9,6],[10,6],[11,6],[12,6],[13,6],[14,6],[14,7],[14,8],[13,8],[12,8],[11,8],[10,8],[9,8],[8,9],[8,10],[8,11],[8,12],[8,13],[8,14],[7,14],[6,14],[6,13],[6,12],[6,11],[6,10],[6,9],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],[0,7],[0,6]];
 const HOME_STRETCH_GRID={red:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],green:[[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],yellow:[[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]],blue:[[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]]};
 function gridCenter(gx,gy){const c=480/15; return {x:gx*c+c/2,y:gy*c+c/2};}
-function getTargetCenter(playerIdx,target){ if(target<0)return null; const ts=currentLayout().track_size||52; if(target<ts){const [gx,gy]=TRACK_GRID[absForPlayerPosition(playerIdx,target)]; return gridCenter(gx,gy);} const lane=HOME_STRETCH_GRID[playerColorName(playerIdx,gameState?.num_players||4)]||[]; const p=lane[target-ts]; return p?gridCenter(p[0],p[1]):null; }
+
+let _geo=null, _geoKey=null;
+function currentGeometry(){
+  const layout=currentLayout();
+  const n=gameState?.config?.board?.home_length??settings.board_home_length??6;
+  const key=`${layout.yard_count}:${n}`;
+  if(_geoKey!==key){_geo=buildBoardGeometry(layout.yard_count,n,480);_geoKey=key;}
+  return _geo;
+}
+
+function getTargetCenter(playerIdx,target){
+  if(target<0)return null;
+  const geo=currentGeometry();
+  const ts=currentLayout().track_size||52;
+  if(target<ts) return geo.trackCenters[absForPlayerPosition(playerIdx,target)]||null;
+  const slot=playerSlot(playerIdx,gameState?.num_players||4);
+  return geo.homeCenters[slot]?.[target-ts]||null;
+}
 function getYardPositions(slot){const c=480/15, o=[[[2.4,2.4],[4.2,2.4],[2.4,4.2],[4.2,4.2]],[[10.8,2.4],[12.6,2.4],[10.8,4.2],[12.6,4.2]],[[10.8,10.8],[12.6,10.8],[10.8,12.6],[12.6,12.6]],[[2.4,10.8],[4.2,10.8],[2.4,12.6],[4.2,12.6]]]; return o[slot].map(p=>({x:p[0]*c,y:p[1]*c}));}
 let _boardFrills=true; // set before each render; false in fast mode unless human has >1 choice
 function pawnSvg(x,y,color,movable,g,label,chosen){
@@ -98,7 +115,7 @@ async function animatePawnSteps(g,from,to){
 
 function drawBoard(){
   const svg=document.getElementById('ludo-board'); if(!svg)return;
-  const S=480, c=S/15, layout=currentLayout();
+  const S=480, layout=currentLayout(), geo=currentGeometry(), c=geo.cellSize;
 
   // Background: white
   let html=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
@@ -112,23 +129,35 @@ function drawBoard(){
     });
 
   // Track cells
-  TRACK_GRID.forEach(([gx,gy])=>html+=`<rect x="${gx*c+.5}" y="${gy*c+.5}" width="${c-1}" height="${c-1}" fill="#fff" stroke="rgba(0,0,0,.12)" stroke-width=".5" rx="2"/>`);
+  geo.trackCenters.forEach(({x,y})=>html+=`<rect x="${x-c/2+.5}" y="${y-c/2+.5}" width="${c-1}" height="${c-1}" fill="#fff" stroke="rgba(0,0,0,.12)" stroke-width=".5" rx="2"/>`);
 
   // Safe havens — medium grey with white shield
   if(settings.safe_squares!==false) Array.from(layout.safe_havens).forEach(abs=>{
-    const [gx,gy]=TRACK_GRID[abs];
-    html+=`<rect x="${gx*c+1}" y="${gy*c+1}" width="${c-2}" height="${c-2}" fill="#C8C8C8" rx="3"/>`;
-    html+=`<foreignObject x="${gx*c+c*.16}" y="${gy*c+c*.12}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;
+    const {x,y}=geo.trackCenters[abs];
+    html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="#C8C8C8" rx="3"/>`;
+    html+=`<foreignObject x="${x-c*.34}" y="${y-c*.38}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;
   });
 
   // Start squares — coloured cell with white shield-heart
-  layout.starts.forEach((abs,slot)=>{const [gx,gy]=TRACK_GRID[abs],col=COLORS[PLAYER_COLORS[slot]]; html+=`<rect x="${gx*c+1}" y="${gy*c+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".88" rx="3"/><foreignObject x="${gx*c+c*.16}" y="${gy*c+c*.12}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;});
+  layout.starts.forEach((abs,slot)=>{
+    const {x,y}=geo.trackCenters[abs],col=COLORS[PLAYER_COLORS[slot]];
+    html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".88" rx="3"/>`;
+    html+=`<foreignObject x="${x-c*.34}" y="${y-c*.38}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;
+  });
 
-  // Finish arrows — white cell with coloured arrow
-  layout.finishes.forEach((abs,slot)=>{const [gx,gy]=TRACK_GRID[abs],col=COLORS[PLAYER_COLORS[slot]],icon=['fa-caret-right','fa-caret-down','fa-caret-left','fa-caret-up'][slot]; html+=`<rect x="${gx*c+1}" y="${gy*c+1}" width="${c-2}" height="${c-2}" fill="#fff" rx="3"/><foreignObject x="${gx*c+c*.18}" y="${gy*c+c*.18}" width="${c*.64}" height="${c*.64}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:${col};font-size:17px;"><i class="fa-solid ${icon}"></i></div></foreignObject>`;});
+  // Finish arrows — white cell with coloured fa-circle-right rotated to point inward
+  layout.finishes.forEach((abs,slot)=>{
+    const {x,y}=geo.trackCenters[abs],col=COLORS[PLAYER_COLORS[slot]];
+    const deg=Math.round(slot*360/layout.yard_count);
+    html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="#fff" rx="3"/>`;
+    html+=`<foreignObject x="${x-c*.32}" y="${y-c*.32}" width="${c*.64}" height="${c*.64}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:${col};font-size:17px;transform:rotate(${deg}deg);"><i class="fa-solid fa-circle-right"></i></div></foreignObject>`;
+  });
 
   // Home stretch lanes
-  Object.entries(HOME_STRETCH_GRID).forEach(([name,cells])=>cells.forEach(([gx,gy])=>html+=`<rect x="${gx*c+1}" y="${gy*c+1}" width="${c-2}" height="${c-2}" fill="${COLORS[name]}" opacity=".92" rx="2"/>`));
+  geo.homeCenters.forEach((lane,armIdx)=>{
+    const col=COLORS[PLAYER_COLORS[armIdx]];
+    lane.forEach(({x,y})=>html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".92" rx="2"/>`);
+  });
 
   // Home center — 4 coloured triangles meeting in the middle
   const cx=7.5*c, cy=7.5*c, tl=[6*c,6*c], tr=[9*c,6*c], br=[9*c,9*c], bl=[6*c,9*c];
@@ -142,16 +171,13 @@ function drawBoard(){
   // Cell index labels — drawn last so they appear over special cells
   if(settings.show_cell_numbers){
     const coloredAbs=new Set([...Array.from(layout.safe_havens),...layout.starts]);
-    TRACK_GRID.forEach(([gx,gy],idx)=>{
+    geo.trackCenters.forEach(({x,y},idx)=>{
       const onColor=coloredAbs.has(idx);
-      html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${(idx+1)%(layout.track_size||52)}</text>`;
+      html+=`<text x="${x-c/2+2}" y="${y-c/2+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${(idx+1)%(layout.track_size||52)}</text>`;
     });
-    // Home stretch labels (positions 52–57 per player lane)
-    Object.values(HOME_STRETCH_GRID).forEach(cells=>{
-      cells.forEach(([gx,gy],i)=>{
-        html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="#fff" opacity="0.9">H${i+1}</text>`;
-      });
-    });
+    geo.homeCenters.forEach(lane=>lane.forEach(({x,y},i)=>{
+      html+=`<text x="${x-c/2+2}" y="${y-c/2+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="#fff" opacity="0.9">H${i+1}</text>`;
+    }));
   }
 
   // Pawns & move previews
@@ -186,7 +212,7 @@ function drawBoard(){
           trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable:false,g,label:i+1,player:player.index,absPos:null});
         } else {
           const absPos=pc.absolute_position!=null?pc.absolute_position:null;
-          const _ts=currentLayout().track_size||52; const center=pc.position>=_ts?getTargetCenter(player.index,pc.position):(absPos!=null?gridCenter(...TRACK_GRID[absPos]):getTargetCenter(player.index,pc.position));
+          const center=absPos!=null?geo.trackCenters[absPos]:getTargetCenter(player.index,pc.position);
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
@@ -204,12 +230,12 @@ function drawBoard(){
       const key=`${Math.round(pt.x)},${Math.round(pt.y)}`;
       const existing=trackGroups.get(key)||[];
       const friendlyCount=existing.filter(pw=>pw.player===p).length;
-      const destAbs=m.target<(currentLayout().track_size||52)?absForPlayerPosition(p,m.target):null;
+      const destAbs=m.target<(layout.track_size||52)?absForPlayerPosition(p,m.target):null;
       const destSafe=destAbs!=null&&safeSet.has(destAbs);
       const hasOpponent=existing.some(pw=>pw.player!==p);
       const wouldCapture=!destSafe&&hasOpponent;
       const opponentOnSafe=destSafe&&hasOpponent;
-      const wouldBlockade=m.target<(currentLayout().track_size||52)&&friendlyCount>=1&&!destSafe;
+      const wouldBlockade=m.target<(layout.track_size||52)&&friendlyCount>=1&&!destSafe;
       if(!previewGroups.has(key))previewGroups.set(key,{friendlyCount,previews:[]});
       previewGroups.get(key).previews.push({cx:pt.x,cy:pt.y,col,g,player:p,destSafe,wouldBlockade,wouldCapture,opponentOnSafe});
     });
