@@ -137,15 +137,37 @@ async function botTakeTurn() {
       const botId = settings.bot_ids?.[cp] ?? 'eris';
       const move  = await runBotPolicy(botId, gameState.valid_moves);
       if (move) {
-        window._botChosenMove = move;
-        renderGame();
+        // Auto-play: no shake — just execute after the move delay
         await new Promise(r => setTimeout(r, _AUTO_DELAY[speed].move));
-        window._botChosenMove = null;
         await makeMove(move.piece_idx, move.target);
       }
     }
   } finally {
     _botPlaying = false;
     scheduleBotPlay();
+  }
+}
+
+// When auto-play is OFF and a bot just rolled, suggest its chosen move via shake.
+// The user must click the shaking pawn to execute; other valid pawns are blocked.
+let _botSuggesting = false;
+async function suggestBotMove() {
+  if (_botSuggesting) return;
+  const speed = settings.auto_play_speed || 'off';
+  if (speed !== 'off') return;
+  if (!gameState || gameState.phase !== 'moving' || gameState.winner !== null) return;
+  if (getPlayerType(gameState.current_player) === 'human') return;
+  if (window._botChosenMove) return;
+  _botSuggesting = true;
+  try {
+    const cp = gameState.current_player;
+    const botId = settings.bot_ids?.[cp] ?? 'eris';
+    const move = await runBotPolicy(botId, gameState.valid_moves);
+    if (move && gameState.phase === 'moving') {
+      window._botChosenMove = move;
+      renderGame();
+    }
+  } finally {
+    _botSuggesting = false;
   }
 }

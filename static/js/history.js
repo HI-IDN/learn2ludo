@@ -92,7 +92,7 @@ function renderMoveHistory(){
     }
     if(e.type==='roll'){
       const pawnsPerPlayer=gameState?.config?.board?.pawns_per_player||4;
-      const moves=typeof getPlayerType==='function'&&getPlayerType(e.player)!=='human'?[]:e.valid_moves||[];
+      const moves=e.valid_moves||[];
       const moveSummary=moves.map(m=>{
         const pi=Math.floor(m.piece_idx/pawnsPerPlayer);
         const li=(m.piece_idx%pawnsPerPlayer)+1;

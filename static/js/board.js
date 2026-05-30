@@ -21,7 +21,7 @@ function pawnSvg(x,y,color,movable,g,label,chosen){
   const botPending=!!window._botChosenMove;
   const isChosen=botPending&&chosen;
   const clickable=movable&&(!botPending||isChosen);
-  const anim=movable?(isChosen?'fa-shake':'fa-beat'):'';
+  const anim=movable?(botPending?(isChosen?'fa-shake':''):'fa-beat'):'';
   return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${clickable?'pointer':'default'};" onclick="clickPiece(${g})"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${anim?' '+anim:''}"></i></div></foreignObject>`;
 }
 function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}

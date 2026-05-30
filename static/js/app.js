@@ -289,7 +289,7 @@ async function rollDice(){
 }
 function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,target:0}); } else { const t=pc.position+dice; if(t<=57)moves.push({piece_idx:g,target:t}); }}); return moves; }
 async function clickPiece(globalIdx){ if(window._botChosenMove&&window._botChosenMove.piece_idx!==globalIdx)return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(m) await makeMove(globalIdx,m.target); }
-async function makeMove(pieceIdx,target){
+async function makeMove(pieceIdx,target){ window._botChosenMove=null;
   const p=Math.floor(pieceIdx/(gameState?.config?.board?.pawns_per_player || 4)), i=pieceIdx%(gameState?.config?.board?.pawns_per_player || 4), pawn=gameState.players[p].pieces[i], from=pawn.position;
   await animatePawnSteps(pieceIdx,from,target);
   try{ const r=await fetch('/api/game/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piece_idx:pieceIdx,target,target_position:target})}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
@@ -350,6 +350,7 @@ function renderGame(){
   if(!gameState)return; drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
   _updateAutoPlayBtn();
   if(typeof scheduleBotPlay==='function') scheduleBotPlay();
+  if(typeof suggestBotMove==='function') suggestBotMove();
   scheduleAutoRoll();
   // Auto-play the only legal move for human players when auto-play speed is active
   const _apSpeed = settings.auto_play_speed || 'off';
