@@ -199,12 +199,14 @@ function drawBoard(){
       group.forEach((pw,idx)=>{
         const ox=(idx-(n-1)/2)*step;
         html+=pawnSvg(pw.cx+ox,pw.cy,pw.col,pw.movable,pw.g,pw.label,window._botChosenMove?.piece_idx===pw.g);
-        const inSafe=pw.absPos!=null&&safeSet.has(pw.absPos);
-        if(inSafe){
-          html+=_pawnIconSvg(pw.cx+ox,pw.cy,null,'fa-shield');
-        } else {
-          const inBlockade=pw.absPos!=null&&group.filter(q=>q.player===pw.player&&q.absPos!=null).length>=2;
-          if(inBlockade) html+=_pawnIconSvg(pw.cx+ox,pw.cy,null,'fa-dumbbell');
+        if(_speed!=='fast'){
+          const inSafe=pw.absPos!=null&&safeSet.has(pw.absPos);
+          if(inSafe){
+            html+=_pawnIconSvg(pw.cx+ox,pw.cy,null,'fa-shield');
+          } else {
+            const inBlockade=pw.absPos!=null&&group.filter(q=>q.player===pw.player&&q.absPos!=null).length>=2;
+            if(inBlockade) html+=_pawnIconSvg(pw.cx+ox,pw.cy,null,'fa-dumbbell');
+          }
         }
       });
     });
@@ -223,12 +225,12 @@ function drawBoard(){
       opponents.forEach((pw,idx)=>{
         const ox=(idx-(total-1)/2)*step;
         html+=pawnSvg(baseCx+ox,baseCy,pw.col,false,pw.g,pw.label,false);
-        html+=_pawnIconSvg(baseCx+ox,baseCy,null,isSafe?'fa-shield':'fa-fire');
+        if(_speed!=='fast') html+=_pawnIconSvg(baseCx+ox,baseCy,null,isSafe?'fa-shield':'fa-fire');
       });
       friendlies.forEach((pw,idx)=>{
         const ox=(opponents.length+idx-(total-1)/2)*step;
         html+=pawnSvg(baseCx+ox,baseCy,pw.col,pw.movable,pw.g,pw.label,window._botChosenMove?.piece_idx===pw.g);
-        if(isSafe) html+=_pawnIconSvg(baseCx+ox,baseCy,null,'fa-shield');
+        if(_speed!=='fast'&&isSafe) html+=_pawnIconSvg(baseCx+ox,baseCy,null,'fa-shield');
       });
       pvData.previews.forEach((pv,idx)=>{
         const ox=(opponents.length+friendlies.length+idx-(total-1)/2)*step;
