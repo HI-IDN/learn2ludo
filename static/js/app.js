@@ -15,7 +15,10 @@ let tabConfig = [];
 let adminToken = null;
 let animatingPieceGlobalIdx = null;
 
-function boardLayout(trackSize=52, yardCount=4) {
+function boardLayout(trackSize=null, yardCount=null) {
+  yardCount = yardCount ?? settings.board_yard_count ?? 4;
+  const hl = settings.board_home_length ?? 6;
+  trackSize = trackSize ?? yardCount * (2 * hl + 1);
   const s = Math.floor(trackSize / yardCount);
   const starts = Array.from({length: yardCount}, (_, i) => i * s);
   const finishes = starts.map(x => (x - 1 + trackSize) % trackSize);
@@ -75,7 +78,7 @@ function normalizeEngineState(raw) {
   const cfg = state.config || {};
   const playerCount = cfg.player_count || state.player_count || state.num_players || parseInt(document.getElementById('set-num-players')?.value || settings.num_players || 4);
   const slots = state.slots || Array.from({length: playerCount}, (_, i) => i);
-  const layout = state.board || boardLayout(cfg.board?.track_size || 52, cfg.board?.yard_count || 4);
+  const layout = state.board || boardLayout(cfg.board?.track_size || null, cfg.board?.yard_count || null);
   const players = state.players || Array.from({length: playerCount}, (_, p) => ({
     index:p, color:PLAYER_COLORS[slots[p]],
     pieces:Array.from({length:(gameState?.config?.board?.pawns_per_player || 4)}, (_,i)=>({index:i, position:-1, finished:false, in_yard:true, absolute_position:null}))
@@ -314,7 +317,7 @@ async function newGame(startingPlayer=0){
   if(_gameStartTime) _startTurnTracking(); else startElapsedTimer();
   renderGame();
 }
-function makeDemoState(n=4,explicit_slots=null){ const slots=explicit_slots||Array.from({length:n},(_,i)=>i); const hl=settings.board_home_length||6; const ts=n*(2*hl+1); return normalizeEngineState({config:{player_count:n,board:{track_size:ts,yard_count:n,home_length:hl}}, slots, phase:'rolling', player:0}); }
+function makeDemoState(n=4,explicit_slots=null){ const slots=explicit_slots||Array.from({length:n},(_,i)=>i); const hl=settings.board_home_length||6; const yc=settings.board_yard_count||Math.max(n,4); const ts=yc*(2*hl+1); return normalizeEngineState({config:{player_count:n,board:{track_size:ts,yard_count:yc,home_length:hl}}, slots, phase:'rolling', player:0}); }
 function animateDice(finalValue){
   const face=document.getElementById('dice-face');
   if((settings?.auto_play_speed||'off')==='fast'){ face.textContent=DICE_FACES[finalValue]||DICE_FACES[1]; return Promise.resolve(); }
