@@ -27,42 +27,34 @@ function pawnSvg(x,y,color,movable,g,label,chosen){
 }
 function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}
 function _pawnIconSvg(x,y,_col,icon){const s=12;const cls=icon==='fa-fire'?'fire':icon==='fa-dumbbell'?'dumbbell':'shield';return `<foreignObject x="${x-s/2}" y="${y-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${s}px;line-height:1;"><i class="fa-solid ${icon} pawn-icon pawn-icon--${cls}"></i></div></foreignObject>`;}
-function getMovePath(playerIdx,pawnIdx,from,to){const path=[]; const start=from<0?getYardPositions(playerSlot(playerIdx,gameState?.num_players||4))[pawnIdx]:getTargetCenter(playerIdx,from); if(start)path.push(start); if(from<0){const t=getTargetCenter(playerIdx,to); if(t)path.push(t); return path;} for(let p=from+1;p<=to;p++){const pt=getTargetCenter(playerIdx,p); if(pt)path.push(pt);} return path;}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 async function animatePawnSteps(g,from,to){
   if((settings?.auto_play_speed||'off')==='fast')return;
-  const wrap=document.getElementById('board-wrap'), svg=document.getElementById('ludo-board');
-  if(!wrap||!svg)return;
-  const p=Math.floor(g/4), i=g%4, path=getMovePath(p,i,from,to);
-  if(path.length<2)return;
-  animatingPieceGlobalIdx=g;
-  drawBoard();
+  const svg=document.getElementById('ludo-board');
+  if(!svg)return;
+  const pawns=gameState?.config?.board?.pawns_per_player||4;
+  const p=Math.floor(g/pawns), i=g%pawns;
   const col=COLORS[playerColorName(p,gameState?.num_players||4)];
-  const overlay=document.createElement('div');
-  overlay.className='moving-pawn-overlay';
-  overlay.style.color=col;
-  overlay.innerHTML='<i class="fa-solid fa-chess-pawn fa-bounce"></i>';
-  wrap.appendChild(overlay);
+
+  // Steps to visit: for yard entry just show the landing cell; otherwise n+1…n+m.
+  const steps=from<0?[to]:Array.from({length:to-from},(_,k)=>from+1+k);
+  if(!steps.length)return;
+
+  animatingPieceGlobalIdx=g;
+  drawBoard(); // hides real pawn, drops previews
+
+  const grp=document.createElementNS('http://www.w3.org/2000/svg','g');
+  svg.appendChild(grp);
   try{
-    // Compute SVG→DOM scale and offset relative to board-wrap.
-    const svgR=svg.getBoundingClientRect(), wrapR=wrap.getBoundingClientRect();
-    const sx=svgR.width/480, sy=svgR.height/480;
-    const ox=svgR.left-wrapR.left, oy=svgR.top-wrapR.top;
-    const half=13; // half of 26px pawn size
-    const pos=(pt)=>`translate(${ox+pt.x*sx-half}px,${oy+pt.y*sy-half}px)`;
-    // Place at starting cell, then hop cell-by-cell with no CSS transition.
-    // (CSS transition was removed — it caused mid-flight jumps when transforms
-    // were updated faster than the transition could complete.)
-    overlay.style.transform=pos(path[0]);
-    if(from<0)await sleep(350);
-    for(const pt of path.slice(1)){
-      overlay.style.transform=pos(pt);
-      overlay.getBoundingClientRect(); // force repaint so the new position is visible
+    for(const pos of steps){
+      const pt=getTargetCenter(p,pos);
+      if(!pt)continue;
+      grp.innerHTML=pawnSvg(pt.x,pt.y,col,false,g,i+1,false);
       if(typeof playSound==='function')playSound('move');
       await sleep(180);
     }
     await sleep(60);
-  } finally{overlay.remove(); animatingPieceGlobalIdx=null;}
+  } finally{grp.remove(); animatingPieceGlobalIdx=null;}
 }
 
 function drawBoard(){
@@ -175,7 +167,7 @@ function drawBoard(){
       const hasOpponent=existing.some(pw=>pw.player!==p);
       const wouldCapture=!destSafe&&hasOpponent;
       const opponentOnSafe=destSafe&&hasOpponent;
-      const wouldBlockade=friendlyCount>=1&&!destSafe;
+      const wouldBlockade=m.target<52&&friendlyCount>=1&&!destSafe;
       if(!previewGroups.has(key))previewGroups.set(key,{friendlyCount,previews:[]});
       previewGroups.get(key).previews.push({cx:pt.x,cy:pt.y,col,g,player:p,destSafe,wouldBlockade,wouldCapture,opponentOnSafe});
     });
@@ -217,24 +209,32 @@ function drawBoard(){
       });
     });
 
-    // 4c. Capture/protected cells: opponent first with fire or shield, preview on top.
+    // 4c. Capture/protected cells: opponents first, then friendly pawns already on cell, then previews on top.
     captureCells.forEach(key=>{
       const group=trackGroups.get(key)||[];
       const pvData=previewGroups.get(key);
-      const movingPlayer=pvData.previews[0]?Math.floor(pvData.previews[0].g/pawnsPerPlayer):-1;
+      const movingPlayer=pvData.previews[0]?.player??-1;
       const opponents=group.filter(pw=>pw.player!==movingPlayer);
+      const friendlies=group.filter(pw=>pw.player===movingPlayer);
       const isSafe=pvData.previews[0]?.opponentOnSafe;
-      const total=opponents.length+pvData.previews.length;
+      const total=opponents.length+friendlies.length+pvData.previews.length;
       const baseCx=pvData.previews[0]?.cx||group[0]?.cx;
       const baseCy=pvData.previews[0]?.cy||group[0]?.cy;
       opponents.forEach((pw,idx)=>{
         const ox=(idx-(total-1)/2)*step;
         html+=pawnSvg(baseCx+ox,baseCy,pw.col,false,pw.g,pw.label,false);
-        html+=_pawnIconSvg(baseCx+ox,baseCy,isSafe?pw.col:'#e85',isSafe?'fa-shield':'fa-fire');
+        html+=_pawnIconSvg(baseCx+ox,baseCy,null,isSafe?'fa-shield':'fa-fire');
+      });
+      friendlies.forEach((pw,idx)=>{
+        const ox=(opponents.length+idx-(total-1)/2)*step;
+        html+=pawnSvg(baseCx+ox,baseCy,pw.col,pw.movable,pw.g,pw.label,window._botChosenMove?.piece_idx===pw.g);
+        if(isSafe) html+=_pawnIconSvg(baseCx+ox,baseCy,null,'fa-shield');
       });
       pvData.previews.forEach((pv,idx)=>{
-        const ox=(opponents.length+idx-(total-1)/2)*step;
+        const ox=(opponents.length+friendlies.length+idx-(total-1)/2)*step;
         html+=pawnPreviewSvg(pv.cx+ox,pv.cy,pv.col,pv.g);
+        if(isSafe)              html+=_pawnIconSvg(pv.cx+ox,pv.cy,null,'fa-shield');
+        else if(pv.wouldBlockade) html+=_pawnIconSvg(pv.cx+ox,pv.cy,null,'fa-dumbbell');
       });
     });
   }

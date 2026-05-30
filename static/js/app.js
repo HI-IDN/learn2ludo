@@ -372,7 +372,7 @@ function renderGame(){
     setTimeout(()=>makeMove(m.piece_idx,m.target), _AUTO_DELAY[_apSpeed].move);
   }
 }
-function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; if(pos>=52)return `H${pos-51}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52; return `T${(abs+1)%52}`; }
+function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; if(pos>=52)return `H${pos-51}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%52; return `T${abs+1}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
 
 // Move history rendering lives in history.js.
