@@ -72,7 +72,18 @@ function getTargetCenter(playerIdx,target){
   const slot=playerSlot(playerIdx,gameState?.num_players||4);
   return geo.homeCenters[slot]?.[target-ts]||null;
 }
-function getYardPositions(slot){const c=480/15, o=[[[2.4,2.4],[4.2,2.4],[2.4,4.2],[4.2,4.2]],[[10.8,2.4],[12.6,2.4],[10.8,4.2],[12.6,4.2]],[[10.8,10.8],[12.6,10.8],[10.8,12.6],[12.6,12.6]],[[2.4,10.8],[4.2,10.8],[2.4,12.6],[4.2,12.6]]]; return o[slot].map(p=>({x:p[0]*c,y:p[1]*c}));}
+function getYardPositions(slot){
+  const c=480/15;
+  // [back-left, back-right, front-left, front-right] — back row drawn first
+  // Positions are in grid units × c, near the start cell within each yard
+  const o=[
+    [[0.9,3.6],[2.1,3.6],[0.9,4.7],[2.1,4.7]],   // red:    yard top-left,     start at [1,6]
+    [[10.3,0.9],[10.3,2.1],[9.2,0.9],[9.2,2.1]],  // green:  yard top-right,    start at [8,1]
+    [[13.1,10.4],[11.9,10.4],[13.1,9.3],[11.9,9.3]], // yellow: yard bottom-right, start at [13,8]
+    [[4.8,13.1],[4.8,11.9],[3.7,13.1],[3.7,11.9]], // blue:   yard bottom-left,  start at [6,13]
+  ];
+  return (o[slot]||o[0]).map(([gx,gy])=>({x:gx*c,y:gy*c}));
+}
 let _boardFrills=true; // set before each render; false in fast mode unless human has >1 choice
 function pawnSvg(x,y,color,movable,g,label,chosen){
   const s=26;
@@ -128,6 +139,14 @@ function drawBoard(){
       const logoSize=c*3.2, logoX=x+c*1.4, logoY=y+c*1.4;
       html+=`<image href="/static/logo.svg" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" opacity="0.18" style="pointer-events:none;"/>`;
     });
+
+  // Yard pawn slots — white circles, back row first then front row
+  const _pawnsPerPlayer=gameState?.config?.board?.pawns_per_player||4;
+  Array.from({length:Math.min(layout.yard_count,4)},(_,slot)=>{
+    getYardPositions(slot).slice(0,_pawnsPerPlayer).forEach(({x,y})=>{
+      html+=`<circle cx="${x}" cy="${y}" r="${c*.38}" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>`;
+    });
+  });
 
   // Track cells
   geo.trackCenters.forEach(({x,y})=>html+=`<rect x="${x-c/2+.5}" y="${y-c/2+.5}" width="${c-1}" height="${c-1}" fill="#fff" stroke="rgba(0,0,0,.12)" stroke-width=".5" rx="2"/>`);
@@ -199,12 +218,11 @@ function drawBoard(){
     gameState.players.forEach(player=>{
       const col=COLORS[player.color]||COLORS[playerColorName(player.index,gameState.num_players)];
       const yard=getYardPositions(playerSlot(player.index,gameState.num_players));
-      let yi=0;
       player.pieces.forEach((pc,i)=>{
         const g=player.index*pawnsPerPlayer+i; if(animatingPieceGlobalIdx===g)return;
         const movable=valid.has(g);
         if(pc.in_yard){
-          const pt=yard[yi++]||yard[0];
+          const pt=yard[i]||yard[0];
           html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,window._botChosenMove?.piece_idx===g);
         } else if(pc.finished){
           const center=getTargetCenter(player.index,57);
