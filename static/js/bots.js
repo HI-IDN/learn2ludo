@@ -112,38 +112,38 @@ function botSection(title, subtitle, bots, allowEmpty = false) {
 
 // ---- Auto-play loop --------------------------------------------------------
 
-let _botPlaying = false;
-function resetBotPlaying() { _botPlaying = false; }
+let _botTimer = null;
+let _botRunning = false;
 
 function scheduleBotPlay() {
-  if (_botPlaying) return;
+  clearTimeout(_botTimer);
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
   if (getPlayerType(gameState.current_player) === 'human') return;
-  _botPlaying = true;
-  setTimeout(botTakeTurn, _AUTO_DELAY[speed].roll);
+  if (_botRunning) return;
+  _botTimer = setTimeout(botTakeTurn, _AUTO_DELAY[speed].roll);
 }
 
 async function botTakeTurn() {
+  const speed = settings.auto_play_speed || 'off';
+  const cp = gameState?.current_player;
+  if (_botRunning) return;
+  if (!gameState || gameState.phase !== 'rolling' || getPlayerType(cp) === 'human' || speed === 'off') return;
+  _botRunning = true;
   try {
-    const speed = settings.auto_play_speed || 'off';
-    const cp = gameState?.current_player;
-    if (!gameState || gameState.phase !== 'rolling' || getPlayerType(cp) === 'human' || speed === 'off') return;
-
     await rollDice();
 
     if (gameState.phase === 'moving' && gameState.valid_moves?.length > 0) {
       const botId = settings.bot_ids?.[cp] ?? 'eris';
       const move  = await runBotPolicy(botId, gameState.valid_moves);
       if (move) {
-        // Auto-play: no shake — just execute after the move delay
         await new Promise(r => setTimeout(r, _AUTO_DELAY[speed].move));
         await makeMove(move.piece_idx, move.target);
       }
     }
   } finally {
-    _botPlaying = false;
+    _botRunning = false;
     scheduleBotPlay();
   }
 }

@@ -21,13 +21,15 @@ function pawnSvg(x,y,color,movable,g,label,chosen){
   const botPending=!!window._botChosenMove;
   const isChosen=botPending&&chosen;
   const clickable=movable&&(!botPending||isChosen);
-  const anim=movable?(botPending?(isChosen?'fa-shake':''):'fa-beat'):'';
+  const _fast=(settings?.auto_play_speed||'off')==='fast';
+  const anim=_fast?'':(movable?(botPending?(isChosen?'fa-shake':''):'fa-beat'):'');
   return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${clickable?'pointer':'default'};" onclick="clickPiece(${g})"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${anim?' '+anim:''}"></i></div></foreignObject>`;
 }
 function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}
 function getMovePath(playerIdx,pawnIdx,from,to){const path=[]; const start=from<0?getYardPositions(playerSlot(playerIdx,gameState?.num_players||4))[pawnIdx]:getTargetCenter(playerIdx,from); if(start)path.push(start); if(from<0){const t=getTargetCenter(playerIdx,to); if(t)path.push(t); return path;} for(let p=from+1;p<=to;p++){const pt=getTargetCenter(playerIdx,p); if(pt)path.push(pt);} return path;}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 async function animatePawnSteps(g,from,to){
+  if((settings?.auto_play_speed||'off')==='fast')return;
   const wrap=document.getElementById('board-wrap'), svg=document.getElementById('ludo-board');
   if(!wrap||!svg)return;
   const p=Math.floor(g/4), i=g%4, path=getMovePath(p,i,from,to);
@@ -110,12 +112,12 @@ function drawBoard(){
     const coloredAbs=new Set([...Array.from(layout.safe_havens),...layout.starts]);
     TRACK_GRID.forEach(([gx,gy],idx)=>{
       const onColor=coloredAbs.has(idx);
-      html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${idx}</text>`;
+      html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${(idx+1)%52}</text>`;
     });
     // Home stretch labels (positions 52–57 per player lane)
     Object.values(HOME_STRETCH_GRID).forEach(cells=>{
       cells.forEach(([gx,gy],i)=>{
-        html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="#fff" opacity="0.9">${52+i}</text>`;
+        html+=`<text x="${gx*c+2}" y="${gy*c+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="#fff" opacity="0.9">H${i+1}</text>`;
       });
     });
   }
@@ -139,7 +141,13 @@ function drawBoard(){
         if(pc.in_yard){
           const pt=yard[yi++]||yard[0];
           html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,window._botChosenMove?.piece_idx===g);
-        } else if(!pc.finished){
+        } else if(pc.finished){
+          const center=getTargetCenter(player.index,57);
+          if(!center)return;
+          const key=`${Math.round(center.x)},${Math.round(center.y)}`;
+          if(!trackGroups.has(key))trackGroups.set(key,[]);
+          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable:false,g,label:i+1,player:player.index});
+        } else {
           const center=pc.position>=52?getTargetCenter(player.index,pc.position):(pc.absolute_position!=null?gridCenter(...TRACK_GRID[pc.absolute_position]):getTargetCenter(player.index,pc.position));
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
@@ -149,10 +157,13 @@ function drawBoard(){
       });
     });
 
-    // 2. Build preview groups — offset behind existing FRIENDLY pawns at destination.
-    //    Opponent pawns are captured on landing, so previews overlap them instead of fanning out.
+    // 2. Build preview groups — only when the user needs to make a choice.
+    //    Skip when auto-play is active and there is at most one valid move (it executes automatically).
+    const _speed=settings?.auto_play_speed||'off';
+    const _isHumanTurn=getPlayerType(gameState.current_player)==='human';
+    const showPreview=(_speed==='off'||gameState.valid_moves.length>1)&&(_speed==='off'||_isHumanTurn);
     const previewGroups=new Map();
-    valid.forEach((m,g)=>{
+    if(showPreview) valid.forEach((m,g)=>{
       const p=Math.floor(g/pawnsPerPlayer),pt=getTargetCenter(p,m.target),col=COLORS[playerColorName(p,gameState.num_players)];
       if(!pt)return;
       const key=`${Math.round(pt.x)},${Math.round(pt.y)}`;
