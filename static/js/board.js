@@ -146,8 +146,9 @@ function drawBoard(){
     html+=`<foreignObject x="${x-c*.34}" y="${y-c*.38}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;
   });
 
-  // Finish arrows — white cell with coloured fa-circle-right rotated to point inward
-  layout.finishes.forEach((abs,slot)=>{
+  // Finish arrows — cell geometrically adjacent to each home stretch entry (start - 2)
+  layout.starts.forEach((start,slot)=>{
+    const abs=(start-2+layout.track_size)%layout.track_size;
     const {x,y}=geo.trackCenters[abs],col=COLORS[PLAYER_COLORS[slot]];
     const deg=Math.round(slot*360/layout.yard_count);
     html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="#fff" rx="3"/>`;
