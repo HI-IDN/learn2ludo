@@ -11,6 +11,45 @@
 //   pawnSvg()
 //   pawnPreviewSvg()
 
+// buildBoardGeometry(yardCount, homeLength, S) → {trackCenters, homeCenters, cellSize, center}
+//
+// trackCenters[absPos]  = {x,y} pixel center for each track cell (length = yardCount*(2n+1))
+// homeCenters[armIdx][j] = {x,y} pixel center; j=0 outermost (position 52), j=n-1 innermost
+//
+// Each arm i sits at angle θ = π + i·(2π/yardCount).  Per arm (2n+1 cells total):
+//   Group 1 (p=0..n-2):    approach — (n-p)c outward, 1c left
+//   Group 2 (p=n-1..2n-2): corner   — 1c outward, (p-n+3)c left
+//   Group 3 (p=2n-1..2n):  crossing — 0 and -1c outward, (n+1)c left
+// Verified: for yardCount=4, n=6, S=480 all 52 track + 24 home centers are pixel-identical
+// to the TRACK_GRID / HOME_STRETCH_GRID constants below.
+function buildBoardGeometry(yardCount, homeLength, S) {
+  const n = homeLength;
+  const c = S / (2 * n + 3);
+  const cx = S / 2, cy = S / 2;
+  const trackSize = yardCount * (2 * n + 1);
+  const trackCenters = new Array(trackSize);
+  const homeCenters = Array.from({length: yardCount}, () => new Array(n));
+  for (let arm = 0; arm < yardCount; arm++) {
+    const theta = Math.PI + arm * 2 * Math.PI / yardCount;
+    const ax = Math.cos(theta), ay = Math.sin(theta);   // outward unit vector
+    const lx = -Math.sin(theta), ly = Math.cos(theta);  // left (CCW perp) unit vector
+    const base = arm * (2 * n + 1);
+    for (let p = 0; p <= n - 2; p++) {
+      const d = n - p;
+      trackCenters[base + p] = {x: cx + d*c*ax + c*lx, y: cy + d*c*ay + c*ly};
+    }
+    for (let p = n - 1; p <= 2*n - 2; p++) {
+      const l = p - n + 3;
+      trackCenters[base + p] = {x: cx + c*ax + l*c*lx, y: cy + c*ay + l*c*ly};
+    }
+    trackCenters[base + 2*n - 1] = {x: cx + (n+1)*c*lx,        y: cy + (n+1)*c*ly};
+    trackCenters[base + 2*n]     = {x: cx - c*ax + (n+1)*c*lx, y: cy - c*ay + (n+1)*c*ly};
+    for (let j = 0; j < n; j++)
+      homeCenters[arm][j] = {x: cx + (n-j)*c*ax, y: cy + (n-j)*c*ay};
+  }
+  return {trackCenters, homeCenters, cellSize: c, center: {x: cx, y: cy}};
+}
+
 const TRACK_GRID=[[1,6],[2,6],[3,6],[4,6],[5,6],[6,5],[6,4],[6,3],[6,2],[6,1],[6,0],[7,0],[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[9,6],[10,6],[11,6],[12,6],[13,6],[14,6],[14,7],[14,8],[13,8],[12,8],[11,8],[10,8],[9,8],[8,9],[8,10],[8,11],[8,12],[8,13],[8,14],[7,14],[6,14],[6,13],[6,12],[6,11],[6,10],[6,9],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],[0,7],[0,6]];
 const HOME_STRETCH_GRID={red:[[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],green:[[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],yellow:[[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]],blue:[[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]]};
 function gridCenter(gx,gy){const c=480/15; return {x:gx*c+c/2,y:gy*c+c/2};}
