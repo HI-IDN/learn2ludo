@@ -22,6 +22,14 @@ sass static/styles/main.scss static/styles/css/main.css --style=compressed
 - Before starting a new feature, remind the user to confirm the current state so we can commit first.
 - Write commit messages on the user's behalf when they give the go-ahead.
 
+## GitHub issues
+
+- Every feature, bug fix, or improvement should have a corresponding GitHub issue.
+- Before starting any non-trivial work, check whether an issue already exists (`gh issue list`). If not, recommend creating one — but confirm with the user first to avoid duplicates.
+- Minor UI/UX polish items (cosmetic tweaks, label changes, small layout adjustments) can be grouped into a single umbrella issue rather than filed individually.
+- Reference issues in commit messages (`refs #N`, `closes #N`) so work is traceable.
+- After merging to `main`, GitHub auto-closes issues whose commits contain `closes #N` — no need to close them manually.
+
 ## Code style
 
 - **No monoliths.** `app.js` owns global state and the init/tab/settings/game loop. Every distinct feature gets its own file. Current modules: `lobby.js`, `board.js`, `history.js`, `action.js`, `features.js`, `sound.js`.
