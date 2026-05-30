@@ -28,7 +28,7 @@ sass static/styles/main.scss static/styles/css/main.css --style=compressed
 - Before starting any non-trivial work, check whether an issue already exists (`gh issue list`). If not, recommend creating one — but confirm with the user first to avoid duplicates.
 - Minor UI/UX polish items (cosmetic tweaks, label changes, small layout adjustments) can be grouped into a single umbrella issue rather than filed individually.
 - Reference issues in commit messages (`refs #N`, `closes #N`) so work is traceable.
-- After merging to `main`, GitHub auto-closes issues whose commits contain `closes #N` — no need to close them manually.
+- **Never close an issue** (via comment, label, or `gh issue close`) without confirming with the user first. Use `closes #N` in commit messages only after the user says the feature is working and gives the go-ahead to commit.
 
 ## Code style
 
