@@ -22,12 +22,19 @@ function renderCurrentAction() {
   if (gameState.winner !== null && gameState.winner !== undefined) {
     if (avatarIcon) avatarIcon.className = 'action-avatar-icon fa-solid fa-crown';
     name.textContent = `${getPlayerName(gameState.winner)} wins!`;
-    instr.textContent = 'Game finished.';
+    if (!cardTop.dataset.winSoundPlayed) {
+      cardTop.dataset.winSoundPlayed = '1';
+      if (typeof playSound === 'function') playSound('win');
+      if (typeof stopElapsedTimer === 'function') stopElapsedTimer();
+    }
+    const elapsed = typeof _formatElapsed === 'function' ? _formatElapsed() : '';
+    instr.innerHTML = `Game finished${elapsed ? ` · <span id="game-elapsed">${elapsed}</span>` : ''}.`;
     if (dice) { dice.style.cursor = 'default'; dice.style.opacity = '0.45'; }
     return;
   }
+  delete cardTop.dataset.winSoundPlayed;
 
-  name.textContent = `${getPlayerName(cp)}'s turn`;
+  name.innerHTML = `${getPlayerName(cp)}'s turn <span id="game-elapsed" class="action-elapsed"></span>`;
 
   const canRoll = phase === 'rolling';
   if (phase === 'rolling') {

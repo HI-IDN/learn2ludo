@@ -53,8 +53,15 @@ class GameSession:
                     self._next_turn()
         elif not valid:
             self._yard_roll_count = 0
-            self.history.append({"player": self.game.player, "dice": value, "type": "roll"})
             blocker = self.gp.find_blocker(self.game.player)
+            no_exact = blocker is None and not self._all_in_yard(self.game.player)
+            self.history.append({
+                "player":        self.game.player,
+                "dice":          value,
+                "type":          "roll",
+                "no_exact_roll": no_exact,
+                "blocked_pawns": self.gp.per_piece_block_reasons(self.game.player),
+            })
             if blocker is not None:
                 self.history.append({
                     "type":       "blocked",
@@ -66,8 +73,13 @@ class GameSession:
                 self._next_turn()
         else:
             self._yard_roll_count = 0
-            self.history.append({"player": self.game.player, "dice": value, "type": "roll",
-                                  "valid_moves": self._valid_moves_list()})
+            self.history.append({
+                "player":        self.game.player,
+                "dice":          value,
+                "type":          "roll",
+                "valid_moves":   self._valid_moves_list(),
+                "blocked_pawns": self.gp.per_piece_block_reasons(self.game.player),
+            })
 
         return value
 

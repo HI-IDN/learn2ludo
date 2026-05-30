@@ -111,13 +111,10 @@
   }
 }
 
-// Auto-play button: always styled like btn-primary but dimmed when idle.
+// Auto-play button: full opacity in all states — icon + label convey the mode.
 // JS adds .active when speed != off, .fast when speed == fast.
 .auto-play-btn {
-  opacity: 0.5;
   transition: opacity 0.15s;
-
-  &.active { opacity: 1; }
 }
 
 // ---- Collapsible sections ---------------------------------------------------

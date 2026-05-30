@@ -104,10 +104,25 @@ function renderMoveHistory(){
           +(pi!==e.player?`${pName} `:'')
           +`P${li}: ${fromL}→${toL}</span>`;
       }).join(' ');
+      const blocked=e.blocked_pawns||[];
+      const blockedSummary=blocked.map(b=>{
+        const li=b.piece+1;
+        let desc;
+        if(b.reason==='yard')          desc='yard';
+        else if(b.reason==='overshoot') desc='exact roll needed';
+        else if(b.blocked_by!=null)     desc=getPlayerName(b.blocked_by);
+        else                            desc='blockaded';
+        const icon=b.reason==='blockade'
+          ?'<i class="fa-solid fa-dumbbell mh-blocked-icon"></i>'
+          :'<i class="fa-solid fa-ban mh-blocked-icon"></i>';
+        return `<span class="mh-blocked">${icon} P${li}: ${desc}</span>`;
+      }).join(' ');
+      const noExactNote=e.no_exact_roll?` ${dot} <span class="mh-note">needs exact roll to finish</span>`:'';
+      const parts=[moveSummary, blockedSummary].filter(Boolean).join(' ');
       return `<div class="move-history-row">`
         +`<i class="fa-solid fa-dice-d6" style="color:${col}"></i>`
         +`<span>${name}${dot}rolled ${e.dice}`
-        +(moveSummary?` ${dot} ${moveSummary}`:'')
+        +(parts?` ${dot} ${parts}`:noExactNote)
         +`</span></div>`;
     }
     if(e.type==='blocked'){
@@ -122,7 +137,7 @@ function renderMoveHistory(){
       const pawnsPerPlayer=gameState?.config?.board?.pawns_per_player||4;
       const pawnNum=(e.captured_piece%pawnsPerPlayer)+1;
       const capturedCol=COLORS[playerColorName(e.captured_player,gameState?.num_players||4)];
-      return `<div class="move-history-row move-history-capture"><i class="fa-solid fa-house-crack" style="color:${capturedCol}"></i><span>${capturedName}${dot}P${pawnNum} captured by ${captorName} · T${e.cell} → Y</span></div>`;
+      return `<div class="move-history-row move-history-capture" style="--capture-color:${captorCol}"><i class="fa-solid fa-house-crack" style="color:${capturedCol}"></i><span>${capturedName}${dot}P${pawnNum} captured by ${captorName} · T${(e.cell+1)%52} → Y</span></div>`;
     }
     const pawnsPerPlayer=gameState?.config?.board?.pawns_per_player||4;
     return `<div class="move-history-row"><i class="fa-solid fa-person-walking" style="color:${col}"></i><span>${name}${dot}P${(e.piece%pawnsPerPlayer)+1}: ${displayCellLabel(e.player,e.from)} → ${displayCellLabel(e.player,e.to)}</span></div>`;

@@ -26,6 +26,7 @@ function pawnSvg(x,y,color,movable,g,label,chosen){
   return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${clickable?'pointer':'default'};" onclick="clickPiece(${g})"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${anim?' '+anim:''}"></i></div></foreignObject>`;
 }
 function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}
+function _pawnIconSvg(x,y,_col,icon){const s=12;const cls=icon==='fa-fire'?'fire':icon==='fa-dumbbell'?'dumbbell':'shield';return `<foreignObject x="${x-s/2}" y="${y-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${s}px;line-height:1;"><i class="fa-solid ${icon} pawn-icon pawn-icon--${cls}"></i></div></foreignObject>`;}
 function getMovePath(playerIdx,pawnIdx,from,to){const path=[]; const start=from<0?getYardPositions(playerSlot(playerIdx,gameState?.num_players||4))[pawnIdx]:getTargetCenter(playerIdx,from); if(start)path.push(start); if(from<0){const t=getTargetCenter(playerIdx,to); if(t)path.push(t); return path;} for(let p=from+1;p<=to;p++){const pt=getTargetCenter(playerIdx,p); if(pt)path.push(pt);} return path;}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 async function animatePawnSteps(g,from,to){
@@ -128,8 +129,8 @@ function drawBoard(){
     const valid=new Map(gameState.valid_moves.map(m=>[m.piece_idx,m]));
     const step=8;
 
-    // 1. Build on-track groups first (no rendering yet) and render yard pawns.
-    //    Preview offsets need to know how many real pawns already sit at each cell.
+    // 1. Build on-track groups; render yard pawns immediately.
+    const safeSet=new Set([...(currentLayout().safe_havens||[])]);
     const trackGroups=new Map();
     gameState.players.forEach(player=>{
       const col=COLORS[player.color]||COLORS[playerColorName(player.index,gameState.num_players)];
@@ -146,19 +147,19 @@ function drawBoard(){
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
-          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable:false,g,label:i+1,player:player.index});
+          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable:false,g,label:i+1,player:player.index,absPos:null});
         } else {
-          const center=pc.position>=52?getTargetCenter(player.index,pc.position):(pc.absolute_position!=null?gridCenter(...TRACK_GRID[pc.absolute_position]):getTargetCenter(player.index,pc.position));
+          const absPos=pc.absolute_position!=null?pc.absolute_position:null;
+          const center=pc.position>=52?getTargetCenter(player.index,pc.position):(absPos!=null?gridCenter(...TRACK_GRID[absPos]):getTargetCenter(player.index,pc.position));
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
-          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable,g,label:i+1,player:player.index});
+          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable,g,label:i+1,player:player.index,absPos});
         }
       });
     });
 
     // 2. Build preview groups — only when the user needs to make a choice.
-    //    Skip when auto-play is active and there is at most one valid move (it executes automatically).
     const _speed=settings?.auto_play_speed||'off';
     const _isHumanTurn=getPlayerType(gameState.current_player)==='human';
     const showPreview=(_speed==='off'||gameState.valid_moves.length>1)&&(_speed==='off'||_isHumanTurn);
@@ -169,38 +170,71 @@ function drawBoard(){
       const key=`${Math.round(pt.x)},${Math.round(pt.y)}`;
       const existing=trackGroups.get(key)||[];
       const friendlyCount=existing.filter(pw=>pw.player===p).length;
-      const wouldCapture=existing.some(pw=>pw.player!==p);
       const destAbs=m.target<52?absForPlayerPosition(p,m.target):null;
-      const destSafe=destAbs!=null&&(currentLayout().safe_havens||[]).includes(destAbs);
+      const destSafe=destAbs!=null&&safeSet.has(destAbs);
+      const hasOpponent=existing.some(pw=>pw.player!==p);
+      const wouldCapture=!destSafe&&hasOpponent;
+      const opponentOnSafe=destSafe&&hasOpponent;
       const wouldBlockade=friendlyCount>=1&&!destSafe;
-      // Only fan out relative to friendly pawns — opponents get captured, not stacked
       if(!previewGroups.has(key))previewGroups.set(key,{friendlyCount,previews:[]});
-      previewGroups.get(key).previews.push({cx:pt.x,cy:pt.y,col,g,wouldBlockade,wouldCapture});
+      previewGroups.get(key).previews.push({cx:pt.x,cy:pt.y,col,g,player:p,destSafe,wouldBlockade,wouldCapture,opponentOnSafe});
     });
 
-    // 3. Render previews underneath real pawns.
-    //    Fan out relative to friendly pawns only; captures overlap the opponent.
-    previewGroups.forEach(({friendlyCount,previews})=>{
+    // 3. Classify cells that need opponent-first rendering (capture or safe-protected).
+    const captureCells=new Set();
+    previewGroups.forEach(({previews},key)=>{
+      if(previews.some(pv=>pv.wouldCapture||pv.opponentOnSafe)) captureCells.add(key);
+    });
+
+    // 4a. Non-capture preview cells: ghost behind, icon above ghost.
+    //     Shield if landing on safe haven; dumbbell if forming a blockade on a normal cell.
+    previewGroups.forEach(({friendlyCount,previews},key)=>{
+      if(captureCells.has(key))return;
       const total=friendlyCount+previews.length;
       previews.forEach((pv,idx)=>{
         const ox=(friendlyCount+idx-(total-1)/2)*step;
         html+=pawnPreviewSvg(pv.cx+ox,pv.cy,pv.col,pv.g);
-        const s=12;
-        if(pv.wouldCapture){
-          // Flame above preview to signal a capture
-          html+=`<foreignObject x="${pv.cx+ox-s/2}" y="${pv.cy-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#e85;font-size:${s}px;line-height:1;filter:drop-shadow(0 0 2px rgba(0,0,0,.4));"><i class="fa-solid fa-fire"></i></div></foreignObject>`;
-        } else if(pv.wouldBlockade){
-          // Shield above preview to signal a blockade would form
-          html+=`<foreignObject x="${pv.cx+ox-s/2}" y="${pv.cy-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${pv.col};font-size:${s}px;line-height:1;filter:drop-shadow(0 0 2px rgba(0,0,0,.4));"><i class="fa-solid fa-shield"></i></div></foreignObject>`;
+        if(pv.destSafe)          html+=_pawnIconSvg(pv.cx+ox,pv.cy,null,'fa-shield');
+        else if(pv.wouldBlockade) html+=_pawnIconSvg(pv.cx+ox,pv.cy,null,'fa-dumbbell');
+      });
+    });
+
+    // 4b. Non-capture track cells: real pawns on top of ghosts.
+    //     Shield on any pawn sitting on a safe haven; dumbbell on any pawn in an active blockade.
+    trackGroups.forEach((group,key)=>{
+      if(captureCells.has(key))return;
+      const n=group.length;
+      group.forEach((pw,idx)=>{
+        const ox=(idx-(n-1)/2)*step;
+        html+=pawnSvg(pw.cx+ox,pw.cy,pw.col,pw.movable,pw.g,pw.label,window._botChosenMove?.piece_idx===pw.g);
+        const inSafe=pw.absPos!=null&&safeSet.has(pw.absPos);
+        if(inSafe){
+          html+=_pawnIconSvg(pw.cx+ox,pw.cy,null,'fa-shield');
+        } else {
+          const inBlockade=pw.absPos!=null&&group.filter(q=>q.player===pw.player&&q.absPos!=null).length>=2;
+          if(inBlockade) html+=_pawnIconSvg(pw.cx+ox,pw.cy,null,'fa-dumbbell');
         }
       });
     });
 
-    // 4. Render on-track groups on top of previews.
-    trackGroups.forEach(group=>{
-      const n=group.length;
-      group.forEach((pw,idx)=>{
-        html+=pawnSvg(pw.cx+(idx-(n-1)/2)*step,pw.cy,pw.col,pw.movable,pw.g,pw.label,window._botChosenMove?.piece_idx===pw.g);
+    // 4c. Capture/protected cells: opponent first with fire or shield, preview on top.
+    captureCells.forEach(key=>{
+      const group=trackGroups.get(key)||[];
+      const pvData=previewGroups.get(key);
+      const movingPlayer=pvData.previews[0]?Math.floor(pvData.previews[0].g/pawnsPerPlayer):-1;
+      const opponents=group.filter(pw=>pw.player!==movingPlayer);
+      const isSafe=pvData.previews[0]?.opponentOnSafe;
+      const total=opponents.length+pvData.previews.length;
+      const baseCx=pvData.previews[0]?.cx||group[0]?.cx;
+      const baseCy=pvData.previews[0]?.cy||group[0]?.cy;
+      opponents.forEach((pw,idx)=>{
+        const ox=(idx-(total-1)/2)*step;
+        html+=pawnSvg(baseCx+ox,baseCy,pw.col,false,pw.g,pw.label,false);
+        html+=_pawnIconSvg(baseCx+ox,baseCy,isSafe?pw.col:'#e85',isSafe?'fa-shield':'fa-fire');
+      });
+      pvData.previews.forEach((pv,idx)=>{
+        const ox=(opponents.length+idx-(total-1)/2)*step;
+        html+=pawnPreviewSvg(pv.cx+ox,pv.cy,pv.col,pv.g);
       });
     });
   }

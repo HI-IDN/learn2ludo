@@ -64,6 +64,14 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
+.action-elapsed {
+  font-size: 0.75em;
+  font-weight: 400;
+  opacity: 0.7;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
 .action-card-body {
   background: $color-bg-alt;
   padding: 16px;
@@ -169,7 +177,7 @@
 }
 
 .move-history-capture {
-  background: color-mix(in srgb, #ff4444 6%, transparent);
+  background: color-mix(in srgb, var(--capture-color, #ff4444) 10%, transparent);
   border-radius: $radius;
 }
 
@@ -179,6 +187,25 @@
 }
 
 .mh-sep {
+  color: $color-text-3;
+}
+
+.mh-note {
+  font-size: 0.78em;
+  color: $color-text-3;
+  font-style: italic;
+}
+
+.mh-blocked {
+  display: inline-block;
+  font-size: 0.78em;
+  font-weight: 500;
+  color: $color-text-2;
+  opacity: 0.8;
+}
+
+.mh-blocked-icon {
+  font-size: 0.85em;
   color: $color-text-3;
 }
 

@@ -115,6 +115,12 @@ function botSection(title, subtitle, bots, allowEmpty = false) {
 let _botTimer = null;
 let _botRunning = false;
 
+function resetBotState() {
+  clearTimeout(_botTimer);
+  _botTimer = null;
+  _botRunning = false;
+}
+
 function scheduleBotPlay() {
   clearTimeout(_botTimer);
   const speed = settings.auto_play_speed || 'off';

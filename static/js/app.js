@@ -274,7 +274,7 @@ async function newGame(startingPlayer=0){
   gameStartingPlayer=startingPlayer;
   cancelNewGame();
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture();
-  if(typeof resetBotPlaying==='function') resetBotPlaying();
+  if(typeof resetBotState==='function') resetBotState();
   const payload=buildNewGamePayload();
   payload.config.starting_player=startingPlayer;
   try{
@@ -335,9 +335,7 @@ function toggleAutoPlay() {
   const cur = settings.auto_play_speed || 'off';
   settings.auto_play_speed = _AUTO_SPEEDS[(_AUTO_SPEEDS.indexOf(cur) + 1) % _AUTO_SPEEDS.length];
   persistSettings();
-  _updateAutoPlayBtn();
-  scheduleAutoRoll();
-  if (typeof scheduleBotPlay === 'function') scheduleBotPlay();
+  if (gameState) renderGame(); else _updateAutoPlayBtn();
 }
 function _updateAutoPlayBtn() {
   const btn = document.getElementById('auto-play-btn');

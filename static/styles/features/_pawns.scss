@@ -12,6 +12,29 @@
   paint-order: stroke fill;
 }
 
+// ---- Pawn overlay icons (shield / fire) -------------------------------------
+// Fixed colours so they read clearly on any player colour.
+// White stroke matches the pawn glyph treatment.
+
+.pawn-icon {
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.35));
+}
+
+.pawn-icon--shield   { color: #C8C8C8; }  // same grey as safe haven cells
+.pawn-icon--dumbbell { color: #C8C8C8; }  // blockade indicator, same grey
+.pawn-icon--fire     { color: #e07830; }  // capture warning
+
+// ---- Beat animation timing --------------------------------------------------
+// Default FA beat is very quick (1s, small scale). Slow it down so it's
+// clearly visible as a "this pawn can move" cue.
+
+.pawn-html .fa-beat {
+  --fa-animation-duration: 2s;
+  --fa-beat-scale: 1.18;
+}
+
 // ---- Preview ghost ----------------------------------------------------------
 // fa-regular (outline) pawn shown at the destination cell.
 
