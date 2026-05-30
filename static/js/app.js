@@ -365,7 +365,22 @@ function toggleAutoPlay() {
   const cur = settings.auto_play_speed || 'off';
   settings.auto_play_speed = _AUTO_SPEEDS[(_AUTO_SPEEDS.indexOf(cur) + 1) % _AUTO_SPEEDS.length];
   persistSettings();
-  if (gameState) renderGame(); else _updateAutoPlayBtn();
+  if (gameState) { renderGame(); if (cur === 'off') _kickAutoPlay(); }
+  else _updateAutoPlayBtn();
+}
+function _kickAutoPlay() {
+  // When switching from pause → play, fire the first action with a short delay
+  // instead of the full inter-turn delay so the transition feels immediate.
+  if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
+  const speed = settings.auto_play_speed || 'off';
+  if (speed === 'off') return;
+  const delay = speed === 'fast' ? 50 : 120;
+  if (getPlayerType(gameState.current_player) === 'human') {
+    clearTimeout(_autoRollTimer);
+    _autoRollTimer = setTimeout(rollDice, delay);
+  } else if (typeof scheduleBotPlay === 'function') {
+    scheduleBotPlay(delay);
+  }
 }
 function _updateAutoPlayBtn() {
   const btn = document.getElementById('auto-play-btn');

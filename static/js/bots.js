@@ -121,14 +121,14 @@ function resetBotState() {
   _botRunning = false;
 }
 
-function scheduleBotPlay() {
+function scheduleBotPlay(overrideDelay) {
   clearTimeout(_botTimer);
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
   if (getPlayerType(gameState.current_player) === 'human') return;
   if (_botRunning) return;
-  _botTimer = setTimeout(botTakeTurn, _AUTO_DELAY[speed].roll);
+  _botTimer = setTimeout(botTakeTurn, overrideDelay ?? _AUTO_DELAY[speed].roll);
 }
 
 async function botTakeTurn() {
