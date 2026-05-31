@@ -22,7 +22,32 @@
 //   Group 3 (p=2n-1..2n):  crossing — 0 and -1c outward, (n+1)c left
 // Verified: for yardCount=4, n=6, S=480 all 52 track + 24 home centers are pixel-identical
 // to the TRACK_GRID / HOME_STRETCH_GRID constants below.
-function buildBoardGeometry(yardCount, homeLength, S) {
+// Returns slot offsets (in arm-local ax/lx fractions) and the slot radius for a given pawn count.
+// Layouts: 3=triangle, 4=2×2, 5=olympic(3+2), 6=3×2, 7=4+3, 8=4×2.
+function _yardSlotLayout(count, yardSize) {
+  // [dax, dlx]: offset in arm-outward (ax) and arm-left (lx) directions, in grid units
+  const templates = {
+    1: {cols:1, rows:1, tpl:[[0,0]]},
+    2: {cols:2, rows:1, tpl:[[-0.5,0],[0.5,0]]},
+    3: {cols:2, rows:2, tpl:[[-0.5,-0.5],[0.5,-0.5],[0,0.5]]},
+    4: {cols:2, rows:2, tpl:[[-0.5,-0.5],[0.5,-0.5],[-0.5,0.5],[0.5,0.5]]},
+    5: {cols:3, rows:2, tpl:[[-1,-0.5],[0,-0.5],[1,-0.5],[-0.5,0.5],[0.5,0.5]]},
+    6: {cols:3, rows:2, tpl:[[-1,-0.5],[0,-0.5],[1,-0.5],[-1,0.5],[0,0.5],[1,0.5]]},
+    7: {cols:4, rows:2, tpl:[[-1.5,-0.5],[-0.5,-0.5],[0.5,-0.5],[1.5,-0.5],[-1,0.5],[0,0.5],[1,0.5]]},
+    8: {cols:4, rows:2, tpl:[[-1.5,-0.5],[-0.5,-0.5],[0.5,-0.5],[1.5,-0.5],[-1.5,0.5],[-0.5,0.5],[0.5,0.5],[1.5,0.5]]},
+  };
+  const t = templates[Math.max(1, Math.min(8, count))] || templates[4];
+  const m = 0.80; // margin: use 80% of yard size
+  const unitAx = (yardSize * m) / (t.cols + 0.5);
+  const unitLx = (yardSize * m) / (t.rows + 0.5);
+  const radius = Math.min(unitAx, unitLx) * 0.44;
+  return {
+    slots: t.tpl.map(([a, l]) => ({dax: a * unitAx, dlx: l * unitLx})),
+    radius,
+  };
+}
+
+function buildBoardGeometry(yardCount, homeLength, pawnsPerPlayer, S) {
   const n = homeLength;
   const c = S / (2 * n + 3);
   const cx = S / 2, cy = S / 2;
@@ -47,7 +72,30 @@ function buildBoardGeometry(yardCount, homeLength, S) {
     for (let j = 0; j < n; j++)
       homeCenters[arm][j] = {x: cx + (n-j)*c*ax, y: cy + (n-j)*c*ay};
   }
-  return {trackCenters, homeCenters, cellSize: c, center: {x: cx, y: cy}};
+  // Yard block per arm: centered at angle (theta + π/4), distance 4.5c√2 from center
+  const yardDist = 4.5 * c * Math.SQRT2;
+  const yardSize = Math.min(5.7 * c,
+    yardDist * Math.SQRT2 * Math.sin(Math.PI / Math.max(yardCount, 3)) * 0.92);
+  const yardCenters = Array.from({length: yardCount}, (_, arm) => {
+    const theta = Math.PI + arm * 2 * Math.PI / yardCount;
+    const a = theta + Math.PI / 4;
+    return {x: cx + yardDist * Math.cos(a), y: cy + yardDist * Math.sin(a), size: yardSize};
+  });
+
+  // Pawn slot positions per yard — layout adapts to pawnsPerPlayer (1–8)
+  const {slots: slotOffsets, radius: slotRadius} = _yardSlotLayout(pawnsPerPlayer, yardSize);
+  const yardPawnSlots = Array.from({length: yardCount}, (_, arm) => {
+    const theta = Math.PI + arm * 2 * Math.PI / yardCount;
+    const ax = Math.cos(theta), ay = Math.sin(theta);
+    const lx = -Math.sin(theta), ly = Math.cos(theta);
+    const {x: yx, y: yy} = yardCenters[arm];
+    return slotOffsets.map(({dax, dlx}) => ({
+      x: yx + dax * ax + dlx * lx,
+      y: yy + dax * ay + dlx * ly,
+    }));
+  });
+
+  return {trackCenters, homeCenters, yardCenters, yardPawnSlots, slotRadius, cellSize: c, center: {x: cx, y: cy}};
 }
 
 const TRACK_GRID=[[1,6],[2,6],[3,6],[4,6],[5,6],[6,5],[6,4],[6,3],[6,2],[6,1],[6,0],[7,0],[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[9,6],[10,6],[11,6],[12,6],[13,6],[14,6],[14,7],[14,8],[13,8],[12,8],[11,8],[10,8],[9,8],[8,9],[8,10],[8,11],[8,12],[8,13],[8,14],[7,14],[6,14],[6,13],[6,12],[6,11],[6,10],[6,9],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],[0,7],[0,6]];
@@ -59,8 +107,9 @@ function invalidateBoardGeometry(){ _geo=null; _geoKey=null; }
 function currentGeometry(){
   const layout=currentLayout();
   const n=gameState?.config?.board?.home_length??settings.board_home_length??6;
-  const key=`${layout.yard_count}:${n}`;
-  if(_geoKey!==key){_geo=buildBoardGeometry(layout.yard_count,n,480);_geoKey=key;}
+  const p=gameState?.config?.board?.pawns_per_player??settings.pawns_per_player??4;
+  const key=`${layout.yard_count}:${n}:${p}`;
+  if(_geoKey!==key){_geo=buildBoardGeometry(layout.yard_count,n,p,480);_geoKey=key;}
   return _geo;
 }
 
@@ -73,16 +122,7 @@ function getTargetCenter(playerIdx,target){
   return geo.homeCenters[slot]?.[target-ts]||null;
 }
 function getYardPositions(slot){
-  const c=480/15;
-  // [back-left, back-right, front-left, front-right] — back row drawn first
-  // Positions are in grid units × c, near the start cell within each yard
-  const o=[
-    [[0.9,3.6],[2.1,3.6],[0.9,4.7],[2.1,4.7]],   // red:    yard top-left,     start at [1,6]
-    [[10.3,0.9],[10.3,2.1],[9.2,0.9],[9.2,2.1]],  // green:  yard top-right,    start at [8,1]
-    [[13.1,10.4],[11.9,10.4],[13.1,9.3],[11.9,9.3]], // yellow: yard bottom-right, start at [13,8]
-    [[4.8,13.1],[4.8,11.9],[3.7,13.1],[3.7,11.9]], // blue:   yard bottom-left,  start at [6,13]
-  ];
-  return (o[slot]||o[0]).map(([gx,gy])=>({x:gx*c,y:gy*c}));
+  return currentGeometry().yardPawnSlots[slot] || currentGeometry().yardPawnSlots[0];
 }
 let _boardFrills=true; // set before each render; false in fast mode unless human has >1 choice
 function pawnSvg(x,y,color,movable,g,label,chosen){
@@ -132,19 +172,19 @@ function drawBoard(){
   // Background: white
   let html=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
 
-  // Yard blocks (4 corners) + logo overlay
-  [[0,0,COLORS.red],[9*c,0,COLORS.green],[9*c,9*c,COLORS.yellow],[0,9*c,COLORS.blue]]
-    .forEach(([x,y,col])=>{
-      html+=`<rect x="${x+c*.15}" y="${y+c*.15}" width="${c*5.7}" height="${c*5.7}" fill="${col}" opacity=".92" rx="8"/>`;
-      const logoSize=c*3.2, logoX=x+c*1.4, logoY=y+c*1.4;
-      html+=`<image href="/static/logo.svg" x="${logoX}" y="${logoY}" width="${logoSize}" height="${logoSize}" opacity="0.18" style="pointer-events:none;"/>`;
-    });
+  // Yard blocks (one per arm) + logo overlay
+  geo.yardCenters.forEach(({x, y, size}, arm) => {
+    const col=COLORS[PLAYER_COLORS[arm]], hs=size/2, pad=c*.1;
+    html+=`<rect x="${x-hs+pad}" y="${y-hs+pad}" width="${size-pad*2}" height="${size-pad*2}" fill="${col}" opacity=".92" rx="8"/>`;
+    const ls=size*.56;
+    html+=`<image href="/static/logo.svg" x="${x-ls/2}" y="${y-ls/2}" width="${ls}" height="${ls}" opacity="0.18" style="pointer-events:none;"/>`;
+  });
 
-  // Yard pawn slots — white circles, back row first then front row
+  // Yard pawn slots — one circle per pawn, layout adapts to pawn count
   const _pawnsPerPlayer=gameState?.config?.board?.pawns_per_player||4;
-  Array.from({length:Math.min(layout.yard_count,4)},(_,slot)=>{
+  Array.from({length:layout.yard_count},(_,slot)=>{
     getYardPositions(slot).slice(0,_pawnsPerPlayer).forEach(({x,y})=>{
-      html+=`<circle cx="${x}" cy="${y}" r="${c*.38}" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>`;
+      html+=`<circle cx="${x}" cy="${y}" r="${geo.slotRadius}" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.82)" stroke-width="1.8"/>`;
     });
   });
 
@@ -169,7 +209,8 @@ function drawBoard(){
   layout.starts.forEach((start,slot)=>{
     const abs=(start-2+layout.track_size)%layout.track_size;
     const {x,y}=geo.trackCenters[abs],col=COLORS[PLAYER_COLORS[slot]];
-    const deg=Math.round(slot*360/layout.yard_count);
+    const armTheta=Math.PI+slot*2*Math.PI/layout.yard_count;
+    const deg=Math.round(armTheta*180/Math.PI+180);
     html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="#fff" rx="3"/>`;
     html+=`<foreignObject x="${x-c*.32}" y="${y-c*.32}" width="${c*.64}" height="${c*.64}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:${col};font-size:17px;transform:rotate(${deg}deg);"><i class="fa-solid fa-circle-right"></i></div></foreignObject>`;
   });
@@ -180,21 +221,27 @@ function drawBoard(){
     lane.forEach(({x,y})=>html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".92" rx="2"/>`);
   });
 
-  // Home center — 4 coloured triangles meeting in the middle
-  const cx=7.5*c, cy=7.5*c, tl=[6*c,6*c], tr=[9*c,6*c], br=[9*c,9*c], bl=[6*c,9*c];
-  [
-    [COLORS.red,   `${tl[0]},${tl[1]} ${bl[0]},${bl[1]} ${cx},${cy}`],
-    [COLORS.green, `${tl[0]},${tl[1]} ${tr[0]},${tr[1]} ${cx},${cy}`],
-    [COLORS.yellow,`${tr[0]},${tr[1]} ${br[0]},${br[1]} ${cx},${cy}`],
-    [COLORS.blue,  `${bl[0]},${bl[1]} ${br[0]},${br[1]} ${cx},${cy}`],
-  ].forEach(([col,pts])=>html+=`<polygon points="${pts}" fill="${col}"/>`);
+  // Home center — N coloured pie slices meeting at board center
+  {
+    const hcx=geo.center.x, hcy=geo.center.y, r=c*1.5, N=layout.yard_count;
+    const half=Math.PI/N;
+    Array.from({length:N},(_,arm)=>{
+      const theta=Math.PI+arm*2*Math.PI/N;
+      const a1=theta-half, a2=theta+half;
+      const col=COLORS[PLAYER_COLORS[arm]];
+      const large=half>Math.PI/2?1:0;
+      const x1=hcx+r*Math.cos(a1), y1=hcy+r*Math.sin(a1);
+      const x2=hcx+r*Math.cos(a2), y2=hcy+r*Math.sin(a2);
+      html+=`<path d="M ${hcx},${hcy} L ${x1},${y1} A ${r},${r},0,${large},1,${x2},${y2} Z" fill="${col}"/>`;
+    });
+  }
 
   // Cell index labels — drawn last so they appear over special cells
   if(settings.show_cell_numbers){
     const coloredAbs=new Set([...Array.from(layout.safe_havens),...layout.starts]);
     geo.trackCenters.forEach(({x,y},idx)=>{
       const onColor=coloredAbs.has(idx);
-      html+=`<text x="${x-c/2+2}" y="${y-c/2+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${(idx+1)%(layout.track_size||52)}</text>`;
+      html+=`<text x="${x-c/2+2}" y="${y-c/2+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${idx}</text>`;
     });
     geo.homeCenters.forEach(lane=>lane.forEach(({x,y},i)=>{
       html+=`<text x="${x-c/2+2}" y="${y-c/2+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="#fff" opacity="0.9">H${i+1}</text>`;

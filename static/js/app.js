@@ -81,11 +81,11 @@ function normalizeEngineState(raw) {
   const layout = state.board || boardLayout(cfg.board?.track_size || null, cfg.board?.yard_count || null);
   const players = state.players || Array.from({length: playerCount}, (_, p) => ({
     index:p, color:PLAYER_COLORS[slots[p]],
-    pieces:Array.from({length:(gameState?.config?.board?.pawns_per_player || 4)}, (_,i)=>({index:i, position:-1, finished:false, in_yard:true, absolute_position:null}))
+    pieces:Array.from({length:(cfg.board?.pawns_per_player || settings.pawns_per_player || 4)}, (_,i)=>({index:i, position:-1, finished:false, in_yard:true, absolute_position:null}))
   }));
   return {
     ...state,
-    config:{board:{track_size:cfg.board?.track_size||52,yard_count:cfg.board?.yard_count||4,home_length:cfg.board?.home_length||6}, player_count:playerCount},
+    config:{board:{track_size:cfg.board?.track_size||52,yard_count:cfg.board?.yard_count||4,home_length:cfg.board?.home_length||6,pawns_per_player:cfg.board?.pawns_per_player||settings.pawns_per_player||4}, player_count:playerCount},
     board:layout, slots, num_players:playerCount,
     current_player: state.current_player ?? state.player ?? 0,
     dice: state.dice ?? state.last_roll ?? 0,
@@ -140,7 +140,7 @@ function readBoardConfig() {
   const yardCount = Math.max(2, Math.min(6, parseInt(document.getElementById('board-yard-count')?.value || settings.board_yard_count || 4)));
   const homeLength = Math.max(2, parseInt(document.getElementById('board-home-length')?.value || settings.board_home_length || 6));
   const trackSize = yardCount * (2 * homeLength + 1);
-  const pawns = Math.max(1, Math.min(4, parseInt(document.getElementById('board-pawns-per-player')?.value || settings.pawns_per_player || 4)));
+  const pawns = Math.max(1, Math.min(8, parseInt(document.getElementById('board-pawns-per-player')?.value || settings.pawns_per_player || 4)));
   const safeOffset = Math.max(1, parseInt(document.getElementById('board-safe-offset')?.value || settings.board_safe_offset || 7));
   const stackHome = document.getElementById('board-stack-home')?.checked ?? !!settings.stack_home_pawns;
 
@@ -331,13 +331,13 @@ async function rollDice(){
   catch{ const dice=1+Math.floor(Math.random()*6); await animateDice(dice); gameState.dice=dice; gameState.last_roll=dice; gameState.phase='moving'; gameState.valid_moves=demoValidMoves(gameState.current_player,dice); }
   renderGame();
 }
-function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,target:0}); } else { const t=pc.position+dice; if(t<=57)moves.push({piece_idx:g,target:t}); }}); return moves; }
+function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,target:0}); } else { const _ts=currentLayout().track_size; const _hl=gameState?.config?.board?.home_length??6; const t=pc.position+dice; if(t<=_ts+_hl-1)moves.push({piece_idx:g,target:t}); }}); return moves; }
 async function clickPiece(globalIdx){ if(window._botChosenMove&&window._botChosenMove.piece_idx!==globalIdx)return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(m) await makeMove(globalIdx,m.target); }
 async function makeMove(pieceIdx,target){ window._botChosenMove=null;
   const p=Math.floor(pieceIdx/(gameState?.config?.board?.pawns_per_player || 4)), i=pieceIdx%(gameState?.config?.board?.pawns_per_player || 4), pawn=gameState.players[p].pieces[i], from=pawn.position;
   await animatePawnSteps(pieceIdx,from,target);
   try{ const r=await fetch('/api/game/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piece_idx:pieceIdx,target,target_position:target})}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
-  catch{ const _ts=currentLayout().track_size; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=57; pawn.absolute_position=target<_ts?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{}}); if(gameState.dice===6){
+  catch{ const _ts=currentLayout().track_size; const _hl=gameState?.config?.board?.home_length??6; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=_ts+_hl-1; pawn.absolute_position=target<_ts?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{}}); if(gameState.dice===6){
       gameState.consecutive_sixes = (gameState.consecutive_sixes || 0) + 1;
       if (gameState.consecutive_sixes >= (settings.max_consecutive_sixes ?? 3)) {
         gameState.consecutive_sixes = 0;
@@ -425,7 +425,7 @@ function renderGame(){
     setTimeout(()=>makeMove(m.piece_idx,m.target), _AUTO_DELAY[_apSpeed].move);
   }
 }
-function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; if(pos>=ts)return `H${pos-ts+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs+1}`; }
+function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; if(pos>=ts)return `H${pos-ts+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
 
 // Move history rendering lives in history.js.
