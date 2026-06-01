@@ -327,10 +327,15 @@ function applyReplaySnapshot(index) {
 }
 
 function updateReplayControls() {
+  const liveControls = document.getElementById('live-speed-controls');
+  const replayControls = document.getElementById('replay-step-controls');
   const prev = document.getElementById('replay-prev-btn');
   const play = document.getElementById('replay-play-btn');
-  const next = document.getElementById('replay-next-btn');
+  const fast = document.getElementById('replay-fast-btn');
+  const forward = document.getElementById('replay-forward-btn');
   const status = document.getElementById('replay-status');
+  if (liveControls) liveControls.style.display = replayModeActive ? 'none' : '';
+  if (replayControls) replayControls.style.display = replayModeActive ? '' : 'none';
   if (!replayModeActive) {
     if (typeof updateLiveTransportControls === 'function') updateLiveTransportControls();
     return;
@@ -347,11 +352,17 @@ function updateReplayControls() {
     play.innerHTML = replayAutoMode === 'normal' ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
     play.title = replayAutoMode === 'normal' ? 'Pause replay' : 'Play replay';
   }
-  if (next) {
-    next.disabled = !replaySnapshots.length || replayIndex >= replaySnapshots.length - 1;
-    next.classList.toggle('active', replayAutoMode === 'fast');
-    next.innerHTML = replayAutoMode === 'fast' ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-forward"></i>';
-    next.title = replayAutoMode === 'fast' ? 'Pause fast replay' : 'Fast replay';
+  if (fast) {
+    fast.disabled = !replaySnapshots.length || replayIndex >= replaySnapshots.length - 1;
+    fast.classList.toggle('active', replayAutoMode === 'fast');
+    fast.innerHTML = replayAutoMode === 'fast' ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-forward"></i>';
+    fast.title = replayAutoMode === 'fast' ? 'Pause fast replay' : 'Fast replay';
+  }
+  if (forward) {
+    forward.disabled = !replaySnapshots.length || replayIndex >= replaySnapshots.length - 1;
+    forward.classList.remove('active');
+    forward.innerHTML = '<i class="fa-solid fa-step-forward"></i>';
+    forward.title = 'Next replay step';
   }
   if (status) status.textContent = replaySnapshots.length ? `${replayIndex + 1}/${replaySnapshots.length}` : '';
   updateSaveGameButton();

@@ -113,6 +113,7 @@ ctx.replayStep(999999);
 const snapshot = {
   replay_history_length: ctx.gameState.history.length,
   replay_game_starts: ctx.gameState.history.filter(e => e.type === 'game_start').length,
+  source_game_starts: data.history.filter(e => e.type === 'game_start').length,
   source_history_length: data.history.length,
   phase: ctx.gameState.phase,
   current_player: ctx.gameState.current_player,
@@ -175,5 +176,11 @@ def test_replay_json_reconstructs_saved_final_state():
     }
 
     assert actual.pop("replay_game_starts") == 1
-    assert actual.pop("replay_history_length") < actual.pop("source_history_length")
+    source_game_starts = actual.pop("source_game_starts")
+    replay_history_length = actual.pop("replay_history_length")
+    source_history_length = actual.pop("source_history_length")
+    if source_game_starts > 1:
+        assert replay_history_length < source_history_length
+    else:
+        assert replay_history_length == source_history_length
     assert actual == expected

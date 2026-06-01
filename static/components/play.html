@@ -45,7 +45,7 @@
                   id="replay-prev-btn"
                   onclick="transportPauseOrBack()"
                   disabled
-                  title="Pause">
+                  title="Previous replay step">
             <i class="fa-solid fa-step-backward"></i>
           </button>
           <button class="btn btn-sm replay-step-btn"
@@ -56,11 +56,18 @@
             <i class="fa-solid fa-play"></i>
           </button>
           <button class="btn btn-sm replay-step-btn"
-                  id="replay-next-btn"
+                  id="replay-fast-btn"
                   onclick="transportFastForward()"
                   disabled
                   title="Fast forward">
             <i class="fa-solid fa-forward"></i>
+          </button>
+          <button class="btn btn-sm replay-step-btn"
+                  id="replay-forward-btn"
+                  onclick="replayStep(1)"
+                  disabled
+                  title="Next replay step">
+            <i class="fa-solid fa-step-forward"></i>
           </button>
           <span class="replay-status" id="replay-status"></span>
         </div>
