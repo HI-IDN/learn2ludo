@@ -1,6 +1,18 @@
 [project]
 name = "learn2ludo"
 version = "0.1.0"
+dependencies = [
+	"fastapi",
+	"numpy",
+	"pydantic",
+	"uvicorn[standard]",
+]
+
+[project.optional-dependencies]
+dev = [
+	"pytest",
+	"httpx",
+]
 
 [project.scripts]
 playludo = "game.play:main"
