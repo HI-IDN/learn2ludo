@@ -32,6 +32,11 @@ class GameSession:
         self._yard_roll_count = 0
         self.starting_player  = self.game.player
         self.round_count      = 1
+        self.history.append({
+            "type": "game_start",
+            "player": self.starting_player,
+            "color": self._color_for_player(self.starting_player),
+        })
 
     def _next_turn(self):
         """Advance to the next player and increment round when starting player comes back."""
@@ -44,8 +49,9 @@ class GameSession:
         if self._finishing_round_player is not None and self.game.player == self.starting_player:
             self.winners = [p for p in range(self.game.config.player_count)
                             if all(pc.finished for pc in self.gp.pieces if pc.player == p)]
-            self.winner = self.winners[0] if self.winners else self._finishing_round_player
+            self.winner = self._finishing_round_player
             self.game.phase = Phase.FINISHED
+            self._append_winner_history()
 
     # ---- public API -------------------------------------------------------
 
@@ -150,6 +156,7 @@ class GameSession:
                 self.winners = [w]
                 self.winner  = w
                 self.game.phase = Phase.FINISHED
+                self._append_winner_history()
                 return {}
         if self.game.phase == Phase.NEXT:
             self._next_turn()
@@ -202,8 +209,12 @@ class GameSession:
             "last_roll":      g.last_roll or 0,
             "valid_moves":    vm,
             "history":          self.history,
+            "starting_player":  self.starting_player,
+            "starting_player_color": self._color_for_player(self.starting_player),
             "winner":           self.winner,
             "winners":          self.winners,
+            "winner_color":     self._color_for_player(self.winner) if self.winner is not None else None,
+            "winner_colors":    [self._color_for_player(w) for w in self.winners],
             "num_players":      n,
             "round_count":      self.round_count,
             "yard_roll_count":  self._yard_roll_count,
@@ -216,7 +227,7 @@ class GameSession:
         g = self.game
         pos = pc.pos
         abs_pos = None
-        if not pc.finished and pos >= 0 and pos < g.board.track_size:
+        if not pc.finished and pos >= 0 and pos < g.board.track_size - 1:
             abs_pos = (pos + g.board.starts[slot]) % g.board.track_size
         return {
             "index":             local_idx,
@@ -251,6 +262,23 @@ class GameSession:
     def _pawn_id_for_piece(self, player_idx: int, local_idx: int) -> str:
         slot = self.game.slots[player_idx]
         return pawn_id(_COLORS[slot], local_idx)
+
+    def _color_for_player(self, player_idx: int | None) -> str | None:
+        if player_idx is None:
+            return None
+        slot = self.game.slots[player_idx]
+        return _COLORS[slot]
+
+    def _append_winner_history(self):
+        if any(e.get("type") == "game_winner" for e in self.history):
+            return
+        self.history.append({
+            "type": "game_winner",
+            "player": self.winner,
+            "color": self._color_for_player(self.winner),
+            "winners": list(self.winners),
+            "winner_colors": [self._color_for_player(w) for w in self.winners],
+        })
 
     def _global_piece_idx(self, player_idx: int, local_idx: int) -> int:
         return player_idx * self.game.config.board.pawns_per_player + local_idx

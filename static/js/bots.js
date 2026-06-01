@@ -54,8 +54,9 @@ function _aresLocal(validMoves) {
 function _isCaptureLocal(move) {
   if (!gameState) return false;
   const trackSize  = gameState.config?.board?.track_size ?? 52;
+  const entry = typeof homeEntryPosition === 'function' ? homeEntryPosition() : trackSize - 1;
   const pawnsPerPlayer = gameState.config?.board?.pawns_per_player ?? 4;
-  if (move.target >= trackSize) return false;
+  if (move.target >= entry) return false;
   let movingPlayer = typeof move.piece_idx === 'number' ? Math.floor(move.piece_idx / pawnsPerPlayer) : null;
   if (movingPlayer == null && move.pawn_id) {
     const pid = String(move.pawn_id).toUpperCase();

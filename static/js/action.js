@@ -16,13 +16,15 @@ function renderCurrentAction() {
   if (!cardTop || !name || !instr) return;
 
   cardTop.classList.remove('idle');
+  cardTop.style.backgroundImage = '';
   cardTop.style.background = color;
   if (avatarIcon) avatarIcon.className = `action-avatar-icon fa-solid ${getPlayerType(cp) !== 'human' ? 'fa-robot' : 'fa-user'}`;
 
-  const _winners = gameState.winners?.length ? gameState.winners : (gameState.winner != null ? [gameState.winner] : []);
+  const _winners = winnerPlayersForBanner();
   if (_winners.length) {
     if (avatarIcon) avatarIcon.className = 'action-avatar-icon fa-solid fa-crown';
-    const names = _winners.map(w => getPlayerName(w));
+    cardTop.style.background = winnerBannerBackground(_winners);
+    const names = winnerNamesForBanner(_winners);
     name.textContent = names.join(' & ') + (_winners.length > 1 ? ' win!' : ' wins!');
     if (!cardTop.dataset.winSoundPlayed) {
       cardTop.dataset.winSoundPlayed = '1';
@@ -51,4 +53,53 @@ function renderCurrentAction() {
   else instr.textContent = 'Waiting for next action.';
 
   if (dice) { dice.style.cursor = canRoll ? 'pointer' : 'default'; dice.style.opacity = canRoll ? '' : '0.45'; }
+}
+
+function winnerPlayersForBanner() {
+  const raw = gameState?.winners?.length ? gameState.winners : (gameState?.winner != null ? [gameState.winner] : []);
+  const unique = [...new Set(raw.map(Number).filter(Number.isInteger))];
+  const order = typeof playerDisplayOrder === 'function'
+    ? playerDisplayOrder(gameState?.num_players || unique.length || 1)
+    : unique;
+  return unique.sort((a, b) => {
+    const ai = order.indexOf(a);
+    const bi = order.indexOf(b);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+}
+
+function winnerPlayerColor(playerIdx) {
+  const player = (gameState?.players || []).find(p => Number(p.index) === Number(playerIdx));
+  const colorName = player?.color || playerColorName(playerIdx, gameState?.num_players || 1);
+  return COLORS[colorName] || COLORS.blue;
+}
+
+function winnerPlayerName(playerIdx) {
+  const player = (gameState?.players || []).find(p => Number(p.index) === Number(playerIdx));
+  return player?.name || getPlayerName(playerIdx);
+}
+
+function winnerPlayerColorName(playerIdx) {
+  const player = (gameState?.players || []).find(p => Number(p.index) === Number(playerIdx));
+  return player?.color || playerColorName(playerIdx, gameState?.num_players || 1);
+}
+
+function winnerBannerBackground(winners) {
+  const colors = winners.map(winnerPlayerColor);
+  if (colors.length <= 1) return colors[0] || COLORS.blue;
+  const stops = colors.map((color, i) => {
+    const from = (i * 100 / colors.length).toFixed(3);
+    const to = ((i + 1) * 100 / colors.length).toFixed(3);
+    return `${color} ${from}%, ${color} ${to}%`;
+  });
+  return `linear-gradient(90deg, ${stops.join(', ')})`;
+}
+
+function winnerNamesForBanner(winners) {
+  const names = winners.map(winnerPlayerName);
+  const counts = names.reduce((acc, n) => ({...acc, [n]: (acc[n] || 0) + 1}), {});
+  return winners.map((w, i) => {
+    if (counts[names[i]] <= 1) return names[i];
+    return `${names[i]} (${winnerPlayerColorName(w)})`;
+  });
 }

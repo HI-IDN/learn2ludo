@@ -71,7 +71,7 @@ class AresBot(BotPolicy):
         target     = move["target"]
         piece_idx = move.get("piece_idx")
         pawn_ref = move.get("pawn_id")
-        if target >= track_size:          # home stretch — no captures
+        if target >= track_size - 1:
             return False
 
         moving_player = self._moving_player(move, game_state, piece_idx, pawns_pp, pawn_ref)

@@ -115,9 +115,10 @@ function getTargetCenter(playerIdx,target){
   if(target<0)return null;
   const geo=currentGeometry();
   const ts=currentLayout().track_size||52;
-  if(target<ts) return geo.trackCenters[absForPlayerPosition(playerIdx,target)]||null;
+  const entry=typeof homeEntryPosition==='function'?homeEntryPosition():ts-1;
+  if(target<entry) return geo.trackCenters[absForPlayerPosition(playerIdx,target)]||null;
   const slot=playerSlot(playerIdx,gameState?.num_players||4);
-  return geo.homeCenters[slot]?.[target-ts]||null;
+  return geo.homeCenters[slot]?.[target-entry]||null;
 }
 function getYardPositions(slot){
   return currentGeometry().yardPawnSlots[slot] || currentGeometry().yardPawnSlots[0];
@@ -287,7 +288,9 @@ function drawBoard(){
           const pt=yard[i]||yard[0];
           html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,_isChosenMoveForPiece(window._botChosenMove,g,pid));
         } else if(pc.finished){
-          const center=getTargetCenter(player.index,57);
+          const entry=typeof homeEntryPosition==='function'?homeEntryPosition():(layout.track_size||52)-1;
+          const finish=entry+(gameState?.config?.board?.home_length??settings.board_home_length??6)-1;
+          const center=getTargetCenter(player.index,finish);
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
@@ -312,12 +315,13 @@ function drawBoard(){
       const key=`${Math.round(pt.x)},${Math.round(pt.y)}`;
       const existing=trackGroups.get(key)||[];
       const friendlyCount=existing.filter(pw=>pw.player===p).length;
-      const destAbs=m.target<(layout.track_size||52)?absForPlayerPosition(p,m.target):null;
+      const entry=typeof homeEntryPosition==='function'?homeEntryPosition():(layout.track_size||52)-1;
+      const destAbs=m.target<entry?absForPlayerPosition(p,m.target):null;
       const destSafe=destAbs!=null&&safeSet.has(destAbs);
       const hasOpponent=existing.some(pw=>pw.player!==p);
       const wouldCapture=!destSafe&&hasOpponent;
       const opponentOnSafe=destSafe&&hasOpponent;
-      const wouldBlockade=m.target<(layout.track_size||52)&&friendlyCount>=1&&!destSafe;
+      const wouldBlockade=m.target<entry&&friendlyCount>=1&&!destSafe;
       if(!previewGroups.has(key))previewGroups.set(key,{friendlyCount,previews:[]});
       previewGroups.get(key).previews.push({cx:pt.x,cy:pt.y,col,g,player:p,destSafe,wouldBlockade,wouldCapture,opponentOnSafe});
     });

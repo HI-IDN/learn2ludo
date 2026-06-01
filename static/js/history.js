@@ -21,9 +21,13 @@ function compactGameState() {
     slots: gameState.slots || [],
     phase: gameState.phase,
     current_player: gameState.current_player,
+    starting_player: gameState.starting_player ?? null,
+    starting_player_color: gameState.starting_player_color ?? null,
     dice: gameState.dice || gameState.last_roll || null,
     winner: gameState.winner ?? null,
     winners: gameState.winners ?? [],
+    winner_color: gameState.winner_color ?? null,
+    winner_colors: gameState.winner_colors ?? [],
     player_times: typeof _playerTimes!=='undefined'?{..._playerTimes}:{},
     players: (gameState.players || []).map(p => ({
       index: p.index,
@@ -102,6 +106,18 @@ function renderMoveHistory(){
     if(e.type==='pregame'){
       const sub=`rolled ${e.roll}${e.round>1?` (re-roll ${e.round})`:''} · first player`;
       return `<div class="move-history-row move-history-pregame"><i class="fa-solid fa-dice-d6" style="color:${e.color}"></i><span>${e.name}${dot}${sub}</span></div>`;
+    }
+    if(e.type==='game_start'){
+      const startColor=e.color||playerColorName(e.player,gameState?.num_players||4);
+      const startCol=COLORS[startColor]||COLORS.blue;
+      return `<div class="move-history-row move-history-game-start"><i class="fa-solid fa-flag-checkered" style="color:${startCol}"></i><span>Starting player${dot}${getPlayerName(e.player)} (${startColor})</span></div>`;
+    }
+    if(e.type==='game_winner'){
+      const winners=e.winners?.length?e.winners:[e.player];
+      const labels=winners.map((w,i)=>`${getPlayerName(w)} (${e.winner_colors?.[i]||playerColorName(w,gameState?.num_players||4)})`);
+      const winColor=e.color||playerColorName(e.player,gameState?.num_players||4);
+      const winCol=COLORS[winColor]||COLORS.blue;
+      return `<div class="move-history-row move-history-game-winner"><i class="fa-solid fa-crown" style="color:${winCol}"></i><span>Winner${winners.length>1?'s':''}${dot}${labels.join(' & ')}</span></div>`;
     }
     const col=COLORS[playerColorName(e.player,gameState?.num_players||4)];
     const name=getPlayerName(e.player);

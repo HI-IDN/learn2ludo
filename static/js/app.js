@@ -32,6 +32,7 @@ function boardLayout(trackSize=null, yardCount=null) {
   return {track_size: trackSize, yard_count: yardCount, starts, finishes, safe_havens};
 }
 function currentLayout(){ return gameState?.board || boardLayout(); }
+function homeEntryPosition(){ return (currentLayout().track_size || 52) - 1; }
 
 function playerSlot(playerIdx, n=gameState?.num_players || settings.num_players || 4) {
   if (gameState?.slots?.[playerIdx] !== undefined) return gameState.slots[playerIdx];
@@ -127,7 +128,15 @@ function normalizeEngineState(raw) {
     current_player: state.current_player ?? state.player ?? 0,
     dice: state.dice ?? state.last_roll ?? 0,
     phase: state.phase || 'rolling',
-    players, valid_moves: validMoves, history: state.history || [], winner: state.winner ?? null
+    players,
+    valid_moves: validMoves,
+    history: state.history || [],
+    starting_player: state.starting_player ?? null,
+    starting_player_color: state.starting_player_color ?? null,
+    winner: state.winner ?? null,
+    winners: state.winners || [],
+    winner_color: state.winner_color ?? null,
+    winner_colors: state.winner_colors || []
   };
 }
 
@@ -368,7 +377,7 @@ async function rollDice(){
   catch{ const dice=1+Math.floor(Math.random()*6); await animateDice(dice); gameState.dice=dice; gameState.last_roll=dice; gameState.phase='moving'; gameState.valid_moves=demoValidMoves(gameState.current_player,dice); }
   renderGame();
 }
-function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:0}); } else { const _ts=currentLayout().track_size; const _hl=gameState?.config?.board?.home_length??6; const t=pc.position+dice; if(t<=_ts+_hl-1)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:t}); }}); return moves; }
+function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:0}); } else { const _entry=homeEntryPosition(); const _hl=gameState?.config?.board?.home_length??6; const t=pc.position+dice; if(t<=_entry+_hl-1)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:t}); }}); return moves; }
 async function clickPiece(globalIdx){ const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(m) await makeMove(m.piece_idx,m.target,m.pawn_id); }
 async function makeMove(pieceIdx,target,pawnIdValue=null){ window._botChosenMove=null;
   if(pieceIdx==null&&pawnIdValue) pieceIdx=pieceIdxFromPawnId(pawnIdValue);
@@ -376,7 +385,7 @@ async function makeMove(pieceIdx,target,pawnIdValue=null){ window._botChosenMove
   const p=Math.floor(pieceIdx/(gameState?.config?.board?.pawns_per_player || 4)), i=pieceIdx%(gameState?.config?.board?.pawns_per_player || 4), pawn=gameState.players[p].pieces[i], from=pawn.position;
   await animatePawnSteps(pieceIdx,from,target);
   try{ const r=await fetch('/api/game/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piece_idx:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,target,target_position:target})}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
-  catch{ const _ts=currentLayout().track_size; const _hl=gameState?.config?.board?.home_length??6; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=_ts+_hl-1; pawn.absolute_position=target<_ts?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{}}); if(gameState.dice===6){
+  catch{ const _entry=homeEntryPosition(); const _hl=gameState?.config?.board?.home_length??6; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=_entry+_hl-1; pawn.absolute_position=target<_entry?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{}}); if(gameState.dice===6){
       gameState.consecutive_sixes = (gameState.consecutive_sixes || 0) + 1;
       if (gameState.consecutive_sixes >= (settings.max_consecutive_sixes ?? 3)) {
         gameState.consecutive_sixes = 0;
@@ -464,8 +473,8 @@ function renderGame(){
     setTimeout(()=>makeMove(m.piece_idx,m.target,m.pawn_id), _AUTO_DELAY[_apSpeed].move);
   }
 }
-function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; if(pos>=ts)return `H${pos-ts+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs+1}`; }
-function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
+function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; const entry=homeEntryPosition(); if(pos>=entry)return `H${pos-entry+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs+1}`; }
+function spacesRemaining(pos,finished=false){ if(finished)return 0; const entry=homeEntryPosition(); const finish=entry+(gameState?.config?.board?.home_length??settings.board_home_length??6)-1; if(pos===-1||pos==null)return finish+1; return Math.max(0,finish-pos); }
 
 // Move history rendering lives in history.js.
 function renderPlayers(){
