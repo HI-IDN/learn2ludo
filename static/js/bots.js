@@ -56,7 +56,16 @@ function _isCaptureLocal(move) {
   const trackSize  = gameState.config?.board?.track_size ?? 52;
   const pawnsPerPlayer = gameState.config?.board?.pawns_per_player ?? 4;
   if (move.target >= trackSize) return false;
-  const movingPlayer = Math.floor(move.piece_idx / pawnsPerPlayer);
+  let movingPlayer = typeof move.piece_idx === 'number' ? Math.floor(move.piece_idx / pawnsPerPlayer) : null;
+  if (movingPlayer == null && move.pawn_id) {
+    const pid = String(move.pawn_id).toUpperCase();
+    (gameState.players ?? []).forEach((player, idx) => {
+      if (movingPlayer != null) return;
+      const found = (player.pieces ?? []).some(pc => String(pc.pawn_id || '').toUpperCase() === pid);
+      if (found) movingPlayer = player.index ?? idx;
+    });
+  }
+  if (movingPlayer == null) return false;
   const slot   = playerSlot(movingPlayer, gameState.num_players);
   const start  = gameState.board?.starts?.[slot] ?? 0;
   const absTarget = (move.target + start) % trackSize;
@@ -146,7 +155,7 @@ async function botTakeTurn() {
       const move  = await runBotPolicy(botId, gameState.valid_moves);
       if (move) {
         await new Promise(r => setTimeout(r, _AUTO_DELAY[speed].move));
-        await makeMove(move.piece_idx, move.target);
+        await makeMove(move.piece_idx ?? null, move.target, move.pawn_id ?? null);
       }
     }
   } finally {

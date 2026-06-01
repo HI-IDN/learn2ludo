@@ -123,6 +123,7 @@ function getYardPositions(slot){
   return currentGeometry().yardPawnSlots[slot] || currentGeometry().yardPawnSlots[0];
 }
 let _boardFrills=true; // set before each render; false in fast mode unless human has >1 choice
+function _isChosenMoveForPiece(move,g,pid){ return !!move&&(move.piece_idx===g||(pid&&move.pawn_id===pid)); }
 function pawnSvg(x,y,color,movable,g,label,chosen){
   const s=26;
   const botPending=!!window._botChosenMove;
@@ -280,23 +281,24 @@ function drawBoard(){
       const yard=getYardPositions(playerSlot(player.index,gameState.num_players));
       player.pieces.forEach((pc,i)=>{
         const g=player.index*pawnsPerPlayer+i; if(animatingPieceGlobalIdx===g)return;
+        const pid=pc.pawn_id||pawnId(player.color||playerColorName(player.index,gameState.num_players),i);
         const movable=valid.has(g);
         if(pc.in_yard){
           const pt=yard[i]||yard[0];
-          html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,window._botChosenMove?.piece_idx===g);
+          html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,_isChosenMoveForPiece(window._botChosenMove,g,pid));
         } else if(pc.finished){
           const center=getTargetCenter(player.index,57);
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
-          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable:false,g,label:i+1,player:player.index,absPos:null});
+          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable:false,g,label:i+1,pid,player:player.index,absPos:null});
         } else {
           const absPos=pc.absolute_position!=null?pc.absolute_position:null;
           const center=absPos!=null?geo.trackCenters[absPos]:getTargetCenter(player.index,pc.position);
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
-          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable,g,label:i+1,player:player.index,absPos});
+          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable,g,label:i+1,pid,player:player.index,absPos});
         }
       });
     });
@@ -346,7 +348,7 @@ function drawBoard(){
       const n=group.length;
       group.forEach((pw,idx)=>{
         const ox=(idx-(n-1)/2)*step;
-        html+=pawnSvg(pw.cx+ox,pw.cy,pw.col,pw.movable,pw.g,pw.label,window._botChosenMove?.piece_idx===pw.g);
+        html+=pawnSvg(pw.cx+ox,pw.cy,pw.col,pw.movable,pw.g,pw.label,_isChosenMoveForPiece(window._botChosenMove,pw.g,pw.pid));
         if(_boardFrills){
           const inSafe=pw.absPos!=null&&safeSet.has(pw.absPos);
           if(inSafe){
@@ -377,7 +379,7 @@ function drawBoard(){
       });
       friendlies.forEach((pw,idx)=>{
         const ox=(opponents.length+idx-(total-1)/2)*step;
-        html+=pawnSvg(baseCx+ox,baseCy,pw.col,pw.movable,pw.g,pw.label,window._botChosenMove?.piece_idx===pw.g);
+        html+=pawnSvg(baseCx+ox,baseCy,pw.col,pw.movable,pw.g,pw.label,_isChosenMoveForPiece(window._botChosenMove,pw.g,pw.pid));
         if(_boardFrills&&isSafe) html+=_pawnIconSvg(baseCx+ox,baseCy,null,'fa-shield');
       });
       pvData.previews.forEach((pv,idx)=>{

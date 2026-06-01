@@ -4,7 +4,7 @@ Bot registry for Learn2Ludo.
 All bots implement BotPolicy.choose_move(valid_moves, game_state).
 RL-trained bots will subclass BotPolicy and load their model in __init__.
 
-valid_moves: list of {"piece_idx": int, "target": int}
+valid_moves: list of {"piece_idx": int, "pawn_id": str, "target": int}
 game_state:  the full dict from the game API (players, board, config, …)
 Returns:     one item from valid_moves, or None
 """
@@ -69,11 +69,14 @@ class AresBot(BotPolicy):
         safe       = set(board.get("safe_havens", []))
 
         target     = move["target"]
-        piece_idx  = move["piece_idx"]
+        piece_idx = move.get("piece_idx")
+        pawn_ref = move.get("pawn_id")
         if target >= track_size:          # home stretch — no captures
             return False
 
-        moving_player = piece_idx // pawns_pp
+        moving_player = self._moving_player(move, game_state, piece_idx, pawns_pp, pawn_ref)
+        if moving_player is None:
+            return False
         slots         = game_state.get("slots", [])
         slot          = slots[moving_player] if moving_player < len(slots) else moving_player
         start         = starts[slot] if slot < len(starts) else 0
@@ -90,6 +93,18 @@ class AresBot(BotPolicy):
                     if pc.get("absolute_position") == abs_target:
                         return True
         return False
+
+    def _moving_player(self, move: dict, game_state: dict, piece_idx: int | None, pawns_pp: int, pawn_ref: str | None) -> int | None:
+        if isinstance(piece_idx, int) and pawns_pp > 0:
+            return piece_idx // pawns_pp
+        if not pawn_ref:
+            return None
+        target = str(pawn_ref).upper()
+        for p in game_state.get("players", []):
+            for pc in p.get("pieces", []):
+                if str(pc.get("pawn_id", "")).upper() == target:
+                    return p.get("index")
+        return None
 
 
 # ---------------------------------------------------------------------------

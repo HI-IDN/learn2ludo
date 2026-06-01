@@ -206,7 +206,8 @@ def roll_dice():
 
 
 class MoveRequest(BaseModel):
-    piece_idx: int
+    piece_idx: Optional[int] = None
+    pawn_id: Optional[str] = None
     target: int
 
 
@@ -214,7 +215,12 @@ class MoveRequest(BaseModel):
 def make_move(req: MoveRequest):
     if not active_game:
         raise HTTPException(status_code=404, detail="No active game")
-    events = active_game.apply_move(req.piece_idx, req.target)
+    if req.piece_idx is None and not req.pawn_id:
+        raise HTTPException(status_code=422, detail="piece_idx or pawn_id is required")
+    try:
+        events = active_game.apply_move(req.piece_idx, req.target, pawn_id_value=req.pawn_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     return {"events": events, "game": active_game.to_dict()}
 
 

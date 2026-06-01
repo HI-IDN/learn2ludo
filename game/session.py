@@ -3,6 +3,19 @@ from game.engine import LudoGame, GameConfig, BoardConfig, Phase
 from game.gameplay import Gameplay, Piece
 
 _COLORS = ['red', 'green', 'yellow', 'blue', 'orange', 'purple']
+_PAWN_PREFIX = {
+    'red': 'R',
+    'green': 'G',
+    'yellow': 'Y',
+    'blue': 'B',
+    'orange': 'O',
+    'purple': 'P',
+}
+
+
+def pawn_id(color: str, pawn_index: int) -> str:
+    prefix = _PAWN_PREFIX.get(str(color).lower(), str(color)[:1].upper())
+    return f"{prefix}{pawn_index + 1}"
 
 
 class GameSession:
@@ -25,8 +38,10 @@ class GameSession:
         self.game.next()
         if self.game.player == self.starting_player:
             self.round_count += 1
-        # Equal-rounds: when play returns to the first finisher the round is over.
-        if self._finishing_round_player is not None and self.game.player == self._finishing_round_player:
+        # Equal-rounds: when play returns to the TRUE first player (starting_player) the round is over.
+        # Using _finishing_round_player as the stop point was wrong — it let everyone wrap
+        # back around to the winner instead of ending when the round genuinely completes.
+        if self._finishing_round_player is not None and self.game.player == self.starting_player:
             self.winners = [p for p in range(self.game.config.player_count)
                             if all(pc.finished for pc in self.gp.pieces if pc.player == p)]
             self.winner = self.winners[0] if self.winners else self._finishing_round_player
@@ -40,6 +55,7 @@ class GameSession:
     def roll_dice(self) -> int:
         value = self.game.roll()          # phase → MOVING, last_roll = value
         valid = self.gp.valid_moves(self.game.player)
+        blocked = self._blocked_pawns_with_ids(self.game.player)
 
         if not valid and self._all_in_yard(self.game.player):
             self._yard_roll_count += 1
@@ -69,7 +85,7 @@ class GameSession:
                 "dice":          value,
                 "type":          "roll",
                 "no_exact_roll": no_exact,
-                "blocked_pawns": self.gp.per_piece_block_reasons(self.game.player),
+                "blocked_pawns": blocked,
             })
             if blocker is not None:
                 self.history.append({
@@ -87,19 +103,27 @@ class GameSession:
                 "dice":          value,
                 "type":          "roll",
                 "valid_moves":   self._valid_moves_list(),
-                "blocked_pawns": self.gp.per_piece_block_reasons(self.game.player),
+                "blocked_pawns": blocked,
             })
 
         return value
 
-    def apply_move(self, piece_idx: int, target: int) -> dict:
-        pawns    = self.game.config.board.pawns_per_player
-        pi       = piece_idx // pawns
-        lidx     = piece_idx  % pawns
-        pc       = [p for p in self.gp.pieces if p.player == pi][lidx]
+    def apply_move(self, piece_idx: int | None, target: int, pawn_id_value: str | None = None) -> dict:
+        pawns = self.game.config.board.pawns_per_player
+        pi, lidx = self._resolve_piece_ref(piece_idx=piece_idx, pawn_id_value=pawn_id_value)
+        pc = [p for p in self.gp.pieces if p.player == pi][lidx]
+        piece_idx = self._global_piece_idx(pi, lidx)
+        moving_pawn_id = self._pawn_id_for_piece(pi, lidx)
         from_pos = pc.pos
         captured = self.gp.move(pc)
-        self.history.append({"player": pi, "piece": piece_idx, "from": from_pos, "to": pc.pos})
+        self.history.append({
+            "type": "move",
+            "player": pi,
+            "piece": piece_idx,
+            "pawn_id": moving_pawn_id,
+            "from": from_pos,
+            "to": pc.pos,
+        })
 
         # Log each capture as a separate history event
         for cap in captured:
@@ -112,7 +136,10 @@ class GameSession:
                 "type":             "capture",
                 "captured_player":  cap.player,
                 "captured_piece":   cap_gidx,
+                "captured_pawn_id": self._pawn_id_for_piece(cap.player, cap_lidx),
                 "by_player":        pi,
+                "by_piece":         piece_idx,
+                "by_pawn_id":       moving_pawn_id,
                 "cell":             abs_cell,
             })
         w = self.gp.has_winner()
@@ -186,13 +213,14 @@ class GameSession:
     # ---- helpers ----------------------------------------------------------
 
     def _piece_dict(self, pc: Piece, local_idx: int, slot: int) -> dict:
-        g   = self.game
+        g = self.game
         pos = pc.pos
         abs_pos = None
         if not pc.finished and pos >= 0 and pos < g.board.track_size:
             abs_pos = (pos + g.board.starts[slot]) % g.board.track_size
         return {
             "index":             local_idx,
+            "pawn_id":           pawn_id(_COLORS[slot], local_idx),
             "position":          pos,
             "in_yard":           pos == -1,
             "finished":          pc.finished,
@@ -212,5 +240,47 @@ class GameSession:
             lidx = next(i for i, p in enumerate(player_pieces) if p is pc)
             gidx = pi * g.config.board.pawns_per_player + lidx
             tgt  = 0 if pc.pos == -1 else pc.pos + g.last_roll
-            moves.append({"piece_idx": gidx, "from": pc.pos, "target": tgt})
+            moves.append({
+                "piece_idx": gidx,
+                "pawn_id": self._pawn_id_for_piece(pi, lidx),
+                "from": pc.pos,
+                "target": tgt,
+            })
         return moves
+
+    def _pawn_id_for_piece(self, player_idx: int, local_idx: int) -> str:
+        slot = self.game.slots[player_idx]
+        return pawn_id(_COLORS[slot], local_idx)
+
+    def _global_piece_idx(self, player_idx: int, local_idx: int) -> int:
+        return player_idx * self.game.config.board.pawns_per_player + local_idx
+
+    def _blocked_pawns_with_ids(self, player_idx: int) -> list:
+        blocked = self.gp.per_piece_block_reasons(player_idx)
+        result = []
+        for entry in blocked:
+            local_idx = entry.get("piece")
+            result.append({
+                **entry,
+                "pawn_id": self._pawn_id_for_piece(player_idx, local_idx),
+            })
+        return result
+
+    def _resolve_piece_ref(self, piece_idx: int | None, pawn_id_value: str | None) -> tuple[int, int]:
+        pawns = self.game.config.board.pawns_per_player
+        if pawn_id_value:
+            target = str(pawn_id_value).upper()
+            for pi in range(self.game.config.player_count):
+                for lidx in range(pawns):
+                    if self._pawn_id_for_piece(pi, lidx).upper() == target:
+                        return pi, lidx
+            raise ValueError(f"Unknown pawn_id: {pawn_id_value}")
+
+        if piece_idx is None:
+            raise ValueError("piece_idx or pawn_id is required")
+
+        pi = piece_idx // pawns
+        lidx = piece_idx % pawns
+        if pi < 0 or pi >= self.game.config.player_count:
+            raise ValueError(f"Invalid piece_idx: {piece_idx}")
+        return pi, lidx

@@ -41,6 +41,23 @@ function playerSlot(playerIdx, n=gameState?.num_players || settings.num_players 
 function playerColorName(playerIdx, n){ return PLAYER_COLORS[playerSlot(playerIdx,n)] || 'blue'; }
 function absForPlayerPosition(playerIdx,pos){ return (pos + currentLayout().starts[playerSlot(playerIdx, gameState?.num_players || 4)]) % ENGINE.track_size; }
 
+const PAWN_ID_PREFIX = {red:'R',green:'G',yellow:'Y',blue:'B',orange:'O',purple:'P'};
+function pawnId(colorName, pawnIndex){ return `${PAWN_ID_PREFIX[colorName]??colorName[0].toUpperCase()}${pawnIndex+1}`; }
+function pieceIdxFromPawnId(pawnIdValue){
+  if(!gameState || !pawnIdValue) return null;
+  const pid=String(pawnIdValue).toUpperCase();
+  const pawns=gameState?.config?.board?.pawns_per_player||4;
+  for(const player of (gameState.players||[])){
+    for(const piece of (player.pieces||[])){
+      if(String(piece.pawn_id||'').toUpperCase()===pid){
+        return player.index*pawns+(piece.index??0);
+      }
+    }
+  }
+  return null;
+}
+function moveRefKey(move){ return move?.pawn_id ? `id:${move.pawn_id}` : `idx:${move?.piece_idx}`; }
+
 const DEFAULT_HUMAN_NAMES = ['Óðinn','Freyja','Loki','Þór','Sif','Týr'];
 const DEFAULT_BOT_NAMES = ['Artemis'];
 function getPlayerType(i){ return settings.player_types?.[i] || (i===0 ? 'human':'random'); }
@@ -81,18 +98,36 @@ function normalizeEngineState(raw) {
   const playerCount = cfg.player_count || state.player_count || state.num_players || parseInt(document.getElementById('set-num-players')?.value || settings.num_players || 4);
   const slots = state.slots || Array.from({length: playerCount}, (_, i) => i);
   const layout = state.board || boardLayout(cfg.board?.track_size || null, cfg.board?.yard_count || null);
-  const players = state.players || Array.from({length: playerCount}, (_, p) => ({
+  const pawnsPerPlayer = cfg.board?.pawns_per_player || settings.pawns_per_player || 4;
+  const sourcePlayers = state.players || Array.from({length: playerCount}, (_, p) => ({
     index:p, color:PLAYER_COLORS[slots[p]],
-    pieces:Array.from({length:(cfg.board?.pawns_per_player || settings.pawns_per_player || 4)}, (_,i)=>({index:i, position:-1, finished:false, in_yard:true, absolute_position:null}))
+    pieces:Array.from({length:pawnsPerPlayer}, (_,i)=>({index:i, position:-1, finished:false, in_yard:true, absolute_position:null}))
   }));
+  const players = sourcePlayers.map((p, pi) => {
+    const color = p.color || PLAYER_COLORS[slots[p.index ?? pi]];
+    const pieces = (p.pieces || []).map((pc, i) => ({
+      ...pc,
+      index: pc.index ?? i,
+      pawn_id: pc.pawn_id || pawnId(color, pc.index ?? i),
+    }));
+    return {...p, color, pieces};
+  });
+  const validMoves = (state.valid_moves || []).map(m => {
+    if (m.pawn_id) return m;
+    const pawns = pawnsPerPlayer;
+    const pi = Math.floor((m.piece_idx ?? -1) / pawns);
+    const li = (m.piece_idx ?? -1) % pawns;
+    const color = players[pi]?.color || playerColorName(pi, playerCount);
+    return {...m, pawn_id: pawnId(color, li)};
+  });
   return {
     ...state,
-    config:{board:{track_size:cfg.board?.track_size||52,yard_count:cfg.board?.yard_count||4,home_length:cfg.board?.home_length||6,pawns_per_player:cfg.board?.pawns_per_player||settings.pawns_per_player||4}, player_count:playerCount},
+    config:{board:{track_size:cfg.board?.track_size||52,yard_count:cfg.board?.yard_count||4,home_length:cfg.board?.home_length||6,pawns_per_player:pawnsPerPlayer}, player_count:playerCount},
     board:layout, slots, num_players:playerCount,
     current_player: state.current_player ?? state.player ?? 0,
     dice: state.dice ?? state.last_roll ?? 0,
     phase: state.phase || 'rolling',
-    players, valid_moves: state.valid_moves || [], history: state.history || [], winner: state.winner ?? null
+    players, valid_moves: validMoves, history: state.history || [], winner: state.winner ?? null
   };
 }
 
@@ -333,13 +368,15 @@ async function rollDice(){
   catch{ const dice=1+Math.floor(Math.random()*6); await animateDice(dice); gameState.dice=dice; gameState.last_roll=dice; gameState.phase='moving'; gameState.valid_moves=demoValidMoves(gameState.current_player,dice); }
   renderGame();
 }
-function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,target:0}); } else { const _ts=currentLayout().track_size; const _hl=gameState?.config?.board?.home_length??6; const t=pc.position+dice; if(t<=_ts+_hl-1)moves.push({piece_idx:g,target:t}); }}); return moves; }
-async function clickPiece(globalIdx){ if(window._botChosenMove&&window._botChosenMove.piece_idx!==globalIdx)return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(m) await makeMove(globalIdx,m.target); }
-async function makeMove(pieceIdx,target){ window._botChosenMove=null;
+function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:0}); } else { const _ts=currentLayout().track_size; const _hl=gameState?.config?.board?.home_length??6; const t=pc.position+dice; if(t<=_ts+_hl-1)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:t}); }}); return moves; }
+async function clickPiece(globalIdx){ const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(m) await makeMove(m.piece_idx,m.target,m.pawn_id); }
+async function makeMove(pieceIdx,target,pawnIdValue=null){ window._botChosenMove=null;
+  if(pieceIdx==null&&pawnIdValue) pieceIdx=pieceIdxFromPawnId(pawnIdValue);
+  if(pieceIdx==null) return;
   const p=Math.floor(pieceIdx/(gameState?.config?.board?.pawns_per_player || 4)), i=pieceIdx%(gameState?.config?.board?.pawns_per_player || 4), pawn=gameState.players[p].pieces[i], from=pawn.position;
   await animatePawnSteps(pieceIdx,from,target);
-  try{ const r=await fetch('/api/game/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piece_idx:pieceIdx,target,target_position:target})}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
-  catch{ const _ts=currentLayout().track_size; const _hl=gameState?.config?.board?.home_length??6; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=_ts+_hl-1; pawn.absolute_position=target<_ts?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{}}); if(gameState.dice===6){
+  try{ const r=await fetch('/api/game/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piece_idx:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,target,target_position:target})}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
+  catch{ const _ts=currentLayout().track_size; const _hl=gameState?.config?.board?.home_length??6; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=_ts+_hl-1; pawn.absolute_position=target<_ts?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{}}); if(gameState.dice===6){
       gameState.consecutive_sixes = (gameState.consecutive_sixes || 0) + 1;
       if (gameState.consecutive_sixes >= (settings.max_consecutive_sixes ?? 3)) {
         gameState.consecutive_sixes = 0;
@@ -424,7 +461,7 @@ function renderGame(){
   if(_apSpeed !== 'off' && gameState.phase==='moving' && gameState.winner===null
       && getPlayerType(gameState.current_player)==='human' && gameState.valid_moves?.length===1){
     const m=gameState.valid_moves[0];
-    setTimeout(()=>makeMove(m.piece_idx,m.target), _AUTO_DELAY[_apSpeed].move);
+    setTimeout(()=>makeMove(m.piece_idx,m.target,m.pawn_id), _AUTO_DELAY[_apSpeed].move);
   }
 }
 function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; if(pos>=ts)return `H${pos-ts+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs+1}`; }
