@@ -139,23 +139,30 @@ function scheduleBotPlay(overrideDelay) {
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
   if (getPlayerType(gameState.current_player) === 'human') return;
   if (_botRunning) return;
-  _botTimer = setTimeout(botTakeTurn, overrideDelay ?? _AUTO_DELAY[speed].roll);
+  const mode = speed === 'fast' ? 'fast' : 'normal';
+  _botTimer = setTimeout(botTakeTurn, overrideDelay ?? _AUTO_DELAY[mode].roll);
 }
 
 async function botTakeTurn() {
   const speed = settings.auto_play_speed || 'off';
+  if (speed === 'off') return;
+  const mode = speed === 'fast' ? 'fast' : 'normal';
   const cp = gameState?.current_player;
   if (_botRunning) return;
-  if (!gameState || gameState.phase !== 'rolling' || getPlayerType(cp) === 'human' || speed === 'off') return;
+  if (!gameState || gameState.phase !== 'rolling' || getPlayerType(cp) === 'human') return;
   _botRunning = true;
   try {
     await rollDice();
 
     if (gameState.phase === 'moving' && gameState.valid_moves?.length > 0) {
-      const botId = settings.bot_ids?.[cp] ?? 'eris';
-      const move  = await runBotPolicy(botId, gameState.valid_moves);
+      let move = gameState.valid_moves.length === 1 ? gameState.valid_moves[0] : null;
+      if (!move) {
+        const botId = settings.bot_ids?.[cp] ?? 'eris';
+        move = await runBotPolicy(botId, gameState.valid_moves);
+      }
+      if (!move && gameState.valid_moves.length === 1) move = gameState.valid_moves[0];
       if (move) {
-        await new Promise(r => setTimeout(r, _AUTO_DELAY[speed].move));
+        await new Promise(r => setTimeout(r, _AUTO_DELAY[mode].move));
         await makeMove(move.piece_idx ?? null, move.target, move.pawn_id ?? null);
       }
     }
@@ -172,6 +179,7 @@ async function suggestBotMove() {
   if (_botSuggesting) return;
   const speed = settings.auto_play_speed || 'off';
   if (speed !== 'off') return;
+  if (_botRunning) return;
   if (!gameState || gameState.phase !== 'moving' || gameState.winner !== null) return;
   if (getPlayerType(gameState.current_player) === 'human') return;
   if (window._botChosenMove) return;
@@ -186,5 +194,33 @@ async function suggestBotMove() {
     }
   } finally {
     _botSuggesting = false;
+  }
+}
+
+let _botFastAdvancing = false;
+async function fastAdvanceBotMove() {
+  if (_botFastAdvancing) return;
+  const speed = settings.auto_play_speed || 'off';
+  if (speed !== 'fast') return;
+  if (_botRunning) return;
+  if (!gameState || gameState.phase !== 'moving' || gameState.winner !== null) return;
+  const cp = gameState.current_player;
+  if (getPlayerType(cp) === 'human') return;
+  if (window._botChosenMove) return;
+  if (!gameState.valid_moves?.length) return;
+
+  _botFastAdvancing = true;
+  try {
+    let move = gameState.valid_moves.length === 1 ? gameState.valid_moves[0] : null;
+    if (!move) {
+      const botId = settings.bot_ids?.[cp] ?? 'eris';
+      move = await runBotPolicy(botId, gameState.valid_moves);
+    }
+    if (!move && gameState.valid_moves.length === 1) move = gameState.valid_moves[0];
+    if (move && gameState.phase === 'moving' && gameState.current_player === cp) {
+      await makeMove(move.piece_idx ?? null, move.target, move.pawn_id ?? null);
+    }
+  } finally {
+    _botFastAdvancing = false;
   }
 }

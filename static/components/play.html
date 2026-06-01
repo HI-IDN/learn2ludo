@@ -18,18 +18,52 @@
 
       <!-- TOP CONTROLS -->
       <div class="side-section controls">
-        <div id="new-game-control">
-          <button class="btn btn-primary" onclick="requestNewGame()">
-            <i class="ti ti-plus"></i> New game
+        <div class="replay-controls-row replay-controls-row--top" id="live-speed-controls">
+          <span class="replay-status">Speed</span>
+          <button class="btn btn-sm replay-step-btn"
+                  id="speed-pause-btn"
+                  onclick="setAutoPlaySpeed('off')"
+                  title="Pause (manual dice and moves)">
+            <i class="fa-solid fa-pause"></i>
+          </button>
+          <button class="btn btn-sm replay-step-btn"
+                  id="speed-normal-btn"
+                  onclick="setAutoPlaySpeed('normal')"
+                  title="Fast (with animation and sound)">
+            <i class="fa-solid fa-play"></i>
+          </button>
+          <button class="btn btn-sm replay-step-btn"
+                  id="speed-fast-btn"
+                  onclick="setAutoPlaySpeed('fast')"
+                  title="Fast forward (no animation, no sound)">
+            <i class="fa-solid fa-forward"></i>
           </button>
         </div>
 
-        <button class="btn btn-primary auto-play-btn"
-                id="auto-play-btn"
-                onclick="toggleAutoPlay()"
-                title="Auto play: cycles off → normal speed → fast speed">
-          <i class="fa-solid fa-pause"></i> Auto play
-        </button>
+        <div class="replay-controls-row replay-controls-row--top" id="replay-step-controls" style="display:none">
+          <button class="btn btn-sm replay-step-btn"
+                  id="replay-prev-btn"
+                  onclick="transportPauseOrBack()"
+                  disabled
+                  title="Pause">
+            <i class="fa-solid fa-step-backward"></i>
+          </button>
+          <button class="btn btn-sm replay-step-btn"
+                  id="replay-play-btn"
+                  onclick="transportPlay()"
+                  disabled
+                  title="Play">
+            <i class="fa-solid fa-play"></i>
+          </button>
+          <button class="btn btn-sm replay-step-btn"
+                  id="replay-next-btn"
+                  onclick="transportFastForward()"
+                  disabled
+                  title="Fast forward">
+            <i class="fa-solid fa-forward"></i>
+          </button>
+          <span class="replay-status" id="replay-status"></span>
+        </div>
 
         <label class="sound-volume-control" title="Sound volume">
           <i class="fa-solid fa-volume-high" id="sound-volume-icon"></i>
@@ -52,10 +86,9 @@
 
       <!-- CURRENT ACTION -->
       <div class="side-section">
-        <div class="player-order-title">Current action</div>
+        <div class="player-order-title" id="current-action-title">Current action</div>
 
         <div class="action-card" id="action-card">
-          <!-- Coloured header — updated by renderCurrentAction / pregame -->
           <div class="action-card-top idle" id="action-card-top">
             <div class="action-card-avatar">
               <i class="action-avatar-icon fa-solid fa-circle-info" id="action-avatar-icon"></i>
@@ -63,16 +96,14 @@
             <div class="action-card-name" id="turn-player-name">Start game</div>
           </div>
 
-          <!-- Body -->
           <div class="action-card-body">
-            <!-- Shared clickable dice — always visible; dispatches to pregame or game -->
-            <div class="dice-face" id="dice-face" onclick="_onDiceClick()">⚀</div>
+            <div class="dice-face" id="dice-face" onclick="_onDiceClick()">&#9856;</div>
 
             <div id="pregame-container" style="display:none"></div>
 
             <div id="game-action-wrap">
               <div class="action-instruction" id="action-instruction">
-                Click <strong>New game</strong> to begin.
+                Pregame will appear here.
               </div>
             </div>
           </div>
@@ -107,14 +138,35 @@
         </div>
       </div>
 
-      <!-- SAVE BUTTON (BOTTOM STICKY) -->
+      <!-- SAVE / REPLAY -->
       <div class="side-footer">
-        <button class="btn btn-sm"
-                id="save-game-json-btn"
-                onclick="saveGameJson()"
-                disabled>
-          <i class="fa-solid fa-download"></i> Save JSON
-        </button>
+        <div class="replay-controls">
+          <div class="replay-controls-row">
+            <div id="new-game-control">
+              <button class="btn btn-primary btn-sm" onclick="requestNewGame()">
+                <i class="ti ti-plus"></i> New game
+              </button>
+            </div>
+            <button class="btn btn-sm"
+                    id="save-game-json-btn"
+                    onclick="saveGameJson()"
+                    disabled
+                    title="Save game JSON">
+              <i class="fa-solid fa-download"></i> Save JSON
+            </button>
+            <input type="file"
+                   id="replay-json-input"
+                   accept="application/json,.json"
+                   onchange="loadReplayJsonFile(this.files?.[0])"
+                   hidden>
+            <button class="btn btn-sm"
+                    id="load-replay-json-btn"
+                    onclick="document.getElementById('replay-json-input')?.click()"
+                    title="Load replay JSON">
+              <i class="fa-solid fa-folder-open"></i> Replay
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>

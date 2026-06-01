@@ -13,6 +13,7 @@ function compactPawn(pawn, index, color) {
 
 function compactGameState() {
   if (!gameState) return null;
+  const history = (gameState.history || []).map(h => ({...h}));
   return {
     v: 2,
     saved_at: new Date().toISOString(),
@@ -28,7 +29,7 @@ function compactGameState() {
     winners: gameState.winners ?? [],
     winner_color: gameState.winner_color ?? null,
     winner_colors: gameState.winner_colors ?? [],
-    player_times: typeof _playerTimes!=='undefined'?{..._playerTimes}:{},
+    player_times: typeof _playerTimes !== 'undefined' ? {..._playerTimes} : {},
     players: (gameState.players || []).map(p => ({
       index: p.index,
       type: typeof getPlayerType === 'function' ? getPlayerType(p.index) : 'unknown',
@@ -37,8 +38,26 @@ function compactGameState() {
       slot: typeof playerSlot === 'function' ? playerSlot(p.index, gameState.num_players) : p.index,
       pawns: (p.pieces || []).map((pawn, idx) => compactPawn(pawn, idx, p.color))
     })),
-    history: [...sessionHistory].reverse().map(h => ({...h}))
+    history
   };
+}
+
+function historyPlayer(playerIdx) {
+  return (gameState?.players || []).find(p => p.index === playerIdx) || null;
+}
+
+function historyPlayerName(playerIdx) {
+  const player = historyPlayer(playerIdx);
+  return player?.name || getPlayerName(playerIdx);
+}
+
+function historyPlayerColorName(playerIdx, fallbackColor) {
+  const player = historyPlayer(playerIdx);
+  return fallbackColor || player?.color || playerColorName(playerIdx, gameState?.num_players || 4);
+}
+
+function historyPlayerColor(playerIdx, fallbackColor) {
+  return COLORS[historyPlayerColorName(playerIdx, fallbackColor)] || COLORS.blue;
 }
 
 function resolvePawnIdFromMove(move, fallbackPlayer) {
@@ -47,11 +66,11 @@ function resolvePawnIdFromMove(move, fallbackPlayer) {
   if (typeof move?.piece_idx === 'number') {
     const pi = Math.floor(move.piece_idx / pawnsPerPlayer);
     const li = move.piece_idx % pawnsPerPlayer;
-    return pawnId(playerColorName(pi, gameState?.num_players || 4), li);
+    return pawnId(historyPlayerColorName(pi), li);
   }
   if (typeof fallbackPlayer === 'number') {
     const li = move?.piece ?? 0;
-    return pawnId(playerColorName(fallbackPlayer, gameState?.num_players || 4), li);
+    return pawnId(historyPlayerColorName(fallbackPlayer), li);
   }
   return '?';
 }
@@ -76,19 +95,17 @@ function updateSaveGameButton() {
   if (btn) btn.disabled = !gameState;
 }
 
-// Persistent session history — never cleared, accumulates across games.
-// Each entry: {type:'move'|'pregame', ...fields}
 const sessionHistory = [];
 let _lastGameHistoryLen = 0;
+let completedGameArchive = loadCompletedGameArchive();
 
 function pushPregameRoll(playerIdx, name, color, roll, round) {
-  sessionHistory.unshift({type:'pregame', playerIdx, name, color, roll, round});
+  sessionHistory.unshift({type: 'pregame', playerIdx, name, color, roll, round});
 }
 
 function syncGameHistory() {
   const h = gameState?.history || [];
   const newEntries = h.slice(_lastGameHistoryLen);
-  // Preserve the type the server set (roll / yard_roll / move); fall back to 'move'.
   newEntries.forEach(e => sessionHistory.unshift({...e, type: e.type || 'move'}));
   _lastGameHistoryLen = h.length;
 }
@@ -97,85 +114,128 @@ function resetGameHistorySync() {
   _lastGameHistoryLen = 0;
 }
 
-function renderMoveHistory(){
-  const list=document.getElementById('move-history-list'); if(!list)return;
-  syncGameHistory();
+function clearSessionHistory() {
+  sessionHistory.length = 0;
+  _lastGameHistoryLen = 0;
+}
 
-  const dot='<span class="mh-sep"> · </span>';
-  const rows=sessionHistory.map(e=>{
-    if(e.type==='pregame'){
-      const sub=`rolled ${e.roll}${e.round>1?` (re-roll ${e.round})`:''} · first player`;
+function setSessionHistory(entries) {
+  sessionHistory.length = 0;
+  (entries || []).slice().reverse().forEach(e => sessionHistory.push({...e, type: e.type || 'move'}));
+  _lastGameHistoryLen = entries?.length || 0;
+}
+
+function loadCompletedGameArchive() {
+  try {
+    return JSON.parse(localStorage.getItem('learn2ludo_completed_games') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveCompletedGameArchive() {
+  localStorage.setItem('learn2ludo_completed_games', JSON.stringify(completedGameArchive));
+}
+
+function archiveCompletedGame() {
+  if (!gameState || gameState.winner == null) return;
+  const history = gameState.history || [];
+  const winnerEvent = history.findLast?.(e => e.type === 'game_winner') || [...history].reverse().find(e => e.type === 'game_winner');
+  const archiveId = `${gameState.starting_player ?? 'x'}:${winnerEvent?.player ?? gameState.winner}:${history.length}:${winnerEvent?.round ?? ''}`;
+  if (completedGameArchive.some(g => g.archive_id === archiveId)) return;
+  const compact = compactGameState();
+  if (!compact) return;
+  completedGameArchive.push({...compact, archive_id: archiveId});
+  saveCompletedGameArchive();
+}
+
+function renderHistoryRows(entries) {
+  const dot = '<span class="mh-sep"> &middot; </span>';
+  return (entries || []).map(e => {
+    if (e.type === 'pregame') {
+      const sub = `rolled ${e.roll}${e.round > 1 ? ` (re-roll ${e.round})` : ''} &middot; first player`;
       return `<div class="move-history-row move-history-pregame"><i class="fa-solid fa-dice-d6" style="color:${e.color}"></i><span>${e.name}${dot}${sub}</span></div>`;
     }
-    if(e.type==='game_start'){
-      const startColor=e.color||playerColorName(e.player,gameState?.num_players||4);
-      const startCol=COLORS[startColor]||COLORS.blue;
-      return `<div class="move-history-row move-history-game-start"><i class="fa-solid fa-flag-checkered" style="color:${startCol}"></i><span>Starting player${dot}${getPlayerName(e.player)} (${startColor})</span></div>`;
+    if (e.type === 'game_start') {
+      const startColor = historyPlayerColorName(e.player, e.color);
+      const startCol = historyPlayerColor(e.player, startColor);
+      return `<div class="move-history-row move-history-game-start"><i class="fa-solid fa-flag-checkered" style="color:${startCol}"></i><span>Starting player${dot}${historyPlayerName(e.player)} (${startColor})</span></div>`;
     }
-    if(e.type==='game_winner'){
-      const winners=e.winners?.length?e.winners:[e.player];
-      const labels=winners.map((w,i)=>`${getPlayerName(w)} (${e.winner_colors?.[i]||playerColorName(w,gameState?.num_players||4)})`);
-      const winColor=e.color||playerColorName(e.player,gameState?.num_players||4);
-      const winCol=COLORS[winColor]||COLORS.blue;
-      return `<div class="move-history-row move-history-game-winner"><i class="fa-solid fa-crown" style="color:${winCol}"></i><span>Winner${winners.length>1?'s':''}${dot}${labels.join(' & ')}</span></div>`;
+    if (e.type === 'game_winner') {
+      const winners = e.winners?.length ? e.winners : [e.player];
+      const labels = winners.map((w, i) => `${historyPlayerName(w)} (${historyPlayerColorName(w, e.winner_colors?.[i])})`);
+      const winColor = historyPlayerColorName(e.player, e.color);
+      const winCol = historyPlayerColor(e.player, winColor);
+      return `<div class="move-history-row move-history-game-winner"><i class="fa-solid fa-crown" style="color:${winCol}"></i><span>Winner${winners.length > 1 ? 's' : ''}${dot}${labels.join(' & ')}</span></div>`;
     }
-    const col=COLORS[playerColorName(e.player,gameState?.num_players||4)];
-    const name=getPlayerName(e.player);
-    if(e.type==='yard_roll'){
-      return `<div class="move-history-row move-history-yard-roll"><i class="fa-solid fa-dice-d6" style="color:${col}"></i><span>${name}${dot}rolled ${e.dice} · no pawn in play (try ${e.attempt}/${e.max_attempts})</span></div>`;
+    const col = historyPlayerColor(e.player);
+    const name = historyPlayerName(e.player);
+    if (e.type === 'yard_roll') {
+      return `<div class="move-history-row move-history-yard-roll"><i class="fa-solid fa-dice-d6" style="color:${col}"></i><span>${name}${dot}rolled ${e.dice} &middot; no pawn in play (try ${e.attempt}/${e.max_attempts})</span></div>`;
     }
-    if(e.type==='roll'){
-      const moves=e.valid_moves||[];
-      const moveSummary=moves.map(m=>{
-        const pawnsPerPlayer=gameState?.config?.board?.pawns_per_player||4;
-        const pi=typeof m.piece_idx==='number'?Math.floor(m.piece_idx/pawnsPerPlayer):e.player;
-        const playerCol=COLORS[playerColorName(pi,gameState?.num_players||4)];
-        const pName=getPlayerName(pi);
-        const fromL=displayCellLabel(pi,m.from??-1);
-        const toL=displayCellLabel(pi,m.target);
-        const pid=resolvePawnIdFromMove(m,pi);
+    if (e.type === 'roll') {
+      const moves = e.valid_moves || [];
+      const moveSummary = moves.map(m => {
+        const pawnsPerPlayer = gameState?.config?.board?.pawns_per_player || 4;
+        const pi = typeof m.piece_idx === 'number' ? Math.floor(m.piece_idx / pawnsPerPlayer) : e.player;
+        const playerCol = historyPlayerColor(pi);
+        const pName = historyPlayerName(pi);
+        const fromL = displayCellLabel(pi, m.from ?? -1);
+        const toL = displayCellLabel(pi, m.target);
+        const pid = resolvePawnIdFromMove(m, pi);
         return `<span class="mh-movable" style="--movable-color:${playerCol}">`
-          +(pi!==e.player?`${pName} `:'')
-          +`${pid}: ${fromL}→${toL}</span>`;
+          + (pi !== e.player ? `${pName} ` : '')
+          + `${pid}: ${fromL}&rarr;${toL}</span>`;
       }).join(' ');
-      const blocked=e.blocked_pawns||[];
-      const blockedSummary=blocked.map(b=>{
-        const pid=b.pawn_id||pawnId(playerColorName(e.player,gameState?.num_players||4), b.piece ?? 0);
+      const blocked = e.blocked_pawns || [];
+      const blockedSummary = blocked.map(b => {
+        const pid = b.pawn_id || pawnId(historyPlayerColorName(e.player), b.piece ?? 0);
         let desc;
-        if(b.reason==='yard')          desc='yard';
-        else if(b.reason==='overshoot') desc='exact roll needed';
-        else if(b.blocked_by!=null)     desc=getPlayerName(b.blocked_by);
-        else                            desc='blockaded';
-        const icon=b.reason==='blockade'
-          ?'<i class="fa-solid fa-dumbbell mh-blocked-icon"></i>'
-          :'<i class="fa-solid fa-ban mh-blocked-icon"></i>';
+        if (b.reason === 'yard') desc = 'yard';
+        else if (b.reason === 'overshoot') desc = 'exact roll needed';
+        else if (b.blocked_by != null) desc = historyPlayerName(b.blocked_by);
+        else desc = 'blockaded';
+        const icon = b.reason === 'blockade'
+          ? '<i class="fa-solid fa-dumbbell mh-blocked-icon"></i>'
+          : '<i class="fa-solid fa-ban mh-blocked-icon"></i>';
         return `<span class="mh-blocked">${icon} ${pid}: ${desc}</span>`;
       }).join(' ');
-      const noExactNote=e.no_exact_roll?` ${dot} <span class="mh-note">needs exact roll to finish</span>`:'';
-      const parts=[moveSummary, blockedSummary].filter(Boolean).join(' ');
+      const noExactNote = e.no_exact_roll ? ` ${dot} <span class="mh-note">needs exact roll to finish</span>` : '';
+      const parts = [moveSummary, blockedSummary].filter(Boolean).join(' ');
       return `<div class="move-history-row">`
-        +`<i class="fa-solid fa-dice-d6" style="color:${col}"></i>`
-        +`<span>${name}${dot}rolled ${e.dice}`
-        +(parts?` ${dot} ${parts}`:noExactNote)
-        +`</span></div>`;
+        + `<i class="fa-solid fa-dice-d6" style="color:${col}"></i>`
+        + `<span>${name}${dot}rolled ${e.dice}`
+        + (parts ? ` ${dot} ${parts}` : noExactNote)
+        + `</span></div>`;
     }
-    if(e.type==='blocked'){
-      const blockerCol=COLORS[playerColorName(e.blocked_by,gameState?.num_players||4)];
-      const blockerName=getPlayerName(e.blocked_by);
-      return `<div class="move-history-row move-history-blocked"><i class="fa-solid fa-ban" style="color:${col}"></i><span>${name}${dot}blocked by ${blockerName}'s blockade · forced to forfeit turn</span></div>`;
+    if (e.type === 'blocked') {
+      const blockerName = historyPlayerName(e.blocked_by);
+      return `<div class="move-history-row move-history-blocked"><i class="fa-solid fa-ban" style="color:${col}"></i><span>${name}${dot}blocked by ${blockerName}'s blockade &middot; forced to forfeit turn</span></div>`;
     }
-    if(e.type==='capture'){
-      const captorCol=COLORS[playerColorName(e.by_player,gameState?.num_players||4)];
-      const capturedName=getPlayerName(e.captured_player);
-      const captorName=getPlayerName(e.by_player);
-      const capturedPid=e.captured_pawn_id||resolvePawnIdFromMove({piece_idx:e.captured_piece},e.captured_player);
-      const capturedCol=COLORS[playerColorName(e.captured_player,gameState?.num_players||4)];
-      const captorPid=e.by_pawn_id||resolvePawnIdFromMove({piece_idx:e.by_piece},e.by_player);
-      return `<div class="move-history-row move-history-capture" style="--capture-color:${captorCol}"><i class="fa-solid fa-house-crack" style="color:${capturedCol}"></i><span>${captorName}${dot}${captorPid} captured ${capturedName}'s ${capturedPid} · T${e.cell} → Y</span></div>`;
+    if (e.type === 'capture') {
+      const captorCol = historyPlayerColor(e.by_player);
+      const capturedName = historyPlayerName(e.captured_player);
+      const captorName = historyPlayerName(e.by_player);
+      const capturedPid = e.captured_pawn_id || resolvePawnIdFromMove({piece_idx: e.captured_piece}, e.captured_player);
+      const capturedCol = historyPlayerColor(e.captured_player);
+      const captorPid = e.by_pawn_id || resolvePawnIdFromMove({piece_idx: e.by_piece}, e.by_player);
+      return `<div class="move-history-row move-history-capture" style="--capture-color:${captorCol}"><i class="fa-solid fa-house-crack" style="color:${capturedCol}"></i><span>${captorName}${dot}${captorPid} captured ${capturedName}'s ${capturedPid} &middot; T${e.cell} &rarr; Y</span></div>`;
     }
-    const pid=e.pawn_id||resolvePawnIdFromMove({piece_idx:e.piece},e.player);
-    return `<div class="move-history-row"><i class="fa-solid fa-person-walking" style="color:${col}"></i><span>${name}${dot}${pid}: ${displayCellLabel(e.player,e.from)} → ${displayCellLabel(e.player,e.to)}</span></div>`;
+    const pid = e.pawn_id || resolvePawnIdFromMove({piece_idx: e.piece}, e.player);
+    return `<div class="move-history-row"><i class="fa-solid fa-person-walking" style="color:${col}"></i><span>${name}${dot}${pid}: ${displayCellLabel(e.player, e.from)} &rarr; ${displayCellLabel(e.player, e.to)}</span></div>`;
   });
+}
 
-  list.innerHTML=rows.length?rows.join(''):'<div class="move-history-empty">No committed moves yet.</div>';
+function renderMoveHistory() {
+  const list = document.getElementById('move-history-list');
+  if (!list) return;
+  if (typeof isReplayActive === 'function' && isReplayActive()) {
+    const rows = renderHistoryRows([...(gameState?.history || [])].reverse());
+    list.innerHTML = rows.length ? rows.join('') : '<div class="move-history-empty">No committed moves yet.</div>';
+    return;
+  }
+  syncGameHistory();
+  archiveCompletedGame();
+  const rows = renderHistoryRows(sessionHistory);
+  list.innerHTML = rows.length ? rows.join('') : '<div class="move-history-empty">No committed moves yet.</div>';
 }

@@ -10,15 +10,22 @@
 .sound-volume-control {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 5px;
+  padding: 5px 9px;
   border: 1px solid $border-medium;
   border-radius: 999px;
   background: $color-bg-alt;
   color: $color-text-2;
+  min-height: 30px;
+
+  i {
+    font-size: 12px;
+  }
 
   input[type="range"] {
-    width: 110px;
+    width: 72px;
+    padding: 0;
+    border: 0;
     accent-color: $color-primary;
   }
 }

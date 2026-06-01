@@ -76,6 +76,7 @@
   }
 
   function playSound(kind) {
+    if ((window.settings?.auto_play_speed || 'off') === 'fast') return;
     if (kind === 'dice') {
       tone(340, 0.04, {type:'square', gain:0.18, endFreq:520});
       setTimeout(() => tone(430, 0.035, {type:'square', gain:0.14, endFreq:260}), 45);

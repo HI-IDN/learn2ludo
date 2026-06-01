@@ -129,9 +129,10 @@ function pawnSvg(x,y,color,movable,g,label,chosen){
   const s=26;
   const botPending=!!window._botChosenMove;
   const isChosen=botPending&&chosen;
-  const clickable=movable&&(!botPending||isChosen);
+  const replay=typeof isReplayActive==='function'&&isReplayActive();
+  const clickable=movable&&!replay&&(!botPending||isChosen);
   const anim=_boardFrills?(movable?(botPending?(isChosen?'fa-shake':''):'fa-beat'):''):'';
-  return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${clickable?'pointer':'default'};" onclick="clickPiece(${g})"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${anim?' '+anim:''}"></i></div></foreignObject>`;
+  return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${clickable?'pointer':'default'};" ${clickable?`onclick="clickPiece(${g})"`:''}><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${anim?' '+anim:''}"></i></div></foreignObject>`;
 }
 function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}
 function _pawnIconSvg(x,y,_col,icon){const s=12;const cls=icon==='fa-fire'?'fire':icon==='fa-dumbbell'?'dumbbell':'shield';return `<foreignObject x="${x-s/2}" y="${y-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${s}px;line-height:1;"><i class="fa-solid ${icon} pawn-icon pawn-icon--${cls}"></i></div></foreignObject>`;}
@@ -171,6 +172,9 @@ function drawBoard(){
 
   // Background: white
   let html=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
+  if(typeof isReplayActive==='function'&&isReplayActive()){
+    html+=`<g opacity="0.96"><rect x="${S-104}" y="14" width="86" height="30" rx="8" fill="${COLORS.blue}"/><text x="${S-61}" y="34" text-anchor="middle" font-size="13" font-family="Jost, sans-serif" font-weight="800" fill="#fff">REPLAY</text></g>`;
+  }
 
   // Yard blocks (one per arm) + logo overlay
   geo.yardCenters.forEach(({x, y, size}, arm) => {
@@ -272,7 +276,7 @@ function drawBoard(){
     // Compute frills flag before any pawn rendering so yard and track pawns agree.
     const _speed=settings?.auto_play_speed||'off';
     const _isHumanTurn=getPlayerType(gameState.current_player)==='human';
-    _boardFrills=_speed!=='fast'||(_isHumanTurn&&gameState.valid_moves.length>1);
+    _boardFrills=_speed!=='fast'||gameState.valid_moves.length>1;
 
     // 1. Build on-track groups; render yard pawns immediately.
     const safeSet=new Set([...(currentLayout().safe_havens||[])]);

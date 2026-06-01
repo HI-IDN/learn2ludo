@@ -89,6 +89,14 @@ function getPlayerName(i){
   }
   return settings.player_names?.[i] || DEFAULT_HUMAN_NAMES[i] || `Player ${i+1}`;
 }
+function gamePlayerName(i) {
+  const player = (gameState?.players || []).find(p => Number(p.index) === Number(i));
+  return player?.name || getPlayerName(i);
+}
+function gamePlayerType(i) {
+  const player = (gameState?.players || []).find(p => Number(p.index) === Number(i));
+  return player?.type || getPlayerType(i);
+}
 function setPlayerType(i,v){ settings.player_types=settings.player_types||{}; settings.player_types[i]=v; syncPlayerCountOptions(); validateBoardConfig(); persistSettings(); renderPlayerTypes(); renderPlayerSlots(); renderPlayers(); }
 function setPlayerName(i,v){ settings.player_names=settings.player_names||{}; settings.player_names[i]=v; persistSettings(); renderPlayers(); renderPlayerSlots(); }
 function persistSettings(){ localStorage.setItem('ludo_settings', JSON.stringify(settings)); }
@@ -143,7 +151,7 @@ function normalizeEngineState(raw) {
 
 
 async function init(){
-  loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); drawBoard();
+  loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); drawBoard(); _updateLiveSpeedControls();
 }
 function loadSettings(){
   try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
@@ -304,7 +312,7 @@ function requestNewGame(){
 
 function cancelNewGame(){
   const ctrl = document.getElementById('new-game-control');
-  if(ctrl) ctrl.innerHTML = `<button class="btn btn-primary" onclick="requestNewGame()"><i class="ti ti-plus"></i> New game</button>`;
+  if(ctrl) ctrl.innerHTML = `<button class="btn btn-primary btn-sm" onclick="requestNewGame()"><i class="ti ti-plus"></i> New game</button>`;
 }
 
 let _gameStartTime=null;
@@ -347,8 +355,10 @@ function _formatElapsed(){ const s=Math.floor((Date.now()-(_gameStartTime||Date.
 function _formatPlayerTime(ms){ if(!ms)return '0:00'; const s=Math.floor(ms/1000); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
 
 async function newGame(startingPlayer=0){
+  if (typeof clearReplayMode === 'function') clearReplayMode();
   gameStartingPlayer=startingPlayer;
   cancelNewGame();
+  if(typeof resetGameHistorySync==='function') resetGameHistorySync();
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture();
   if(typeof resetBotState==='function') resetBotState();
   const payload=buildNewGamePayload();
@@ -371,6 +381,7 @@ function animateDice(finalValue){
   return new Promise(resolve=>{ const timer=setInterval(()=>{ face.textContent=DICE_FACES[1+Math.floor(Math.random()*6)]; if(performance.now()-start>=650){clearInterval(timer); face.textContent=DICE_FACES[finalValue]||DICE_FACES[1]; face.classList.remove('rolling'); resolve();}},55); });
 }
 async function rollDice(){
+  if(typeof isReplayActive==='function'&&isReplayActive())return;
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture(); if(!gameState)return;
   const diceEl=document.getElementById('dice-face'); if(diceEl){diceEl.style.cursor='default';diceEl.style.opacity='0.45';}
   try{ const r=await fetch('/api/game/roll',{method:'POST'}); const d=await r.json(); const dice=Number(d.dice ?? d.roll ?? d.last_roll ?? d.value ?? d); await animateDice(dice); gameState=normalizeEngineState(d.game||d.state||d); if(!gameState.dice)gameState.dice=dice; }
@@ -378,8 +389,9 @@ async function rollDice(){
   renderGame();
 }
 function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:0}); } else { const _entry=homeEntryPosition(); const _hl=gameState?.config?.board?.home_length??6; const t=pc.position+dice; if(t<=_entry+_hl-1)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:t}); }}); return moves; }
-async function clickPiece(globalIdx){ const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(m) await makeMove(m.piece_idx,m.target,m.pawn_id); }
+async function clickPiece(globalIdx){ if(typeof isReplayActive==='function'&&isReplayActive())return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(m) await makeMove(m.piece_idx,m.target,m.pawn_id); }
 async function makeMove(pieceIdx,target,pawnIdValue=null){ window._botChosenMove=null;
+  if(typeof isReplayActive==='function'&&isReplayActive())return;
   if(pieceIdx==null&&pawnIdValue) pieceIdx=pieceIdxFromPawnId(pawnIdValue);
   if(pieceIdx==null) return;
   const p=Math.floor(pieceIdx/(gameState?.config?.board?.pawns_per_player || 4)), i=pieceIdx%(gameState?.config?.board?.pawns_per_player || 4), pawn=gameState.players[p].pieces[i], from=pawn.position;
@@ -408,20 +420,43 @@ function toggleSection(id){
 }
 
 const _AUTO_SPEEDS = ['off', 'normal', 'fast'];
-const _AUTO_DELAY  = { normal: { roll: 900, move: 600 }, fast: { roll: 200, move: 150 } };
+const _AUTO_DELAY  = { off: { roll: 900, move: 600 }, normal: { roll: 900, move: 600 }, fast: { roll: 0, move: 0 } };
+let _autoForcedMoveTimer = null;
+
+function _clearLiveAutomationTimers() {
+  clearTimeout(_autoRollTimer);
+  clearTimeout(_autoForcedMoveTimer);
+  if (typeof resetBotState === 'function') resetBotState();
+}
+
+function setAutoPlaySpeed(speed) {
+  if (!_AUTO_SPEEDS.includes(speed)) return;
+  _clearLiveAutomationTimers();
+  settings.auto_play_speed = speed;
+  persistSettings();
+  _updateLiveSpeedControls();
+  if (gameState) {
+    renderGame();
+    if (speed !== 'off') {
+      _kickAutoPlay(true);
+      _tryAutoResolveForcedHumanMove(true);
+    }
+  }
+}
+
 function toggleAutoPlay() {
   const cur = settings.auto_play_speed || 'off';
-  settings.auto_play_speed = _AUTO_SPEEDS[(_AUTO_SPEEDS.indexOf(cur) + 1) % _AUTO_SPEEDS.length];
-  persistSettings();
-  if (gameState) { renderGame(); if (cur === 'off') _kickAutoPlay(); }
-  else _updateAutoPlayBtn();
+  setAutoPlaySpeed(_AUTO_SPEEDS[(_AUTO_SPEEDS.indexOf(cur) + 1) % _AUTO_SPEEDS.length]);
 }
-function _kickAutoPlay() {
+
+function _kickAutoPlay(immediate = false) {
+  if (typeof isReplayActive === 'function' && isReplayActive()) return;
   if (typeof _pg !== 'undefined' && _pg) return; // pregame handles its own rolls
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
-  const delay = speed === 'fast' ? 50 : 120;
+  const mode = speed === 'fast' ? 'fast' : 'normal';
+  const delay = immediate ? 0 : _AUTO_DELAY[mode].roll;
   if (getPlayerType(gameState.current_player) === 'human') {
     clearTimeout(_autoRollTimer);
     _autoRollTimer = setTimeout(rollDice, delay);
@@ -429,21 +464,39 @@ function _kickAutoPlay() {
     scheduleBotPlay(delay);
   }
 }
-function _updateAutoPlayBtn() {
-  const btn = document.getElementById('auto-play-btn');
-  if (!btn) return;
+
+function _updateLiveSpeedControls() {
   const speed = settings.auto_play_speed || 'off';
-  btn.classList.toggle('active', speed !== 'off');
-  btn.classList.toggle('fast', speed === 'fast');
-  const icons  = { off: 'fa-pause', normal: 'fa-play', fast: 'fa-forward' };
-  const labels = { off: 'Pause', normal: 'Normal', fast: 'Fast' };
-  btn.innerHTML = `<i class="fa-solid ${icons[speed]}"></i> ${labels[speed]}`;
+  const map = {
+    off: document.getElementById('speed-pause-btn'),
+    normal: document.getElementById('speed-normal-btn'),
+    fast: document.getElementById('speed-fast-btn'),
+  };
+  Object.entries(map).forEach(([mode, btn]) => {
+    if (!btn) return;
+    btn.classList.toggle('active', speed === mode);
+    btn.setAttribute('aria-pressed', speed === mode ? 'true' : 'false');
+  });
+}
+
+function _tryAutoResolveForcedHumanMove(immediate = false) {
+  clearTimeout(_autoForcedMoveTimer);
+  if (typeof isReplayActive === 'function' && isReplayActive()) return;
+  const speed = settings.auto_play_speed || 'off';
+  if (speed === 'off') return;
+  if (!gameState || gameState.phase !== 'moving' || gameState.winner !== null) return;
+  if (getPlayerType(gameState.current_player) !== 'human') return;
+  if (gameState.valid_moves?.length !== 1) return;
+  const m = gameState.valid_moves[0];
+  const delay = immediate ? 0 : _AUTO_DELAY[speed].move;
+  _autoForcedMoveTimer = setTimeout(() => makeMove(m.piece_idx, m.target, m.pawn_id), delay);
 }
 
 let _autoRollTimer = null;
 function scheduleAutoRoll() {
   clearTimeout(_autoRollTimer);
-  if (typeof _pg !== 'undefined' && _pg) return; // pregame drives its own rolls
+  if (typeof isReplayActive === 'function' && isReplayActive()) return;
+  if (typeof _pg !== 'undefined' && _pg) return;
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
@@ -461,17 +514,13 @@ function renderGame(){
   }
   if(_lastTurnPlayer!==_cp) _lastTurnPlayer=_cp;
   drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
-  _updateAutoPlayBtn();
+  _updateLiveSpeedControls();
   if(typeof scheduleBotPlay==='function') scheduleBotPlay();
+  if(typeof fastAdvanceBotMove==='function') fastAdvanceBotMove();
   if(typeof suggestBotMove==='function') suggestBotMove();
   scheduleAutoRoll();
-  // When auto-play is active and the move is unambiguous (≤1 valid move), execute without preview.
-  const _apSpeed = settings.auto_play_speed || 'off';
-  if(_apSpeed !== 'off' && gameState.phase==='moving' && gameState.winner===null
-      && getPlayerType(gameState.current_player)==='human' && gameState.valid_moves?.length===1){
-    const m=gameState.valid_moves[0];
-    setTimeout(()=>makeMove(m.piece_idx,m.target,m.pawn_id), _AUTO_DELAY[_apSpeed].move);
-  }
+  if(typeof isReplayActive==='function'&&isReplayActive())return;
+  _tryAutoResolveForcedHumanMove();
 }
 function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; const entry=homeEntryPosition(); if(pos>=entry)return `H${pos-entry+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs+1}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; const entry=homeEntryPosition(); const finish=entry+(gameState?.config?.board?.home_length??settings.board_home_length??6)-1; if(pos===-1||pos==null)return finish+1; return Math.max(0,finish-pos); }
@@ -494,7 +543,7 @@ function renderPlayers(){
     const liveMs=(_playerTimes[p.index]||0)+(_gameStartTime&&isCurrent&&_turnStartTime?Date.now()-_turnStartTime:0);
     const timeStr=_gameStartTime?`<span class="player-order-dot"> · </span><span class="player-order-time">${_formatPlayerTime(liveMs)}</span>`:'';
     const sortedPieces=[...p.pieces].sort((a,b)=>{const r=q=>q.finished?2:!q.in_yard?1:0;return r(b)-r(a);});
-    return `<div class="player-order-row-min${isCurrent?' current':''}"><i class="fa-solid ${getPlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${getPlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}${timeStr}</div><div class="player-order-pawns">${sortedPieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
+    return `<div class="player-order-row-min${isCurrent?' current':''}"><i class="fa-solid ${gamePlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${gamePlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}${timeStr}</div><div class="player-order-pawns">${sortedPieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
   }).join('');
   // Round subtitle
   const sub=document.getElementById('players-subtitle');
@@ -574,3 +623,53 @@ async function startTraining(){try{await fetch('/api/train/start',{method:'POST'
 async function stopTraining(){try{await fetch('/api/train/stop',{method:'POST'});}catch{}}
 async function loadStats(){try{const r=await fetch('/api/stats'); const d=await r.json(); document.getElementById('st-games').textContent=d.games_played??0;}catch{}}
 window.addEventListener('DOMContentLoaded', async () => { await (window.learn2ludoComponentsReady || Promise.resolve()); init(); });
+
+function setLiveAutoSpeed(speed) {
+  settings.auto_play_speed = speed;
+  persistSettings();
+  updateLiveTransportControls();
+  if (gameState && speed !== 'off') _kickAutoPlay();
+}
+
+function toggleAutoPlay() {
+  const cur = settings.auto_play_speed || 'off';
+  setLiveAutoSpeed(_AUTO_SPEEDS[(_AUTO_SPEEDS.indexOf(cur) + 1) % _AUTO_SPEEDS.length]);
+}
+
+function _updateAutoPlayBtn() {
+  updateLiveTransportControls();
+}
+
+function _updateLiveSpeedControls() {
+  updateLiveTransportControls();
+}
+
+function updateLiveTransportControls() {
+  if (typeof isReplayActive === 'function' && isReplayActive()) return;
+  const pause = document.getElementById('replay-prev-btn');
+  const play = document.getElementById('replay-play-btn');
+  const fast = document.getElementById('replay-next-btn');
+  const status = document.getElementById('replay-status');
+  const speed = settings.auto_play_speed || 'off';
+  if (pause) {
+    pause.disabled = false;
+    pause.classList.toggle('active', speed === 'off');
+    pause.innerHTML = '<i class="fa-solid fa-pause"></i>';
+    pause.title = 'Pause autoplay';
+  }
+  if (play) {
+    play.disabled = false;
+    play.classList.toggle('active', speed === 'normal');
+    play.innerHTML = '<i class="fa-solid fa-play"></i>';
+    play.title = 'Play with animations';
+  }
+  if (fast) {
+    fast.disabled = false;
+    fast.classList.toggle('active', speed === 'fast');
+    fast.innerHTML = '<i class="fa-solid fa-forward"></i>';
+    fast.title = 'Fast play';
+  }
+  if (status) status.textContent = '';
+  const legacy = document.getElementById('auto-play-btn');
+  if (legacy) legacy.style.display = 'none';
+}

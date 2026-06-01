@@ -1,0 +1,8722 @@
+{
+  "v": 2,
+  "saved_at": "2026-06-01T12:35:39.417Z",
+  "config": {
+    "board": {
+      "track_size": 26,
+      "yard_count": 2,
+      "home_length": 6,
+      "pawns_per_player": 3
+    },
+    "player_count": 2
+  },
+  "board": {
+    "track_size": 26,
+    "yard_count": 2,
+    "starts": [
+      8,
+      21
+    ],
+    "finishes": [
+      6,
+      19
+    ],
+    "safe_havens": [
+      8,
+      1,
+      21,
+      14
+    ]
+  },
+  "slots": [
+    0,
+    1
+  ],
+  "phase": "finished",
+  "current_player": 0,
+  "starting_player": 0,
+  "starting_player_color": "red",
+  "dice": 4,
+  "winner": 0,
+  "winners": [
+    0
+  ],
+  "winner_color": "red",
+  "winner_colors": [
+    "red"
+  ],
+  "player_times": {
+    "0": 21625,
+    "1": 23086
+  },
+  "players": [
+    {
+      "index": 0,
+      "type": "random",
+      "name": "Rauður",
+      "color": "red",
+      "slot": 0,
+      "pawns": [
+        {
+          "id": "R1",
+          "p": 30,
+          "y": false,
+          "f": true,
+          "a": null
+        },
+        {
+          "id": "R2",
+          "p": 30,
+          "y": false,
+          "f": true,
+          "a": null
+        },
+        {
+          "id": "R3",
+          "p": 30,
+          "y": false,
+          "f": true,
+          "a": null
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "type": "random",
+      "name": "Grænn",
+      "color": "green",
+      "slot": 1,
+      "pawns": [
+        {
+          "id": "G1",
+          "p": 30,
+          "y": false,
+          "f": true,
+          "a": null
+        },
+        {
+          "id": "G2",
+          "p": 30,
+          "y": false,
+          "f": true,
+          "a": null
+        },
+        {
+          "id": "G3",
+          "p": 28,
+          "y": false,
+          "f": false,
+          "a": null
+        }
+      ]
+    }
+  ],
+  "history": [
+    {
+      "type": "pregame",
+      "playerIdx": 0,
+      "name": "Rauður",
+      "color": "#AC1A2F",
+      "roll": 1,
+      "round": 1
+    },
+    {
+      "type": "pregame",
+      "playerIdx": 1,
+      "name": "Grænn",
+      "color": "#719500",
+      "roll": 3,
+      "round": 1
+    },
+    {
+      "type": "game_start",
+      "player": 1,
+      "color": "green"
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 1,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 1,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 0,
+          "target": 4
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 0,
+      "to": 4
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 2,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 5,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 5,
+      "type": "yard_roll",
+      "attempt": 3,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 4,
+          "target": 8
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 4,
+      "to": 8
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 3,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 4,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 3,
+      "type": "yard_roll",
+      "attempt": 3,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 8,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 8,
+      "to": 11
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 5,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 0,
+          "target": 5
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 0,
+      "to": 5
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 11,
+          "target": 13
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 11,
+      "to": 13
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 5,
+          "target": 7
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 5,
+      "to": 7
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 13,
+          "target": 15
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 13,
+      "to": 15
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 7,
+          "target": 8
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 7,
+      "to": 8
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 15,
+          "target": 16
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 15,
+      "to": 16
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 8,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 0,
+          "target": 5
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 8,
+          "target": 13
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 0,
+      "to": 5
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 16,
+          "target": 21
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 16,
+      "to": 21
+    },
+    {
+      "type": "capture",
+      "captured_player": 0,
+      "captured_piece": 2,
+      "captured_pawn_id": "R3",
+      "by_player": 1,
+      "by_piece": 4,
+      "by_pawn_id": "G2",
+      "cell": 16
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 5,
+          "target": 8
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 5,
+      "to": 8
+    },
+    {
+      "type": "capture",
+      "captured_player": 1,
+      "captured_piece": 4,
+      "captured_pawn_id": "G2",
+      "by_player": 0,
+      "by_piece": 1,
+      "by_pawn_id": "R2",
+      "cell": 16
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 3,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 4,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 0,
+          "target": 3
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 0,
+      "to": 3
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 8,
+          "target": 14
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 8,
+      "to": 14
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 14,
+          "target": 16
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 14,
+      "to": 16
+    },
+    {
+      "type": "capture",
+      "captured_player": 1,
+      "captured_piece": 4,
+      "captured_pawn_id": "G2",
+      "by_player": 0,
+      "by_piece": 1,
+      "by_pawn_id": "R2",
+      "cell": 24
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 2,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 4,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 5,
+      "type": "yard_roll",
+      "attempt": 3,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 16,
+          "target": 22
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 16,
+          "target": 18
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 0,
+          "target": 2
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 0,
+      "to": 2
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 3,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 4,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 0,
+          "target": 6
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 0,
+          "target": 4
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 0,
+          "target": 4
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 0,
+      "to": 4
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 16,
+          "target": 17
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 2,
+          "target": 3
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 2,
+      "to": 3
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 4,
+          "target": 8
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 0,
+          "target": 4
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 0,
+      "to": 4
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 3,
+          "target": 9
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "blockade",
+          "blocked_by": 1,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 3,
+      "to": 9
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 9,
+          "target": 15
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "blockade",
+          "blocked_by": 1,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 0,
+          "target": 5
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 9,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "blockade",
+          "blocked_by": 1,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 0,
+      "to": 5
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 4,
+          "target": 6
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 4,
+          "target": 6
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 4,
+      "to": 6
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 5,
+          "target": 9
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 16,
+          "target": 20
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 9,
+          "target": 13
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 5,
+      "to": 9
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 6,
+          "target": 11
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 4,
+          "target": 9
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 4,
+      "to": 9
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 9,
+          "target": 11
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 16,
+          "target": 18
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 9,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 16,
+      "to": 18
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 6,
+          "target": 8
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 9,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 6,
+      "to": 8
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 9,
+          "target": 14
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 18,
+          "target": 23
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 9,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 18,
+      "to": 23
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 8,
+          "target": 11
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 9,
+          "target": 12
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 9,
+      "to": 12
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 9,
+          "target": 13
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 23,
+          "target": 27
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 9,
+          "target": 13
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 23,
+      "to": 27
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 8,
+          "target": 10
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 12,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 12,
+      "to": 14
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 9,
+          "target": 12
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 27,
+          "target": 30
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 9,
+          "target": 12
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 9,
+      "to": 12
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 8,
+          "target": 13
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 14,
+          "target": 19
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 14,
+      "to": 19
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 9,
+          "target": 13
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 12,
+          "target": 16
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 9,
+      "to": 13
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 8,
+          "target": 9
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 19,
+          "target": 20
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 19,
+      "to": 20
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 13,
+          "target": 15
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 27,
+          "target": 29
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 12,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 13,
+      "to": 15
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 8,
+          "target": 11
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 20,
+          "target": 23
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 8,
+      "to": 11
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 15,
+          "target": 17
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 27,
+          "target": 29
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 12,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 15,
+      "to": 17
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 11,
+          "target": 15
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 20,
+          "target": 24
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 11,
+      "to": 15
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 17,
+          "target": 19
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 27,
+          "target": 29
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 12,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 27,
+      "to": 29
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 15,
+          "target": 16
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 20,
+          "target": 21
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 15,
+      "to": 16
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 17,
+          "target": 20
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 12,
+          "target": 15
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 12,
+      "to": 15
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 16,
+          "target": 19
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 20,
+          "target": 23
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 20,
+      "to": 23
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 17,
+          "target": 19
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 15,
+          "target": 17
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 15,
+      "to": 17
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 16,
+          "target": 21
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 23,
+          "target": 28
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 16,
+      "to": 21
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 17,
+          "target": 19
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 17,
+          "target": 19
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 17,
+      "to": 19
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 21,
+          "target": 22
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 23,
+          "target": 24
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 21,
+      "to": 22
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 17,
+          "target": 19
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 19,
+          "target": 21
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 17,
+      "to": 19
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 22,
+          "target": 23
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 23,
+          "target": 24
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 23,
+      "to": 24
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 19,
+          "target": 23
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 19,
+          "target": 23
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 19,
+      "to": 23
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 22,
+          "target": 24
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 24,
+          "target": 26
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 22,
+      "to": 24
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 23,
+          "target": 26
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 19,
+          "target": 22
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 23,
+      "to": 26
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 24,
+          "target": 30
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 24,
+          "target": 30
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 24,
+      "to": 30
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 24,
+          "target": 25
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 24,
+      "to": 25
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 19,
+          "target": 25
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 19,
+      "to": 25
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 25,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 25,
+      "to": 30
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 25,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 25,
+      "to": 30
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 26,
+          "target": 29
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 26,
+      "to": 29
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 29,
+          "target": 30
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 29,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 29,
+      "to": 30
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 29,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 29,
+      "to": 30
+    },
+    {
+      "type": "game_winner",
+      "player": 0,
+      "color": "red",
+      "winners": [
+        0
+      ],
+      "winner_colors": [
+        "red"
+      ]
+    },
+    {
+      "type": "pregame",
+      "playerIdx": 0,
+      "name": "Eris",
+      "color": "#AC1A2F",
+      "roll": 5,
+      "round": 1
+    },
+    {
+      "type": "pregame",
+      "playerIdx": 1,
+      "name": "Grænn",
+      "color": "#719500",
+      "roll": 4,
+      "round": 1
+    },
+    {
+      "type": "game_start",
+      "player": 0,
+      "color": "red"
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 4,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 1,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 2,
+      "type": "yard_roll",
+      "attempt": 3,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 0,
+          "target": 3
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 0,
+      "to": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 1,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 0,
+          "target": 6
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 0,
+      "to": 6
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 6,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 6,
+      "to": 11
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 3,
+          "target": 9
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 3,
+          "target": 6
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 0,
+          "target": 3
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 0,
+      "to": 3
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 11,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 11,
+      "to": 14
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 3,
+          "target": 8
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 3,
+          "target": 8
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 3,
+      "to": 8
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 14,
+          "target": 15
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 14,
+      "to": 15
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 3,
+          "target": 6
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 8,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 3,
+      "to": 6
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 15,
+          "target": 16
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 15,
+      "to": 16
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 6,
+          "target": 7
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 8,
+          "target": 9
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 6,
+      "to": 7
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 16,
+          "target": 19
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 16,
+      "to": 19
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 7,
+          "target": 10
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 8,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 8,
+      "to": 11
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 19,
+          "target": 22
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 19,
+      "to": 22
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 7,
+          "target": 13
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 11,
+          "target": 17
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 11,
+      "to": 17
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 7,
+          "target": 9
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 17,
+          "target": 19
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 7,
+      "to": 9
+    },
+    {
+      "type": "capture",
+      "captured_player": 0,
+      "captured_piece": 1,
+      "captured_pawn_id": "R2",
+      "by_player": 1,
+      "by_piece": 3,
+      "by_pawn_id": "G1",
+      "cell": 4
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 2,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 1,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 3,
+      "type": "yard_roll",
+      "attempt": 3,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 9,
+          "target": 10
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 17,
+          "target": 18
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 17,
+      "to": 18
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 3,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 5,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 0,
+          "target": 5
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 0,
+      "to": 5
+    },
+    {
+      "type": "capture",
+      "captured_player": 1,
+      "captured_piece": 4,
+      "captured_pawn_id": "G2",
+      "by_player": 0,
+      "by_piece": 1,
+      "by_pawn_id": "R2",
+      "cell": 13
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 9,
+          "target": 13
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 9,
+      "to": 13
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 5,
+          "target": 7
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 5,
+      "to": 7
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 13,
+          "target": 17
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 13,
+      "to": 17
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 7,
+          "target": 13
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 7,
+      "to": 13
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 13,
+          "target": 16
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 13,
+      "to": 16
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 17,
+          "target": 21
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 17,
+      "to": 21
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 16,
+          "target": 21
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 16,
+      "to": 21
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 21,
+          "target": 24
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 21,
+      "to": 24
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 21,
+          "target": 26
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 21,
+      "to": 26
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 24,
+          "target": 28
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 24,
+      "to": 28
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 26,
+          "target": 27
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 26,
+      "to": 27
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 28,
+          "target": 29
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 0,
+          "target": 1
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 28,
+      "to": 29
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 27,
+          "target": 28
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 27,
+      "to": 28
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 0,
+          "target": 4
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 0,
+      "to": 4
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 28,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 28,
+      "to": 30
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 4,
+          "target": 7
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 4,
+      "to": 7
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 7,
+          "target": 10
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 7,
+      "to": 10
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 10,
+          "target": 16
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 10,
+          "target": 15
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 0,
+          "target": 5
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 0,
+      "to": 5
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 10,
+          "target": 12
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 5,
+          "target": 7
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 10,
+      "to": 12
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 12,
+          "target": 16
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 5,
+          "target": 9
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 12,
+      "to": 16
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 16,
+          "target": 19
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 5,
+          "target": 8
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 5,
+      "to": 8
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 16,
+          "target": 22
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 8,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 16,
+      "to": 22
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 29,
+          "target": 30
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 22,
+          "target": 23
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 8,
+          "target": 9
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 22,
+      "to": 23
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 23,
+          "target": 28
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 8,
+          "target": 13
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 23,
+      "to": 28
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 8,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 8,
+      "to": 14
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 28,
+          "target": 30
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 14,
+          "target": 16
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 14,
+      "to": 16
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 29,
+          "target": 30
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 28,
+          "target": 29
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 16,
+          "target": 17
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 16,
+      "to": 17
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 17,
+          "target": 20
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 17,
+      "to": 20
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 20,
+          "target": 24
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 20,
+      "to": 24
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 24,
+          "target": 29
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 24,
+      "to": 29
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 29,
+          "target": 30
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 28,
+          "target": 29
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 29,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 29,
+      "to": 30
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 28,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 28,
+      "to": 30
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 0,
+          "target": 3
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 0,
+      "to": 3
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 3,
+          "target": 8
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 2,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 3,
+      "to": 8
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 29,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 29,
+      "to": 30
+    },
+    {
+      "type": "game_winner",
+      "player": 1,
+      "color": "green",
+      "winners": [
+        1
+      ],
+      "winner_colors": [
+        "green"
+      ]
+    },
+    {
+      "type": "pregame",
+      "playerIdx": 0,
+      "name": "Eris",
+      "color": "#AC1A2F",
+      "roll": 3,
+      "round": 1
+    },
+    {
+      "type": "pregame",
+      "playerIdx": 1,
+      "name": "Grænn",
+      "color": "#719500",
+      "roll": 2,
+      "round": 1
+    },
+    {
+      "type": "game_start",
+      "player": 0,
+      "color": "red"
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 2,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 3,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 0,
+          "target": 3
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 0,
+      "to": 3
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 1,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 3,
+      "type": "yard_roll",
+      "attempt": 2,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 1,
+      "type": "yard_roll",
+      "attempt": 3,
+      "max_attempts": 3
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 3,
+          "target": 7
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 3,
+      "to": 7
+    },
+    {
+      "player": 1,
+      "piece": null,
+      "from": null,
+      "to": null,
+      "dice": 1,
+      "type": "yard_roll",
+      "attempt": 1,
+      "max_attempts": 3
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 0,
+          "target": 4
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 0,
+      "to": 4
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 7,
+          "target": 8
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 7,
+      "to": 8
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 4,
+          "target": 5
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 4,
+      "to": 5
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 8,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 8,
+      "to": 11
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 5,
+          "target": 10
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 5,
+      "to": 10
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 11,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        },
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 11,
+      "to": 14
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 10,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 10,
+      "to": 11
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 14,
+          "target": 20
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 0,
+          "target": 6
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 14,
+          "target": 20
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 0,
+          "target": 4
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 0,
+          "target": 4
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 14,
+          "target": 18
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 0,
+      "to": 4
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 11,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 11,
+      "to": 14
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 4,
+          "target": 5
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 0,
+          "target": 1
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 14,
+          "target": 15
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 14,
+      "to": 15
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 14,
+          "target": 19
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 14,
+      "to": 19
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 4,
+          "target": 8
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 0,
+          "target": 4
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 15,
+          "target": 19
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 4,
+      "to": 8
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 19,
+          "target": 24
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 19,
+      "to": 24
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 8,
+          "target": 14
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 0,
+          "target": 6
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 15,
+          "target": 21
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 0,
+      "to": 6
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 8,
+          "target": 12
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 6,
+          "target": 10
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 15,
+          "target": 19
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 8,
+      "to": 12
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 24,
+          "target": 30
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 24,
+          "target": 29
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 0,
+          "target": 5
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 0,
+      "to": 5
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 12,
+          "target": 13
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 6,
+          "target": 7
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 15,
+          "target": 16
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 6,
+      "to": 7
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 24,
+          "target": 28
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 5,
+          "target": 9
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 24,
+      "to": 28
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 12,
+          "target": 18
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 7,
+          "target": 13
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 15,
+          "target": 21
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 12,
+      "to": 18
+    },
+    {
+      "type": "capture",
+      "captured_player": 1,
+      "captured_piece": 5,
+      "captured_pawn_id": "G3",
+      "by_player": 0,
+      "by_piece": 0,
+      "by_pawn_id": "R1",
+      "cell": 0
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 18,
+          "target": 23
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 7,
+          "target": 12
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 15,
+          "target": 20
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 18,
+      "to": 23
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 23,
+          "target": 26
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 7,
+          "target": 10
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 15,
+          "target": 18
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 15,
+      "to": 18
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 23,
+          "target": 25
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 7,
+          "target": 9
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 18,
+          "target": 20
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 23,
+      "to": 25
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 7,
+          "target": 13
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 18,
+          "target": 24
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 0,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 18,
+      "to": 24
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 0,
+          "pawn_id": "R1",
+          "from": 25,
+          "target": 30
+        },
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 7,
+          "target": 12
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 24,
+          "target": 29
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 0,
+      "pawn_id": "R1",
+      "from": 25,
+      "to": 30
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 28,
+          "target": 29
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 28,
+      "to": 29
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 7,
+          "target": 13
+        },
+        {
+          "piece_idx": 2,
+          "pawn_id": "R3",
+          "from": 24,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 2,
+      "pawn_id": "R3",
+      "from": 24,
+      "to": 30
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 7,
+          "target": 10
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 7,
+      "to": 10
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 4,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G2"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 10,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 10,
+      "to": 11
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 4,
+          "pawn_id": "G2",
+          "from": 29,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 4,
+      "pawn_id": "G2",
+      "from": 29,
+      "to": 30
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 11,
+          "target": 14
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 11,
+      "to": 14
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 14,
+          "target": 15
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 14,
+      "to": 15
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 15,
+          "target": 17
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 15,
+      "to": 17
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 17,
+          "target": 23
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 17,
+      "to": 23
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 23,
+          "target": 27
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 23,
+      "to": 27
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": -1,
+          "target": 0
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 0,
+          "target": 1
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 0,
+      "to": 1
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 1,
+          "target": 2
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 1,
+      "to": 2
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 27,
+          "target": 29
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 27,
+      "to": 29
+    },
+    {
+      "player": 1,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 2,
+          "target": 3
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 2,
+      "to": 3
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 3,
+          "target": 6
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 3,
+      "to": 6
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 6,
+          "target": 11
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 6,
+      "to": 11
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 11,
+          "target": 17
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 11,
+      "to": 17
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 17,
+          "target": 19
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "yard",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 17,
+      "to": 19
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": -1,
+          "target": 0
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 19,
+          "target": 25
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": -1,
+      "to": 0
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 0,
+          "target": 4
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 19,
+          "target": 23
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 0,
+      "to": 4
+    },
+    {
+      "player": 0,
+      "dice": 6,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 4,
+          "target": 7
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 19,
+          "target": 22
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 19,
+      "to": 22
+    },
+    {
+      "player": 0,
+      "dice": 3,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 4,
+          "target": 10
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 22,
+          "target": 28
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 4,
+      "to": 10
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 10,
+          "target": 16
+        },
+        {
+          "piece_idx": 5,
+          "pawn_id": "G3",
+          "from": 22,
+          "target": 28
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G3",
+      "from": 22,
+      "to": 28
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 10,
+          "target": 15
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 10,
+      "to": 15
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 15,
+          "target": 21
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 15,
+      "to": 21
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 21,
+          "target": 27
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 21,
+      "to": 27
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 3,
+          "piece": 0,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G1"
+        },
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 2,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 3,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 3,
+          "pawn_id": "G1",
+          "from": 27,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 3,
+      "pawn_id": "G1",
+      "from": 27,
+      "to": 30
+    },
+    {
+      "player": 0,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 1,
+          "piece": 1,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "R2"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 6,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 5,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "player": 0,
+      "dice": 1,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 1,
+          "pawn_id": "R2",
+          "from": 29,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 0,
+      "piece": 1,
+      "pawn_id": "R2",
+      "from": 29,
+      "to": 30
+    },
+    {
+      "player": 1,
+      "dice": 4,
+      "type": "roll",
+      "no_exact_roll": true,
+      "blocked_pawns": [
+        {
+          "piece_idx": 5,
+          "piece": 2,
+          "reason": "overshoot",
+          "blocked_by": null,
+          "pawn_id": "G3"
+        }
+      ]
+    },
+    {
+      "type": "game_winner",
+      "player": 0,
+      "color": "red",
+      "winners": [
+        0
+      ],
+      "winner_colors": [
+        "red"
+      ]
+    }
+  ]
+}

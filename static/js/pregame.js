@@ -3,6 +3,7 @@
 let _pg = null;
 
 function showPregame(activeSlots) {
+  if (typeof clearReplayMode === 'function') clearReplayMode();
   const active = activeSlots
     || (typeof lobbyActiveSlots === 'function' ? lobbyActiveSlots() : [0,1,2,3]);
   const n = active.length;
@@ -17,7 +18,8 @@ function showPregame(activeSlots) {
     round: 1,
   };
 
-  if(typeof resetGameHistorySync==='function') resetGameHistorySync();
+  if(typeof clearSessionHistory==='function') clearSessionHistory();
+  else if(typeof resetGameHistorySync==='function') resetGameHistorySync();
   // Start the wall-clock and show the board with all pawns in yard immediately.
   if(typeof _startGameClock==='function') _startGameClock();
   if(typeof makeDemoState==='function'){
@@ -40,6 +42,11 @@ function _hidePregame() {
   _setPregameSubtitle('');
   _setActionCardTop(null, 'fa-circle-info', 'Start game', true);
   _pg = null;
+}
+
+function clearPregameMode() {
+  clearTimeout(_pgAutoTimer);
+  _hidePregame();
 }
 
 function _setActionCardTop(color, iconClass, label, idle = false) {
@@ -112,6 +119,7 @@ function _renderPregame() {
 }
 
 function _onDiceClick() {
+  if (typeof isReplayActive === 'function' && isReplayActive()) return;
   if (_pg) pregameRoll();
   else if (typeof rollDice === 'function') rollDice();
 }
