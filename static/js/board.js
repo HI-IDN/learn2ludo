@@ -59,16 +59,14 @@ function buildBoardGeometry(yardCount, homeLength, pawnsPerPlayer, S) {
     const ax = Math.cos(theta), ay = Math.sin(theta);   // outward unit vector
     const lx = -Math.sin(theta), ly = Math.cos(theta);  // left (CCW perp) unit vector
     const base = arm * (2 * n + 1);
-    for (let p = 0; p <= n - 2; p++) {
-      const d = n - p;
-      trackCenters[base + p] = {x: cx + d*c*ax + c*lx, y: cy + d*c*ay + c*ly};
-    }
-    for (let p = n - 1; p <= 2*n - 2; p++) {
-      const l = p - n + 3;
-      trackCenters[base + p] = {x: cx + c*ax + l*c*lx, y: cy + c*ay + l*c*ly};
-    }
-    trackCenters[base + 2*n - 1] = {x: cx + (n+1)*c*lx,        y: cy + (n+1)*c*ly};
-    trackCenters[base + 2*n]     = {x: cx - c*ax + (n+1)*c*lx, y: cy - c*ay + (n+1)*c*ly};
+    // Right column first (p=0..n-1): d=p+2, outermost at d=n+1, directly below cap
+    for (let p = 0; p < n; p++)
+      trackCenters[base + p] = {x: cx + (p+2)*c*ax - c*lx, y: cy + (p+2)*c*ay - c*ly};
+    // Cap (p=n): at d=n+1, centre-line — arrow cell
+    trackCenters[base + n] = {x: cx + (n+1)*c*ax, y: cy + (n+1)*c*ay};
+    // Left column (p=n+1..2n): outermost→innermost, d=n+1 down to d=2, directly above cap first
+    for (let p = n+1; p <= 2*n; p++)
+      trackCenters[base + p] = {x: cx + (2*n+2-p)*c*ax + c*lx, y: cy + (2*n+2-p)*c*ay + c*ly};
     for (let j = 0; j < n; j++)
       homeCenters[arm][j] = {x: cx + (n-j)*c*ax, y: cy + (n-j)*c*ay};
   }
@@ -188,21 +186,30 @@ function drawBoard(){
     });
   });
 
-  // Track cells
-  geo.trackCenters.forEach(({x,y})=>html+=`<rect x="${x-c/2+.5}" y="${y-c/2+.5}" width="${c-1}" height="${c-1}" fill="#fff" stroke="rgba(0,0,0,.12)" stroke-width=".5" rx="2"/>`);
-
-  // Safe havens — medium grey with white shield
-  if(settings.safe_squares!==false) Array.from(layout.safe_havens).forEach(abs=>{
-    const {x,y}=geo.trackCenters[abs];
-    html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="#C8C8C8" rx="3"/>`;
-    html+=`<foreignObject x="${x-c*.34}" y="${y-c*.38}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;
+  // Track cells — each rotated to align with its arm direction
+  const _cpa=2*(gameState?.config?.board?.home_length??settings.board_home_length??6)+1; // cells per arm
+  const _N=layout.yard_count;
+  // Content rotation matches arm theta = PI + i*2PI/N → rot = (theta*180/PI+180)%360 = i*360/N
+  const _armRot=i=>(i*360/_N)%360;
+  geo.trackCenters.forEach(({x,y},idx)=>{
+    const rot=_armRot(Math.floor(idx/_cpa));
+    html+=`<rect x="${x-c/2+.5}" y="${y-c/2+.5}" width="${c-1}" height="${c-1}" fill="#fff" stroke="rgba(0,0,0,.12)" stroke-width=".5" rx="2" transform="rotate(${rot},${x},${y})"/>`;
   });
 
-  // Start squares — coloured cell with white shield-heart
+  // Safe havens — medium grey with white shield (rotated with arm)
+  if(settings.safe_squares!==false) Array.from(layout.safe_havens).forEach(abs=>{
+    const {x,y}=geo.trackCenters[abs];
+    const rot=_armRot(Math.floor(abs/_cpa));
+    html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="#C8C8C8" rx="3" transform="rotate(${rot},${x},${y})"/>`;
+    html+=`<foreignObject x="${x-c*.34}" y="${y-c*.38}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;transform:rotate(${rot}deg)"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;
+  });
+
+  // Start squares — coloured cell with white shield-heart (rotated with arm)
   layout.starts.forEach((abs,slot)=>{
     const {x,y}=geo.trackCenters[abs],col=COLORS[PLAYER_COLORS[slot]];
-    html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".88" rx="3"/>`;
-    html+=`<foreignObject x="${x-c*.34}" y="${y-c*.38}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;
+    const rot=_armRot(Math.floor(abs/_cpa));
+    html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".88" rx="3" transform="rotate(${rot},${x},${y})"/>`;
+    html+=`<foreignObject x="${x-c*.34}" y="${y-c*.38}" width="${c*.68}" height="${c*.68}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1;transform:rotate(${rot}deg)"><i class="fa-solid fa-shield-heart"></i></div></foreignObject>`;
   });
 
   // Finish arrows — cell geometrically adjacent to each home stretch entry (start - 2)
@@ -210,15 +217,19 @@ function drawBoard(){
     const abs=(start-2+layout.track_size)%layout.track_size;
     const {x,y}=geo.trackCenters[abs],col=COLORS[PLAYER_COLORS[slot]];
     const armTheta=Math.PI+slot*2*Math.PI/layout.yard_count;
-    const deg=Math.round(armTheta*180/Math.PI+180);
+    const deg=Math.round(((armTheta*180/Math.PI+180)%360+360)%360);
     html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="#fff" rx="3"/>`;
     html+=`<foreignObject x="${x-c*.32}" y="${y-c*.32}" width="${c*.64}" height="${c*.64}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:${col};font-size:17px;transform:rotate(${deg}deg);"><i class="fa-solid fa-circle-right"></i></div></foreignObject>`;
   });
 
-  // Home stretch lanes
+  // Home stretch lanes — innermost cell (j=n-1) left uncoloured; coloured centre handles it
   geo.homeCenters.forEach((lane,armIdx)=>{
     const col=COLORS[PLAYER_COLORS[armIdx]];
-    lane.forEach(({x,y})=>html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".92" rx="2"/>`);
+    const rot=_armRot(armIdx);
+    lane.slice(0,-1).forEach(({x,y})=>html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".92" rx="2" transform="rotate(${rot},${x},${y})"/>`);
+    // Innermost cell: uncoloured rectangle (no fill)
+    const {x:ix,y:iy}=lane[lane.length-1];
+    html+=`<rect x="${ix-c/2+1}" y="${iy-c/2+1}" width="${c-2}" height="${c-2}" fill="#fff" stroke="rgba(0,0,0,.08)" stroke-width=".5" rx="2" transform="rotate(${rot},${ix},${iy})"/>`;
   });
 
   // Home center — N coloured pie slices meeting at board center
@@ -241,10 +252,12 @@ function drawBoard(){
     const coloredAbs=new Set([...Array.from(layout.safe_havens),...layout.starts]);
     geo.trackCenters.forEach(({x,y},idx)=>{
       const onColor=coloredAbs.has(idx);
-      html+=`<text x="${x-c/2+2}" y="${y-c/2+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9">${idx}</text>`;
+      const rot=_armRot(Math.floor(idx/_cpa));
+      html+=`<text x="${x-c*.42}" y="${y-c*.32}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="${onColor?'#fff':'#333'}" opacity="0.9" transform="rotate(${rot},${x},${y})">${idx+1}</text>`;
     });
-    geo.homeCenters.forEach(lane=>lane.forEach(({x,y},i)=>{
-      html+=`<text x="${x-c/2+2}" y="${y-c/2+7}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="#fff" opacity="0.9">H${i+1}</text>`;
+    geo.homeCenters.forEach((lane,armIdx)=>lane.forEach(({x,y},i)=>{
+      const rot=_armRot(armIdx);
+      html+=`<text x="${x-c*.42}" y="${y-c*.32}" text-anchor="start" font-size="5" font-family="monospace" font-weight="700" fill="#fff" opacity="0.9" transform="rotate(${rot},${x},${y})">H${i+1}</text>`;
     }));
   }
 

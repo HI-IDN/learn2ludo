@@ -139,7 +139,7 @@ function renderMoveHistory(){
       const pawnsPerPlayer=gameState?.config?.board?.pawns_per_player||4;
       const pawnNum=(e.captured_piece%pawnsPerPlayer)+1;
       const capturedCol=COLORS[playerColorName(e.captured_player,gameState?.num_players||4)];
-      return `<div class="move-history-row move-history-capture" style="--capture-color:${captorCol}"><i class="fa-solid fa-house-crack" style="color:${capturedCol}"></i><span>${capturedName}${dot}P${pawnNum} captured by ${captorName} · T${(e.cell+1)%52} → Y</span></div>`;
+      return `<div class="move-history-row move-history-capture" style="--capture-color:${captorCol}"><i class="fa-solid fa-house-crack" style="color:${capturedCol}"></i><span>${capturedName}${dot}P${pawnNum} captured by ${captorName} · T${e.cell} → Y</span></div>`;
     }
     const pawnsPerPlayer=gameState?.config?.board?.pawns_per_player||4;
     return `<div class="move-history-row"><i class="fa-solid fa-person-walking" style="color:${col}"></i><span>${name}${dot}P${(e.piece%pawnsPerPlayer)+1}: ${displayCellLabel(e.player,e.from)} → ${displayCellLabel(e.player,e.to)}</span></div>`;

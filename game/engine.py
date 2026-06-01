@@ -30,10 +30,12 @@ class BoardLayout:
 
     @staticmethod
     def generate(board:BoardConfig):
-        s=board.track_size//board.yard_count
-        starts=[i*s for i in range(board.yard_count)]
-        finishes=[(x-1)%board.track_size for x in starts]
-        safe={(i*s+board.safe_offset)%board.track_size for i in range(board.yard_count)}|set(starts)
+        s=board.track_size//board.yard_count  # cells per arm = 2*home_length+1
+        n=(s-1)//2                             # home_length
+        start_off=n+2                          # start at right-col cell 2 (1-based pos n+3)
+        starts=[(i*s+start_off)%board.track_size for i in range(board.yard_count)]
+        finishes=[(x-2)%board.track_size for x in starts]  # cap = home entry, 2 before start
+        safe={(start-board.safe_offset)%board.track_size for start in starts}|set(starts)
         return BoardLayout(board.track_size,board.yard_count,starts,finishes,safe)
 
 def assign_slots(cfg):

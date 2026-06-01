@@ -19,13 +19,15 @@ function boardLayout(trackSize=null, yardCount=null) {
   yardCount = yardCount ?? settings.board_yard_count ?? 4;
   const hl = settings.board_home_length ?? 6;
   trackSize = trackSize ?? yardCount * (2 * hl + 1);
-  const s = Math.floor(trackSize / yardCount);
-  const starts = Array.from({length: yardCount}, (_, i) => i * s);
-  const finishes = starts.map(x => (x - 1 + trackSize) % trackSize);
+  const s = Math.floor(trackSize / yardCount);  // cells per arm = 2*hl+1
+  const n = (s - 1) / 2;                        // home_length
+  const startOff = n + 2;                        // start at local 1-based pos n+3 = right col cell 2
   const safeOffset = settings.board_safe_offset ?? 7;
+  const starts = Array.from({length: yardCount}, (_, i) => (i * s + startOff) % trackSize);
+  const finishes = starts.map(x => (x - 2 + trackSize) % trackSize); // cap = home entry
   const safe_havens = new Set([
     ...starts,
-    ...starts.map(start => (start + safeOffset) % trackSize)
+    ...starts.map(start => (start - safeOffset + trackSize) % trackSize) // safeOffset cells before start
   ]);
   return {track_size: trackSize, yard_count: yardCount, starts, finishes, safe_havens};
 }
@@ -425,7 +427,7 @@ function renderGame(){
     setTimeout(()=>makeMove(m.piece_idx,m.target), _AUTO_DELAY[_apSpeed].move);
   }
 }
-function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; if(pos>=ts)return `H${pos-ts+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs}`; }
+function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; if(pos>=ts)return `H${pos-ts+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs+1}`; }
 function spacesRemaining(pos,finished=false){ if(finished)return 0; if(pos===-1||pos==null)return 57; return Math.max(0,57-pos); }
 
 // Move history rendering lives in history.js.
