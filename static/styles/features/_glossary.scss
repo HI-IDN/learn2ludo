@@ -1,0 +1,166 @@
+// =============================================================================
+// Glossary page
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Search bar -------------------------------------------------------------
+
+.glossary-search-wrap {
+  position: relative;
+  max-width: 480px;
+  margin-bottom: 32px;
+}
+
+.glossary-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $color-text-3;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.glossary-search {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  border: 1px solid $border-medium;
+  border-radius: $radius;
+  font-family: $font-sans;
+  font-size: 14px;
+  background: $color-bg-alt;
+  color: $color-text;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px $accent-tint-border;
+  }
+
+  &::placeholder {
+    color: $color-text-3;
+  }
+}
+
+// ---- Empty / no-results state -----------------------------------------------
+
+.glossary-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 20px;
+  border: 1px dashed $border-medium;
+  border-radius: $radius;
+  color: $color-text-3;
+  font-size: 13px;
+
+  i { font-size: 20px; flex-shrink: 0; }
+}
+
+// ---- Letter groups ----------------------------------------------------------
+
+.glossary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.glossary-letter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.glossary-letter {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-primary;
+  padding-bottom: 6px;
+  border-bottom: 1px solid $border-light;
+  margin-bottom: 4px;
+}
+
+// ---- Individual entries -----------------------------------------------------
+
+.glossary-entry {
+  border: 1px solid $border-light;
+  border-radius: $radius;
+  background: $color-bg-alt;
+  overflow: hidden;
+
+  &[open] {
+    .glossary-chevron {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.glossary-summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 8px 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+
+  &::-webkit-details-marker { display: none; }
+
+  &:hover {
+    background: $color-bg;
+  }
+}
+
+.glossary-term {
+  font-size: 14px;
+  font-weight: 700;
+  color: $color-text;
+  white-space: nowrap;
+}
+
+.glossary-short {
+  font-size: 13px;
+  color: $color-text-2;
+  line-height: 1.5;
+}
+
+.glossary-chevron {
+  font-size: 14px;
+  color: $color-text-3;
+  transition: transform 0.18s ease;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.glossary-detail {
+  padding: 0 14px 14px;
+  font-size: 13px;
+  color: $color-text-2;
+  line-height: 1.65;
+  border-top: 1px solid $border-light;
+
+  p { margin: 0; }
+}
+
+.glossary-example {
+  margin-top: 10px !important;
+  padding: 8px 12px;
+  background: $color-bg;
+  border-radius: $radius;
+  font-size: 12px;
+  color: $color-text-2;
+}
+
+// ---- Hidden entries (filtered out by search) --------------------------------
+
+.glossary-entry--hidden {
+  display: none;
+}
+
+.glossary-letter-group--hidden {
+  display: none;
+}

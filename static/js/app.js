@@ -304,6 +304,7 @@ async function loadTabs(){
     {id:'train',label:'Train',icon:'ti-brain',enabled:true,default_visible:false,order:3},
     {id:'stats',label:'Stats & Replay',icon:'ti-chart-bar',enabled:true,default_visible:true,order:4},
     {id:'bots',label:'Bots',icon:'ti-robot',enabled:true,default_visible:false,order:5},
+    {id:'glossary',label:'Glossary',icon:'ti-book',enabled:true,default_visible:true,order:6},
     {id:'admin',label:'Admin',icon:'ti-shield',enabled:true,default_visible:true,order:99,admin_only:true}
   ]; }
   renderTabs();
