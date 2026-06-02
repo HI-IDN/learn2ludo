@@ -122,9 +122,19 @@ function persistSettings(){ localStorage.setItem('ludo_settings', JSON.stringify
 function getOrCreateAnonymousUserId() {
   const existing = localStorage.getItem(CONSENT_ID_STORAGE_KEY);
   if (existing) return existing;
-  const generated = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
-    ? crypto.randomUUID()
-    : `anon-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  let generated = null;
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    generated = crypto.randomUUID();
+  } else if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    generated = `anon-${Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')}`;
+  } else {
+    const tick = typeof performance !== 'undefined' && typeof performance.now === 'function'
+      ? performance.now().toString(36).replace('.', '')
+      : Date.now().toString(36);
+    generated = `anon-${Date.now().toString(36)}-${tick}`;
+  }
   localStorage.setItem(CONSENT_ID_STORAGE_KEY, generated);
   return generated;
 }
@@ -188,13 +198,13 @@ function renderConsentGate() {
          <i class="fa-solid fa-circle-info"></i>
          <strong>Research consent required.</strong>
          By playing this game, you agree that your moves, game states, and interactions may be stored and used for academic research on human decision-making. No personally identifiable information will be collected.
-         <div style="margin-top:8px">
-           <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer">
+         <div class="consent-gate-check">
+           <label class="consent-gate-label">
              <input type="checkbox" id="consent-checkbox" onchange="updateConsentConfirmState()">
              <span>I understand and agree.</span>
            </label>
          </div>
-         <div style="margin-top:8px">
+         <div class="consent-gate-actions">
            <button class="btn btn-primary btn-sm" id="consent-confirm-btn" onclick="confirmHumanConsent()" disabled>Confirm consent</button>
          </div>
        </div>`;
@@ -281,7 +291,18 @@ function ensureTransportButtonStyles() {
 
 
 async function init(){
-  ensureTransportButtonStyles(); loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); renderConsentGate(); drawBoard(); _updateLiveSpeedControls();
+  ensureTransportButtonStyles();
+  loadSettings();
+  applySettingsToControls();
+  if(typeof initSoundControls==='function') initSoundControls();
+  await loadTabs();
+  await loadStats();
+  await loadBotRegistry();
+  renderPlayers();
+  renderLobbySlots();
+  renderConsentGate();
+  drawBoard();
+  _updateLiveSpeedControls();
 }
 function loadSettings(){
   try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
