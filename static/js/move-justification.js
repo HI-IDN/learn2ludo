@@ -110,8 +110,8 @@ function moveJustificationKeydown(event) {
 async function confirmMoveJustification() {
   if (!_pendingJustifiedMove || _moveJustificationSubmitting) return;
   const input = document.getElementById('move-justification-input');
-  const justification = input?.value.trim() || '';
-  if (!justification) {
+  const justification = input?.value || '';
+  if (!justification.trim()) {
     updateMoveJustificationConfirm();
     return;
   }

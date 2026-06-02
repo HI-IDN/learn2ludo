@@ -191,6 +191,27 @@ This makes it easier to:
 
 ---
 
+# 💾 Saved Game JSON
+
+Saved games include a `history` array of replay events. Move events keep the existing flat history shape and include justification metadata:
+
+```json
+{
+  "type": "move",
+  "player": 0,
+  "piece": 2,
+  "pawn_id": "R3",
+  "from": 14,
+  "to": 18,
+  "justification": "This pawn is closest to home.",
+  "timestamp": "2026-06-01T10:32:00Z"
+}
+```
+
+Moves without a player-entered reason store `"justification": null`. Older saved games without these fields still load; missing move metadata is normalized to `null` during replay/load handling.
+
+---
+
 # ⚙️ Configurable Rules
 
 Examples of configurable gameplay settings include:

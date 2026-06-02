@@ -249,7 +249,7 @@ function normalizeReplayData(data) {
   const yardCount = boardCfg.yard_count || data.board?.yard_count || playerCount;
   const trackSize = boardCfg.track_size || data.board?.track_size || yardCount * (2 * homeLength + 1);
   const slots = data.slots?.length ? data.slots : players.map(p => p.slot ?? p.index);
-  const history = replayableHistory(data.history || []);
+  const history = replayableHistory(data.history || []).map(normalizeReplayHistoryEvent);
   return {
     ...data,
     config: {
@@ -275,6 +275,15 @@ function replayableHistory(history) {
   const starts = history.map((e, i) => e.type === 'game_start' ? i : -1).filter(i => i >= 0);
   if (!starts.length) return history;
   return history.slice(starts[starts.length - 1]);
+}
+
+function normalizeReplayHistoryEvent(event) {
+  if (event?.type !== 'move') return event;
+  return {
+    ...event,
+    justification: Object.prototype.hasOwnProperty.call(event, 'justification') ? event.justification : null,
+    timestamp: Object.prototype.hasOwnProperty.call(event, 'timestamp') ? event.timestamp : null,
+  };
 }
 
 function normalizeReplayBoard(board, trackSize, yardCount, homeLength, safeOffset) {

@@ -1,5 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
+from datetime import datetime
 
 import server
 from game.engine import Phase
@@ -74,7 +75,9 @@ def test_api_equal_rounds_finishes_on_provisional_winner_wrap(client: TestClient
     session.game.player = 2
 
     _advance_turn_via_skip(client, expected_player=3)
-    state = _advance_turn_via_skip(client, expected_player=0, expect_finished=True)
+    _advance_turn_via_skip(client, expected_player=0)
+    _advance_turn_via_skip(client, expected_player=1)
+    state = _advance_turn_via_skip(client, expected_player=2, expect_finished=True)
 
     assert state["winner"] == 2
     assert state["winners"] == [2]
@@ -91,7 +94,31 @@ def test_api_equal_rounds_reports_co_winners_at_cutoff(client: TestClient):
     session.game.player = 2
 
     _advance_turn_via_skip(client, expected_player=3)
-    state = _advance_turn_via_skip(client, expected_player=0, expect_finished=True)
+    _advance_turn_via_skip(client, expected_player=0)
+    _advance_turn_via_skip(client, expected_player=1)
+    state = _advance_turn_via_skip(client, expected_player=2, expect_finished=True)
 
     assert state["winner"] == 2
     assert state["winners"] == [1, 2]
+
+
+def test_api_move_persists_justification_and_timestamp(client: TestClient):
+    r = client.post("/api/game/new", json=_new_game_payload(equal_rounds=False))
+    assert r.status_code == 200
+
+    session = server.active_game
+    session.game.player = 0
+    session.game.last_roll = 6
+    session.game.phase = Phase.MOVING
+
+    r = client.post("/api/game/move", json={
+        "piece_idx": 0,
+        "target": 0,
+        "justification": "  Open with R1.  ",
+    })
+    assert r.status_code == 200
+
+    move = next(e for e in reversed(r.json()["game"]["history"]) if e.get("type") == "move")
+    assert move["justification"] == "  Open with R1.  "
+    assert move["timestamp"].endswith("Z")
+    datetime.fromisoformat(move["timestamp"].replace("Z", "+00:00"))

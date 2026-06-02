@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from game.engine import LudoGame, GameConfig, BoardConfig, Phase
 from game.gameplay import Gameplay, Piece
 
@@ -28,6 +29,7 @@ class GameSession:
         self.winners: list = []
         self.equal_rounds         = equal_rounds
         self._finishing_round_player = None  # first finisher in equal-rounds mode
+        self._finishing_round_wrapped = False
         self.max_yard_rolls   = max(1, max_yard_rolls)
         self._yard_roll_count = 0
         self.starting_player  = self.game.player
@@ -43,10 +45,13 @@ class GameSession:
         self.game.next()
         if self.game.player == self.starting_player:
             self.round_count += 1
-        # Equal-rounds: when play returns to the TRUE first player (starting_player) the round is over.
-        # Using _finishing_round_player as the stop point was wrong — it let everyone wrap
-        # back around to the winner instead of ending when the round genuinely completes.
-        if self._finishing_round_player is not None and self.game.player == self.starting_player:
+            if self._finishing_round_player is not None:
+                self._finishing_round_wrapped = True
+        if (
+            self._finishing_round_player is not None
+            and self._finishing_round_wrapped
+            and self.game.player == self._finishing_round_player
+        ):
             self.winners = [p for p in range(self.game.config.player_count)
                             if all(pc.finished for pc in self.gp.pieces if pc.player == p)]
             self.winner = self._finishing_round_player
@@ -114,7 +119,13 @@ class GameSession:
 
         return value
 
-    def apply_move(self, piece_idx: int | None, target: int, pawn_id_value: str | None = None) -> dict:
+    def apply_move(
+        self,
+        piece_idx: int | None,
+        target: int,
+        pawn_id_value: str | None = None,
+        justification: str | None = None,
+    ) -> dict:
         pawns = self.game.config.board.pawns_per_player
         pi, lidx = self._resolve_piece_ref(piece_idx=piece_idx, pawn_id_value=pawn_id_value)
         pc = [p for p in self.gp.pieces if p.player == pi][lidx]
@@ -129,6 +140,8 @@ class GameSession:
             "pawn_id": moving_pawn_id,
             "from": from_pos,
             "to": pc.pos,
+            "justification": justification,
+            "timestamp": self._timestamp(),
         })
 
         # Log each capture as a separate history event
@@ -262,6 +275,9 @@ class GameSession:
     def _pawn_id_for_piece(self, player_idx: int, local_idx: int) -> str:
         slot = self.game.slots[player_idx]
         return pawn_id(_COLORS[slot], local_idx)
+
+    def _timestamp(self) -> str:
+        return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
     def _color_for_player(self, player_idx: int | None) -> str | None:
         if player_idx is None:

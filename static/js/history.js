@@ -13,7 +13,7 @@ function compactPawn(pawn, index, color) {
 
 function compactGameState() {
   if (!gameState) return null;
-  const history = (gameState.history || []).map(h => ({...h}));
+  const history = (gameState.history || []).map(compactHistoryEvent);
   return {
     v: 2,
     saved_at: new Date().toISOString(),
@@ -40,6 +40,16 @@ function compactGameState() {
     })),
     history
   };
+}
+
+function compactHistoryEvent(event) {
+  const copy = {...event};
+  if (copy.type === 'move' || (!copy.type && ('from' in copy || 'to' in copy))) {
+    copy.type = copy.type || 'move';
+    if (!Object.prototype.hasOwnProperty.call(copy, 'justification')) copy.justification = null;
+    if (!Object.prototype.hasOwnProperty.call(copy, 'timestamp')) copy.timestamp = null;
+  }
+  return copy;
 }
 
 function historyPlayer(playerIdx) {

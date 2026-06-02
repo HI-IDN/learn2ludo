@@ -1,5 +1,6 @@
 from game.engine import BoardConfig, GameConfig, Phase
 from game.session import GameSession
+from datetime import datetime
 
 
 def make_session(num_players=4, home_length=6, equal_rounds=False, starting_player=0):
@@ -105,13 +106,27 @@ class TestEqualRounds:
 
         s.game.player = 2
         s.game.phase = Phase.NEXT
-        s._next_turn()
-        assert s.game.player == 3
-        assert s.game.phase != Phase.FINISHED
+        for expected_player in [3, 0, 1]:
+            s.game.phase = Phase.NEXT
+            s._next_turn()
+            assert s.game.player == expected_player
+            assert s.game.phase != Phase.FINISHED
 
         s.game.phase = Phase.NEXT
         s._next_turn()
+        assert s.game.player == 2
         assert s.game.phase == Phase.FINISHED
+
+    def test_starting_player_after_winner_gets_final_turn(self):
+        s = make_session(num_players=4, equal_rounds=True, starting_player=3)
+        self._finish_all(s, 2)
+        s._finishing_round_player = 2
+
+        s.game.player = 2
+        s.game.phase = Phase.NEXT
+        s._next_turn()
+        assert s.game.player == 3
+        assert s.game.phase != Phase.FINISHED
 
     def test_starting_player_wins_all_others_get_extra_turn(self):
         s = make_session(num_players=4, equal_rounds=True, starting_player=0)
@@ -214,3 +229,30 @@ class TestPawnIdentifiers:
         capture = next(e for e in s.history if e.get("type") == "capture")
         assert capture["by_pawn_id"] == "R1"
         assert capture["captured_pawn_id"] == "G1"
+
+    def test_move_history_records_justification_and_timestamp(self):
+        s = make_session(num_players=4, home_length=6)
+        s.game.player = 0
+        s.game.last_roll = 6
+        s.game.phase = Phase.MOVING
+
+        s.apply_move(piece_idx=0, target=0, justification="  Move R1 out now.  ")
+        latest = s.history[-1]
+
+        assert latest["type"] == "move"
+        assert latest["justification"] == "  Move R1 out now.  "
+        assert latest["timestamp"].endswith("Z")
+        datetime.fromisoformat(latest["timestamp"].replace("Z", "+00:00"))
+
+    def test_move_history_records_null_justification_when_absent(self):
+        s = make_session(num_players=4, home_length=6)
+        s.game.player = 0
+        s.game.last_roll = 6
+        s.game.phase = Phase.MOVING
+
+        s.apply_move(piece_idx=0, target=0)
+        latest = s.history[-1]
+
+        assert latest["type"] == "move"
+        assert latest["justification"] is None
+        assert latest["timestamp"].endswith("Z")

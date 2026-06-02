@@ -19,7 +19,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from game.engine import GameConfig, BoardConfig
 from game.session import GameSession
@@ -209,6 +209,7 @@ class MoveRequest(BaseModel):
     piece_idx: Optional[int] = None
     pawn_id: Optional[str] = None
     target: int
+    justification: Optional[str] = Field(default=None, max_length=400)
 
 
 @app.post("/api/game/move")
@@ -218,7 +219,12 @@ def make_move(req: MoveRequest):
     if req.piece_idx is None and not req.pawn_id:
         raise HTTPException(status_code=422, detail="piece_idx or pawn_id is required")
     try:
-        events = active_game.apply_move(req.piece_idx, req.target, pawn_id_value=req.pawn_id)
+        events = active_game.apply_move(
+            req.piece_idx,
+            req.target,
+            pawn_id_value=req.pawn_id,
+            justification=req.justification,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return {"events": events, "game": active_game.to_dict()}
