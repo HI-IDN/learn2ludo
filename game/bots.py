@@ -10,7 +10,12 @@ Returns:     one item from valid_moves, or None
 """
 
 import random
+import json
 from abc import ABC, abstractmethod
+from pathlib import Path
+
+
+BOTS_CONFIG_PATH = Path(__file__).resolve().parents[1] / "config" / "bots.json"
 
 
 class BotPolicy(ABC):
@@ -28,7 +33,16 @@ class BotPolicy(ABC):
             "name": self.name,
             "type": getattr(self, "type", "heuristic"),
             "description": self.description,
+            "selectable": True,
+            "implemented": True,
         }
+
+
+def load_bot_catalog() -> list[dict]:
+    if not BOTS_CONFIG_PATH.exists():
+        return []
+    data = json.loads(BOTS_CONFIG_PATH.read_text(encoding="utf-8"))
+    return data.get("bots", [])
 
 
 # ---------------------------------------------------------------------------
@@ -121,4 +135,26 @@ def register(bot: BotPolicy):
 
 
 def get_bot_info() -> list[dict]:
-    return [b.to_info() for b in REGISTRY.values()]
+    catalog = load_bot_catalog()
+    if not catalog:
+        return [b.to_info() for b in REGISTRY.values()]
+
+    seen = set()
+    bots = []
+    for entry in catalog:
+        bot_id = entry.get("id")
+        if not bot_id:
+            continue
+        implemented = bot_id in REGISTRY
+        info = {
+            **entry,
+            "implemented": implemented,
+            "selectable": bool(entry.get("selectable", implemented)) and implemented,
+        }
+        bots.append(info)
+        seen.add(bot_id)
+
+    for bot_id, bot in REGISTRY.items():
+        if bot_id not in seen:
+            bots.append(bot.to_info())
+    return bots

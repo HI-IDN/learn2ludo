@@ -140,7 +140,7 @@ function lobbyToggleSlot(slotIdx) {
 }
 
 function lobbyBotSelect(slotIdx, playerIdx) {
-  const bots = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+  const bots = typeof getSelectableBots === 'function' ? getSelectableBots() : (typeof getBotRegistry === 'function' ? getBotRegistry() : []);
   const current = settings.bot_ids?.[playerIdx] ?? (bots[0]?.id || 'eris');
   const options = bots.map(b =>
     `<option value="${b.id}" ${b.id === current ? 'selected' : ''}>${typeof botLobbyLabel === 'function' ? botLobbyLabel(b) : b.name}</option>`
@@ -159,7 +159,7 @@ function lobbySetType(slotIdx, type) {
   settings.player_types[playerIdx] = type === 'human' ? 'human' : 'random';
   // persist default bot id so getPlayerName doesn't fall back to "Bot"
   if (type !== 'human' && !settings.bot_ids?.[playerIdx]) {
-    const bots = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+    const bots = typeof getSelectableBots === 'function' ? getSelectableBots() : (typeof getBotRegistry === 'function' ? getBotRegistry() : []);
     if (bots.length) { settings.bot_ids = settings.bot_ids || {}; settings.bot_ids[playerIdx] = bots[0].id; }
   }
   persistSettings();

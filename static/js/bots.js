@@ -4,15 +4,12 @@
 // JS policies are offline fallbacks only — do not add game logic here.
 
 const FALLBACK_BOTS = [
-  { id: 'eris', name: 'Eris', description: 'Goddess of Discord — moves at random' },
-  { id: 'ares', name: 'Ares', description: 'God of War — captures enemy pawns when possible' },
-];
-
-const PLANNED_HEURISTIC_BOTS = [
-  { id: 'athena', name: 'Athena', description: 'Goddess of Wisdom — keeps pawns safe first', status: 'Planned' },
-  { id: 'hestia', name: 'Hestia', description: 'Goddess of the Hearth — brings pawns home first', status: 'Planned' },
-  { id: 'apollo', name: 'Apollo', description: 'God of Order — balances capture, safety, and progress', status: 'Planned' },
-  { id: 'hermes', name: 'Hermes', description: 'God of Travel — spreads pawns across the board', status: 'Planned' },
+  { id: 'eris', name: 'Eris', type: 'heuristic', epithet: 'Goddess of Discord', description: 'Moves at random.', focus: 'Pure random baseline.', status: 'Available', selectable: true, implemented: true },
+  { id: 'ares', name: 'Ares', type: 'heuristic', epithet: 'God of War', description: 'Captures enemy pawns when possible, else moves at random.', focus: 'Capture if possible, otherwise random.', status: 'Available', selectable: true, implemented: true },
+  { id: 'athena', name: 'Athena', type: 'heuristic', epithet: 'Goddess of Wisdom', description: 'Keeps pawns safe before looking for other moves.', focus: 'Avoid capture threats.', status: 'Planned', selectable: false, implemented: false },
+  { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Advance the pawn closest to home.', status: 'Planned', selectable: false, implemented: false },
+  { id: 'apollo', name: 'Apollo', type: 'heuristic', epithet: 'God of Order', description: 'Balances capture, safety, and progress.', focus: 'Simple scoring across capture, safety, and progress.', status: 'Planned', selectable: false, implemented: false },
+  { id: 'hermes', name: 'Hermes', type: 'heuristic', epithet: 'God of Travel', description: 'Keeps pawns distributed across the board.', focus: 'Spread pawns for flexibility.', status: 'Planned', selectable: false, implemented: false },
 ];
 
 let BOT_REGISTRY = FALLBACK_BOTS;
@@ -26,9 +23,10 @@ async function loadBotRegistry() {
 }
 
 function getBotRegistry() { return BOT_REGISTRY; }
+function getSelectableBots() { return BOT_REGISTRY.filter(b => b.selectable !== false && b.implemented !== false); }
 
 function botEpithet(bot) {
-  return String(bot?.description || '').split('—')[0].trim();
+  return bot?.epithet || '';
 }
 
 function botLobbyLabel(bot) {
@@ -101,12 +99,10 @@ function renderBotsPage() {
   if (!wrap) return;
 
   const heuristics = BOT_REGISTRY.filter(b => b.type === 'heuristic' || !b.type);
-  const plannedIds = new Set(heuristics.map(b => b.id));
-  const planned = PLANNED_HEURISTIC_BOTS.filter(b => !plannedIds.has(b.id));
   const trained    = BOT_REGISTRY.filter(b => b.type === 'trained');
 
   wrap.innerHTML = `
-    ${botSection('Heuristics', 'Rule-based opponents — no training required', heuristics.concat(planned))}
+    ${botSection('Heuristics', 'Rule-based opponents — no training required', heuristics)}
     ${botSection('Trained Models', 'RL agents produced by the Train tab', trained, true)}
   `;
 }
@@ -121,8 +117,8 @@ function botSection(title, subtitle, bots, allowEmpty = false) {
               <div class="bot-card-name">${b.name}</div>
               ${b.status ? `<span class="bot-card-status">${b.status}</span>` : ''}
             </div>
-            <div class="bot-card-desc">${b.description}</div>
-            ${botFocusLine(b) ? `<div class="bot-card-focus">${botFocusLine(b)}</div>` : ''}
+            <div class="bot-card-desc">${botCardDescription(b)}</div>
+            ${b.focus ? `<div class="bot-card-focus">Focus: ${b.focus}</div>` : ''}
           </div>
         </div>`).join('')
     : allowEmpty
@@ -142,16 +138,8 @@ function botSection(title, subtitle, bots, allowEmpty = false) {
     </div>`;
 }
 
-function botFocusLine(bot) {
-  const focus = {
-    eris: 'Focus: pure random baseline.',
-    ares: 'Focus: capture if possible, otherwise random.',
-    athena: 'Focus: avoid capture threats.',
-    hestia: 'Focus: advance the pawn closest to home.',
-    apollo: 'Focus: simple scoring across capture, safety, and progress.',
-    hermes: 'Focus: keep pawns distributed for flexibility.',
-  };
-  return focus[bot?.id] || '';
+function botCardDescription(bot) {
+  return [bot?.epithet, bot?.description].filter(Boolean).join(' — ');
 }
 
 // ---- Auto-play loop --------------------------------------------------------
