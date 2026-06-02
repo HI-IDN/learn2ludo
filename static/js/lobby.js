@@ -143,7 +143,7 @@ function lobbyBotSelect(slotIdx, playerIdx) {
   const bots = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
   const current = settings.bot_ids?.[playerIdx] ?? (bots[0]?.id || 'eris');
   const options = bots.map(b =>
-    `<option value="${b.id}" ${b.id === current ? 'selected' : ''}>${b.name}</option>`
+    `<option value="${b.id}" ${b.id === current ? 'selected' : ''}>${typeof botLobbyLabel === 'function' ? botLobbyLabel(b) : b.name}</option>`
   ).join('');
   return `<select class="lobby-bot-select"
     onchange="lobbySetBotId(${slotIdx}, this.value)"

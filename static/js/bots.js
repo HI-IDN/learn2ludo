@@ -8,6 +8,13 @@ const FALLBACK_BOTS = [
   { id: 'ares', name: 'Ares', description: 'God of War — captures enemy pawns when possible' },
 ];
 
+const PLANNED_HEURISTIC_BOTS = [
+  { id: 'athena', name: 'Athena', description: 'Goddess of Wisdom — keeps pawns safe first', status: 'Planned' },
+  { id: 'hestia', name: 'Hestia', description: 'Goddess of the Hearth — brings pawns home first', status: 'Planned' },
+  { id: 'apollo', name: 'Apollo', description: 'God of Order — balances capture, safety, and progress', status: 'Planned' },
+  { id: 'hermes', name: 'Hermes', description: 'God of Travel — spreads pawns across the board', status: 'Planned' },
+];
+
 let BOT_REGISTRY = FALLBACK_BOTS;
 
 async function loadBotRegistry() {
@@ -19,6 +26,15 @@ async function loadBotRegistry() {
 }
 
 function getBotRegistry() { return BOT_REGISTRY; }
+
+function botEpithet(bot) {
+  return String(bot?.description || '').split('—')[0].trim();
+}
+
+function botLobbyLabel(bot) {
+  const epithet = botEpithet(bot);
+  return epithet ? `${bot.name} (${epithet})` : bot.name;
+}
 
 // ---- Server-side policy (primary) ------------------------------------------
 
@@ -85,10 +101,12 @@ function renderBotsPage() {
   if (!wrap) return;
 
   const heuristics = BOT_REGISTRY.filter(b => b.type === 'heuristic' || !b.type);
+  const plannedIds = new Set(heuristics.map(b => b.id));
+  const planned = PLANNED_HEURISTIC_BOTS.filter(b => !plannedIds.has(b.id));
   const trained    = BOT_REGISTRY.filter(b => b.type === 'trained');
 
   wrap.innerHTML = `
-    ${botSection('Heuristics', 'Rule-based opponents — no training required', heuristics)}
+    ${botSection('Heuristics', 'Rule-based opponents — no training required', heuristics.concat(planned))}
     ${botSection('Trained Models', 'RL agents produced by the Train tab', trained, true)}
   `;
 }
@@ -96,11 +114,15 @@ function renderBotsPage() {
 function botSection(title, subtitle, bots, allowEmpty = false) {
   const cards = bots.length
     ? bots.map(b => `
-        <div class="bot-card">
+        <div class="bot-card${b.status ? ' bot-card--planned' : ''}">
           <div class="bot-card-icon"><i class="fa-solid fa-robot"></i></div>
           <div class="bot-card-body">
-            <div class="bot-card-name">${b.name}</div>
+            <div class="bot-card-title">
+              <div class="bot-card-name">${b.name}</div>
+              ${b.status ? `<span class="bot-card-status">${b.status}</span>` : ''}
+            </div>
             <div class="bot-card-desc">${b.description}</div>
+            ${botFocusLine(b) ? `<div class="bot-card-focus">${botFocusLine(b)}</div>` : ''}
           </div>
         </div>`).join('')
     : allowEmpty
@@ -118,6 +140,18 @@ function botSection(title, subtitle, bots, allowEmpty = false) {
       </div>
       <div class="bot-cards">${cards}</div>
     </div>`;
+}
+
+function botFocusLine(bot) {
+  const focus = {
+    eris: 'Focus: pure random baseline.',
+    ares: 'Focus: capture if possible, otherwise random.',
+    athena: 'Focus: avoid capture threats.',
+    hestia: 'Focus: advance the pawn closest to home.',
+    apollo: 'Focus: simple scoring across capture, safety, and progress.',
+    hermes: 'Focus: keep pawns distributed for flexibility.',
+  };
+  return focus[bot?.id] || '';
 }
 
 // ---- Auto-play loop --------------------------------------------------------
