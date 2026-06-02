@@ -732,6 +732,8 @@ function renderPlayers(){
   if(sub&&gameState&&gameState.phase!=='rolling'||gameState?.history?.length){
     const round=gameState?.round_count??null;
     if(sub&&round) sub.textContent=`· Round ${round}`;
+  } else if (sub) {
+    sub.textContent = '';
   }
 }
 function renderPlayerSlots() {

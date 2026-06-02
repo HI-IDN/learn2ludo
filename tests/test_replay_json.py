@@ -8,6 +8,23 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
+
+def expected_round_count(saved: dict) -> int:
+    if saved.get("round_count"):
+        return saved["round_count"]
+    history = saved.get("history") or []
+    start = next((e.get("player") for e in history if e.get("type") == "game_start"), saved.get("starting_player", 0))
+    current = start
+    rounds = 1
+    for event in history:
+        if event.get("type") not in {"roll", "yard_roll"}:
+            continue
+        player = event.get("player")
+        if player == start and current != start:
+            rounds += 1
+        current = player
+    return rounds
+
 NODE_REPLAY_CHECK = r"""
 const fs = require('fs');
 const vm = require('vm');
@@ -121,6 +138,7 @@ const snapshot = {
   winners: ctx.gameState.winners,
   winner_color: ctx.gameState.winner_color,
   winner_colors: ctx.gameState.winner_colors,
+  round_count: ctx.gameState.round_count,
   dice: ctx.gameState.dice,
   players: ctx.gameState.players.map(p => ({
     index: p.index,
@@ -138,6 +156,42 @@ const snapshot = {
 };
 
 process.stdout.write(JSON.stringify(snapshot));
+"""
+
+NODE_REPLAY_HISTORY_CHECK = r"""
+const fs = require('fs');
+const vm = require('vm');
+
+const list = { innerHTML: '' };
+const ctx = {
+  console,
+  gameState: {
+    num_players: 2,
+    players: [
+      {index: 0, name: 'Eris', color: 'yellow', pieces: [{pawn_id: 'Y2'}]},
+      {index: 1, name: 'Ares', color: 'blue', pieces: [{pawn_id: 'B1'}]},
+    ],
+    history: [
+      {type: 'move', player: 0, piece: 1, pawn_id: 'Y2', from: 11, to: 15, justification: 'because <safe> & fast'},
+      {type: 'move', player: 1, piece: 0, pawn_id: 'B1', from: 4, to: 7, justification: null},
+    ],
+  },
+  COLORS: {yellow: '#F5CF47', blue: '#0098AA'},
+  document: { getElementById: (id) => id === 'move-history-list' ? list : null },
+  localStorage: { getItem: () => null, setItem() {} },
+  isReplayActive: () => true,
+  isLiveHistoryBrowsing: () => false,
+  getPlayerName: (idx) => idx === 0 ? 'Eris' : 'Ares',
+  playerColorName: (idx) => idx === 0 ? 'yellow' : 'blue',
+  pawnId: (color, idx) => `${color[0].toUpperCase()}${idx + 1}`,
+  displayCellLabel: (_player, pos) => `T${pos + 1}`,
+};
+
+vm.createContext(ctx);
+vm.runInContext(fs.readFileSync('static/js/history.js', 'utf8'), ctx);
+ctx.renderMoveHistory();
+
+process.stdout.write(JSON.stringify({html: list.innerHTML}));
 """
 
 
@@ -162,6 +216,7 @@ def test_replay_json_reconstructs_saved_final_state():
         "winners": saved["winners"],
         "winner_color": saved["winner_color"],
         "winner_colors": saved["winner_colors"],
+        "round_count": expected_round_count(saved),
         "dice": saved["dice"],
         "players": [
             {
@@ -184,3 +239,25 @@ def test_replay_json_reconstructs_saved_final_state():
     else:
         assert replay_history_length == source_history_length
     assert actual == expected
+
+
+def test_replay_history_displays_justifications_without_placeholders():
+    if not shutil.which("node"):
+        pytest.skip("node is required for history.js regression coverage")
+
+    result = subprocess.run(
+        ["node", "-e", NODE_REPLAY_HISTORY_CHECK],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    html = json.loads(result.stdout)["html"]
+
+    assert "Eris" in html
+    assert "Y2: T12" in html
+    assert "because &lt;safe&gt; &amp; fast" in html
+    assert "mh-note" in html
+    assert "null" not in html
+    assert "undefined" not in html

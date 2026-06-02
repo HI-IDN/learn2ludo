@@ -356,10 +356,12 @@ function applyReplayEvent(state, event) {
     state.starting_player = event.player;
     state.starting_player_color = event.color || state.players[event.player]?.color || null;
     state.current_player = event.player;
+    state.round_count = 1;
     state.phase = 'rolling';
     return;
   }
   if (event.type === 'roll' || event.type === 'yard_roll') {
+    updateReplayRoundCount(state, event.player);
     state.current_player = event.player;
     state.dice = event.dice || 0;
     state.last_roll = state.dice;
@@ -405,6 +407,16 @@ function applyReplayEvent(state, event) {
     state.winner_colors = event.winner_colors || state.winners.map(w => state.players[w]?.color);
     state.current_player = event.player;
     state.phase = 'finished';
+  }
+}
+
+function updateReplayRoundCount(state, playerIdx) {
+  if (playerIdx == null) return;
+  const startingPlayer = state.starting_player ?? 0;
+  if (Number(playerIdx) === Number(startingPlayer) && Number(state.current_player) !== Number(startingPlayer)) {
+    state.round_count = (state.round_count || 1) + 1;
+  } else if (!state.round_count) {
+    state.round_count = 1;
   }
 }
 

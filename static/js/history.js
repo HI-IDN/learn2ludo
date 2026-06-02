@@ -85,6 +85,15 @@ function resolvePawnIdFromMove(move, fallbackPlayer) {
   return '?';
 }
 
+function escapeHistoryText(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function saveGameJson() {
   const data = compactGameState();
   if (!data) return;
@@ -233,7 +242,8 @@ function renderHistoryRows(entries) {
       return `<div class="move-history-row move-history-capture" style="--capture-color:${captorCol}"><i class="fa-solid fa-house-crack" style="color:${capturedCol}"></i><span>${captorName}${dot}${captorPid} captured ${capturedName}'s ${capturedPid} &middot; T${e.cell} &rarr; Y</span></div>`;
     }
     const pid = e.pawn_id || resolvePawnIdFromMove({piece_idx: e.piece}, e.player);
-    return `<div class="move-history-row"><i class="fa-solid fa-person-walking" style="color:${col}"></i><span>${name}${dot}${pid}: ${displayCellLabel(e.player, e.from)} &rarr; ${displayCellLabel(e.player, e.to)}</span></div>`;
+    const reason = e.justification ? ` ${dot} <span class="mh-note">${escapeHistoryText(e.justification)}</span>` : '';
+    return `<div class="move-history-row"><i class="fa-solid fa-person-walking" style="color:${col}"></i><span>${name}${dot}${pid}: ${displayCellLabel(e.player, e.from)} &rarr; ${displayCellLabel(e.player, e.to)}${reason}</span></div>`;
   });
 }
 
