@@ -55,6 +55,15 @@
       "description": "Saved bot models"
     },
     {
+      "id": "glossary",
+      "label": "Glossary",
+      "icon": "ti-book",
+      "enabled": true,
+      "default_visible": true,
+      "order": 6,
+      "description": "AI and gameplay terms explained"
+    },
+    {
       "id": "admin",
       "label": "Admin",
       "icon": "ti-shield",

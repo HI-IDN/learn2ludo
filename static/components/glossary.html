@@ -1,0 +1,351 @@
+<!-- GLOSSARY -->
+  <div class="panel" id="panel-glossary">
+    <div style="margin-bottom:24px;">
+      <h1 style="font-size:22px; font-weight:700;">Glossary</h1>
+      <p style="font-size:13px; color:var(--text2); margin-top:4px;">Key AI, gameplay, and system terms used throughout the app.</p>
+    </div>
+
+    <div class="glossary-search-wrap">
+      <i class="ti ti-search glossary-search-icon"></i>
+      <input
+        type="search"
+        id="glossary-search"
+        class="glossary-search"
+        placeholder="Search terms…"
+        oninput="filterGlossary(this.value)"
+        autocomplete="off"
+      >
+    </div>
+
+    <div id="glossary-no-results" class="glossary-empty" style="display:none;">
+      <i class="ti ti-mood-empty"></i>
+      <span>No terms match your search.</span>
+    </div>
+
+    <div id="glossary-list" class="glossary-list">
+
+      <!-- A -->
+      <div class="glossary-letter-group" data-letter="A">
+        <h2 class="glossary-letter">A</h2>
+
+        <details class="glossary-entry" data-term="agent">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Agent</span>
+            <span class="glossary-short">An AI player that perceives the game state and decides what move to make.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            In reinforcement learning, an agent interacts with an environment (the game) by taking actions and receiving rewards. In Learn2Ludo, a bot is an agent that has been trained — or programmed with rules — to play Ludo.
+            <p class="glossary-example"><strong>Example:</strong> The "Weighted Bot" is an agent that scores each possible move and always picks the best one according to its weights.</p>
+          </div>
+        </details>
+
+      </div>
+
+      <!-- B -->
+      <div class="glossary-letter-group" data-letter="B">
+        <h2 class="glossary-letter">B</h2>
+
+        <details class="glossary-entry" data-term="blockade">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Blockade</span>
+            <span class="glossary-short">Two or more pawns of the same colour stacked on one square, blocking opponents from passing.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            A blockade forms when two (or more, depending on the rule set) pawns of the same player share a square. Opponents cannot land on or pass through that square. Blockades are a key defensive and offensive tactic in Ludo.
+            <p class="glossary-example"><strong>Example:</strong> If your two green pawns sit on square 14, no other player can move through square 14.</p>
+          </div>
+        </details>
+
+        <details class="glossary-entry" data-term="bot">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Bot (AI player)</span>
+            <span class="glossary-short">A computer-controlled player that automatically picks moves.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            A bot replaces a human player in a slot and chooses moves without any input. Bots in Learn2Ludo range from purely random players to trained AI models. You can configure bots on the Bots page.
+          </div>
+        </details>
+
+      </div>
+
+      <!-- C -->
+      <div class="glossary-letter-group" data-letter="C">
+        <h2 class="glossary-letter">C</h2>
+
+        <details class="glossary-entry" data-term="capture">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Capture</span>
+            <span class="glossary-short">Landing on a square occupied by an opponent's pawn and sending it back to their yard.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            When a pawn lands on a square that holds an opponent's pawn, the opponent's pawn is captured and returned to their starting yard. The capturing player may receive a bonus roll. Pawns on safe squares cannot be captured.
+            <p class="glossary-example"><strong>Example:</strong> You roll a 3, your pawn lands on square 22 where an opponent sits — their pawn goes back to start.</p>
+          </div>
+        </details>
+
+      </div>
+
+      <!-- D -->
+      <div class="glossary-letter-group" data-letter="D">
+        <h2 class="glossary-letter">D</h2>
+
+        <details class="glossary-entry" data-term="deterministic">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Deterministic decision</span>
+            <span class="glossary-short">A decision that always produces the same result given the same inputs — no randomness involved.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            A deterministic bot always picks the same move when it faces the same game situation. This makes it predictable and easy to reason about. Contrast with stochastic behaviour, where the same situation can lead to different choices.
+            <p class="glossary-example"><strong>Example:</strong> A greedy bot that always captures if a capture is available is deterministic.</p>
+          </div>
+        </details>
+
+      </div>
+
+      <!-- F -->
+      <div class="glossary-letter-group" data-letter="F">
+        <h2 class="glossary-letter">F</h2>
+
+        <details class="glossary-entry" data-term="feature">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Feature</span>
+            <span class="glossary-short">A measurable property of the game state used by an AI to evaluate a move.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            Features translate raw game data into numbers that a bot can reason about. Common features in Learn2Ludo include "distance to home", "number of safe pawns", or "threat of being captured". The Weighted Bot combines these features with weights to score each possible move.
+            <p class="glossary-example"><strong>Example:</strong> "Pawns in home stretch" is a feature with a positive value — more pawns near home is generally better.</p>
+          </div>
+        </details>
+
+      </div>
+
+      <!-- G -->
+      <div class="glossary-letter-group" data-letter="G">
+        <h2 class="glossary-letter">G</h2>
+
+        <details class="glossary-entry" data-term="game state">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Game state</span>
+            <span class="glossary-short">A complete snapshot of the game at a given moment: all pawn positions, whose turn it is, and the dice roll.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            The game state captures everything needed to continue or replay a game. It includes each player's pawn positions, the current turn, any pending dice roll, and the phase (rolling, moving, finished). The AI uses the game state as its input when deciding the next move.
+          </div>
+        </details>
+
+      </div>
+
+      <!-- H -->
+      <div class="glossary-letter-group" data-letter="H">
+        <h2 class="glossary-letter">H</h2>
+
+        <details class="glossary-entry" data-term="heuristic">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Heuristic</span>
+            <span class="glossary-short">A rule of thumb or scoring formula used to evaluate how good a move or game position is.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            Heuristics give a quick estimate of value without exhaustive calculation. In board games they are often hand-crafted by domain experts. The Weighted Bot in Learn2Ludo is heuristic-based: it assigns scores to moves using a set of weighted features rather than learning from experience.
+            <p class="glossary-example"><strong>Example:</strong> "Prefer moves that advance a pawn closer to home" is a simple heuristic.</p>
+          </div>
+        </details>
+
+      </div>
+
+      <!-- J -->
+      <div class="glossary-letter-group" data-letter="J">
+        <h2 class="glossary-letter">J</h2>
+
+        <details class="glossary-entry" data-term="justification">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Justification (player explanation)</span>
+            <span class="glossary-short">A human-readable explanation of why a bot chose a particular move.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            When a bot makes a move, the game can display a justification — a short description of which features drove the decision and by how much. This helps players understand what the AI is "thinking" without requiring knowledge of the underlying maths.
+          </div>
+        </details>
+
+      </div>
+
+      <!-- M -->
+      <div class="glossary-letter-group" data-letter="M">
+        <h2 class="glossary-letter">M</h2>
+
+        <details class="glossary-entry" data-term="model">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Model (AI model)</span>
+            <span class="glossary-short">The learned parameters that define how a trained bot evaluates positions and selects moves.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            After training, an RL bot's knowledge is stored as a model — a set of numbers (weights or a neural network) that encode what it has learned. You can save, load, and compare models on the Bots page.
+          </div>
+        </details>
+
+        <details class="glossary-entry" data-term="move">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Move</span>
+            <span class="glossary-short">Advancing one pawn by the number shown on the dice.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            On each turn a player rolls the dice and must move one eligible pawn the exact number of squares shown. A move can result in landing on a safe square, capturing an opponent, or reaching home. If no pawn can move legally, the turn passes.
+          </div>
+        </details>
+
+      </div>
+
+      <!-- P -->
+      <div class="glossary-letter-group" data-letter="P">
+        <h2 class="glossary-letter">P</h2>
+
+        <details class="glossary-entry" data-term="pawn">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Pawn</span>
+            <span class="glossary-short">One of the four playing pieces each player moves around the board.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            Each player controls four pawns that begin in their yard. Pawns must exit the yard (usually by rolling a 6), travel the full track, and reach home to score. A pawn that is captured is returned to the yard.
+          </div>
+        </details>
+
+        <details class="glossary-entry" data-term="preset variant">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Preset variant</span>
+            <span class="glossary-short">A named collection of rule settings that can be applied to a game in one click.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            Preset variants let you quickly switch between different rule configurations — for example "Classic Ludo", "Fast Mode", or a custom research variant — without manually adjusting every individual rule. Presets are managed on the Settings page.
+          </div>
+        </details>
+
+      </div>
+
+      <!-- R -->
+      <div class="glossary-letter-group" data-letter="R">
+        <h2 class="glossary-letter">R</h2>
+
+        <details class="glossary-entry" data-term="rule set">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Rule set</span>
+            <span class="glossary-short">The complete set of rules governing a game session, including movement, captures, and special squares.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            The rule set determines how the game is played: what roll is needed to leave the yard, whether blockades are allowed, how safe squares work, and more. Different rule sets can dramatically change game dynamics and bot behaviour.
+          </div>
+        </details>
+
+      </div>
+
+      <!-- S -->
+      <div class="glossary-letter-group" data-letter="S">
+        <h2 class="glossary-letter">S</h2>
+
+        <details class="glossary-entry" data-term="safe square">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Safe square</span>
+            <span class="glossary-short">A board position where a pawn cannot be captured by opponents.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            Safe squares are marked on the board and provide protection. Any pawn resting on a safe square is immune to capture. The home column (the coloured stretch before home) is always safe. Some rule sets also designate star squares or starting squares as safe.
+          </div>
+        </details>
+
+        <details class="glossary-entry" data-term="state">
+          <summary class="glossary-summary">
+            <span class="glossary-term">State (game state)</span>
+            <span class="glossary-short">Everything the game needs to know at a given moment to continue play.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            See <strong>Game state</strong>. In AI and reinforcement learning, "state" is the general term for the observation an agent receives from its environment before deciding on an action.
+          </div>
+        </details>
+
+        <details class="glossary-entry" data-term="stochastic">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Stochastic (random) behaviour</span>
+            <span class="glossary-short">Behaviour that involves randomness — the same inputs can lead to different outcomes.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            A stochastic bot does not always pick the best move; it samples from a probability distribution over moves. This can make it less predictable and sometimes harder to exploit than a fully deterministic bot. Dice rolls are the core source of stochasticity in Ludo.
+            <p class="glossary-example"><strong>Example:</strong> A random bot picks any legal move with equal probability — pure stochastic behaviour.</p>
+          </div>
+        </details>
+
+      </div>
+
+      <!-- T -->
+      <div class="glossary-letter-group" data-letter="T">
+        <h2 class="glossary-letter">T</h2>
+
+        <details class="glossary-entry" data-term="training">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Training</span>
+            <span class="glossary-short">The process of running many games so an RL bot improves its strategy through experience.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            During training, the agent plays thousands of episodes, receives rewards for good outcomes (winning, capturing, advancing), and adjusts its model to maximise future rewards. Training is configured and monitored on the Train page.
+          </div>
+        </details>
+
+        <details class="glossary-entry" data-term="turn">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Turn</span>
+            <span class="glossary-short">One player's opportunity to roll the dice and move a pawn.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            Players take turns in a fixed rotation. On each turn the active player rolls the dice, then chooses a pawn to move (if any move is legal). Rolling a 6 may grant an extra turn, depending on the rule set.
+          </div>
+        </details>
+
+      </div>
+
+      <!-- W -->
+      <div class="glossary-letter-group" data-letter="W">
+        <h2 class="glossary-letter">W</h2>
+
+        <details class="glossary-entry" data-term="weighted bot">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Weighted bot</span>
+            <span class="glossary-short">A bot that scores each move using a weighted sum of game features and picks the highest-scoring move.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            The weighted bot assigns a numerical importance (weight) to each feature. To evaluate a move, it multiplies each feature value by its weight and sums the results. The move with the highest total score wins. Weights can be tuned on the Bots page.
+          </div>
+        </details>
+
+        <details class="glossary-entry" data-term="weighted decision">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Weighted decision</span>
+            <span class="glossary-short">A decision made by combining multiple factors, each scaled by an importance weight.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            Rather than treating all considerations as equal, a weighted decision multiplies each factor by its weight before combining them. Higher-weight factors dominate the final score. This lets you control which aspects of the game the bot prioritises.
+            <p class="glossary-example"><strong>Example:</strong> If "capture opponent" has weight 10 and "advance pawn" has weight 1, the bot will almost always prefer capturing over advancing.</p>
+          </div>
+        </details>
+
+      </div>
+
+    </div><!-- /#glossary-list -->
+  </div><!-- /#panel-glossary -->
