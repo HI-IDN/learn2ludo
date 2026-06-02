@@ -152,10 +152,11 @@ function pawnSvg(x,y,color,movable,g,label,chosen){
   const botPending=!!window._botChosenMove;
   const isChosen=botPending&&chosen;
   const replay=typeof isReplayActive==='function'&&isReplayActive();
+  const replayFast=typeof isReplayFastModeActive==='function'&&isReplayFastModeActive();
   const browsing=typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing();
   const pastChosen=!botPending&&chosen&&(replay||browsing);
   const clickable=movable&&!replay&&!browsing&&(!botPending||isChosen);
-  const anim=pastChosen?'fa-shake':(_boardFrills?(movable?(botPending?(isChosen?'fa-shake':''):'fa-beat'):''):'');
+  const anim=replayFast?'':(pastChosen?'fa-shake':(_boardFrills?(movable?(botPending?(isChosen?'fa-shake':''):'fa-beat'):''):''));
   return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${clickable?'pointer':'default'};" ${clickable?`onclick="clickPiece(${g})"`:''}><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${anim?' '+anim:''}"></i></div></foreignObject>`;
 }
 function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}
@@ -317,7 +318,8 @@ function drawBoard(){
     // Compute frills flag before any pawn rendering so yard and track pawns agree.
     const _speed=settings?.auto_play_speed||'off';
     const _isHumanTurn=getPlayerType(gameState.current_player)==='human';
-    _boardFrills=_speed!=='fast'||gameState.valid_moves.length>1;
+    const _replayFast=typeof isReplayFastModeActive==='function'&&isReplayFastModeActive();
+    _boardFrills=!_replayFast&&(_speed!=='fast'||gameState.valid_moves.length>1);
 
     // 1. Build on-track groups; render yard pawns immediately.
     const safeSet=new Set([...(currentLayout().safe_havens||[])]);

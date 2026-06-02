@@ -33,17 +33,19 @@
     1
   ],
   "phase": "finished",
-  "current_player": 0,
+  "current_player": 1,
   "starting_player": 0,
   "starting_player_color": "red",
-  "dice": 1,
-  "winner": 0,
+  "dice": 2,
+  "winner": 1,
   "winners": [
-    0
+    0,
+    1
   ],
-  "winner_color": "red",
+  "winner_color": "green",
   "winner_colors": [
-    "red"
+    "red",
+    "green"
   ],
   "player_times": {
     "0": 12988,
@@ -103,9 +105,9 @@
         },
         {
           "id": "G2",
-          "p": 28,
+          "p": 30,
           "y": false,
-          "f": false,
+          "f": true,
           "a": null
         },
         {
@@ -4559,6 +4561,41 @@
       ],
       "winner_colors": [
         "red"
+      ]
+    },
+    {
+      "player": 1,
+      "dice": 2,
+      "type": "roll",
+      "valid_moves": [
+        {
+          "piece_idx": 5,
+          "pawn_id": "G2",
+          "from": 28,
+          "target": 30
+        }
+      ],
+      "blocked_pawns": []
+    },
+    {
+      "type": "move",
+      "player": 1,
+      "piece": 5,
+      "pawn_id": "G2",
+      "from": 28,
+      "to": 30
+    },
+    {
+      "type": "game_winner",
+      "player": 1,
+      "color": "green",
+      "winners": [
+        0,
+        1
+      ],
+      "winner_colors": [
+        "red",
+        "green"
       ]
     }
   ]

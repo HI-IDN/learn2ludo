@@ -221,6 +221,14 @@ function isReplayActive() {
   return replayModeActive;
 }
 
+function isReplayFastModeActive() {
+  return replayModeActive && replayAutoMode === 'fast';
+}
+
+function isReplayTentativeWinner() {
+  return replayModeActive && replayIndex >= 0 && replayIndex < replaySnapshots.length - 1 && gameState?.winner != null;
+}
+
 function clearReplayMode() {
   stopReplayFastForward();
   replayModeActive = false;

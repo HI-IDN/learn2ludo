@@ -21,6 +21,7 @@ function renderCurrentAction() {
 
   const replay = typeof isReplayActive === 'function' && isReplayActive();
   const browsing = typeof isLiveHistoryBrowsing === 'function' && isLiveHistoryBrowsing();
+  const tentativeReplayWinner = typeof isReplayTentativeWinner === 'function' && isReplayTentativeWinner();
   setCurrentActionMode(replay);
   if (dice && (replay || browsing)) {
     dice.textContent = DICE_FACES[gameState.dice || gameState.last_roll || 0] || DICE_FACES[1];
@@ -32,6 +33,13 @@ function renderCurrentAction() {
   if (avatarIcon) avatarIcon.className = `action-avatar-icon fa-solid ${actionPlayerType(cp) !== 'human' ? 'fa-robot' : 'fa-user'}`;
 
   const _winners = winnerPlayersForBanner();
+  if (tentativeReplayWinner) {
+    delete cardTop.dataset.winSoundPlayed;
+    name.textContent = `${winnerPlayerName(cp)}'s turn`;
+    instr.innerHTML = `Tentative winner${' · '}${winnerNamesForBanner(_winners).join(' & ')}. Equal number of turns is enforced. Remaining players get one more chance.`;
+    if (dice) { dice.style.cursor = 'default'; dice.style.opacity = '0.45'; }
+    return;
+  }
   if (_winners.length) {
     if (avatarIcon) avatarIcon.className = 'action-avatar-icon fa-solid fa-crown';
     cardTop.style.background = winnerBannerBackground(_winners);

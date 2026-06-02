@@ -151,7 +151,7 @@ function archiveCompletedGame() {
 
 function renderHistoryRows(entries) {
   const dot = '<span class="mh-sep"> &middot; </span>';
-  return (entries || []).map(e => {
+  return (entries || []).map((e, idx, all) => {
     if (e.type === 'pregame') {
       const sub = `rolled ${e.roll}${e.round > 1 ? ` (re-roll ${e.round})` : ''} &middot; first player`;
       return `<div class="move-history-row move-history-pregame"><i class="fa-solid fa-dice-d6" style="color:${e.color}"></i><span>${e.name}${dot}${sub}</span></div>`;
@@ -166,7 +166,8 @@ function renderHistoryRows(entries) {
       const labels = winners.map((w, i) => `${historyPlayerName(w)} (${historyPlayerColorName(w, e.winner_colors?.[i])})`);
       const winColor = historyPlayerColorName(e.player, e.color);
       const winCol = historyPlayerColor(e.player, winColor);
-      return `<div class="move-history-row move-history-game-winner"><i class="fa-solid fa-crown" style="color:${winCol}"></i><span>Winner${winners.length > 1 ? 's' : ''}${dot}${labels.join(' & ')}</span></div>`;
+      const tentative = idx < all.length - 1;
+      return `<div class="move-history-row move-history-game-winner"><i class="fa-solid fa-crown" style="color:${winCol}"></i><span>${tentative ? 'Tentative winner' : `Winner${winners.length > 1 ? 's' : ''}`}${dot}${labels.join(' & ')}</span></div>`;
     }
     const col = historyPlayerColor(e.player);
     const name = historyPlayerName(e.player);
