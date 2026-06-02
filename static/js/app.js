@@ -427,15 +427,19 @@ async function rollDice(){
   renderGame();
 }
 function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:0}); } else { const _entry=homeEntryPosition(); const _hl=gameState?.config?.board?.home_length??6; const t=pc.position+dice; if(t<=_entry+_hl-1)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:t}); }}); return moves; }
-async function clickPiece(globalIdx){ if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(m) await makeMove(m.piece_idx,m.target,m.pawn_id); }
-async function makeMove(pieceIdx,target,pawnIdValue=null){ window._botChosenMove=null;
+async function clickPiece(globalIdx){ if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return; if(typeof isMoveJustificationBusy==='function'&&isMoveJustificationBusy())return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(!m)return; if(typeof shouldAskForMoveJustification==='function'&&shouldAskForMoveJustification(m)){ requestMoveJustification(m); return; } await makeMove(m.piece_idx,m.target,m.pawn_id); }
+async function makeMove(pieceIdx,target,pawnIdValue=null,justification=null){ window._botChosenMove=null;
   if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return;
   if(pieceIdx==null&&pawnIdValue) pieceIdx=pieceIdxFromPawnId(pawnIdValue);
   if(pieceIdx==null) return;
+  const selectedMove=(gameState?.valid_moves||[]).find(x=>x.piece_idx===pieceIdx||(pawnIdValue&&x.pawn_id===pawnIdValue))||{piece_idx:pieceIdx,pawn_id:pawnIdValue,target};
+  if(typeof moveNeedsJustification==='function'&&moveNeedsJustification(selectedMove,justification)){ requestMoveJustification(selectedMove); return; }
   const p=Math.floor(pieceIdx/(gameState?.config?.board?.pawns_per_player || 4)), i=pieceIdx%(gameState?.config?.board?.pawns_per_player || 4), pawn=gameState.players[p].pieces[i], from=pawn.position;
   await animatePawnSteps(pieceIdx,from,target);
-  try{ const r=await fetch('/api/game/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({piece_idx:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,target,target_position:target})}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
-  catch{ const _entry=homeEntryPosition(); const _hl=gameState?.config?.board?.home_length??6; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=_entry+_hl-1; pawn.absolute_position=target<_entry?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{}}); if(gameState.dice===6){
+  const payload={piece_idx:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,target,target_position:target};
+  if(justification) payload.justification=justification;
+  try{ const r=await fetch('/api/game/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
+  catch{ const _entry=homeEntryPosition(); const _hl=gameState?.config?.board?.home_length??6; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=_entry+_hl-1; pawn.absolute_position=target<_entry?absForPlayerPosition(p,target):null; gameState.history.push({player:p,piece:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{},justification:justification||null}); if(gameState.dice===6){
       gameState.consecutive_sixes = (gameState.consecutive_sixes || 0) + 1;
       if (gameState.consecutive_sixes >= (settings.max_consecutive_sixes ?? 3)) {
         gameState.consecutive_sixes = 0;
@@ -678,6 +682,7 @@ function scheduleAutoRoll() {
 
 function renderGame(){
   if(!gameState)return;
+  if(typeof renderMoveJustificationPrompt==='function') renderMoveJustificationPrompt();
   // Accumulate per-player turn time when the active player changes.
   const _cp=gameState.current_player;
   if(_turnStartTime!=null&&_lastTurnPlayer!=null&&_cp!==_lastTurnPlayer){

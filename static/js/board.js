@@ -161,6 +161,23 @@ function pawnSvg(x,y,color,movable,g,label,chosen){
 }
 function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}
 function _pawnIconSvg(x,y,_col,icon){const s=12;const cls=icon==='fa-fire'?'fire':icon==='fa-dumbbell'?'dumbbell':'shield';return `<foreignObject x="${x-s/2}" y="${y-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${s}px;line-height:1;"><i class="fa-solid ${icon} pawn-icon pawn-icon--${cls}"></i></div></foreignObject>`;}
+function _pawnNotationSvg(x,y,labels){
+  if(!labels?.length)return '';
+  const text=labels.join(', ');
+  const w=Math.max(30, Math.min(120, text.length*8+12));
+  return `<foreignObject x="${x-w/2}" y="${y-32}" width="${w}" height="24" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-notation-badge">${text}</div></foreignObject>`;
+}
+function _showPawnNotation(playerIdx,movable,inYard,finished){
+  if(!(typeof isMoveJustificationActive==='function'&&isMoveJustificationActive()))return false;
+  if(finished)return false;
+  if(!inYard)return true;
+  return playerIdx===gameState?.current_player&&movable;
+}
+function _addPawnNotationGroup(groups,x,y,label){
+  const key=`${Math.round(x)},${Math.round(y)}`;
+  if(!groups.has(key))groups.set(key,{x,y,labels:[]});
+  groups.get(key).labels.push(label);
+}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 async function animatePawnSteps(g,from,to){
   if((settings?.auto_play_speed||'off')==='fast'&&!(typeof isReplayActive==='function'&&isReplayActive())&&!(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return;
@@ -314,6 +331,7 @@ function drawBoard(){
     const pawnsPerPlayer=gameState.config?.board?.pawns_per_player||4;
     const valid=new Map(gameState.valid_moves.map(m=>[m.piece_idx,m]));
     const step=8;
+    const notationGroups=new Map();
 
     // Compute frills flag before any pawn rendering so yard and track pawns agree.
     const _speed=settings?.auto_play_speed||'off';
@@ -336,6 +354,7 @@ function drawBoard(){
         if(pc.in_yard){
           const pt=yard[i]||yard[0];
           html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,_chosenMoveForPiece(g,pid));
+          if(_showPawnNotation(player.index,movable,true,pc.finished)) _addPawnNotationGroup(notationGroups,pt.x,pt.y,pid);
         } else if(pc.finished){
           const entry=typeof homeEntryPosition==='function'?homeEntryPosition():(layout.track_size||52)-1;
           const finish=entry+(gameState?.config?.board?.home_length??settings.board_home_length??6)-1;
@@ -343,14 +362,14 @@ function drawBoard(){
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
-          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable:false,g,label:i+1,pid,player:player.index,absPos:null});
+          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable:false,g,label:i+1,pid,player:player.index,absPos:null,finished:true});
         } else {
           const absPos=pc.absolute_position!=null?pc.absolute_position:null;
           const center=absPos!=null?geo.trackCenters[absPos]:getTargetCenter(player.index,pc.position);
           if(!center)return;
           const key=`${Math.round(center.x)},${Math.round(center.y)}`;
           if(!trackGroups.has(key))trackGroups.set(key,[]);
-          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable,g,label:i+1,pid,player:player.index,absPos});
+          trackGroups.get(key).push({cx:center.x,cy:center.y,col,movable,g,label:i+1,pid,player:player.index,absPos,finished:false});
         }
       });
     });
@@ -441,6 +460,14 @@ function drawBoard(){
         if(isSafe)              html+=_pawnIconSvg(pv.cx+ox,pv.cy,null,'fa-shield');
         else if(pv.wouldBlockade) html+=_pawnIconSvg(pv.cx+ox,pv.cy,null,'fa-dumbbell');
       });
+    });
+
+    trackGroups.forEach((group)=>{
+      const labels=group.filter(pw=>_showPawnNotation(pw.player,pw.movable,false,pw.finished)).map(pw=>pw.pid);
+      labels.forEach(label=>_addPawnNotationGroup(notationGroups,group[0].cx,group[0].cy,label));
+    });
+    notationGroups.forEach(({x,y,labels})=>{
+      html+=_pawnNotationSvg(x,y,labels);
     });
   }
   svg.innerHTML=html;

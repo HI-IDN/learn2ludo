@@ -35,6 +35,25 @@
   --fa-beat-scale: 1.18;
 }
 
+.pawn-notation-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 120px;
+  padding: 1px 4px;
+  border: 1px solid rgba(38, 38, 38, 0.2);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #262626;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
 // ---- Preview ghost ----------------------------------------------------------
 // fa-regular (outline) pawn shown at the destination cell.
 

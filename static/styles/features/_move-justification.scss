@@ -1,0 +1,56 @@
+@use "../base/variables" as *;
+
+.move-justification-wrap {
+  margin-top: 12px;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.move-justification-box {
+  border: 1px solid $accent-tint-border;
+  border-radius: $radius;
+  background: $accent-tint;
+  padding: 12px;
+}
+
+.move-justification-label {
+  display: block;
+  margin-bottom: 4px;
+  color: $color-text;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.move-justification-help {
+  margin-bottom: 8px;
+  color: $color-text-2;
+  font-size: 12px;
+}
+
+.move-justification-input {
+  width: 100%;
+  min-height: 76px;
+  resize: vertical;
+  border: 1px solid $border-medium;
+  border-radius: $radius;
+  background: $color-bg-alt;
+  color: $color-text;
+  font-family: $font-sans;
+  font-size: 13px;
+  line-height: 1.35;
+  padding: 9px 10px;
+
+  &:focus {
+    outline: 2px solid color-mix(in srgb, $color-primary 22%, transparent);
+    border-color: $color-primary;
+  }
+}
+
+.move-justification-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
