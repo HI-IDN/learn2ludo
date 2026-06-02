@@ -199,16 +199,20 @@ function applySettingsToControls(){
   const val=(id,v)=>{const e=document.getElementById(id); if(e)e.value=v;};
   c('rule-safe', settings.safe_squares ?? true); c('rule-equal-turns', settings.equal_rounds ?? false); c('set-show-cell-numbers', settings.show_cell_numbers ?? false); val('rule-max-sixes', settings.max_consecutive_sixes ?? 3); val('rule-empty-board-rolls', settings.empty_board_rolls ?? 3);
   val('set-num-players', settings.num_players ?? 4); val('board-yard-count', settings.board_yard_count ?? 4); val('board-track-size', settings.board_track_size ?? 52); val('board-safe-offset', settings.board_safe_offset ?? 7); val('board-home-length', settings.board_home_length ?? 6); val('board-pawns-per-player', settings.pawns_per_player ?? 4); c('board-stack-home', settings.stack_home_pawns ?? false);
-  val('move-justification-frequency', settings.move_justification_frequency ?? 'always'); val('move-justification-every-n', settings.move_justification_every_n ?? 2); updateMoveJustificationSettingsVisibility();
+  val('move-justification-frequency', settings.move_justification_frequency ?? 'always'); val('move-justification-every-n', settings.move_justification_every_n ?? 2); val('move-justification-sporadic-chance', Math.round((settings.move_justification_random_probability ?? 0.35) * 100)); updateMoveJustificationSettingsVisibility();
 }
 function updateMoveJustificationSettingsVisibility(){
   const mode=document.getElementById('move-justification-frequency')?.value || settings.move_justification_frequency || 'always';
-  const row=document.getElementById('move-justification-every-row');
-  if(row) row.hidden = mode !== 'every-n';
+  const everyRow=document.getElementById('move-justification-every-row');
+  const sporadicRow=document.getElementById('move-justification-sporadic-row');
+  if(everyRow) everyRow.hidden = mode !== 'every-n';
+  if(sporadicRow) sporadicRow.hidden = mode !== 'random';
 }
 function saveSettings(){
   const boardCfg = readBoardConfig();
   const justificationMode = document.getElementById('move-justification-frequency')?.value || settings.move_justification_frequency || 'always';
+  const sporadicChanceRaw = parseInt(document.getElementById('move-justification-sporadic-chance')?.value || 35);
+  const sporadicChance = Number.isFinite(sporadicChanceRaw) ? Math.max(0, Math.min(100, sporadicChanceRaw)) : 35;
   settings={...settings,
     num_players: settings.num_players ?? 4,
     board_yard_count: boardCfg.yard_count ?? settings.board_yard_count ?? 4,
@@ -228,7 +232,7 @@ function saveSettings(){
     show_cell_numbers:document.getElementById('set-show-cell-numbers')?.checked ?? false,
     move_justification_frequency:['always','every-n','random','off'].includes(justificationMode) ? justificationMode : 'always',
     move_justification_every_n:Math.max(1, parseInt(document.getElementById('move-justification-every-n')?.value || settings.move_justification_every_n || 2)),
-    move_justification_random_probability:settings.move_justification_random_probability ?? 0.35,
+    move_justification_random_probability:sporadicChance / 100,
 
     sound_volume: typeof getSoundVolume==='function' ? getSoundVolume() : (settings.sound_volume ?? 0.8)
   };

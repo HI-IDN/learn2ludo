@@ -116,6 +116,77 @@ ctx.moveJustificationKeydown({
 process.stdout.write(JSON.stringify({focused, prevented}));
 """
 
+NODE_PROMPT_SETTINGS_CHECK = r"""
+const fs = require('fs');
+const vm = require('vm');
+
+const elements = {
+  'move-justification-frequency': {value: 'random'},
+  'move-justification-every-n': {value: '4'},
+  'move-justification-sporadic-chance': {value: '65'},
+  'move-justification-every-row': {hidden: false},
+  'move-justification-sporadic-row': {hidden: true},
+};
+
+const ctx = {
+  console,
+  settings: {
+    move_justification_frequency: 'random',
+    move_justification_every_n: 4,
+    move_justification_random_probability: 0.65,
+  },
+  document: {getElementById: (id) => elements[id] || null},
+  window: {addEventListener() {}, learn2ludoComponentsReady: Promise.resolve()},
+  localStorage: {
+    getItem: () => JSON.stringify({
+      move_justification_frequency: 'random',
+      move_justification_every_n: 4,
+      move_justification_random_probability: 0.65,
+    }),
+    setItem() {},
+  },
+  readBoardConfig: () => ({
+    yard_count: 4,
+    track_size: 52,
+    safe_offset: 7,
+    home_length: 6,
+    pawns_per_player: 4,
+    stack_home_pawns: false,
+  }),
+  validateBoardConfig: () => ({}),
+  persistSettings: () => {},
+  renderPlayers: () => {},
+  renderLobbySlots: () => {},
+  drawBoard: () => {},
+};
+
+vm.createContext(ctx);
+vm.runInContext(fs.readFileSync('static/js/app.js', 'utf8'), ctx);
+
+ctx.loadSettings();
+ctx.applySettingsToControls();
+const visibleForSporadic = {
+  every: elements['move-justification-every-row'].hidden,
+  sporadic: elements['move-justification-sporadic-row'].hidden,
+  chance: elements['move-justification-sporadic-chance'].value,
+};
+
+ctx.saveSettings();
+
+elements['move-justification-frequency'].value = 'every-n';
+ctx.updateMoveJustificationSettingsVisibility();
+const visibleForEveryN = {
+  every: elements['move-justification-every-row'].hidden,
+  sporadic: elements['move-justification-sporadic-row'].hidden,
+};
+
+process.stdout.write(JSON.stringify({
+  visibleForSporadic,
+  visibleForEveryN,
+  probability: vm.runInContext('settings.move_justification_random_probability', ctx),
+}));
+"""
+
 
 def test_move_justification_prompt_frequency_modes():
     if not shutil.which("node"):
@@ -155,3 +226,22 @@ def test_move_justification_enter_focuses_confirm_without_newline():
     actual = json.loads(result.stdout)
 
     assert actual == {"focused": True, "prevented": True}
+
+
+def test_move_justification_sporadic_setting_visibility_and_persistence():
+    if not shutil.which("node"):
+        pytest.skip("node is required for move justification JS regression coverage")
+
+    result = subprocess.run(
+        ["node", "-e", NODE_PROMPT_SETTINGS_CHECK],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    actual = json.loads(result.stdout)
+
+    assert actual["visibleForSporadic"] == {"every": True, "sporadic": False, "chance": 65}
+    assert actual["visibleForEveryN"] == {"every": False, "sporadic": True}
+    assert actual["probability"] == 0.65
