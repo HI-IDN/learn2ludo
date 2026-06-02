@@ -3,7 +3,7 @@
     {
       "id": "eris",
       "name": "Eris",
-      "type": "heuristic",
+      "type": "baseline",
       "epithet": "Goddess of Discord",
       "description": "Chooses from valid moves without using strategy.",
       "focus": "Useful as a baseline for comparing whether another strategy is actually helping.",

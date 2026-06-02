@@ -7,6 +7,7 @@ def test_bot_catalog_includes_available_and_planned_bots():
 
     assert by_id["eris"]["selectable"] is True
     assert by_id["eris"]["implemented"] is True
+    assert by_id["eris"]["type"] == "baseline"
     assert by_id["eris"]["epithet"] == "Goddess of Discord"
 
     assert by_id["ares"]["selectable"] is True

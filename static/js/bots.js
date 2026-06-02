@@ -4,7 +4,7 @@
 // JS policies are offline fallbacks only — do not add game logic here.
 
 const FALLBACK_BOTS = [
-  { id: 'eris', name: 'Eris', type: 'heuristic', epithet: 'Goddess of Discord', description: 'Chooses from valid moves without using strategy.', focus: 'Useful as a baseline for comparing whether another strategy is actually helping.', status: 'Available', selectable: true, implemented: true },
+  { id: 'eris', name: 'Eris', type: 'baseline', epithet: 'Goddess of Discord', description: 'Chooses from valid moves without using strategy.', focus: 'Useful as a baseline for comparing whether another strategy is actually helping.', status: 'Available', selectable: true, implemented: true },
   { id: 'ares', name: 'Ares', type: 'heuristic', epithet: 'God of War', description: 'Looks for chances to send opponent pawns back to their yard.', focus: 'Values disruption: a capture can slow one opponent more than a small advance helps Ares.', status: 'Available', selectable: true, implemented: true },
   { id: 'athena', name: 'Athena', type: 'heuristic', epithet: 'Goddess of Wisdom', description: 'Keeps pawns safe before looking for other moves.', focus: 'Compares current danger with landing-square danger, preferring moves that reduce exposure.', status: 'Available', selectable: true, implemented: true },
   { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Prefers the most progressed pawn, especially when a move brings it nearer to the home stretch.', status: 'Available', selectable: true, implemented: true },
@@ -232,11 +232,13 @@ function renderBotsPage() {
   const wrap = document.getElementById('bots-sections');
   if (!wrap) return;
 
+  const baseline   = BOT_REGISTRY.filter(b => b.type === 'baseline');
   const heuristics = BOT_REGISTRY.filter(b => b.type === 'heuristic' || !b.type);
   const weighted   = BOT_REGISTRY.filter(b => b.type === 'weighted-template' || b.type === 'weighted');
   const trained    = BOT_REGISTRY.filter(b => b.type === 'trained');
 
   wrap.innerHTML = `
+    ${botSection('Baseline', 'No strategy — useful for comparison', baseline)}
     ${botSection('Heuristics', 'Rule-based opponents — no training required', heuristics)}
     ${botSection('Create your own weighted bot', 'Combine heuristic features with sliders — Apollo is the example template', weighted, true)}
     ${botSection('Trained Models', 'RL agents produced by the Train tab', trained, true)}
