@@ -4,6 +4,8 @@ let _pg = null;
 
 function showPregame(activeSlots) {
   if (typeof clearReplayMode === 'function') clearReplayMode();
+  if (typeof resetLiveTimeline === 'function') resetLiveTimeline();
+  if (typeof setCurrentActionMode === 'function') setCurrentActionMode(false);
   const active = activeSlots
     || (typeof lobbyActiveSlots === 'function' ? lobbyActiveSlots() : [0,1,2,3]);
   const n = active.length;
@@ -40,6 +42,7 @@ function _hidePregame() {
   if (container) { container.style.display = 'none'; container.innerHTML = ''; }
   document.getElementById('game-action-wrap')?.style.removeProperty('display');
   _setPregameSubtitle('');
+  if (typeof setCurrentActionMode === 'function') setCurrentActionMode(false);
   _setActionCardTop(null, 'fa-circle-info', 'Start game', true);
   _pg = null;
 }

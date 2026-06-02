@@ -14,6 +14,9 @@ let gameStartingPlayer = null; // set when first player is determined
 let tabConfig = [];
 let adminToken = null;
 let animatingPieceGlobalIdx = null;
+let liveTimelineSnapshots = [];
+let liveTimelineIndex = -1;
+let liveTimelineLastKey = null;
 
 function boardLayout(trackSize=null, yardCount=null) {
   yardCount = yardCount ?? settings.board_yard_count ?? 4;
@@ -58,6 +61,19 @@ function pieceIdxFromPawnId(pawnIdValue){
   return null;
 }
 function moveRefKey(move){ return move?.pawn_id ? `id:${move.pawn_id}` : `idx:${move?.piece_idx}`; }
+function moveMatchesEvent(move, event) {
+  if (!move || !event) return false;
+  if (move.pawn_id && event.pawn_id && String(move.pawn_id).toUpperCase() === String(event.pawn_id).toUpperCase()) return true;
+  if (typeof move.piece_idx === 'number' && typeof event.piece_idx === 'number' && move.piece_idx === event.piece_idx) return true;
+  if (typeof move.piece_idx === 'number' && typeof event.piece === 'number') {
+    const pawns = gameState?.config?.board?.pawns_per_player || 4;
+    const movePlayer = Math.floor(move.piece_idx / pawns);
+    const moveLocal = move.piece_idx % pawns;
+    const eventPlayer = typeof event.player === 'number' ? event.player : movePlayer;
+    return movePlayer === eventPlayer && moveLocal === (event.piece % pawns);
+  }
+  return false;
+}
 
 const DEFAULT_HUMAN_NAMES = ['Óðinn','Freyja','Loki','Þór','Sif','Týr'];
 const DEFAULT_BOT_NAMES = ['Artemis'];
@@ -148,10 +164,26 @@ function normalizeEngineState(raw) {
   };
 }
 
+function ensureTransportButtonStyles() {
+  if (document.getElementById('transport-button-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'transport-button-styles';
+  style.textContent = `
+    .replay-controls-row--top{align-items:center;gap:8px}
+    .replay-step-btn{min-width:34px;justify-content:center;border-color:#10099F;background:#fff;color:#10099F}
+    .replay-step-btn:hover:not(:disabled){background:#0098AA;border-color:#0098AA;color:#fff}
+    .replay-step-btn.active,
+    .replay-step-btn[aria-pressed="true"]{background:#10099F;border-color:#10099F;color:#fff}
+    .replay-step-btn.active:hover:not(:disabled),
+    .replay-step-btn[aria-pressed="true"]:hover:not(:disabled){background:#0098AA;border-color:#0098AA;color:#fff}
+  `;
+  document.head.appendChild(style);
+}
+
 
 
 async function init(){
-  loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); drawBoard(); _updateLiveSpeedControls();
+  ensureTransportButtonStyles(); loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); drawBoard(); _updateLiveSpeedControls();
 }
 function loadSettings(){
   try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
@@ -289,12 +321,16 @@ function gameInProgress(){
   return gameState && gameState.winner === null;
 }
 
+function gameHasStarted() {
+  return !!((gameState?.history || []).length);
+}
+
 function requestNewGame(){
   gameStartingPlayer=null;
   // Use the current game's slots so the pregame matches the Players panel.
   // Fall back to lobby slots when there's no active game.
   const slots = gameState?.slots ?? (typeof lobbyActiveSlots==='function' ? lobbyActiveSlots() : null);
-  if(gameInProgress()){
+  if(gameInProgress()&&gameHasStarted()){
     const ctrl = document.getElementById('new-game-control');
     if(!ctrl) { showPregame(slots); return; }
     ctrl.innerHTML = `
@@ -356,6 +392,7 @@ function _formatPlayerTime(ms){ if(!ms)return '0:00'; const s=Math.floor(ms/1000
 
 async function newGame(startingPlayer=0){
   if (typeof clearReplayMode === 'function') clearReplayMode();
+  resetLiveTimeline();
   gameStartingPlayer=startingPlayer;
   cancelNewGame();
   if(typeof resetGameHistorySync==='function') resetGameHistorySync();
@@ -381,7 +418,7 @@ function animateDice(finalValue){
   return new Promise(resolve=>{ const timer=setInterval(()=>{ face.textContent=DICE_FACES[1+Math.floor(Math.random()*6)]; if(performance.now()-start>=650){clearInterval(timer); face.textContent=DICE_FACES[finalValue]||DICE_FACES[1]; face.classList.remove('rolling'); resolve();}},55); });
 }
 async function rollDice(){
-  if(typeof isReplayActive==='function'&&isReplayActive())return;
+  if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return;
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture(); if(!gameState)return;
   const diceEl=document.getElementById('dice-face'); if(diceEl){diceEl.style.cursor='default';diceEl.style.opacity='0.45';}
   try{ const r=await fetch('/api/game/roll',{method:'POST'}); const d=await r.json(); const dice=Number(d.dice ?? d.roll ?? d.last_roll ?? d.value ?? d); await animateDice(dice); gameState=normalizeEngineState(d.game||d.state||d); if(!gameState.dice)gameState.dice=dice; }
@@ -389,9 +426,9 @@ async function rollDice(){
   renderGame();
 }
 function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:0}); } else { const _entry=homeEntryPosition(); const _hl=gameState?.config?.board?.home_length??6; const t=pc.position+dice; if(t<=_entry+_hl-1)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:t}); }}); return moves; }
-async function clickPiece(globalIdx){ if(typeof isReplayActive==='function'&&isReplayActive())return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(m) await makeMove(m.piece_idx,m.target,m.pawn_id); }
+async function clickPiece(globalIdx){ if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(m) await makeMove(m.piece_idx,m.target,m.pawn_id); }
 async function makeMove(pieceIdx,target,pawnIdValue=null){ window._botChosenMove=null;
-  if(typeof isReplayActive==='function'&&isReplayActive())return;
+  if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return;
   if(pieceIdx==null&&pawnIdValue) pieceIdx=pieceIdxFromPawnId(pawnIdValue);
   if(pieceIdx==null) return;
   const p=Math.floor(pieceIdx/(gameState?.config?.board?.pawns_per_player || 4)), i=pieceIdx%(gameState?.config?.board?.pawns_per_player || 4), pawn=gameState.players[p].pieces[i], from=pawn.position;
@@ -417,6 +454,117 @@ async function makeMove(pieceIdx,target,pawnIdValue=null){ window._botChosenMove
 function toggleSection(id){
   const el=document.getElementById(id);
   if(el) el.classList.toggle('collapsed');
+}
+
+function resetLiveTimeline() {
+  liveTimelineSnapshots = [];
+  liveTimelineIndex = -1;
+  liveTimelineLastKey = null;
+}
+
+function isLiveHistoryBrowsing() {
+  return liveTimelineSnapshots.length > 0 && liveTimelineIndex >= 0 && liveTimelineIndex < liveTimelineSnapshots.length - 1;
+}
+
+function liveTimelineKey(state) {
+  return JSON.stringify({
+    phase: state?.phase,
+    current_player: state?.current_player,
+    dice: state?.dice,
+    winner: state?.winner,
+    history_len: state?.history?.length || 0,
+    players: (state?.players || []).map(p => ({
+      index: p.index,
+      pieces: (p.pieces || []).map(pc => [pc.position, !!pc.finished, !!pc.in_yard]),
+    })),
+  });
+}
+
+function captureLiveTimelineSnapshot() {
+  if (!gameState) return;
+  if (typeof isReplayActive === 'function' && isReplayActive()) return;
+  if (isLiveHistoryBrowsing()) return;
+  const key = liveTimelineKey(gameState);
+  if (key === liveTimelineLastKey) return;
+  liveTimelineSnapshots.push(JSON.parse(JSON.stringify(gameState)));
+  liveTimelineLastKey = key;
+  liveTimelineIndex = liveTimelineSnapshots.length - 1;
+}
+
+function liveTimelineHistoryLength(snapshot) {
+  return snapshot?.history?.length || 0;
+}
+
+function liveTimelineAnchorIndexes() {
+  if (!liveTimelineSnapshots.length) return [];
+  const anchors = [0];
+  let lastHistoryLength = liveTimelineHistoryLength(liveTimelineSnapshots[0]);
+  for (let i = 1; i < liveTimelineSnapshots.length; i++) {
+    const historyLength = liveTimelineHistoryLength(liveTimelineSnapshots[i]);
+    const isHead = i === liveTimelineSnapshots.length - 1;
+    if (historyLength !== lastHistoryLength || isHead) {
+      if (anchors[anchors.length - 1] !== i) anchors.push(i);
+      lastHistoryLength = historyLength;
+    }
+  }
+  return anchors;
+}
+
+function liveTimelineAnchorPosition() {
+  const anchors = liveTimelineAnchorIndexes();
+  return anchors.indexOf(liveTimelineIndex);
+}
+
+function liveTimelineChosenMove() {
+  if (!isLiveHistoryBrowsing()) return null;
+  if (gameState?.phase !== 'moving' || !(gameState?.valid_moves || []).length) return null;
+  const nextSnapshot = liveTimelineSnapshots[liveTimelineIndex + 1];
+  const event = nextSnapshot?.history?.[nextSnapshot.history.length - 1];
+  if (!event || event.type !== 'move') return null;
+  return (gameState.valid_moves || []).some(move => moveMatchesEvent(move, event)) ? event : null;
+}
+
+async function animateLiveTimelineTransition(fromIndex, toIndex) {
+  if (fromIndex === toIndex) return;
+  const fromSnapshot = liveTimelineSnapshots[fromIndex];
+  const toSnapshot = liveTimelineSnapshots[toIndex];
+  const fromHistoryLength = liveTimelineHistoryLength(fromSnapshot);
+  const toHistoryLength = liveTimelineHistoryLength(toSnapshot);
+  let event = null;
+  let from = null;
+  let to = null;
+
+  if (toHistoryLength > fromHistoryLength) {
+    event = toSnapshot?.history?.[toHistoryLength - 1];
+    from = event?.from;
+    to = event?.to;
+  } else if (fromHistoryLength > toHistoryLength) {
+    event = fromSnapshot?.history?.[fromHistoryLength - 1];
+    from = event?.to;
+    to = event?.from;
+  }
+
+  if (!event || from == null || to == null || typeof animatePawnSteps !== 'function') return;
+  const pieceIdx = typeof event.piece === 'number' ? event.piece : pieceIdxFromPawnId(event.pawn_id);
+  if (pieceIdx == null) return;
+  await animatePawnSteps(pieceIdx, from, to);
+}
+
+async function liveTimelineStep(delta) {
+  if (!liveTimelineSnapshots.length) return;
+  if (typeof clearPregameMode === 'function' && typeof _pg !== 'undefined' && _pg) return;
+  _clearLiveAutomationTimers();
+  if (liveTimelineIndex < 0) liveTimelineIndex = liveTimelineSnapshots.length - 1;
+  const anchors = liveTimelineAnchorIndexes();
+  const currentAnchor = anchors.indexOf(liveTimelineIndex);
+  const anchorPos = currentAnchor >= 0 ? currentAnchor : anchors.length - 1;
+  const nextAnchor = Math.max(0, Math.min(anchors.length - 1, anchorPos + delta));
+  const next = anchors[nextAnchor];
+  if (next == null || next === liveTimelineIndex) return;
+  await animateLiveTimelineTransition(liveTimelineIndex, next);
+  liveTimelineIndex = next;
+  gameState = normalizeEngineState(JSON.parse(JSON.stringify(liveTimelineSnapshots[liveTimelineIndex])));
+  renderGame();
 }
 
 const _AUTO_SPEEDS = ['off', 'normal', 'fast'];
@@ -466,7 +614,13 @@ function _kickAutoPlay(immediate = false) {
 }
 
 function _updateLiveSpeedControls() {
+  if (typeof isReplayActive === 'function' && isReplayActive()) return;
+  const liveControls = document.getElementById('live-speed-controls');
+  const replayControls = document.getElementById('replay-step-controls');
+  if (liveControls) liveControls.style.display = '';
+  if (replayControls) replayControls.style.display = 'none';
   const speed = settings.auto_play_speed || 'off';
+  const browsing = isLiveHistoryBrowsing();
   const map = {
     off: document.getElementById('speed-pause-btn'),
     normal: document.getElementById('speed-normal-btn'),
@@ -476,7 +630,24 @@ function _updateLiveSpeedControls() {
     if (!btn) return;
     btn.classList.toggle('active', speed === mode);
     btn.setAttribute('aria-pressed', speed === mode ? 'true' : 'false');
+    btn.disabled = browsing;
   });
+  const back = document.getElementById('live-back-btn');
+  const forward = document.getElementById('live-forward-btn');
+  const status = document.getElementById('live-timeline-status');
+  const anchors = liveTimelineAnchorIndexes();
+  const anchorPos = liveTimelineAnchorPosition();
+  if (back) back.disabled = !anchors.length || anchorPos <= 0;
+  if (forward) forward.disabled = !browsing || anchorPos >= anchors.length - 1;
+  if (status) status.textContent = browsing && anchorPos >= 0 ? `${anchorPos + 1}/${anchors.length}` : '';
+}
+
+function updateLiveTransportControls() {
+  _updateLiveSpeedControls();
+}
+
+function _updateAutoPlayBtn() {
+  _updateLiveSpeedControls();
 }
 
 function _tryAutoResolveForcedHumanMove(immediate = false) {
@@ -514,12 +685,17 @@ function renderGame(){
   }
   if(_lastTurnPlayer!==_cp) _lastTurnPlayer=_cp;
   drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
+  captureLiveTimelineSnapshot();
+  if(typeof isReplayActive==='function'&&isReplayActive()){
+    if(typeof updateReplayControls==='function') updateReplayControls();
+    return;
+  }
   _updateLiveSpeedControls();
+  if(isLiveHistoryBrowsing()) return;
   if(typeof scheduleBotPlay==='function') scheduleBotPlay();
   if(typeof fastAdvanceBotMove==='function') fastAdvanceBotMove();
   if(typeof suggestBotMove==='function') suggestBotMove();
   scheduleAutoRoll();
-  if(typeof isReplayActive==='function'&&isReplayActive())return;
   _tryAutoResolveForcedHumanMove();
 }
 function displayCellLabel(player,pos){ if(pos===-1||pos==null)return 'Y'; const ts=currentLayout().track_size; const entry=homeEntryPosition(); if(pos>=entry)return `H${pos-entry+1}`; const abs=(pos+currentLayout().starts[playerSlot(player,gameState?.num_players||4)])%ts; return `T${abs+1}`; }
@@ -623,53 +799,3 @@ async function startTraining(){try{await fetch('/api/train/start',{method:'POST'
 async function stopTraining(){try{await fetch('/api/train/stop',{method:'POST'});}catch{}}
 async function loadStats(){try{const r=await fetch('/api/stats'); const d=await r.json(); document.getElementById('st-games').textContent=d.games_played??0;}catch{}}
 window.addEventListener('DOMContentLoaded', async () => { await (window.learn2ludoComponentsReady || Promise.resolve()); init(); });
-
-function setLiveAutoSpeed(speed) {
-  settings.auto_play_speed = speed;
-  persistSettings();
-  updateLiveTransportControls();
-  if (gameState && speed !== 'off') _kickAutoPlay();
-}
-
-function toggleAutoPlay() {
-  const cur = settings.auto_play_speed || 'off';
-  setLiveAutoSpeed(_AUTO_SPEEDS[(_AUTO_SPEEDS.indexOf(cur) + 1) % _AUTO_SPEEDS.length]);
-}
-
-function _updateAutoPlayBtn() {
-  updateLiveTransportControls();
-}
-
-function _updateLiveSpeedControls() {
-  updateLiveTransportControls();
-}
-
-function updateLiveTransportControls() {
-  if (typeof isReplayActive === 'function' && isReplayActive()) return;
-  const pause = document.getElementById('replay-prev-btn');
-  const play = document.getElementById('replay-play-btn');
-  const fast = document.getElementById('replay-next-btn');
-  const status = document.getElementById('replay-status');
-  const speed = settings.auto_play_speed || 'off';
-  if (pause) {
-    pause.disabled = false;
-    pause.classList.toggle('active', speed === 'off');
-    pause.innerHTML = '<i class="fa-solid fa-pause"></i>';
-    pause.title = 'Pause autoplay';
-  }
-  if (play) {
-    play.disabled = false;
-    play.classList.toggle('active', speed === 'normal');
-    play.innerHTML = '<i class="fa-solid fa-play"></i>';
-    play.title = 'Play with animations';
-  }
-  if (fast) {
-    fast.disabled = false;
-    fast.classList.toggle('active', speed === 'fast');
-    fast.innerHTML = '<i class="fa-solid fa-forward"></i>';
-    fast.title = 'Fast play';
-  }
-  if (status) status.textContent = '';
-  const legacy = document.getElementById('auto-play-btn');
-  if (legacy) legacy.style.display = 'none';
-}

@@ -1,6 +1,11 @@
 // Learn2Ludo current action panel.
 // Classic script, not ES module.
 
+function setCurrentActionMode(isReplay = false) {
+  const title = document.getElementById('current-action-title');
+  if (title) title.textContent = isReplay ? 'Replay action' : 'Current action';
+}
+
 function renderCurrentAction() {
   if (!gameState) return;
   const phase = gameState.phase;
@@ -15,8 +20,9 @@ function renderCurrentAction() {
   if (!cardTop || !name || !instr) return;
 
   const replay = typeof isReplayActive === 'function' && isReplayActive();
-  if (title) title.textContent = replay ? 'Replay action' : 'Current action';
-  if (dice && replay) {
+  const browsing = typeof isLiveHistoryBrowsing === 'function' && isLiveHistoryBrowsing();
+  setCurrentActionMode(replay);
+  if (dice && (replay || browsing)) {
     dice.textContent = DICE_FACES[gameState.dice || gameState.last_roll || 0] || DICE_FACES[1];
   }
 
@@ -45,17 +51,19 @@ function renderCurrentAction() {
 
   name.textContent = `${winnerPlayerName(cp)}'s turn`;
 
-  const canRoll = !replay && phase === 'rolling';
+  const canRoll = !replay && !browsing && phase === 'rolling';
   if (phase === 'rolling') {
     const yardCount = gameState.yard_roll_count || 0;
     const yardMax = gameState.max_yard_rolls || 3;
-    instr.textContent = yardCount > 0
+    instr.textContent = browsing
+      ? 'Viewing earlier live move.'
+      : yardCount > 0
       ? `Try ${yardCount + 1}/${yardMax} - roll to enter.`
       : 'Click the dice to roll.';
-  } else if (phase === 'moving') instr.textContent = 'Choose a pawn to move.';
-  else if (phase === 'next') instr.textContent = 'Pass to the next player.';
+  } else if (phase === 'moving') instr.textContent = browsing ? 'Viewing earlier live move.' : 'Choose a pawn to move.';
+  else if (phase === 'next') instr.textContent = browsing ? 'Viewing earlier live move.' : 'Pass to the next player.';
   else if (phase === 'finished') instr.textContent = 'Game finished.';
-  else instr.textContent = 'Waiting for next action.';
+  else instr.textContent = browsing ? 'Viewing earlier live move.' : 'Waiting for next action.';
 
   if (dice) { dice.style.cursor = canRoll ? 'pointer' : 'default'; dice.style.opacity = canRoll ? '' : '0.45'; }
 }

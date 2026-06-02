@@ -19,7 +19,13 @@
       <!-- TOP CONTROLS -->
       <div class="side-section controls">
         <div class="replay-controls-row replay-controls-row--top" id="live-speed-controls">
-          <span class="replay-status">Speed</span>
+          <span class="replay-status">Controls</span>
+          <button class="btn btn-sm replay-step-btn"
+                  id="live-back-btn"
+                  onclick="liveTimelineStep(-1)"
+                  title="Previous move">
+            <i class="fa-solid fa-step-backward"></i>
+          </button>
           <button class="btn btn-sm replay-step-btn"
                   id="speed-pause-btn"
                   onclick="setAutoPlaySpeed('off')"
@@ -38,14 +44,22 @@
                   title="Fast forward (no animation, no sound)">
             <i class="fa-solid fa-forward"></i>
           </button>
+          <button class="btn btn-sm replay-step-btn"
+                  id="live-forward-btn"
+                  onclick="liveTimelineStep(1)"
+                  title="Next move">
+            <i class="fa-solid fa-step-forward"></i>
+          </button>
+          <span class="replay-status" id="live-timeline-status"></span>
         </div>
 
         <div class="replay-controls-row replay-controls-row--top" id="replay-step-controls" style="display:none">
+          <span class="replay-status">Controls</span>
           <button class="btn btn-sm replay-step-btn"
                   id="replay-prev-btn"
                   onclick="transportPauseOrBack()"
                   disabled
-                  title="Previous replay step">
+                  title="Previous move">
             <i class="fa-solid fa-step-backward"></i>
           </button>
           <button class="btn btn-sm replay-step-btn"
@@ -66,7 +80,7 @@
                   id="replay-forward-btn"
                   onclick="replayStep(1)"
                   disabled
-                  title="Next replay step">
+                  title="Next move">
             <i class="fa-solid fa-step-forward"></i>
           </button>
           <span class="replay-status" id="replay-status"></span>
@@ -161,17 +175,19 @@
                     title="Save game JSON">
               <i class="fa-solid fa-download"></i> Save JSON
             </button>
-            <input type="file"
-                   id="replay-json-input"
-                   accept="application/json,.json"
-                   onchange="loadReplayJsonFile(this.files?.[0])"
-                   hidden>
-            <button class="btn btn-sm"
-                    id="load-replay-json-btn"
-                    onclick="document.getElementById('replay-json-input')?.click()"
-                    title="Load replay JSON">
-              <i class="fa-solid fa-folder-open"></i> Replay
-            </button>
+            <div id="load-replay-control">
+              <input type="file"
+                     id="replay-json-input"
+                     accept="application/json,.json"
+                     onchange="loadReplayJsonFile(this.files?.[0])"
+                     hidden>
+              <button class="btn btn-sm"
+                      id="load-replay-json-btn"
+                      onclick="requestLoadReplayJson()"
+                      title="Load replay JSON">
+                <i class="fa-solid fa-folder-open"></i> Replay
+              </button>
+            </div>
           </div>
         </div>
       </div>

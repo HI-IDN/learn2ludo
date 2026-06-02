@@ -234,6 +234,11 @@ function renderMoveHistory() {
     list.innerHTML = rows.length ? rows.join('') : '<div class="move-history-empty">No committed moves yet.</div>';
     return;
   }
+  if (typeof isLiveHistoryBrowsing === 'function' && isLiveHistoryBrowsing()) {
+    const rows = renderHistoryRows([...(gameState?.history || [])].reverse());
+    list.innerHTML = rows.length ? rows.join('') : '<div class="move-history-empty">No committed moves yet.</div>';
+    return;
+  }
   syncGameHistory();
   archiveCompletedGame();
   const rows = renderHistoryRows(sessionHistory);

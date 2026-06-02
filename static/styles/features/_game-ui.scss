@@ -134,6 +134,39 @@
   flex-wrap: wrap;
 }
 
+.replay-controls-row--top {
+  align-items: center;
+  gap: 8px;
+}
+
+.replay-step-btn {
+  min-width: 34px;
+  justify-content: center;
+  border-color: $color-primary;
+  background: #fff;
+  color: $color-primary;
+
+  &:hover:not(:disabled) {
+    background: $color-teal;
+    border-color: $color-teal;
+    color: #fff;
+  }
+
+  &.active,
+  &[aria-pressed="true"] {
+    background: $color-primary;
+    border-color: $color-primary;
+    color: #fff;
+  }
+
+  &.active:hover:not(:disabled),
+  &[aria-pressed="true"]:hover:not(:disabled) {
+    background: $color-teal;
+    border-color: $color-teal;
+    color: #fff;
+  }
+}
+
 // ---- Shared list container --------------------------------------------------
 
 .move-history-list,

@@ -123,31 +123,74 @@ function getTargetCenter(playerIdx,target){
 function getYardPositions(slot){
   return currentGeometry().yardPawnSlots[slot] || currentGeometry().yardPawnSlots[0];
 }
+function getAnimatedCenter(playerIdx,pieceIdx,pos){
+  if(pos<0){
+    const slot=playerSlot(playerIdx,gameState?.num_players||4);
+    return getYardPositions(slot)?.[pieceIdx]||null;
+  }
+  return getTargetCenter(playerIdx,pos);
+}
 let _boardFrills=true; // set before each render; false in fast mode unless human has >1 choice
-function _isChosenMoveForPiece(move,g,pid){ return !!move&&(move.piece_idx===g||(pid&&move.pawn_id===pid)); }
+function _isChosenMoveForPiece(move,g,pid){
+  if(!move) return false;
+  if(typeof moveMatchesEvent==='function') return moveMatchesEvent({piece_idx:g,pawn_id:pid}, move);
+  return move.piece_idx===g||(pid&&move.pawn_id===pid);
+}
+function _pastChosenMove(){
+  const replay=typeof isReplayActive==='function'&&isReplayActive();
+  const browsing=typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing();
+  if(!replay&&!browsing) return null;
+  if(replay&&typeof replayChosenMove==='function') return replayChosenMove();
+  if(browsing&&typeof liveTimelineChosenMove==='function') return liveTimelineChosenMove();
+  return null;
+}
+function _chosenMoveForPiece(g,pid){
+  return _isChosenMoveForPiece(window._botChosenMove,g,pid)||_isChosenMoveForPiece(_pastChosenMove(),g,pid);
+}
 function pawnSvg(x,y,color,movable,g,label,chosen){
   const s=26;
   const botPending=!!window._botChosenMove;
   const isChosen=botPending&&chosen;
   const replay=typeof isReplayActive==='function'&&isReplayActive();
-  const clickable=movable&&!replay&&(!botPending||isChosen);
-  const anim=_boardFrills?(movable?(botPending?(isChosen?'fa-shake':''):'fa-beat'):''):'';
+  const browsing=typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing();
+  const pastChosen=!botPending&&chosen&&(replay||browsing);
+  const clickable=movable&&!replay&&!browsing&&(!botPending||isChosen);
+  const anim=pastChosen?'fa-shake':(_boardFrills?(movable?(botPending?(isChosen?'fa-shake':''):'fa-beat'):''):'');
   return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${clickable?'pointer':'default'};" ${clickable?`onclick="clickPiece(${g})"`:''}><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${anim?' '+anim:''}"></i></div></foreignObject>`;
 }
 function pawnPreviewSvg(x,y,color,g){const s=28;return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html preview" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-regular fa-chess-pawn"></i></div></foreignObject>`;}
 function _pawnIconSvg(x,y,_col,icon){const s=12;const cls=icon==='fa-fire'?'fire':icon==='fa-dumbbell'?'dumbbell':'shield';return `<foreignObject x="${x-s/2}" y="${y-25}" width="${s}" height="${s}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${s}px;line-height:1;"><i class="fa-solid ${icon} pawn-icon pawn-icon--${cls}"></i></div></foreignObject>`;}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 async function animatePawnSteps(g,from,to){
-  if((settings?.auto_play_speed||'off')==='fast')return;
+  if((settings?.auto_play_speed||'off')==='fast'&&!(typeof isReplayActive==='function'&&isReplayActive())&&!(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return;
   const svg=document.getElementById('ludo-board');
   if(!svg)return;
   const pawns=gameState?.config?.board?.pawns_per_player||4;
   const p=Math.floor(g/pawns), i=g%pawns;
   const col=COLORS[playerColorName(p,gameState?.num_players||4)];
 
-  // Steps to visit: for yard entry just show the landing cell; otherwise n+1…n+m.
-  const steps=from<0?[to]:Array.from({length:to-from},(_,k)=>from+1+k);
-  if(!steps.length)return;
+  const points=[];
+  if(from<0&&to<0){
+    const pt=getAnimatedCenter(p,i,to);
+    if(pt) points.push(pt);
+  } else if(from<0){
+    const pt=getAnimatedCenter(p,i,to);
+    if(pt) points.push(pt);
+  } else if(to<0){
+    const pt=getAnimatedCenter(p,i,to);
+    if(pt) points.push(pt);
+  } else if(to>from){
+    for(let pos=from+1;pos<=to;pos++){
+      const pt=getAnimatedCenter(p,i,pos);
+      if(pt) points.push(pt);
+    }
+  } else if(to<from){
+    for(let pos=from-1;pos>=to;pos--){
+      const pt=getAnimatedCenter(p,i,pos);
+      if(pt) points.push(pt);
+    }
+  }
+  if(!points.length)return;
 
   animatingPieceGlobalIdx=g;
   drawBoard(); // hides real pawn, drops previews
@@ -155,9 +198,7 @@ async function animatePawnSteps(g,from,to){
   const grp=document.createElementNS('http://www.w3.org/2000/svg','g');
   svg.appendChild(grp);
   try{
-    for(const pos of steps){
-      const pt=getTargetCenter(p,pos);
-      if(!pt)continue;
+    for(const pt of points){
       grp.innerHTML=pawnSvg(pt.x,pt.y,col,false,g,i+1,false);
       if(typeof playSound==='function')playSound('move');
       await sleep(180);
@@ -172,7 +213,7 @@ function drawBoard(){
 
   // Background: white
   let html=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
-  if(typeof isReplayActive==='function'&&isReplayActive()){
+  if((typeof isReplayActive==='function'&&isReplayActive())||(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing())){
     html+=`<g opacity="0.96"><rect x="${S-104}" y="14" width="86" height="30" rx="8" fill="${COLORS.blue}"/><text x="${S-61}" y="34" text-anchor="middle" font-size="13" font-family="Jost, sans-serif" font-weight="800" fill="#fff">REPLAY</text></g>`;
   }
 
@@ -290,7 +331,7 @@ function drawBoard(){
         const movable=valid.has(g);
         if(pc.in_yard){
           const pt=yard[i]||yard[0];
-          html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,_isChosenMoveForPiece(window._botChosenMove,g,pid));
+          html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,_chosenMoveForPiece(g,pid));
         } else if(pc.finished){
           const entry=typeof homeEntryPosition==='function'?homeEntryPosition():(layout.track_size||52)-1;
           const finish=entry+(gameState?.config?.board?.home_length??settings.board_home_length??6)-1;
@@ -356,7 +397,7 @@ function drawBoard(){
       const n=group.length;
       group.forEach((pw,idx)=>{
         const ox=(idx-(n-1)/2)*step;
-        html+=pawnSvg(pw.cx+ox,pw.cy,pw.col,pw.movable,pw.g,pw.label,_isChosenMoveForPiece(window._botChosenMove,pw.g,pw.pid));
+        html+=pawnSvg(pw.cx+ox,pw.cy,pw.col,pw.movable,pw.g,pw.label,_chosenMoveForPiece(pw.g,pw.pid));
         if(_boardFrills){
           const inSafe=pw.absPos!=null&&safeSet.has(pw.absPos);
           if(inSafe){
@@ -387,7 +428,7 @@ function drawBoard(){
       });
       friendlies.forEach((pw,idx)=>{
         const ox=(opponents.length+idx-(total-1)/2)*step;
-        html+=pawnSvg(baseCx+ox,baseCy,pw.col,pw.movable,pw.g,pw.label,_isChosenMoveForPiece(window._botChosenMove,pw.g,pw.pid));
+        html+=pawnSvg(baseCx+ox,baseCy,pw.col,pw.movable,pw.g,pw.label,_chosenMoveForPiece(pw.g,pw.pid));
         if(_boardFrills&&isSafe) html+=_pawnIconSvg(baseCx+ox,baseCy,null,'fa-shield');
       });
       pvData.previews.forEach((pv,idx)=>{

@@ -8,6 +8,69 @@ let replayModeActive = false;
 let replayFastForwardTimer = null;
 let replayAutoMode = null;
 
+function renderLoadReplayButton() {
+  const ctrl = document.getElementById('load-replay-control');
+  if (!ctrl) return;
+  ctrl.innerHTML = `
+    <input type="file"
+           id="replay-json-input"
+           accept="application/json,.json"
+           onchange="loadReplayJsonFile(this.files?.[0])"
+           hidden>
+    <button class="btn btn-sm"
+            id="load-replay-json-btn"
+            onclick="requestLoadReplayJson()"
+            title="Load replay JSON">
+      <i class="fa-solid fa-folder-open"></i> Replay
+    </button>`;
+}
+
+function prepareReplayBoard() {
+  if (typeof clearReplayMode === 'function') clearReplayMode();
+  if (typeof clearPregameMode === 'function') clearPregameMode();
+  if (typeof resetLiveTimeline === 'function') resetLiveTimeline();
+  if (typeof clearSessionHistory === 'function') clearSessionHistory();
+  else if (typeof resetGameHistorySync === 'function') resetGameHistorySync();
+  if (typeof stopElapsedTimer === 'function') stopElapsedTimer();
+  settings.auto_play_speed = 'off';
+  persistSettings();
+  gameStartingPlayer = null;
+  const slots = gameState?.slots || (typeof lobbyActiveSlots === 'function' ? lobbyActiveSlots() : null);
+  const n = slots?.length || parseInt(document.getElementById('set-num-players')?.value || settings.num_players || 4);
+  if (typeof makeDemoState === 'function') {
+    gameState = makeDemoState(n, slots || Array.from({length:n}, (_, i) => i));
+    renderGame();
+  }
+  if (typeof setCurrentActionMode === 'function') setCurrentActionMode(false);
+}
+
+function requestLoadReplayJson() {
+  if (typeof gameInProgress === 'function' && typeof gameHasStarted === 'function' && gameInProgress() && gameHasStarted()) {
+    const ctrl = document.getElementById('load-replay-control');
+    if (!ctrl) return;
+    ctrl.innerHTML = `
+      <div class="new-game-confirm">
+        <span class="new-game-confirm-msg"><i class="fa-solid fa-triangle-exclamation"></i> Abandon current game?</span>
+        <div class="new-game-confirm-btns">
+          <button class="btn btn-danger btn-sm" onclick="confirmLoadReplayJson()">Yes, load replay</button>
+          <button class="btn btn-sm" onclick="cancelLoadReplayJson()">Cancel</button>
+        </div>
+      </div>`;
+    return;
+  }
+  confirmLoadReplayJson();
+}
+
+function cancelLoadReplayJson() {
+  renderLoadReplayButton();
+}
+
+function confirmLoadReplayJson() {
+  renderLoadReplayButton();
+  prepareReplayBoard();
+  document.getElementById('replay-json-input')?.click();
+}
+
 async function loadReplayJsonFile(file) {
   if (!file) return;
   try {
@@ -20,6 +83,7 @@ async function loadReplayJsonFile(file) {
   } finally {
     const input = document.getElementById('replay-json-input');
     if (input) input.value = '';
+    renderLoadReplayButton();
   }
 }
 
@@ -36,6 +100,7 @@ function readReplayFile(file) {
 function loadReplayJson(data) {
   stopReplayFastForward();
   if (typeof clearPregameMode === 'function') clearPregameMode();
+  if (typeof setCurrentActionMode === 'function') setCurrentActionMode(true);
   replayData = normalizeReplayData(data);
   applyReplaySettings(replayData);
   replaySnapshots = buildReplaySnapshots(replayData);
@@ -63,14 +128,17 @@ function applyReplaySettings(data) {
   });
 }
 
-function replayStep(delta) {
+async function replayStep(delta) {
   stopReplayFastForward();
-  replayStepBy(delta);
+  await replayStepBy(delta, {animate: delta === 1});
 }
 
-function replayStepBy(delta) {
+async function replayStepBy(delta, { animate = true } = {}) {
   if (!replaySnapshots.length) return;
-  replayIndex = Math.max(0, Math.min(replaySnapshots.length - 1, replayIndex + delta));
+  const nextIndex = Math.max(0, Math.min(replaySnapshots.length - 1, replayIndex + delta));
+  if (nextIndex === replayIndex) return;
+  if (animate && delta > 0) await animateReplayAdvance(nextIndex, true);
+  replayIndex = nextIndex;
   applyReplaySnapshot(replayIndex);
 }
 
@@ -83,23 +151,46 @@ function toggleReplayFastForward(mode = 'fast') {
   }
   stopReplayFastForward();
   replayAutoMode = mode;
-  replayFastForwardTimer = setInterval(() => {
+  const tick = async () => {
     if (!replayModeActive || replayIndex >= replaySnapshots.length - 1) {
       stopReplayFastForward();
       updateReplayControls();
       return;
     }
-    if (replayAutoMode === 'normal' && typeof playSound === 'function') playSound('move');
-    replayStepBy(1);
-  }, mode === 'fast' ? 90 : 650);
+    if (replayAutoMode === 'normal') await animateReplayAdvance(replayIndex + 1);
+    await replayStepBy(1, {animate:false});
+    if (!replayFastForwardTimer) return;
+    replayFastForwardTimer = setTimeout(tick, mode === 'fast' ? 90 : 650);
+  };
+  replayFastForwardTimer = setTimeout(tick, 0);
   updateReplayControls();
 }
 
 function stopReplayFastForward() {
   if (!replayFastForwardTimer) return;
-  clearInterval(replayFastForwardTimer);
+  clearTimeout(replayFastForwardTimer);
   replayFastForwardTimer = null;
   replayAutoMode = null;
+}
+
+async function animateReplayAdvance(nextIndex, force = false) {
+  if (!force && replayAutoMode !== 'normal') return;
+  const nextSnapshot = replaySnapshots[nextIndex];
+  const event = nextSnapshot?.history?.[nextSnapshot.history.length - 1];
+  if (!event || event.type !== 'move') return;
+  if (typeof animatePawnSteps !== 'function') return;
+  const pieceIdx = typeof event.piece === 'number' ? event.piece : pieceIdxFromPawnId(event.pawn_id);
+  if (pieceIdx == null) return;
+  await animatePawnSteps(pieceIdx, event.from, event.to);
+}
+
+function replayChosenMove() {
+  if (!replayModeActive) return null;
+  if (gameState?.phase !== 'moving' || !(gameState?.valid_moves || []).length) return null;
+  const nextSnapshot = replaySnapshots[replayIndex + 1];
+  const event = nextSnapshot?.history?.[nextSnapshot.history.length - 1];
+  if (!event || event.type !== 'move') return null;
+  return (gameState.valid_moves || []).some(move => moveMatchesEvent(move, event)) ? event : null;
 }
 
 function transportPauseOrBack() {
@@ -136,6 +227,7 @@ function clearReplayMode() {
   replayData = null;
   replayIndex = -1;
   replaySnapshots = [];
+  if (typeof setCurrentActionMode === 'function') setCurrentActionMode(false);
   updateReplayControls();
 }
 
