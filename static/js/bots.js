@@ -4,12 +4,12 @@
 // JS policies are offline fallbacks only — do not add game logic here.
 
 const FALLBACK_BOTS = [
-  { id: 'eris', name: 'Eris', type: 'heuristic', epithet: 'Goddess of Discord', description: 'Chooses from valid moves without using strategy.', focus: 'Use as the pure random baseline.', status: 'Available', selectable: true, implemented: true },
-  { id: 'ares', name: 'Ares', type: 'heuristic', epithet: 'God of War', description: 'Looks for captures before falling back to random movement.', focus: 'Prioritise capture opportunities.', status: 'Available', selectable: true, implemented: true },
-  { id: 'athena', name: 'Athena', type: 'heuristic', epithet: 'Goddess of Wisdom', description: 'Keeps pawns safe before looking for other moves.', focus: 'Avoid capture threats.', status: 'Available', selectable: true, implemented: true },
-  { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Advance the pawn closest to home.', status: 'Available', selectable: true, implemented: true },
+  { id: 'eris', name: 'Eris', type: 'heuristic', epithet: 'Goddess of Discord', description: 'Chooses from valid moves without using strategy.', focus: 'Useful as a baseline for comparing whether another strategy is actually helping.', status: 'Available', selectable: true, implemented: true },
+  { id: 'ares', name: 'Ares', type: 'heuristic', epithet: 'God of War', description: 'Looks for chances to send opponent pawns back to their yard.', focus: 'Values disruption: a capture can slow one opponent more than a small advance helps Ares.', status: 'Available', selectable: true, implemented: true },
+  { id: 'athena', name: 'Athena', type: 'heuristic', epithet: 'Goddess of Wisdom', description: 'Keeps pawns safe before looking for other moves.', focus: 'Compares current danger with landing-square danger, preferring moves that reduce exposure.', status: 'Available', selectable: true, implemented: true },
+  { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Prefers the most progressed pawn, especially when a move brings it nearer to the home stretch.', status: 'Available', selectable: true, implemented: true },
   { id: 'apollo', name: 'Apollo', type: 'weighted-template', epithet: 'God of Order', description: 'Example weighted bot combining the simple heuristic features.', focus: 'Student-created bot template: tune weights for capture, safety, progress, and spread.', status: 'Example', selectable: false, implemented: false },
-  { id: 'hermes', name: 'Hermes', type: 'heuristic', epithet: 'God of Travel', description: 'Keeps pawns distributed across the board.', focus: 'Spread pawns for flexibility.', status: 'Available', selectable: true, implemented: true },
+  { id: 'hermes', name: 'Hermes', type: 'heuristic', epithet: 'God of Travel', description: 'Keeps pawns distributed across the board.', focus: 'Avoids clustering by choosing moves that increase distance from friendly pawns already in play.', status: 'Available', selectable: true, implemented: true },
 ];
 
 let BOT_REGISTRY = FALLBACK_BOTS;
@@ -236,7 +236,7 @@ function botSection(title, subtitle, bots, allowEmpty = false) {
           <div class="bot-card-body">
             <div class="bot-card-title">
               <div class="bot-card-name">${b.name}</div>
-              ${b.status ? `<span class="bot-card-status">${b.status}</span>` : ''}
+              ${b.status && b.status !== 'Available' ? `<span class="bot-card-status">${b.status}</span>` : ''}
             </div>
             <div class="bot-card-desc">${botCardDescription(b)}</div>
             ${b.focus ? `<div class="bot-card-focus">Focus: ${b.focus}</div>` : ''}

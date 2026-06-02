@@ -6,7 +6,7 @@
       "type": "heuristic",
       "epithet": "Goddess of Discord",
       "description": "Chooses from valid moves without using strategy.",
-      "focus": "Use as the pure random baseline.",
+      "focus": "Useful as a baseline for comparing whether another strategy is actually helping.",
       "status": "Available",
       "selectable": true
     },
@@ -15,8 +15,8 @@
       "name": "Ares",
       "type": "heuristic",
       "epithet": "God of War",
-      "description": "Looks for captures before falling back to random movement.",
-      "focus": "Prioritise capture opportunities.",
+      "description": "Looks for chances to send opponent pawns back to their yard.",
+      "focus": "Values disruption: a capture can slow one opponent more than a small advance helps Ares.",
       "status": "Available",
       "selectable": true
     },
@@ -26,7 +26,7 @@
       "type": "heuristic",
       "epithet": "Goddess of Wisdom",
       "description": "Keeps pawns safe before looking for other moves.",
-      "focus": "Avoid capture threats.",
+      "focus": "Compares current danger with landing-square danger, preferring moves that reduce exposure.",
       "status": "Available",
       "selectable": true
     },
@@ -36,7 +36,7 @@
       "type": "heuristic",
       "epithet": "Goddess of the Hearth",
       "description": "Brings pawns home as directly as possible.",
-      "focus": "Advance the pawn closest to home.",
+      "focus": "Prefers the most progressed pawn, especially when a move brings it nearer to the home stretch.",
       "status": "Available",
       "selectable": true
     },
@@ -56,7 +56,7 @@
       "type": "heuristic",
       "epithet": "God of Travel",
       "description": "Keeps pawns distributed across the board.",
-      "focus": "Spread pawns for flexibility.",
+      "focus": "Avoids clustering by choosing moves that increase distance from friendly pawns already in play.",
       "status": "Available",
       "selectable": true
     }
