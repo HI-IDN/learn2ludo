@@ -3,7 +3,7 @@
 
 let _pendingJustifiedMove = null;
 let _moveJustificationSubmitting = false;
-let _moveJustificationEligibleCount = 0;
+let _moveJustificationEligibleCounts = {};
 
 function moveJustificationMode() {
   const mode = settings?.move_justification_frequency || 'always';
@@ -21,7 +21,7 @@ function moveJustificationRandomProbability() {
 }
 
 function resetMoveJustificationFrequency() {
-  _moveJustificationEligibleCount = 0;
+  _moveJustificationEligibleCounts = {};
 }
 
 function isMoveJustificationEligible(move) {
@@ -38,14 +38,19 @@ function isMoveJustificationEligible(move) {
   return true;
 }
 
+function moveJustificationPlayerKey() {
+  return String(gameState?.current_player ?? 0);
+}
+
 function shouldPromptForEligibleMove(consume=false) {
   const mode = moveJustificationMode();
   if (mode === 'off') return false;
   if (mode === 'always') return true;
 
   if (mode === 'every-n') {
-    const nextCount = _moveJustificationEligibleCount + 1;
-    if (consume) _moveJustificationEligibleCount = nextCount;
+    const key = moveJustificationPlayerKey();
+    const nextCount = (_moveJustificationEligibleCounts[key] || 0) + 1;
+    if (consume) _moveJustificationEligibleCounts[key] = nextCount;
     return nextCount % moveJustificationEveryN() === 0;
   }
 

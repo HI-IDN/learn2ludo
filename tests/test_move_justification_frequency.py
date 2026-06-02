@@ -57,6 +57,19 @@ results.everyN = [
   ctx.moveNeedsJustification(move, null),
 ];
 
+ctx.settings.move_justification_frequency = 'every-n';
+ctx.settings.move_justification_every_n = 2;
+ctx.resetMoveJustificationFrequency();
+ctx.gameState.current_player = 0;
+const p0First = ctx.moveNeedsJustification(move, null);
+ctx.gameState.current_player = 1;
+const p1First = ctx.moveNeedsJustification(move, null);
+ctx.gameState.current_player = 0;
+const p0Second = ctx.moveNeedsJustification(move, null);
+ctx.gameState.current_player = 1;
+const p1Second = ctx.moveNeedsJustification(move, null);
+results.everyNPerPlayer = [p0First, p1First, p0Second, p1Second];
+
 ctx.settings.move_justification_frequency = 'random';
 ctx.settings.move_justification_random_probability = 1;
 ctx.resetMoveJustificationFrequency();
@@ -94,6 +107,7 @@ def test_move_justification_prompt_frequency_modes():
     assert actual["always"] is True
     assert actual["off"] is False
     assert actual["everyN"] == [False, False, True, False, False, True]
+    assert actual["everyNPerPlayer"] == [False, False, True, True]
     assert actual["randomAlways"] is True
     assert actual["randomNever"] is False
     assert actual["forcedMoveSkipped"] is False
