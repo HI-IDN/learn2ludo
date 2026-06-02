@@ -435,6 +435,7 @@ function animateDice(finalValue){
 }
 async function rollDice(){
   if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return;
+  if(typeof isMoveJustificationActive==='function'&&isMoveJustificationActive())return;
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture(); if(!gameState)return;
   const diceEl=document.getElementById('dice-face'); if(diceEl){diceEl.style.cursor='default';diceEl.style.opacity='0.45';}
   try{ const r=await fetch('/api/game/roll',{method:'POST'}); const d=await r.json(); const dice=Number(d.dice ?? d.roll ?? d.last_roll ?? d.value ?? d); await animateDice(dice); gameState=normalizeEngineState(d.game||d.state||d); if(!gameState.dice)gameState.dice=dice; }
@@ -621,6 +622,7 @@ function toggleAutoPlay() {
 function _kickAutoPlay(immediate = false) {
   if (typeof isReplayActive === 'function' && isReplayActive()) return;
   if (typeof _pg !== 'undefined' && _pg) return; // pregame handles its own rolls
+  if (typeof isMoveJustificationActive === 'function' && isMoveJustificationActive()) return;
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
@@ -674,6 +676,7 @@ function _updateAutoPlayBtn() {
 function _tryAutoResolveForcedHumanMove(immediate = false) {
   clearTimeout(_autoForcedMoveTimer);
   if (typeof isReplayActive === 'function' && isReplayActive()) return;
+  if (typeof isMoveJustificationActive === 'function' && isMoveJustificationActive()) return;
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'moving' || gameState.winner !== null) return;
@@ -689,6 +692,7 @@ function scheduleAutoRoll() {
   clearTimeout(_autoRollTimer);
   if (typeof isReplayActive === 'function' && isReplayActive()) return;
   if (typeof _pg !== 'undefined' && _pg) return;
+  if (typeof isMoveJustificationActive === 'function' && isMoveJustificationActive()) return;
   const speed = settings.auto_play_speed || 'off';
   if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'rolling' || gameState.winner !== null) return;

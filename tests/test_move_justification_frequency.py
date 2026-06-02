@@ -89,6 +89,33 @@ results.forcedMoveSkipped = (() => {
 process.stdout.write(JSON.stringify(results));
 """
 
+NODE_PROMPT_KEYDOWN_CHECK = r"""
+const fs = require('fs');
+const vm = require('vm');
+
+let focused = false;
+let prevented = false;
+const ctx = {
+  console,
+  settings: {},
+  gameState: null,
+  document: {
+    getElementById: (id) => id === 'move-justification-confirm'
+      ? {focus: () => { focused = true; }}
+      : null,
+  },
+};
+
+vm.createContext(ctx);
+vm.runInContext(fs.readFileSync('static/js/move-justification.js', 'utf8'), ctx);
+ctx.moveJustificationKeydown({
+  key: 'Enter',
+  preventDefault: () => { prevented = true; },
+});
+
+process.stdout.write(JSON.stringify({focused, prevented}));
+"""
+
 
 def test_move_justification_prompt_frequency_modes():
     if not shutil.which("node"):
@@ -111,3 +138,20 @@ def test_move_justification_prompt_frequency_modes():
     assert actual["randomAlways"] is True
     assert actual["randomNever"] is False
     assert actual["forcedMoveSkipped"] is False
+
+
+def test_move_justification_enter_focuses_confirm_without_newline():
+    if not shutil.which("node"):
+        pytest.skip("node is required for move justification JS regression coverage")
+
+    result = subprocess.run(
+        ["node", "-e", NODE_PROMPT_KEYDOWN_CHECK],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    actual = json.loads(result.stdout)
+
+    assert actual == {"focused": True, "prevented": True}

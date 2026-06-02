@@ -156,7 +156,8 @@ function pawnSvg(x,y,color,movable,g,label,chosen){
   const browsing=typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing();
   const pastChosen=!botPending&&chosen&&(replay||browsing);
   const pendingChosen=typeof isMoveAwaitingJustification==='function'&&isMoveAwaitingJustification(g);
-  const clickable=movable&&!replay&&!browsing&&(!botPending||isChosen);
+  const locked=typeof isMoveJustificationActive==='function'&&isMoveJustificationActive();
+  const clickable=movable&&!locked&&!replay&&!browsing&&(!botPending||isChosen);
   const anim=replayFast?'':(pendingChosen||pastChosen?'fa-shake':(_boardFrills?(movable?(botPending?(isChosen?'fa-shake':''):'fa-beat'):''):''));
   return `<foreignObject x="${x-s/2}" y="${y-s/2}" width="${s}" height="${s}" style="overflow:visible;cursor:${clickable?'pointer':'default'};" ${clickable?`onclick="clickPiece(${g})"`:''}><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-html${movable?' movable':''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:${color};font-size:${s}px;line-height:1;"><i class="fa-solid fa-chess-pawn${anim?' '+anim:''}"></i></div></foreignObject>`;
 }

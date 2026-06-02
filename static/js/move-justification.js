@@ -150,9 +150,9 @@ function updateMoveJustificationConfirm() {
 }
 
 function moveJustificationKeydown(event) {
-  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+  if (event.key === 'Enter') {
     event.preventDefault();
-    confirmMoveJustification();
+    document.getElementById('move-justification-confirm')?.focus();
   }
 }
 
