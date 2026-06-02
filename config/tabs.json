@@ -15,8 +15,17 @@
       "icon": "ti-dice",
       "enabled": true,
       "default_visible": true,
-      "order": 1,
+      "order": 2,
       "description": "Board and game controls"
+    },
+    {
+      "id": "explorer",
+      "label": "History",
+      "icon": "ti-world",
+      "enabled": true,
+      "default_visible": true,
+      "order": 1,
+      "description": "Ludo history and variant explorer"
     },
     {
       "id": "settings",
@@ -24,7 +33,7 @@
       "icon": "ti-settings",
       "enabled": true,
       "default_visible": true,
-      "order": 2,
+      "order": 3,
       "description": "Board rules and players"
     },
     {
@@ -33,7 +42,7 @@
       "icon": "ti-brain",
       "enabled": true,
       "default_visible": false,
-      "order": 3,
+      "order": 4,
       "description": "RL training controls"
     },
     {
@@ -42,7 +51,7 @@
       "icon": "ti-chart-bar",
       "enabled": true,
       "default_visible": true,
-      "order": 4,
+      "order": 5,
       "description": "Win rates and history"
     },
     {
@@ -51,7 +60,7 @@
       "icon": "ti-robot",
       "enabled": true,
       "default_visible": false,
-      "order": 5,
+      "order": 6,
       "description": "Saved bot models"
     },
     {

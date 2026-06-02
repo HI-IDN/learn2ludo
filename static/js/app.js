@@ -299,18 +299,19 @@ async function loadTabs(){
   try{ const r=await fetch('/api/tabs'); tabConfig=(await r.json()).tabs; }
   catch{ tabConfig=[
     {id:'lobby',label:'Players',icon:'ti-users',enabled:true,default_visible:true,order:0},
-    {id:'play',label:'Play',icon:'ti-dice',enabled:true,default_visible:true,order:1},
-    {id:'settings',label:'Settings',icon:'ti-settings',enabled:true,default_visible:true,order:2},
-    {id:'train',label:'Train',icon:'ti-brain',enabled:true,default_visible:false,order:3},
-    {id:'stats',label:'Stats & Replay',icon:'ti-chart-bar',enabled:true,default_visible:true,order:4},
-    {id:'bots',label:'Bots',icon:'ti-robot',enabled:true,default_visible:false,order:5},
+    {id:'explorer',label:'History',icon:'ti-world',enabled:true,default_visible:true,order:1},
+    {id:'play',label:'Play',icon:'ti-dice',enabled:true,default_visible:true,order:2},
+    {id:'settings',label:'Settings',icon:'ti-settings',enabled:true,default_visible:true,order:3},
+    {id:'train',label:'Train',icon:'ti-brain',enabled:true,default_visible:false,order:4},
+    {id:'stats',label:'Stats & Replay',icon:'ti-chart-bar',enabled:true,default_visible:true,order:5},
+    {id:'bots',label:'Bots',icon:'ti-robot',enabled:true,default_visible:false,order:6},
     {id:'admin',label:'Admin',icon:'ti-shield',enabled:true,default_visible:true,order:99,admin_only:true}
   ]; }
   renderTabs();
 }
 function getVisibleTabs(){ return tabConfig.filter(t=>t.enabled).sort((a,b)=>a.order-b.order); }
 function renderTabs(){ const nav=document.getElementById('tab-nav'); nav.innerHTML=''; getVisibleTabs().forEach(t=>{ const b=document.createElement('button'); b.className='tab-btn'; b.id='tab-btn-'+t.id; b.innerHTML=`<i class="ti ${t.icon}"></i>${t.label}`; b.onclick=()=>switchTab(t.id); nav.appendChild(b); }); switchTab(getVisibleTabs()[0]?.id || 'play'); }
-function switchTab(id){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tab-btn-'+id)?.classList.add('active'); document.getElementById('panel-'+id)?.classList.add('active'); if(id==='stats')loadStats(); if(id==='lobby')renderLobbySlots(); if(id==='bots')renderBotsPage(); }
+function switchTab(id){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tab-btn-'+id)?.classList.add('active'); document.getElementById('panel-'+id)?.classList.add('active'); if(id==='stats')loadStats(); if(id==='lobby')renderLobbySlots(); if(id==='bots')renderBotsPage(); if(id==='explorer'&&typeof renderHistoryExplorer==='function')renderHistoryExplorer(); }
 async function doAdminLogin(){adminToken='dev';}
 async function doOverlayLogin(){adminToken='dev'; closeOverlay(); switchTab('admin');}
 function closeOverlay(){ const o=document.getElementById('admin-overlay'); if(o)o.style.display='none'; }

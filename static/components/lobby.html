@@ -23,10 +23,16 @@
     </div>
 
     <div class="lobby-footer">
-      <button class="btn btn-primary" onclick="startFromLobby()">
-        <i class="ti ti-play"></i>
-        Start Game
-      </button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="startFromLobby()">
+          <i class="ti ti-play"></i>
+          Start Game
+        </button>
+        <button class="btn" onclick="openHistoryExplorer()">
+          <i class="ti ti-world"></i>
+          Explore History
+        </button>
+      </div>
       <div id="lobby-hint"></div>
     </div>
 

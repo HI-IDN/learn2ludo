@@ -191,3 +191,8 @@ function startFromLobby() {
   drawBoard();
   showPregame(active);
 }
+
+function openHistoryExplorer() {
+  if (typeof switchTab === 'function') switchTab('explorer');
+  if (typeof renderHistoryExplorer === 'function') renderHistoryExplorer(true);
+}

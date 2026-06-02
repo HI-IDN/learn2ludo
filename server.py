@@ -40,6 +40,7 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 CONFIG_PATH = Path(__file__).parent / "config" / "tabs.json"
 STATS_PATH = Path(__file__).parent / "config" / "stats.json"
+VARIANTS_HISTORY_PATH = Path(__file__).parent / "docs" / "variants_history.json"
 
 active_game: Optional[GameSession] = None
 active_env: Optional[LudoEnv] = None
@@ -312,6 +313,16 @@ def training_progress():
 @app.get("/api/stats")
 def get_stats():
     return load_stats()
+
+
+@app.get("/api/variants/history")
+def get_variants_history():
+    if not VARIANTS_HISTORY_PATH.exists():
+        return {"variants": [], "timeline_start": 500}
+    try:
+        return json.loads(VARIANTS_HISTORY_PATH.read_text())
+    except json.JSONDecodeError as exc:
+        raise HTTPException(status_code=500, detail="Invalid variants history data") from exc
 
 
 # ---------------------------------------------------------------------------
