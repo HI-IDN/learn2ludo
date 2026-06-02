@@ -318,8 +318,10 @@ function drawBoard(){
     // Compute frills flag before any pawn rendering so yard and track pawns agree.
     const _speed=settings?.auto_play_speed||'off';
     const _isHumanTurn=getPlayerType(gameState.current_player)==='human';
+    const _inspectMode=(typeof isReplayActive==='function'&&isReplayActive())||(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing());
     const _replayFast=typeof isReplayFastModeActive==='function'&&isReplayFastModeActive();
-    _boardFrills=!_replayFast&&(_speed!=='fast'||gameState.valid_moves.length>1);
+    const _showRichHints=!_replayFast&&(_speed!=='fast'||_inspectMode||(_isHumanTurn&&gameState.valid_moves.length>1));
+    _boardFrills=_showRichHints;
 
     // 1. Build on-track groups; render yard pawns immediately.
     const safeSet=new Set([...(currentLayout().safe_havens||[])]);
@@ -354,7 +356,7 @@ function drawBoard(){
     });
 
     // 2. Build preview groups — only when the user needs to make a choice.
-    const showPreview=(_speed==='off'||gameState.valid_moves.length>1)&&(_speed==='off'||_isHumanTurn);
+    const showPreview=_showRichHints;
     const previewGroups=new Map();
     if(showPreview) valid.forEach((m,g)=>{
       const p=Math.floor(g/pawnsPerPlayer),pt=getTargetCenter(p,m.target),col=COLORS[playerColorName(p,gameState.num_players)];
