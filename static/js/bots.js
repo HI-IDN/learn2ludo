@@ -8,7 +8,7 @@ const FALLBACK_BOTS = [
   { id: 'ares', name: 'Ares', type: 'heuristic', epithet: 'God of War', description: 'Captures enemy pawns when possible, else moves at random.', focus: 'Capture if possible, otherwise random.', status: 'Available', selectable: true, implemented: true },
   { id: 'athena', name: 'Athena', type: 'heuristic', epithet: 'Goddess of Wisdom', description: 'Keeps pawns safe before looking for other moves.', focus: 'Avoid capture threats.', status: 'Planned', selectable: false, implemented: false },
   { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Advance the pawn closest to home.', status: 'Planned', selectable: false, implemented: false },
-  { id: 'apollo', name: 'Apollo', type: 'heuristic', epithet: 'God of Order', description: 'Balances capture, safety, and progress.', focus: 'Simple scoring across capture, safety, and progress.', status: 'Planned', selectable: false, implemented: false },
+  { id: 'apollo', name: 'Apollo', type: 'weighted-template', epithet: 'God of Order', description: 'Example weighted bot combining the simple heuristic features.', focus: 'Student-created bot template: tune weights for capture, safety, progress, and spread.', status: 'Example', selectable: false, implemented: false },
   { id: 'hermes', name: 'Hermes', type: 'heuristic', epithet: 'God of Travel', description: 'Keeps pawns distributed across the board.', focus: 'Spread pawns for flexibility.', status: 'Planned', selectable: false, implemented: false },
 ];
 
@@ -99,10 +99,12 @@ function renderBotsPage() {
   if (!wrap) return;
 
   const heuristics = BOT_REGISTRY.filter(b => b.type === 'heuristic' || !b.type);
+  const weighted   = BOT_REGISTRY.filter(b => b.type === 'weighted-template' || b.type === 'weighted');
   const trained    = BOT_REGISTRY.filter(b => b.type === 'trained');
 
   wrap.innerHTML = `
     ${botSection('Heuristics', 'Rule-based opponents — no training required', heuristics)}
+    ${botSection('Create your own weighted bot', 'Combine heuristic features with sliders — Apollo is the example template', weighted, true)}
     ${botSection('Trained Models', 'RL agents produced by the Train tab', trained, true)}
   `;
 }

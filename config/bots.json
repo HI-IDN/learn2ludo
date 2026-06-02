@@ -43,11 +43,11 @@
     {
       "id": "apollo",
       "name": "Apollo",
-      "type": "heuristic",
+      "type": "weighted-template",
       "epithet": "God of Order",
-      "description": "Balances capture, safety, and progress.",
-      "focus": "Simple scoring across capture, safety, and progress.",
-      "status": "Planned",
+      "description": "Example weighted bot combining the simple heuristic features.",
+      "focus": "Student-created bot template: tune weights for capture, safety, progress, and spread.",
+      "status": "Example",
       "selectable": false
     },
     {
