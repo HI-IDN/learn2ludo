@@ -59,6 +59,16 @@
       "focus": "Avoids clustering by choosing moves that increase distance from friendly pawns already in play.",
       "status": "Available",
       "selectable": true
+    },
+    {
+      "id": "hephaestus",
+      "name": "Hephaestus",
+      "type": "heuristic",
+      "epithet": "God of the Forge",
+      "description": "Builds defensive stacks with friendly pawns.",
+      "focus": "Looks for moves that land on another friendly pawn to form a blockade.",
+      "status": "Available",
+      "selectable": true
     }
   ]
 }

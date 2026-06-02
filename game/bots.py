@@ -26,6 +26,7 @@ class MoveFeatures:
     risk_reduction: float = 0.0
     progress: float = 0.0
     safety: float = 0.0
+    blockade: float = 0.0
     spread: float = 0.0
     activation: float = 0.0
 
@@ -36,6 +37,7 @@ class MoveFeatures:
             "risk_reduction": self.risk_reduction,
             "progress": self.progress,
             "safety": self.safety,
+            "blockade": self.blockade,
             "spread": self.spread,
             "activation": self.activation,
         }
@@ -185,10 +187,11 @@ def move_features(move: dict, game_state: dict | None = None) -> MoveFeatures:
 
     risk = _risk_at(target_abs, moving_player, game_state, values)
     current_risk = _risk_at(from_abs, moving_player, game_state, values)
+    blockade = 1.0 if _friendly_stack_at(target_abs, moving_player, move, game_state) else 0.0
     safety = 0.0
     if target is not None and target >= values["home_entry"]:
         safety = 1.0
-    elif target_abs is not None and (target_abs in values["safe_havens"] or _friendly_stack_at(target_abs, moving_player, move, game_state)):
+    elif target_abs is not None and (target_abs in values["safe_havens"] or blockade):
         safety = 1.0
 
     finish = max(values["finish"], 1)
@@ -201,6 +204,7 @@ def move_features(move: dict, game_state: dict | None = None) -> MoveFeatures:
         risk_reduction=max(current_risk - risk, 0.0),
         progress=progress,
         safety=safety,
+        blockade=blockade,
         spread=_spread_score(target_abs, moving_player, move, game_state, values),
         activation=activation,
     )
@@ -300,11 +304,21 @@ class HermesBot(BotPolicy):
         return choose_by_feature(valid_moves, game_state, lambda _move, f: f.spread)
 
 
+class HephaestusBot(BotPolicy):
+    id          = "hephaestus"
+    name        = "Hephaestus"
+    type        = "heuristic"
+    description = "God of the Forge — builds friendly blockades"
+
+    def choose_move(self, valid_moves, game_state=None):
+        return choose_by_feature(valid_moves, game_state, lambda _move, f: f.blockade)
+
+
 # ---------------------------------------------------------------------------
 # Registry — add new bots here; RL bots will register themselves on load
 # ---------------------------------------------------------------------------
 
-_BUILTIN: list[BotPolicy] = [ErisBot(), AresBot(), AthenaBot(), HestiaBot(), HermesBot()]
+_BUILTIN: list[BotPolicy] = [ErisBot(), AresBot(), AthenaBot(), HestiaBot(), HermesBot(), HephaestusBot()]
 REGISTRY: dict[str, BotPolicy] = {b.id: b for b in _BUILTIN}
 
 

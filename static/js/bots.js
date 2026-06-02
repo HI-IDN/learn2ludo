@@ -10,6 +10,7 @@ const FALLBACK_BOTS = [
   { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Prefers the most progressed pawn, especially when a move brings it nearer to the home stretch.', status: 'Available', selectable: true, implemented: true },
   { id: 'apollo', name: 'Apollo', type: 'weighted-template', epithet: 'God of Order', description: 'Example weighted bot combining the simple heuristic features.', focus: 'Student-created bot template: tune weights for capture, safety, progress, and spread.', status: 'Example', selectable: false, implemented: false },
   { id: 'hermes', name: 'Hermes', type: 'heuristic', epithet: 'God of Travel', description: 'Keeps pawns distributed across the board.', focus: 'Avoids clustering by choosing moves that increase distance from friendly pawns already in play.', status: 'Available', selectable: true, implemented: true },
+  { id: 'hephaestus', name: 'Hephaestus', type: 'heuristic', epithet: 'God of the Forge', description: 'Builds defensive stacks with friendly pawns.', focus: 'Looks for moves that land on another friendly pawn to form a blockade.', status: 'Available', selectable: true, implemented: true },
 ];
 
 let BOT_REGISTRY = FALLBACK_BOTS;
@@ -56,6 +57,7 @@ function runBotPolicyLocal(botId, validMoves) {
   if (botId === 'athena') return _chooseByLocalFeature(validMoves, f => [f.riskReduction, f.safety, -f.risk]);
   if (botId === 'hestia') return _chooseByLocalFeature(validMoves, f => f.progress);
   if (botId === 'hermes') return _chooseByLocalFeature(validMoves, f => f.spread);
+  if (botId === 'hephaestus') return _chooseByLocalFeature(validMoves, f => f.blockade);
   return _erisLocal(validMoves);
 }
 
@@ -92,6 +94,7 @@ function _localMoveFeatures(move) {
     riskReduction: Math.max(currentRisk - risk, 0),
     progress: Math.max(0, Math.min((move.target ?? 0) / finish, 1)),
     safety: _isSafeLandingLocal(move, targetAbs) ? 1 : 0,
+    blockade: _isBlockadeLocal(move, targetAbs) ? 1 : 0,
     spread: _spreadLocal(move, targetAbs),
   };
 }
@@ -185,6 +188,10 @@ function _isSafeLandingLocal(move, absTarget) {
   if ((move.target ?? -1) >= entry) return true;
   const safe = gameState?.board?.safe_havens ?? [];
   if (safe.includes?.(absTarget)) return true;
+  return _isBlockadeLocal(move, absTarget);
+}
+
+function _isBlockadeLocal(move, absTarget) {
   const movingPlayer = _movingPlayerLocal(move);
   return (gameState?.players ?? []).some((player, idx) =>
     (player.index ?? idx) === movingPlayer &&
@@ -239,7 +246,7 @@ function botSection(title, subtitle, bots, allowEmpty = false) {
               ${b.status && b.status !== 'Available' ? `<span class="bot-card-status">${b.status}</span>` : ''}
             </div>
             <div class="bot-card-desc">${botCardDescription(b)}</div>
-            ${b.focus ? `<div class="bot-card-focus">Focus: ${b.focus}</div>` : ''}
+            ${b.focus ? `<div class="bot-card-focus">${b.focus}</div>` : ''}
           </div>
         </div>`).join('')
     : allowEmpty

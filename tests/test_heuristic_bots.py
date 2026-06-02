@@ -41,7 +41,7 @@ def test_shared_features_detect_capture_and_progress():
 
     assert features["capture"] == 1.0
     assert features["progress"] > 0
-    assert set(features) == {"capture", "risk", "risk_reduction", "progress", "safety", "spread", "activation"}
+    assert set(features) == {"capture", "risk", "risk_reduction", "progress", "safety", "blockade", "spread", "activation"}
 
 
 def test_ares_prefers_capture():
@@ -92,3 +92,15 @@ def test_hermes_prefers_spreading_pawns():
     ], game_state)
 
     assert move["target"] == 30
+
+
+def test_hephaestus_prefers_forming_blockades():
+    game_state = state([
+        {"index": 0, "pieces": [piece(0, "R1", 8, 8), piece(1, "R2", 4, 4)]},
+    ])
+    move = REGISTRY["hephaestus"].choose_move([
+        {"piece_idx": 1, "pawn_id": "R2", "target": 8},
+        {"piece_idx": 1, "pawn_id": "R2", "target": 10},
+    ], game_state)
+
+    assert move["target"] == 8
