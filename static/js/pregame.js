@@ -3,9 +3,7 @@
 let _pg = null;
 
 function showPregame(activeSlots) {
-  if (typeof hasGameplayConsent === 'function' && !hasGameplayConsent()) {
-    if (typeof switchTab === 'function') switchTab('lobby');
-    if (typeof renderConsentGate === 'function') renderConsentGate();
+  if (typeof enforceConsentGate === 'function' && !enforceConsentGate()) {
     return;
   }
   if (typeof clearReplayMode === 'function') clearReplayMode();

@@ -185,8 +185,7 @@ function lobbySetName(slotIdx, v) {
 }
 
 function startFromLobby() {
-  if (typeof hasGameplayConsent === 'function' && !hasGameplayConsent()) {
-    if (typeof renderConsentGate === 'function') renderConsentGate();
+  if (typeof enforceConsentGate === 'function' && !enforceConsentGate()) {
     return;
   }
   const active = lobbyActiveSlots();

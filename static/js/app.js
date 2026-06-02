@@ -19,6 +19,7 @@ let liveTimelineIndex = -1;
 let liveTimelineLastKey = null;
 const CONSENT_STORAGE_KEY = 'ludo_research_consent';
 const CONSENT_ID_STORAGE_KEY = 'ludo_research_anon_id';
+const CONSENT_SEQ_STORAGE_KEY = 'ludo_research_anon_seq';
 
 function boardLayout(trackSize=null, yardCount=null) {
   yardCount = yardCount ?? settings.board_yard_count ?? 4;
@@ -130,10 +131,9 @@ function getOrCreateAnonymousUserId() {
     crypto.getRandomValues(bytes);
     generated = `anon-${Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('')}`;
   } else {
-    const tick = typeof performance !== 'undefined' && typeof performance.now === 'function'
-      ? performance.now().toString(36).replace('.', '')
-      : Date.now().toString(36);
-    generated = `anon-${Date.now().toString(36)}-${tick}`;
+    const nextSeq = Number(localStorage.getItem(CONSENT_SEQ_STORAGE_KEY) || '0') + 1;
+    localStorage.setItem(CONSENT_SEQ_STORAGE_KEY, String(nextSeq));
+    generated = `anon-${Date.now().toString(36)}-${nextSeq.toString(36)}`;
   }
   localStorage.setItem(CONSENT_ID_STORAGE_KEY, generated);
   return generated;
@@ -171,6 +171,13 @@ function initializeConsentRecord() {
 function hasGameplayConsent() {
   const record = initializeConsentRecord();
   return !!(record?.consent && record?.consented_at);
+}
+
+function enforceConsentGate() {
+  if (hasGameplayConsent()) return true;
+  if (typeof switchTab === 'function') switchTab('lobby');
+  renderConsentGate();
+  return false;
 }
 
 function updateLobbyStartAvailability() {
