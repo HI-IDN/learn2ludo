@@ -1,0 +1,160 @@
+{
+  "timeline_start": 500,
+  "timeline_end": 2026,
+  "variants": [
+    {
+      "id": "pachisi",
+      "name": "Pachisi",
+      "origin": "Indian subcontinent",
+      "country": "India",
+      "coordinates": {
+        "lat": 22.9734,
+        "lng": 78.6569
+      },
+      "year": 500,
+      "period_label": "~500 AD",
+      "distinctive_rules": [
+        "Traditionally played with cowrie shells",
+        "Cross-and-circle board with racing and captures"
+      ],
+      "description": "Ancient South Asian ancestor of the modern Ludo family.",
+      "rule_overrides": {
+        "safe_squares": true,
+        "max_consecutive_sixes": 3,
+        "empty_board_rolls": 3
+      }
+    },
+    {
+      "id": "chaupar",
+      "name": "Chaupar",
+      "origin": "North India",
+      "country": "India",
+      "coordinates": {
+        "lat": 28.6139,
+        "lng": 77.209
+      },
+      "year": null,
+      "period_label": "Date uncertain",
+      "distinctive_rules": [
+        "Regional Pachisi family variation",
+        "Rule emphasis differs by local tradition"
+      ],
+      "description": "A historical Indian variation often grouped with Pachisi traditions.",
+      "rule_overrides": {
+        "safe_squares": true,
+        "max_consecutive_sixes": 3,
+        "empty_board_rolls": 3
+      }
+    },
+    {
+      "id": "ludo-uk",
+      "name": "Ludo (patented)",
+      "origin": "England",
+      "country": "United Kingdom",
+      "coordinates": {
+        "lat": 51.5074,
+        "lng": -0.1278
+      },
+      "year": 1896,
+      "period_label": "1896",
+      "distinctive_rules": [
+        "Commercialized modern rule standard",
+        "Dice-based turn structure with home stretches"
+      ],
+      "description": "Alfred Coller patented the modern branded Ludo format in England.",
+      "rule_overrides": {
+        "safe_squares": true,
+        "max_consecutive_sixes": 3,
+        "empty_board_rolls": 3
+      }
+    },
+    {
+      "id": "parcheesi",
+      "name": "Parcheesi",
+      "origin": "United States",
+      "country": "United States",
+      "coordinates": {
+        "lat": 39.8283,
+        "lng": -98.5795
+      },
+      "year": 1867,
+      "period_label": "1867",
+      "distinctive_rules": [
+        "Two-dice movement conventions",
+        "Blockades and captures are central tactics"
+      ],
+      "description": "American adaptation inspired by Pachisi traditions.",
+      "rule_overrides": {
+        "safe_squares": true,
+        "max_consecutive_sixes": 3,
+        "empty_board_rolls": 3
+      }
+    },
+    {
+      "id": "mensch",
+      "name": "Mensch ärgere Dich nicht",
+      "origin": "Germany",
+      "country": "Germany",
+      "coordinates": {
+        "lat": 51.1657,
+        "lng": 10.4515
+      },
+      "year": 1914,
+      "period_label": "1914",
+      "distinctive_rules": [
+        "Simple race-and-bump structure",
+        "Popularized as a family and social game"
+      ],
+      "description": "German variant that became one of Europe’s best-known race games.",
+      "rule_overrides": {
+        "safe_squares": true,
+        "max_consecutive_sixes": 3,
+        "empty_board_rolls": 3
+      }
+    },
+    {
+      "id": "sorry",
+      "name": "Sorry!",
+      "origin": "United States",
+      "country": "United States",
+      "coordinates": {
+        "lat": 42.3601,
+        "lng": -71.0589
+      },
+      "year": 1929,
+      "period_label": "1929",
+      "distinctive_rules": [
+        "Card-driven movement instead of dice",
+        "Swap and bump mechanics create volatility"
+      ],
+      "description": "A card-based cousin in the broader cross-and-circle lineage.",
+      "rule_overrides": {
+        "safe_squares": true,
+        "max_consecutive_sixes": 3,
+        "empty_board_rolls": 3
+      }
+    },
+    {
+      "id": "learn2ludo",
+      "name": "Learn2Ludo",
+      "origin": "Digital / online",
+      "country": "Global",
+      "coordinates": {
+        "lat": 0.0,
+        "lng": 0.0
+      },
+      "year": 2026,
+      "period_label": "Present day",
+      "distinctive_rules": [
+        "Configurable board geometry and player slots",
+        "Supports bots, replay, and RL experimentation"
+      ],
+      "description": "Modern educational and experimentation-focused Ludo platform.",
+      "rule_overrides": {
+        "safe_squares": true,
+        "max_consecutive_sixes": 3,
+        "empty_board_rolls": 3
+      }
+    }
+  ]
+}
