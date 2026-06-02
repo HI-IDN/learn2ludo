@@ -27,8 +27,8 @@
       "epithet": "Goddess of Wisdom",
       "description": "Keeps pawns safe before looking for other moves.",
       "focus": "Avoid capture threats.",
-      "status": "Planned",
-      "selectable": false
+      "status": "Available",
+      "selectable": true
     },
     {
       "id": "hestia",
@@ -37,8 +37,8 @@
       "epithet": "Goddess of the Hearth",
       "description": "Brings pawns home as directly as possible.",
       "focus": "Advance the pawn closest to home.",
-      "status": "Planned",
-      "selectable": false
+      "status": "Available",
+      "selectable": true
     },
     {
       "id": "apollo",
@@ -57,8 +57,8 @@
       "epithet": "God of Travel",
       "description": "Keeps pawns distributed across the board.",
       "focus": "Spread pawns for flexibility.",
-      "status": "Planned",
-      "selectable": false
+      "status": "Available",
+      "selectable": true
     }
   ]
 }
