@@ -1,6 +1,6 @@
 const EXPLORER_DEFAULT_DATA = {
   timeline_start: 500,
-  timeline_end: new Date().getFullYear(),
+  timeline_end: 2026,
   variants: [],
 };
 
