@@ -189,15 +189,26 @@ function loadSettings(){
   try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
   settings.auto_play_speed='off';
   if(settings.sound_volume===undefined) settings.sound_volume=0.8;
+  if(!['always','every-n','random','off'].includes(settings.move_justification_frequency)) settings.move_justification_frequency='always';
+  settings.move_justification_every_n=Math.max(1, parseInt(settings.move_justification_every_n || 2));
+  const randomProbability=Number(settings.move_justification_random_probability ?? 0.35);
+  settings.move_justification_random_probability=Number.isFinite(randomProbability) ? Math.max(0, Math.min(1, randomProbability)) : 0.35;
 }
 function applySettingsToControls(){
   const c=(id,v)=>{const e=document.getElementById(id); if(e)e.checked=v;};
   const val=(id,v)=>{const e=document.getElementById(id); if(e)e.value=v;};
   c('rule-safe', settings.safe_squares ?? true); c('rule-equal-turns', settings.equal_rounds ?? false); c('set-show-cell-numbers', settings.show_cell_numbers ?? false); val('rule-max-sixes', settings.max_consecutive_sixes ?? 3); val('rule-empty-board-rolls', settings.empty_board_rolls ?? 3);
   val('set-num-players', settings.num_players ?? 4); val('board-yard-count', settings.board_yard_count ?? 4); val('board-track-size', settings.board_track_size ?? 52); val('board-safe-offset', settings.board_safe_offset ?? 7); val('board-home-length', settings.board_home_length ?? 6); val('board-pawns-per-player', settings.pawns_per_player ?? 4); c('board-stack-home', settings.stack_home_pawns ?? false);
+  val('move-justification-frequency', settings.move_justification_frequency ?? 'always'); val('move-justification-every-n', settings.move_justification_every_n ?? 2); updateMoveJustificationSettingsVisibility();
+}
+function updateMoveJustificationSettingsVisibility(){
+  const mode=document.getElementById('move-justification-frequency')?.value || settings.move_justification_frequency || 'always';
+  const row=document.getElementById('move-justification-every-row');
+  if(row) row.hidden = mode !== 'every-n';
 }
 function saveSettings(){
   const boardCfg = readBoardConfig();
+  const justificationMode = document.getElementById('move-justification-frequency')?.value || settings.move_justification_frequency || 'always';
   settings={...settings,
     num_players: settings.num_players ?? 4,
     board_yard_count: boardCfg.yard_count ?? settings.board_yard_count ?? 4,
@@ -215,10 +226,13 @@ function saveSettings(){
     empty_board_rolls:Math.max(1, parseInt(document.getElementById('rule-empty-board-rolls')?.value || 3)),
     equal_rounds:document.getElementById('rule-equal-turns')?.checked ?? false,
     show_cell_numbers:document.getElementById('set-show-cell-numbers')?.checked ?? false,
+    move_justification_frequency:['always','every-n','random','off'].includes(justificationMode) ? justificationMode : 'always',
+    move_justification_every_n:Math.max(1, parseInt(document.getElementById('move-justification-every-n')?.value || settings.move_justification_every_n || 2)),
+    move_justification_random_probability:settings.move_justification_random_probability ?? 0.35,
 
     sound_volume: typeof getSoundVolume==='function' ? getSoundVolume() : (settings.sound_volume ?? 0.8)
   };
-  validateBoardConfig(); persistSettings(); renderPlayers(); renderLobbySlots(); drawBoard();
+  updateMoveJustificationSettingsVisibility(); validateBoardConfig(); persistSettings(); renderPlayers(); renderLobbySlots(); drawBoard();
 }
 function getGameRules(){ return {six_to_enter:true, six_extra_turn:true, capture_enabled:true, safe_squares: settings.safe_squares ?? true, max_consecutive_sixes: settings.max_consecutive_sixes ?? 3, no_pawn_three_rolls:true, empty_board_rolls: settings.empty_board_rolls ?? 3, equal_rounds: settings.equal_rounds ?? false}; }
 
@@ -397,6 +411,7 @@ async function newGame(startingPlayer=0){
   gameStartingPlayer=startingPlayer;
   cancelNewGame();
   if(typeof resetGameHistorySync==='function') resetGameHistorySync();
+  if(typeof resetMoveJustificationFrequency==='function') resetMoveJustificationFrequency();
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture();
   if(typeof resetBotState==='function') resetBotState();
   const payload=buildNewGamePayload();
@@ -427,9 +442,10 @@ async function rollDice(){
   renderGame();
 }
 function demoValidMoves(playerIdx,dice){ const p=gameState.players[playerIdx]; const moves=[]; p.pieces.forEach((pc,i)=>{ const g=playerIdx*(gameState?.config?.board?.pawns_per_player || 4)+i; if(pc.finished)return; if(pc.in_yard){ if(dice===6)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:0}); } else { const _entry=homeEntryPosition(); const _hl=gameState?.config?.board?.home_length??6; const t=pc.position+dice; if(t<=_entry+_hl-1)moves.push({piece_idx:g,pawn_id:pc.pawn_id||pawnId(p.color,i),target:t}); }}); return moves; }
-async function clickPiece(globalIdx){ if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return; if(typeof isMoveJustificationBusy==='function'&&isMoveJustificationBusy())return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(!m)return; if(typeof shouldAskForMoveJustification==='function'&&shouldAskForMoveJustification(m)){ requestMoveJustification(m); return; } await makeMove(m.piece_idx,m.target,m.pawn_id); }
+async function clickPiece(globalIdx){ if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return; if(typeof isMoveJustificationBusy==='function'&&isMoveJustificationBusy())return; if(typeof isMoveJustificationActive==='function'&&isMoveJustificationActive())return; const m=(gameState?.valid_moves||[]).find(x=>x.piece_idx===globalIdx); if(window._botChosenMove&&moveRefKey(window._botChosenMove)!==moveRefKey(m))return; if(!m)return; await makeMove(m.piece_idx,m.target,m.pawn_id); }
 async function makeMove(pieceIdx,target,pawnIdValue=null,justification=null){ window._botChosenMove=null;
   if((typeof isReplayActive==='function'&&isReplayActive()) || (typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()))return;
+  if(!justification && typeof isMoveJustificationActive==='function' && isMoveJustificationActive())return;
   if(pieceIdx==null&&pawnIdValue) pieceIdx=pieceIdxFromPawnId(pawnIdValue);
   if(pieceIdx==null) return;
   const selectedMove=(gameState?.valid_moves||[]).find(x=>x.piece_idx===pieceIdx||(pawnIdValue&&x.pawn_id===pawnIdValue))||{piece_idx:pieceIdx,pawn_id:pawnIdValue,target};

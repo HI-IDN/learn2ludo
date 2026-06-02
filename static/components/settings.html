@@ -90,5 +90,27 @@
           <label class="toggle"><input type="checkbox" id="set-show-cell-numbers" onchange="saveSettings()"><span class="toggle-slider"></span></label>
         </div>
       </div>
+      <div class="settings-card">
+        <h2>Move justifications</h2>
+        <div class="rule-row">
+          <div>
+            <div class="rule-name">Prompt frequency</div>
+            <div class="rule-desc">Ask for a reason only on eligible human moves with at least two choices</div>
+          </div>
+          <select id="move-justification-frequency" class="settings-select" onchange="saveSettings()">
+            <option value="always">Always</option>
+            <option value="every-n">Every N moves</option>
+            <option value="random">Random / sporadic</option>
+            <option value="off">Off</option>
+          </select>
+        </div>
+        <div class="rule-row" id="move-justification-every-row">
+          <div>
+            <div class="rule-name">Every N eligible moves</div>
+            <div class="rule-desc">For example, 2 prompts every second eligible move</div>
+          </div>
+          <input type="number" id="move-justification-every-n" class="settings-number" min="1" value="2" onchange="saveSettings()">
+        </div>
+      </div>
     </div>
   </div>

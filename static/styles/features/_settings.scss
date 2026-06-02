@@ -60,3 +60,22 @@
   color: $color-text-3;
   margin-top: 2px;
 }
+
+.settings-select,
+.settings-number {
+  border: 1px solid $border-medium;
+  border-radius: 8px;
+  background: $color-bg-alt;
+  color: $color-text;
+  font-family: $font-sans;
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+.settings-select {
+  min-width: 142px;
+}
+
+.settings-number {
+  width: 72px;
+}

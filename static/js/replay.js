@@ -100,6 +100,7 @@ function readReplayFile(file) {
 function loadReplayJson(data) {
   stopReplayFastForward();
   if (typeof clearPregameMode === 'function') clearPregameMode();
+  if (typeof resetMoveJustificationFrequency === 'function') resetMoveJustificationFrequency();
   if (typeof setCurrentActionMode === 'function') setCurrentActionMode(true);
   replayData = normalizeReplayData(data);
   applyReplaySettings(replayData);

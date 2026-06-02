@@ -3,8 +3,28 @@
 
 let _pendingJustifiedMove = null;
 let _moveJustificationSubmitting = false;
+let _moveJustificationEligibleCount = 0;
 
-function shouldAskForMoveJustification(move) {
+function moveJustificationMode() {
+  const mode = settings?.move_justification_frequency || 'always';
+  return ['always', 'every-n', 'random', 'off'].includes(mode) ? mode : 'always';
+}
+
+function moveJustificationEveryN() {
+  return Math.max(1, parseInt(settings?.move_justification_every_n || 2));
+}
+
+function moveJustificationRandomProbability() {
+  const value = Number(settings?.move_justification_random_probability ?? 0.35);
+  if (!Number.isFinite(value)) return 0.35;
+  return Math.max(0, Math.min(1, value));
+}
+
+function resetMoveJustificationFrequency() {
+  _moveJustificationEligibleCount = 0;
+}
+
+function isMoveJustificationEligible(move) {
   if (_moveJustificationSubmitting) return false;
   if (!gameState || !move) return false;
   if (gameState.phase !== 'moving') return false;
@@ -18,8 +38,32 @@ function shouldAskForMoveJustification(move) {
   return true;
 }
 
+function shouldPromptForEligibleMove(consume=false) {
+  const mode = moveJustificationMode();
+  if (mode === 'off') return false;
+  if (mode === 'always') return true;
+
+  if (mode === 'every-n') {
+    const nextCount = _moveJustificationEligibleCount + 1;
+    if (consume) _moveJustificationEligibleCount = nextCount;
+    return nextCount % moveJustificationEveryN() === 0;
+  }
+
+  if (mode === 'random') {
+    return Math.random() < moveJustificationRandomProbability();
+  }
+
+  return true;
+}
+
+function shouldAskForMoveJustification(move) {
+  return isMoveJustificationEligible(move) && shouldPromptForEligibleMove(false);
+}
+
 function moveNeedsJustification(move, justification) {
-  return !String(justification || '').trim() && shouldAskForMoveJustification(move);
+  return !String(justification || '').trim()
+    && isMoveJustificationEligible(move)
+    && shouldPromptForEligibleMove(true);
 }
 
 function isMoveJustificationBusy() {
