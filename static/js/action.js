@@ -68,7 +68,14 @@ function renderCurrentAction() {
       : yardCount > 0
       ? `Try ${yardCount + 1}/${yardMax} - roll to enter.`
       : 'Click the dice to roll.';
-  } else if (phase === 'moving') instr.textContent = browsing ? 'Viewing earlier live move.' : 'Choose a pawn to move.';
+  } else if (phase === 'moving') {
+    const pendingPawn = typeof pendingMoveJustificationPawnId === 'function' ? pendingMoveJustificationPawnId() : null;
+    instr.textContent = browsing
+      ? 'Viewing earlier live move.'
+      : pendingPawn
+      ? `User chose to move pawn ${pendingPawn}.`
+      : 'Choose a pawn to move.';
+  }
   else if (phase === 'next') instr.textContent = browsing ? 'Viewing earlier live move.' : 'Pass to the next player.';
   else if (phase === 'finished') instr.textContent = 'Game finished.';
   else instr.textContent = browsing ? 'Viewing earlier live move.' : 'Waiting for next action.';

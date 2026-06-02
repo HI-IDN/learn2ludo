@@ -30,10 +30,15 @@ function isMoveJustificationActive() {
   return !!_pendingJustifiedMove;
 }
 
+function pendingMoveJustificationPawnId() {
+  return _pendingJustifiedMove?.pawn_id || null;
+}
+
 function requestMoveJustification(move) {
   _pendingJustifiedMove = {...move};
   _moveJustificationSubmitting = false;
   renderMoveJustificationPrompt();
+  renderCurrentAction();
   renderPawnOptions();
   drawBoard();
 }
@@ -42,6 +47,7 @@ function cancelMoveJustification() {
   _pendingJustifiedMove = null;
   _moveJustificationSubmitting = false;
   renderMoveJustificationPrompt();
+  renderCurrentAction();
   renderPawnOptions();
   drawBoard();
 }
