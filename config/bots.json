@@ -5,8 +5,8 @@
       "name": "Eris",
       "type": "heuristic",
       "epithet": "Goddess of Discord",
-      "description": "Moves at random.",
-      "focus": "Pure random baseline.",
+      "description": "Chooses from valid moves without using strategy.",
+      "focus": "Use as the pure random baseline.",
       "status": "Available",
       "selectable": true
     },
@@ -15,8 +15,8 @@
       "name": "Ares",
       "type": "heuristic",
       "epithet": "God of War",
-      "description": "Captures enemy pawns when possible, else moves at random.",
-      "focus": "Capture if possible, otherwise random.",
+      "description": "Looks for captures before falling back to random movement.",
+      "focus": "Prioritise capture opportunities.",
       "status": "Available",
       "selectable": true
     },
