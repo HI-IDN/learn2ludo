@@ -113,6 +113,17 @@ function gamePlayerType(i) {
   const player = (gameState?.players || []).find(p => Number(p.index) === Number(i));
   return player?.type || getPlayerType(i);
 }
+function escapeAttr(value) {
+  return String(value ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function gamePlayerNameTitle(i) {
+  if (gamePlayerType(i) === 'human') return '';
+  const registry = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+  const botId = settings.bot_ids?.[i];
+  const bot = registry.find(b => b.id === botId) || registry.find(b => b.name === gamePlayerName(i));
+  if (!bot) return '';
+  return [bot.epithet, bot.description, bot.focus].filter(Boolean).join(' — ');
+}
 function setPlayerType(i,v){ settings.player_types=settings.player_types||{}; settings.player_types[i]=v; syncPlayerCountOptions(); validateBoardConfig(); persistSettings(); renderPlayerTypes(); renderPlayerSlots(); renderPlayers(); }
 function setPlayerName(i,v){ settings.player_names=settings.player_names||{}; settings.player_names[i]=v; persistSettings(); renderPlayers(); renderPlayerSlots(); }
 function persistSettings(){ localStorage.setItem('ludo_settings', JSON.stringify(settings)); }
@@ -749,7 +760,8 @@ function renderPlayers(){
     const liveMs=(_playerTimes[p.index]||0)+(_gameStartTime&&isCurrent&&_turnStartTime?Date.now()-_turnStartTime:0);
     const timeStr=_gameStartTime?`<span class="player-order-dot"> · </span><span class="player-order-time">${_formatPlayerTime(liveMs)}</span>`:'';
     const sortedPieces=[...p.pieces].sort((a,b)=>{const r=q=>q.finished?2:!q.in_yard?1:0;return r(b)-r(a);});
-    return `<div class="player-order-row-min${isCurrent?' current':''}"><i class="fa-solid ${gamePlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name">${gamePlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}${timeStr}</div><div class="player-order-pawns">${sortedPieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
+    const nameTitle=gamePlayerNameTitle(p.index);
+    return `<div class="player-order-row-min${isCurrent?' current':''}"><i class="fa-solid ${gamePlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name" ${nameTitle?`title="${escapeAttr(nameTitle)}"`:''}>${gamePlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}${timeStr}</div><div class="player-order-pawns">${sortedPieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
   }).join('');
   // Round subtitle
   const sub=document.getElementById('players-subtitle');
