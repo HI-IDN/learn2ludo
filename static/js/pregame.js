@@ -3,6 +3,11 @@
 let _pg = null;
 
 function showPregame(activeSlots) {
+  if (typeof hasGameplayConsent === 'function' && !hasGameplayConsent()) {
+    if (typeof switchTab === 'function') switchTab('lobby');
+    if (typeof renderConsentGate === 'function') renderConsentGate();
+    return;
+  }
   if (typeof clearReplayMode === 'function') clearReplayMode();
   if (typeof resetLiveTimeline === 'function') resetLiveTimeline();
   if (typeof setCurrentActionMode === 'function') setCurrentActionMode(false);

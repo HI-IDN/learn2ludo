@@ -17,6 +17,8 @@ let animatingPieceGlobalIdx = null;
 let liveTimelineSnapshots = [];
 let liveTimelineIndex = -1;
 let liveTimelineLastKey = null;
+const CONSENT_STORAGE_KEY = 'ludo_research_consent';
+const CONSENT_ID_STORAGE_KEY = 'ludo_research_anon_id';
 
 function boardLayout(trackSize=null, yardCount=null) {
   yardCount = yardCount ?? settings.board_yard_count ?? 4;
@@ -117,6 +119,102 @@ function setPlayerType(i,v){ settings.player_types=settings.player_types||{}; se
 function setPlayerName(i,v){ settings.player_names=settings.player_names||{}; settings.player_names[i]=v; persistSettings(); renderPlayers(); renderPlayerSlots(); }
 function persistSettings(){ localStorage.setItem('ludo_settings', JSON.stringify(settings)); }
 
+function getOrCreateAnonymousUserId() {
+  const existing = localStorage.getItem(CONSENT_ID_STORAGE_KEY);
+  if (existing) return existing;
+  const generated = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+    ? crypto.randomUUID()
+    : `anon-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  localStorage.setItem(CONSENT_ID_STORAGE_KEY, generated);
+  return generated;
+}
+
+function loadConsentRecord() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(CONSENT_STORAGE_KEY) || 'null');
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function initializeConsentRecord() {
+  const existing = loadConsentRecord();
+  if (existing && typeof existing.consent === 'boolean') {
+    if (!existing.anonymous_user_id) {
+      const hydrated = {...existing, anonymous_user_id: getOrCreateAnonymousUserId()};
+      localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(hydrated));
+      return hydrated;
+    }
+    return existing;
+  }
+  const initialized = {
+    consent: false,
+    consented_at: null,
+    anonymous_user_id: getOrCreateAnonymousUserId(),
+  };
+  localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(initialized));
+  return initialized;
+}
+
+function hasGameplayConsent() {
+  const record = initializeConsentRecord();
+  return !!(record?.consent && record?.consented_at);
+}
+
+function updateLobbyStartAvailability() {
+  const startBtn = document.getElementById('lobby-start-game-btn');
+  if (!startBtn) return;
+  const consented = hasGameplayConsent();
+  startBtn.disabled = !consented;
+  startBtn.title = consented ? '' : 'Please provide consent before starting a game.';
+}
+
+function updateConsentConfirmState() {
+  const confirmBtn = document.getElementById('consent-confirm-btn');
+  const checkbox = document.getElementById('consent-checkbox');
+  if (!confirmBtn || !checkbox) return;
+  confirmBtn.disabled = !checkbox.checked;
+}
+
+function renderConsentGate() {
+  const gate = document.getElementById('lobby-consent-gate');
+  if (!gate) return;
+  const consented = hasGameplayConsent();
+  gate.innerHTML = consented
+    ? `<div class="lobby-hint"><i class="fa-solid fa-circle-check"></i> Research consent recorded.</div>`
+    : `<div class="lobby-hint">
+         <i class="fa-solid fa-circle-info"></i>
+         <strong>Research consent required.</strong>
+         By playing this game, you agree that your moves, game states, and interactions may be stored and used for academic research on human decision-making. No personally identifiable information will be collected.
+         <div style="margin-top:8px">
+           <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer">
+             <input type="checkbox" id="consent-checkbox" onchange="updateConsentConfirmState()">
+             <span>I understand and agree.</span>
+           </label>
+         </div>
+         <div style="margin-top:8px">
+           <button class="btn btn-primary btn-sm" id="consent-confirm-btn" onclick="confirmHumanConsent()" disabled>Confirm consent</button>
+         </div>
+       </div>`;
+  updateConsentConfirmState();
+  updateLobbyStartAvailability();
+}
+
+function confirmHumanConsent() {
+  const checkbox = document.getElementById('consent-checkbox');
+  if (!checkbox?.checked) return;
+  const record = initializeConsentRecord();
+  localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify({
+    ...record,
+    consent: true,
+    consented_at: new Date().toISOString(),
+    anonymous_user_id: record?.anonymous_user_id || getOrCreateAnonymousUserId(),
+  }));
+  renderConsentGate();
+}
+
 function normalizeEngineState(raw) {
   const state = raw?.game || raw?.state || raw || {};
   const cfg = state.config || {};
@@ -183,12 +281,13 @@ function ensureTransportButtonStyles() {
 
 
 async function init(){
-  ensureTransportButtonStyles(); loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); drawBoard(); _updateLiveSpeedControls();
+  ensureTransportButtonStyles(); loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); renderConsentGate(); drawBoard(); _updateLiveSpeedControls();
 }
 function loadSettings(){
   try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
   settings.auto_play_speed='off';
   if(settings.sound_volume===undefined) settings.sound_volume=0.8;
+  initializeConsentRecord();
 }
 function applySettingsToControls(){
   const c=(id,v)=>{const e=document.getElementById(id); if(e)e.checked=v;};

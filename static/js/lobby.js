@@ -108,6 +108,7 @@ function renderLobbySlots() {
 
   renderLobbyHint(active);
   renderLobbyYardControl();
+  if (typeof renderConsentGate === 'function') renderConsentGate();
 }
 
 function renderLobbyHint(active) {
@@ -184,6 +185,10 @@ function lobbySetName(slotIdx, v) {
 }
 
 function startFromLobby() {
+  if (typeof hasGameplayConsent === 'function' && !hasGameplayConsent()) {
+    if (typeof renderConsentGate === 'function') renderConsentGate();
+    return;
+  }
   const active = lobbyActiveSlots();
   settings.num_players = active.length;
   persistSettings();

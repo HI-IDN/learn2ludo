@@ -2,6 +2,8 @@
 <div class="panel" id="panel-lobby">
   <div class="lobby-wrap">
 
+    <div class="lobby-hint" id="lobby-consent-gate"></div>
+
     <div class="lobby-header">
       <div class="lobby-title">
         <span class="lobby-title-main">Player Setup</span>
@@ -23,7 +25,7 @@
     </div>
 
     <div class="lobby-footer">
-      <button class="btn btn-primary" onclick="startFromLobby()">
+      <button class="btn btn-primary" id="lobby-start-game-btn" onclick="startFromLobby()">
         <i class="ti ti-play"></i>
         Start Game
       </button>
