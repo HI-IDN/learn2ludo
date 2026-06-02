@@ -104,3 +104,15 @@ def test_hephaestus_prefers_forming_blockades():
     ], game_state)
 
     assert move["target"] == 8
+
+
+def test_artemis_prefers_activating_yard_pawns():
+    game_state = state([
+        {"index": 0, "pieces": [piece(0, "R1", -1, None, in_yard=True), piece(1, "R2", 8, 8)]},
+    ])
+    move = REGISTRY["artemis"].choose_move([
+        {"piece_idx": 0, "pawn_id": "R1", "target": 0},
+        {"piece_idx": 1, "pawn_id": "R2", "target": 12},
+    ], game_state)
+
+    assert move["pawn_id"] == "R1"

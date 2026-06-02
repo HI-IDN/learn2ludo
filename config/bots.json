@@ -69,6 +69,16 @@
       "focus": "Looks for moves that land on another friendly pawn to form a blockade.",
       "status": "Available",
       "selectable": true
+    },
+    {
+      "id": "artemis",
+      "name": "Artemis",
+      "type": "heuristic",
+      "epithet": "Goddess of the Hunt",
+      "description": "Gets pawns out of the yard whenever possible.",
+      "focus": "Prioritises activating new pawns so more pieces can join the chase.",
+      "status": "Available",
+      "selectable": true
     }
   ]
 }

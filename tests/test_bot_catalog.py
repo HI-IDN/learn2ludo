@@ -24,3 +24,7 @@ def test_bot_catalog_includes_available_and_planned_bots():
     assert by_id["hephaestus"]["selectable"] is True
     assert by_id["hephaestus"]["implemented"] is True
     assert by_id["hephaestus"]["id"] in REGISTRY
+
+    assert by_id["artemis"]["selectable"] is True
+    assert by_id["artemis"]["implemented"] is True
+    assert by_id["artemis"]["id"] in REGISTRY

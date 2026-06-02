@@ -314,11 +314,21 @@ class HephaestusBot(BotPolicy):
         return choose_by_feature(valid_moves, game_state, lambda _move, f: f.blockade)
 
 
+class ArtemisBot(BotPolicy):
+    id          = "artemis"
+    name        = "Artemis"
+    type        = "heuristic"
+    description = "Goddess of the Hunt — gets pawns into play"
+
+    def choose_move(self, valid_moves, game_state=None):
+        return choose_by_feature(valid_moves, game_state, lambda _move, f: f.activation)
+
+
 # ---------------------------------------------------------------------------
 # Registry — add new bots here; RL bots will register themselves on load
 # ---------------------------------------------------------------------------
 
-_BUILTIN: list[BotPolicy] = [ErisBot(), AresBot(), AthenaBot(), HestiaBot(), HermesBot(), HephaestusBot()]
+_BUILTIN: list[BotPolicy] = [ErisBot(), AresBot(), AthenaBot(), HestiaBot(), HermesBot(), HephaestusBot(), ArtemisBot()]
 REGISTRY: dict[str, BotPolicy] = {b.id: b for b in _BUILTIN}
 
 
