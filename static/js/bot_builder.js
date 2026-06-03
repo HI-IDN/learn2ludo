@@ -168,7 +168,6 @@ function renderBotBuilderCard() {
             </div>
           </div>
         </div>
-        </div>
       </div>
     </div>`;
 }
