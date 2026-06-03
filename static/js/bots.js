@@ -39,7 +39,13 @@ function getOrderedBotRegistry() {
 }
 
 function getBotRegistry() { return BOT_REGISTRY; }
-function getSelectableBots() { return getOrderedBotRegistry().filter(b => b.selectable !== false && b.implemented !== false); }
+function getSelectableBots() {
+  return getOrderedBotRegistry().filter(b =>
+    b.selectable !== false &&
+    b.implemented !== false &&
+    (b.id !== 'student-weighted' || typeof studentBotIsAvailable !== 'function' || studentBotIsAvailable())
+  );
+}
 
 function botEpithet(bot) {
   return bot?.epithet || '';
@@ -300,7 +306,7 @@ function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '
         </div>`).join('')
     : '';
   const cards = botCards || extraCardHtml
-    ? `${botCards}${extraCardHtml}`
+    ? `${extraCardHtml}${botCards}`
     : allowEmpty
       ? `<div class="bot-empty">
            <i class="ti ti-brain"></i>
