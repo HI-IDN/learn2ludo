@@ -180,16 +180,80 @@ function renderLobbySlots() {
   setTimeout(renderLobbyBoardPreview, 50);
 }
 
+function _colorSpan(slotIdx) {
+  const name = (PLAYER_COLORS[slotIdx] || 'blue');
+  const hex  = COLORS[name] || '#888';
+  return `<span style="color:${hex};font-weight:700">${name.charAt(0).toUpperCase() + name.slice(1)}</span>`;
+}
+
+function _slotGaps(sortedSlots, yards) {
+  const n = sortedSlots.length;
+  return sortedSlots.map((s, i) => ((sortedSlots[(i + 1) % n] - s + yards) % yards));
+}
+
 function renderLobbyHint(active) {
   const hint = document.getElementById('lobby-hint');
   if (!hint) return;
-  hint.innerHTML = active.length === 2
-    ? `<div class="lobby-hint">
-         <i class="fa-solid fa-lightbulb"></i>
-         Diagonal corners recommended:
-         <strong>Red + Yellow</strong> or <strong>Green + Blue</strong>
-       </div>`
-    : '';
+  const n = active.length;
+  const yards = settings.board_yard_count ?? 4;
+
+  if (n < 2) { hint.innerHTML = ''; return; }
+
+  const sorted = [...active].sort((a, b) => a - b);
+  const gaps   = _slotGaps(sorted, yards);
+  const maxG   = Math.max(...gaps);
+  const minG   = Math.min(...gaps);
+  const isEven = maxG === minG;
+
+  // -- Even spacing: no warning needed (optionally encourage) --
+  if (isEven) {
+    hint.innerHTML = n === yards
+      ? '' // all slots filled = always balanced, no hint needed
+      : `<div class="lobby-hint">
+           <i class="fa-solid fa-circle-check lobby-hint-icon"></i>
+           Players are evenly spaced — balanced setup.
+         </div>`;
+    return;
+  }
+
+  // -- Uneven spacing --
+  // Build the set of all optimal distributions (evenly-spaced starting slots)
+  const step = yards / n; // may be fractional
+  const isInteger = Number.isInteger(step);
+
+  let body = '';
+
+  if (n === 2 && yards === 4) {
+    // Special case: name the two diagonal pairs
+    const d1 = `${_colorSpan(0)} + ${_colorSpan(2)}`;
+    const d2 = `${_colorSpan(1)} + ${_colorSpan(3)}`;
+    body = `<i class="fa-solid fa-lightbulb lobby-hint-icon"></i>
+      Diagonal corners recommended for a fair start:
+      <div class="lobby-hint-pairs">
+        ${d1}
+        <span class="lobby-hint-or">or</span>
+        ${d2}
+      </div>`;
+  } else if (isInteger) {
+    // Can enumerate all balanced starting offsets
+    const options = Array.from({length: step}, (_, offset) => {
+      const slots = Array.from({length: n}, (_, i) => (offset + i * step) % yards);
+      return slots.map(_colorSpan).join(' + ');
+    });
+    const pairs = options.map((o, i) =>
+      i === 0 ? o : `<span class="lobby-hint-or">or</span> ${o}`
+    ).join(' ');
+    body = `<i class="fa-solid fa-lightbulb lobby-hint-icon"></i>
+      For a balanced game, spread players evenly:
+      <div class="lobby-hint-pairs">${pairs}</div>`;
+  } else {
+    // Fractional step — just warn, can't give a perfect arrangement
+    body = `<i class="fa-solid fa-triangle-exclamation lobby-hint-icon"></i>
+      ${n} players on a ${yards}-yard board cannot be perfectly balanced —
+      some players will have more space than others.`;
+  }
+
+  hint.innerHTML = `<div class="lobby-hint">${body}</div>`;
 }
 
 function lobbyToggleSlot(slotIdx) {

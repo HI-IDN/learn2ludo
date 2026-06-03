@@ -624,20 +624,34 @@
 // ---- 2p hint (rendered below Start Game) ------------------------------------
 
 .lobby-hint {
-  margin-top: 16px;
+  margin-top: 24px;
   border-radius: $radius;
-  padding: 12px 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  padding: 14px 20px;
   font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
   background: $accent-tint;
   border: 1px solid $accent-tint-border;
   color: $color-text-2;
-  line-height: 1.5;
 
-  i { color: $color-primary; flex-shrink: 0; margin-top: 1px; }
-  strong { color: $color-text; }
+  i.lobby-hint-icon { color: $color-primary; margin-right: 6px; }
+
+  .lobby-hint-pairs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .lobby-hint-or {
+    font-weight: 400;
+    font-size: 12px;
+    color: $color-text-3;
+  }
 
   &--warn {
     background: $danger-tint;
