@@ -35,6 +35,7 @@
 @use "features/game-ui";      // .turn-banner, .dice-face, .move-history-*, .pawn-options-*
 @use "features/settings";     // .settings-grid, .train-layout, .rule-row, .form-row
 @use "features/stats";        // .stats-row, .stat-card, .dice-audit-*, .progress-bar-*, .mini-chart
+@use "features/profiles";     // .profiles-wrap, .profile-card, registration/consent modals
 @use "features/lobby";        // .lobby-wrap, .lobby-slot, .lobby-play-btn
 @use "features/bots";         // .bots-sections, .bot-card, .bot-empty
 @use "features/bot-builder";  // .bot-builder-card, slider controls for custom CDR bot

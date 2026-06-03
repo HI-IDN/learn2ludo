@@ -1,0 +1,370 @@
+// =============================================================================
+// Profiles — player registration and session identity panel
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ── Panel wrapper ─────────────────────────────────────────────────────────────
+
+.profiles-wrap {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px 0;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.profiles-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.profiles-title {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: $color-text;
+}
+
+.profiles-subtitle {
+  display: block;
+  font-size: 13px;
+  color: $color-text-2;
+  margin-top: 4px;
+}
+
+// ── Profile card grid ─────────────────────────────────────────────────────────
+
+.profiles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.profiles-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: $color-text-3;
+  text-align: center;
+
+  i { font-size: 36px; }
+  p { font-size: 14px; line-height: 1.5; margin: 0; }
+}
+
+.profile-card {
+  position: relative;
+  background: $color-bg-alt;
+  border: 1.5px solid $border-light;
+  border-radius: $radius-lg;
+  padding: 20px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &--ready {
+    border-color: $color-green;
+    box-shadow: 0 0 0 3px rgba(113, 149, 0, 0.12);
+  }
+}
+
+.profile-card-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: $color-text-3;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: $danger-tint; color: $color-danger; }
+}
+
+.profile-card-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: $color-bg-raised;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: $color-primary;
+}
+
+.profile-card-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: $color-text;
+}
+
+.profile-card-age {
+  font-size: 11px;
+  color: $color-text-3;
+  background: $color-bg-raised;
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.profile-card-status {
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-green;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.profiles-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+// ── Modal backdrop & container ────────────────────────────────────────────────
+
+.profiles-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+
+  &[hidden] { display: none; }
+}
+
+.profiles-modal {
+  background: $color-bg-alt;
+  border-radius: $radius-lg;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+
+  &--sm { max-width: 480px; }
+}
+
+.profiles-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px 0;
+  flex-shrink: 0;
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: $color-text;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+.profiles-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: $color-bg-raised;
+  color: $color-text-2;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: $border-medium; color: $color-text; }
+}
+
+.profiles-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+}
+
+.profiles-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid $border-light;
+  flex-shrink: 0;
+}
+
+// ── Registration form elements ────────────────────────────────────────────────
+
+.reg-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reg-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: $color-text;
+  margin: 0;
+}
+
+.reg-required {
+  color: $color-danger;
+}
+
+.reg-hint {
+  font-size: 12px;
+  color: $color-text-2;
+  margin: 0;
+}
+
+.reg-error {
+  font-size: 12px;
+  color: $color-danger;
+  margin: 0;
+  min-height: 1em;
+}
+
+.reg-input {
+  padding: 9px 12px;
+  border: 1.5px solid $border-medium;
+  border-radius: $radius;
+  font-size: 14px;
+  font-family: $font-sans;
+  color: $color-text;
+  background: $color-bg-alt;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &::placeholder { color: $color-text-3; }
+  &:focus {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px rgba(16, 9, 159, 0.1);
+  }
+}
+
+.reg-select {
+  padding: 9px 12px;
+  border: 1.5px solid $border-medium;
+  border-radius: $radius;
+  font-size: 14px;
+  font-family: $font-sans;
+  color: $color-text;
+  background: $color-bg-alt;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+
+  &:focus { border-color: $color-primary; }
+}
+
+// Avatar icon grid
+.reg-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 6px;
+}
+
+.reg-icon-btn {
+  aspect-ratio: 1;
+  border-radius: $radius;
+  border: 2px solid $border-light;
+  background: $color-bg;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.12s, background 0.12s, transform 0.1s;
+  color: $color-text;
+
+  &:hover { border-color: $color-primary; background: $accent-tint; transform: scale(1.08); }
+  &.selected { border-color: $color-primary; background: $accent-tint; box-shadow: 0 0 0 2px $color-primary; }
+}
+
+// Consent box
+.reg-consent-box {
+  background: $color-bg;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+  padding: 16px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: $color-text-2;
+  max-height: 220px;
+  overflow-y: auto;
+
+  p { margin: 0 0 10px; &:last-child { margin-bottom: 0; } }
+  strong { color: $color-text; }
+
+  &--warning {
+    border-color: $color-yellow;
+    background: #FFFBEA;
+  }
+}
+
+.reg-check-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: $color-text;
+  cursor: pointer;
+  line-height: 1.5;
+
+  input[type="checkbox"] {
+    margin-top: 2px;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: $color-primary;
+    cursor: pointer;
+  }
+}
+
+.reconsent-name {
+  font-weight: 700;
+  color: $color-primary;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 600px) {
+  .profiles-grid { grid-template-columns: repeat(2, 1fr); }
+  .reg-icon-grid { grid-template-columns: repeat(6, 1fr); }
+}

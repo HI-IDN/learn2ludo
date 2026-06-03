@@ -1,13 +1,22 @@
 {
   "tabs": [
     {
-      "id": "lobby",
+      "id": "profiles",
       "label": "Players",
-      "icon": "ti-users",
+      "icon": "ti-user-circle",
       "enabled": true,
       "default_visible": true,
       "order": 0,
-      "description": "Player setup and game start"
+      "description": "Register and select who is playing"
+    },
+    {
+      "id": "lobby",
+      "label": "Setup",
+      "icon": "ti-users",
+      "enabled": true,
+      "default_visible": true,
+      "order": 1,
+      "description": "Player slots, board shape, and game start"
     },
     {
       "id": "play",

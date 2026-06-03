@@ -25,6 +25,8 @@ const FACE_ICONS = (() => {
 const DEFAULT_FACE_ICON = 'fa-face-smile';
 
 function getPlayerIcon(playerIdx) {
+  const profile = typeof getSlotProfile === 'function' ? getSlotProfile(playerIdx) : null;
+  if (profile?.icon && FACE_ICONS.includes(profile.icon)) return profile.icon;
   const icon = settings.player_icons?.[playerIdx];
   if (icon && FACE_ICONS.includes(icon)) return icon;
   return DEFAULT_FACE_ICON;

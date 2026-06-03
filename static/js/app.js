@@ -103,6 +103,8 @@ function getPlayerName(i){
     }
     return settings.bot_names?.[i] || 'Bot';
   }
+  const profile = typeof getSlotProfile === 'function' ? getSlotProfile(i) : null;
+  if (profile) return profile.username;
   return settings.player_names?.[i] || DEFAULT_HUMAN_NAMES[i] || `Player ${i+1}`;
 }
 function gamePlayerName(i) {
@@ -194,7 +196,7 @@ function ensureTransportButtonStyles() {
 
 
 async function init(){
-  ensureTransportButtonStyles(); loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); drawBoard(); _updateLiveSpeedControls();
+  ensureTransportButtonStyles(); loadSettings(); applySettingsToControls(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); if(typeof initProfilesPanel==='function') initProfilesPanel(); drawBoard(); _updateLiveSpeedControls();
 }
 function loadSettings(){
   try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
@@ -340,7 +342,7 @@ async function loadTabs(){
 }
 function getVisibleTabs(){ return tabConfig.filter(t=>t.enabled).sort((a,b)=>a.order-b.order); }
 function renderTabs(){ const nav=document.getElementById('tab-nav'); nav.innerHTML=''; getVisibleTabs().forEach(t=>{ const b=document.createElement('button'); b.className='tab-btn'; b.id='tab-btn-'+t.id; b.innerHTML=`<i class="ti ${t.icon}"></i>${t.label}`; b.onclick=()=>switchTab(t.id); nav.appendChild(b); }); switchTab(getVisibleTabs()[0]?.id || 'play'); }
-function switchTab(id){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tab-btn-'+id)?.classList.add('active'); document.getElementById('panel-'+id)?.classList.add('active'); if(id==='stats')loadStats(); if(id==='lobby')renderLobbySlots(); if(id==='bots')renderBotsPage(); }
+function switchTab(id){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tab-btn-'+id)?.classList.add('active'); document.getElementById('panel-'+id)?.classList.add('active'); if(id==='stats')loadStats(); if(id==='lobby')renderLobbySlots(); if(id==='profiles'&&typeof renderProfiles==='function')renderProfiles(); if(id==='bots')renderBotsPage(); }
 async function doAdminLogin(){adminToken='dev';}
 async function doOverlayLogin(){adminToken='dev'; closeOverlay(); switchTab('admin');}
 function closeOverlay(){ const o=document.getElementById('admin-overlay'); if(o)o.style.display='none'; }

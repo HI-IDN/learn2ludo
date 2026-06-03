@@ -90,16 +90,10 @@ function renderLobbySlots() {
               <i class="fa-solid fa-robot"></i> Bot
             </button>
           </div>
-          ${!isHuman ? lobbyBotSelect(slotIdx, playerIdx) : ''}
-          <div class="lobby-name-wrap">
-            <input class="lobby-name-input" type="text"
-              placeholder="${isHuman ? 'Enter name…' : ''}"
-              value="${isHuman ? name : ''}"
-              ${isHuman ? '' : 'disabled'}
-              oninput="lobbySetName(${slotIdx}, this.value)"
-              onkeydown="if(event.key==='Enter')this.blur()">
-            ${isHuman ? `<i class="fa-solid fa-pen lobby-name-edit-icon"></i>` : ''}
-          </div>
+          ${!isHuman ? lobbyBotSelect(slotIdx, playerIdx) : (typeof lobbyProfileSelect === 'function' ? lobbyProfileSelect(slotIdx, playerIdx) : '')}
+          ${isHuman && typeof getSlotProfile === 'function' && !getSlotProfile(playerIdx)
+            ? `<p class="lobby-no-profile-hint"><a href="#" onclick="event.preventDefault();switchTab('profiles')">Register first</a> to add a human player.</p>`
+            : ''}
         </div>` : `
         <div class="lobby-slot-body lobby-slot-add">
           <i class="fa-solid fa-plus"></i>

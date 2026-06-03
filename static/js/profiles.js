@@ -1,0 +1,336 @@
+// Profiles — player registration, consent, and session identity.
+// Profile = { id, username (unique, ≤10 chars), icon (FA face), age_range, consent_ts, leaderboard_opt_in }
+// Session consent tracked in sessionStorage so returning players re-consent each browser session.
+
+const PROFILE_STORAGE_KEY = 'learn2ludo_profiles';
+const SESSION_CONSENT_KEY  = 'learn2ludo_session_consented';
+const PROFILE_NAME_MAX     = 10;
+
+const AGE_RANGES = ['Under 13', '13–17', '18–29', '30–44', '45–59', '60+', 'Prefer not to say'];
+
+const CONSENT_TEXT = `
+<p>You are invited to participate in a research study on human decision-making in strategy games,
+conducted at the University of Iceland.</p>
+<p><strong>What data is collected:</strong> Your gameplay actions — moves made, game states, and any
+written reflections you provide — will be recorded and stored. No personally identifiable information
+(name, email, IP address, or device identifiers) is collected or linked to your data.</p>
+<p><strong>How your data will be used:</strong> Anonymised data may be used in academic publications,
+presentations, and for training AI models. Only researchers involved in this study will have access to
+session data during analysis.</p>
+<p><strong>Your right to withdraw:</strong> Participation is entirely voluntary. You may stop playing
+at any time. Because data is stored anonymously and cannot be traced back to you once collected, it
+may not be possible to remove your historical gameplay records from the dataset after they have been
+submitted.</p>
+<p><strong>Ethics approval:</strong> This study is conducted in accordance with the University of
+Iceland's research ethics guidelines. Questions about your rights as a participant may be directed to
+the research team.</p>
+`;
+
+// ── Storage ──────────────────────────────────────────────────────────────────
+
+function loadProfiles() {
+  try { return JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function saveProfiles(profiles) {
+  localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profiles));
+}
+
+function getProfileById(id) {
+  return loadProfiles().find(p => p.id === id) || null;
+}
+
+// ── Session consent ───────────────────────────────────────────────────────────
+
+function getSessionConsented() {
+  try { return new Set(JSON.parse(sessionStorage.getItem(SESSION_CONSENT_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+
+function markSessionConsented(profileId) {
+  const s = getSessionConsented();
+  s.add(profileId);
+  sessionStorage.setItem(SESSION_CONSENT_KEY, JSON.stringify([...s]));
+}
+
+function isSessionConsented(profileId) {
+  return getSessionConsented().has(profileId);
+}
+
+// ── Lobby integration ─────────────────────────────────────────────────────────
+
+function getSlotProfile(playerIdx) {
+  const id = settings.profile_ids?.[playerIdx];
+  return id ? getProfileById(id) : null;
+}
+
+function setSlotProfile(playerIdx, profileId) {
+  settings.profile_ids = settings.profile_ids || {};
+  // Remove this profile from any other slot first (one profile per slot)
+  if (profileId) {
+    for (const k of Object.keys(settings.profile_ids)) {
+      if (Number(k) !== playerIdx && settings.profile_ids[k] === profileId)
+        delete settings.profile_ids[k];
+    }
+    settings.profile_ids[playerIdx] = profileId;
+  } else {
+    delete settings.profile_ids[playerIdx];
+  }
+  persistSettings();
+}
+
+function cleanStaleProfileIds() {
+  if (!settings.profile_ids) return;
+  const existing = new Set(loadProfiles().map(p => p.id));
+  let changed = false;
+  for (const k of Object.keys(settings.profile_ids)) {
+    if (!existing.has(settings.profile_ids[k])) { delete settings.profile_ids[k]; changed = true; }
+  }
+  if (changed) persistSettings();
+}
+
+// ── Panel rendering ───────────────────────────────────────────────────────────
+
+function renderProfiles() {
+  const wrap = document.getElementById('profiles-grid');
+  if (!wrap) return;
+  const profiles = loadProfiles();
+  if (!profiles.length) {
+    wrap.innerHTML = `
+      <div class="profiles-empty">
+        <i class="fa-solid fa-user-plus"></i>
+        <p>No players registered yet.<br>Add a player to get started.</p>
+      </div>`;
+    return;
+  }
+  wrap.innerHTML = profiles.map(p => {
+    const ready = isSessionConsented(p.id);
+    return `
+      <div class="profile-card${ready ? ' profile-card--ready' : ''}">
+        <button class="profile-card-delete" onclick="deleteProfile('${p.id}')" title="Remove player">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="profile-card-icon">
+          <i class="fa-solid ${escapeAttr(p.icon)}"></i>
+        </div>
+        <div class="profile-card-name">${escapeAttr(p.username)}</div>
+        <div class="profile-card-age">${escapeAttr(p.age_range)}</div>
+        ${ready
+          ? `<div class="profile-card-status"><i class="fa-solid fa-circle-check"></i> Ready</div>`
+          : `<button class="btn btn-primary btn-sm" onclick="openReconsent('${p.id}')">
+               <i class="fa-solid fa-right-to-bracket"></i> Select
+             </button>`}
+      </div>`;
+  }).join('');
+}
+
+// ── Delete ────────────────────────────────────────────────────────────────────
+
+function deleteProfile(id) {
+  const profile = getProfileById(id);
+  if (!confirm(`Remove player "${profile?.username || id}"?`)) return;
+  saveProfiles(loadProfiles().filter(p => p.id !== id));
+  if (settings.profile_ids) {
+    for (const k of Object.keys(settings.profile_ids)) {
+      if (settings.profile_ids[k] === id) delete settings.profile_ids[k];
+    }
+    persistSettings();
+  }
+  renderProfiles();
+  if (typeof renderLobbySlots === 'function') renderLobbySlots();
+}
+
+// ── Registration modal ────────────────────────────────────────────────────────
+
+let _regIcon = null;
+
+function openProfileRegistration() {
+  _regIcon = null;
+  const modal = document.getElementById('profile-reg-modal');
+  if (!modal) return;
+  const usernameEl = document.getElementById('reg-username');
+  if (usernameEl) usernameEl.value = '';
+  const ageEl = document.getElementById('reg-age-select');
+  if (ageEl) ageEl.value = '';
+  const consentEl = document.getElementById('reg-consent-check');
+  if (consentEl) consentEl.checked = false;
+  const parentEl = document.getElementById('reg-parent-check');
+  if (parentEl) parentEl.checked = false;
+  const leaderEl = document.getElementById('reg-leaderboard-check');
+  if (leaderEl) leaderEl.checked = false;
+  modal.removeAttribute('hidden');
+  _renderRegIcons();
+  _updateRegParent();
+  _updateRegSubmit();
+  usernameEl?.focus();
+}
+
+function closeProfileRegistration() {
+  document.getElementById('profile-reg-modal')?.setAttribute('hidden', '');
+  _regIcon = null;
+}
+
+function _renderRegIcons() {
+  const grid = document.getElementById('reg-icon-grid');
+  if (!grid) return;
+  const selected = _regIcon;
+  grid.innerHTML = FACE_ICONS.map(ic =>
+    `<button class="reg-icon-btn${ic === selected ? ' selected' : ''}"
+      title="${ic.replace('fa-face-','').replace(/-/g,' ')}"
+      onclick="regSelectIcon('${ic}')">
+      <i class="fa-solid ${ic}"></i>
+    </button>`
+  ).join('');
+}
+
+function regSelectIcon(ic) {
+  _regIcon = ic;
+  _renderRegIcons();
+  _updateRegSubmit();
+}
+
+function _updateRegParent() {
+  const age = document.getElementById('reg-age-select')?.value;
+  const row = document.getElementById('reg-parent-row');
+  if (row) row.hidden = age !== 'Under 13';
+  _updateRegSubmit();
+}
+
+function _updateRegSubmit() {
+  const btn = document.getElementById('reg-submit-btn');
+  if (!btn) return;
+  const username = document.getElementById('reg-username')?.value.trim();
+  const age      = document.getElementById('reg-age-select')?.value;
+  const consent  = document.getElementById('reg-consent-check')?.checked;
+  const needsParent = age === 'Under 13';
+  const parentOk = !needsParent || document.getElementById('reg-parent-check')?.checked;
+  btn.disabled = !(_regIcon && username && age && consent && parentOk);
+}
+
+function _regUsernameError(msg) {
+  const el = document.getElementById('reg-username-error');
+  if (el) el.textContent = msg;
+}
+
+function submitRegistration() {
+  const username  = document.getElementById('reg-username')?.value.trim();
+  const age       = document.getElementById('reg-age-select')?.value;
+  const consent   = document.getElementById('reg-consent-check')?.checked;
+  const leaderboard = document.getElementById('reg-leaderboard-check')?.checked ?? false;
+
+  if (!_regIcon || !username || !age || !consent) return;
+
+  const profiles = loadProfiles();
+  if (profiles.some(p => p.username.toLowerCase() === username.toLowerCase())) {
+    _regUsernameError('That name is already taken. Choose another.');
+    document.getElementById('reg-username')?.focus();
+    return;
+  }
+  _regUsernameError('');
+
+  const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : Date.now().toString(36) + Math.random().toString(36).slice(2);
+
+  profiles.push({ id, username, icon: _regIcon, age_range: age, consent_ts: Date.now(), leaderboard_opt_in: leaderboard });
+  saveProfiles(profiles);
+  markSessionConsented(id);
+  closeProfileRegistration();
+  renderProfiles();
+  if (typeof renderLobbySlots === 'function') renderLobbySlots();
+}
+
+// ── Re-consent modal ──────────────────────────────────────────────────────────
+
+let _reconsentId       = null;
+let _reconsentCallback = null;
+
+function openReconsent(profileId, callback) {
+  const profile = getProfileById(profileId);
+  if (!profile) return;
+  _reconsentId       = profileId;
+  _reconsentCallback = callback || null;
+
+  const modal = document.getElementById('profile-reconsent-modal');
+  if (!modal) return;
+
+  const nameEl = modal.querySelector('.reconsent-name');
+  if (nameEl) nameEl.innerHTML =
+    `<i class="fa-solid ${escapeAttr(profile.icon)}"></i> ${escapeAttr(profile.username)}`;
+
+  const checkEl = document.getElementById('reconsent-check');
+  if (checkEl) checkEl.checked = false;
+  const btn = document.getElementById('reconsent-submit');
+  if (btn) btn.disabled = true;
+
+  modal.removeAttribute('hidden');
+}
+
+function closeReconsent() {
+  document.getElementById('profile-reconsent-modal')?.setAttribute('hidden', '');
+  _reconsentId       = null;
+  _reconsentCallback = null;
+}
+
+function submitReconsent() {
+  if (!document.getElementById('reconsent-check')?.checked) return;
+  if (!_reconsentId) { closeReconsent(); return; }
+  markSessionConsented(_reconsentId);
+  const cb = _reconsentCallback;
+  const id = _reconsentId;
+  closeReconsent();
+  renderProfiles();
+  if (typeof renderLobbySlots === 'function') renderLobbySlots();
+  if (cb) cb(id);
+}
+
+// ── Lobby helpers ─────────────────────────────────────────────────────────────
+
+function lobbyProfileSelect(slotIdx, playerIdx) {
+  cleanStaleProfileIds();
+  const profiles  = loadProfiles();
+  const currentId = settings.profile_ids?.[playerIdx];
+  const usedIds   = new Set(
+    Object.entries(settings.profile_ids || {})
+      .filter(([k]) => Number(k) !== playerIdx)
+      .map(([, v]) => v)
+  );
+  const options = [
+    `<option value="">— pick player —</option>`,
+    ...profiles.map(p => {
+      const inUse = usedIds.has(p.id) && p.id !== currentId;
+      const tick  = isSessionConsented(p.id) ? ' ✓' : '';
+      return `<option value="${p.id}"${p.id === currentId ? ' selected' : ''}${inUse ? ' disabled' : ''}>${escapeAttr(p.username)}${tick}${inUse ? ' (in use)' : ''}</option>`;
+    })
+  ].join('');
+
+  return `<select class="lobby-bot-select lobby-profile-select"
+    onchange="lobbyPickProfile(${slotIdx}, this.value)"
+    onclick="event.stopPropagation()">
+    ${options}
+  </select>`;
+}
+
+function lobbyPickProfile(slotIdx, profileId) {
+  const playerIdx = lobbyActiveSlots().indexOf(slotIdx);
+  if (playerIdx === -1) return;
+  if (!profileId) { setSlotProfile(playerIdx, null); renderLobbySlots(); return; }
+  if (isSessionConsented(profileId)) {
+    setSlotProfile(playerIdx, profileId);
+    renderLobbySlots();
+  } else {
+    openReconsent(profileId, id => { setSlotProfile(playerIdx, id); renderLobbySlots(); });
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+function initProfilesPanel() {
+  cleanStaleProfileIds();
+  const regText      = document.getElementById('reg-consent-text');
+  if (regText) regText.innerHTML = CONSENT_TEXT;
+  const reconsentText = document.getElementById('reconsent-consent-text');
+  if (reconsentText) reconsentText.innerHTML = CONSENT_TEXT;
+  renderProfiles();
+}

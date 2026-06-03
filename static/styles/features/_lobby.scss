@@ -383,6 +383,18 @@
   }
 }
 
+// Profile picker (human slots)
+.lobby-profile-select { color: #eee; }
+
+.lobby-no-profile-hint {
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+  margin: 0;
+
+  a { color: $color-teal; text-decoration: none; &:hover { text-decoration: underline; } }
+}
+
 // ---- 2p hint (rendered below Start Game) ------------------------------------
 
 .lobby-hint {

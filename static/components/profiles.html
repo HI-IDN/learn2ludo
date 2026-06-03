@@ -1,0 +1,150 @@
+<!-- PROFILES — player registration and session sign-in shown before the lobby -->
+<div class="panel" id="panel-profiles">
+  <div class="profiles-wrap">
+
+    <div class="profiles-header">
+      <div>
+        <span class="profiles-title">Who's Playing?</span>
+        <span class="profiles-subtitle">Select yourself to join this session, or register as a new player.</span>
+      </div>
+      <button class="btn btn-primary" onclick="openProfileRegistration()">
+        <i class="fa-solid fa-user-plus"></i> New Player
+      </button>
+    </div>
+
+    <div class="profiles-grid" id="profiles-grid">
+      <!-- injected by renderProfiles() -->
+    </div>
+
+    <div class="profiles-footer">
+      <button class="btn btn-primary" onclick="switchTab('lobby')">
+        <i class="ti ti-users"></i> Player Setup
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Registration modal ──────────────────────────────────────────────────── -->
+<div class="profiles-backdrop" id="profile-reg-modal" hidden onclick="if(event.target===this)closeProfileRegistration()">
+  <div class="profiles-modal" role="dialog" aria-modal="true" aria-labelledby="reg-modal-title">
+
+    <div class="profiles-modal-header">
+      <h2 id="reg-modal-title">New Player Registration</h2>
+      <button class="profiles-modal-close" onclick="closeProfileRegistration()" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="profiles-modal-body">
+
+      <!-- Username -->
+      <div class="reg-section">
+        <label class="reg-label" for="reg-username">Player name <span class="reg-required">*</span></label>
+        <p class="reg-hint">Short name shown during gameplay (max 10 characters).</p>
+        <input id="reg-username" class="reg-input" type="text" maxlength="10"
+          placeholder="e.g. Freyja"
+          oninput="_updateRegSubmit()" autocomplete="off" spellcheck="false">
+        <p class="reg-error" id="reg-username-error"></p>
+      </div>
+
+      <!-- Avatar -->
+      <div class="reg-section">
+        <p class="reg-label">Choose your avatar <span class="reg-required">*</span></p>
+        <div class="reg-icon-grid" id="reg-icon-grid">
+          <!-- injected by _renderRegIcons() -->
+        </div>
+      </div>
+
+      <!-- Age range -->
+      <div class="reg-section">
+        <label class="reg-label" for="reg-age-select">Age range <span class="reg-required">*</span></label>
+        <p class="reg-hint">Required for research correlation. Your exact age is never stored.</p>
+        <select id="reg-age-select" class="reg-select" onchange="_updateRegParent()">
+          <option value="">— select —</option>
+          <option>Under 13</option>
+          <option>13–17</option>
+          <option>18–29</option>
+          <option>30–44</option>
+          <option>45–59</option>
+          <option>60+</option>
+          <option>Prefer not to say</option>
+        </select>
+      </div>
+
+      <!-- Parental consent (Under 13 only) -->
+      <div class="reg-section reg-parent-row" id="reg-parent-row" hidden>
+        <div class="reg-consent-box reg-consent-box--warning">
+          <p><strong>Parental or guardian consent required.</strong>
+          If you are under 13, a parent or legal guardian must approve your participation before you continue.</p>
+          <label class="reg-check-label">
+            <input type="checkbox" id="reg-parent-check" onchange="_updateRegSubmit()">
+            <span>A parent or guardian has given permission for me to participate in this research study.</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Research consent -->
+      <div class="reg-section">
+        <p class="reg-label">Research consent <span class="reg-required">*</span></p>
+        <div class="reg-consent-box" id="reg-consent-text">
+          <!-- injected by initProfilesPanel() -->
+        </div>
+        <label class="reg-check-label">
+          <input type="checkbox" id="reg-consent-check" onchange="_updateRegSubmit()">
+          <span>I have read the above information and I freely agree to participate in this research study.</span>
+        </label>
+      </div>
+
+      <!-- Bot leaderboard opt-in -->
+      <div class="reg-section">
+        <p class="reg-label">Optional</p>
+        <label class="reg-check-label">
+          <input type="checkbox" id="reg-leaderboard-check">
+          <span>If I train a bot, I'd like it to appear on the public bot leaderboard.</span>
+        </label>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="profiles-modal-footer">
+      <button class="btn" onclick="closeProfileRegistration()">Cancel</button>
+      <button class="btn btn-primary" id="reg-submit-btn" onclick="submitRegistration()" disabled>
+        <i class="fa-solid fa-user-check"></i> Register
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Re-consent modal ────────────────────────────────────────────────────── -->
+<div class="profiles-backdrop" id="profile-reconsent-modal" hidden onclick="if(event.target===this)closeReconsent()">
+  <div class="profiles-modal profiles-modal--sm" role="dialog" aria-modal="true" aria-labelledby="reconsent-title">
+
+    <div class="profiles-modal-header">
+      <h2 id="reconsent-title">Welcome back, <span class="reconsent-name"></span></h2>
+      <button class="profiles-modal-close" onclick="closeReconsent()" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="profiles-modal-body">
+      <div class="reg-consent-box" id="reconsent-consent-text">
+        <!-- injected by initProfilesPanel() -->
+      </div>
+      <label class="reg-check-label" style="margin-top:12px">
+        <input type="checkbox" id="reconsent-check"
+          onchange="document.getElementById('reconsent-submit').disabled=!this.checked">
+        <span>I have read the above information and I freely agree to participate in this research study.</span>
+      </label>
+    </div>
+
+    <div class="profiles-modal-footer">
+      <button class="btn" onclick="closeReconsent()">Cancel</button>
+      <button class="btn btn-primary" id="reconsent-submit" onclick="submitReconsent()" disabled>
+        <i class="fa-solid fa-right-to-bracket"></i> Join session
+      </button>
+    </div>
+
+  </div>
+</div>
