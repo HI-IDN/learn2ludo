@@ -6,7 +6,7 @@
       "type": "baseline",
       "epithet": "Goddess of Discord",
       "description": "Chooses from valid moves without using strategy.",
-      "focus": "Profile: None (pure random).",
+      "template": "template-SDR",
       "status": "Available",
       "selectable": true
     },
@@ -16,7 +16,7 @@
       "type": "heuristic",
       "epithet": "God of War",
       "description": "Looks for chances to send opponent pawns back to their yard.",
-      "focus": "Profile: +1.00 Capture.",
+      "template": "template-SDR",
       "status": "Available",
       "selectable": true
     },
@@ -26,7 +26,7 @@
       "type": "heuristic",
       "epithet": "Goddess of Wisdom",
       "description": "Keeps pawns safe before looking for other moves.",
-      "focus": "Profile: +1.00 Safety.",
+      "template": "template-SDR",
       "status": "Available",
       "selectable": true
     },
@@ -36,7 +36,7 @@
       "type": "heuristic",
       "epithet": "Goddess of the Hearth",
       "description": "Brings pawns home as directly as possible.",
-      "focus": "Profile: +1.00 Progress.",
+      "template": "template-SDR",
       "status": "Available",
       "selectable": true
     },
@@ -46,7 +46,7 @@
       "type": "weighted",
       "epithet": "God of Order",
       "description": "Balanced weighted bot combining capture, safety, progress, and activation.",
-      "focus": "Profile: +0.35 Safety ≥ +0.30 Capture ≥ +0.25 Progress ≫ +0.10 Activation.",
+      "template": "template-CDR",
       "status": "Template",
       "selectable": true
     },
@@ -56,7 +56,7 @@
       "type": "weighted",
       "epithet": "User CDR",
       "description": "Custom weighted bot configured with sliders.",
-      "focus": "Template: User-defined CDR.",
+      "template": "user-CDR",
       "status": "Custom",
       "selectable": true
     },
@@ -66,7 +66,7 @@
       "type": "heuristic",
       "epithet": "God of Travel",
       "description": "Keeps pawns distributed across the board.",
-      "focus": "Profile: +1.00 Spread.",
+      "template": "template-SDR",
       "status": "Available",
       "selectable": true
     },
@@ -76,7 +76,7 @@
       "type": "heuristic",
       "epithet": "God of the Forge",
       "description": "Builds defensive stacks with friendly pawns.",
-      "focus": "Profile: +1.00 Blockade.",
+      "template": "template-SDR",
       "status": "Available",
       "selectable": true
     },
@@ -86,7 +86,7 @@
       "type": "heuristic",
       "epithet": "Goddess of the Hunt",
       "description": "Gets pawns out of the yard whenever possible.",
-      "focus": "Profile: +1.00 Activation.",
+      "template": "template-SDR",
       "status": "Available",
       "selectable": true
     }
