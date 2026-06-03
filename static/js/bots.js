@@ -40,7 +40,7 @@ function getOrderedBotRegistry() {
 
 function getBotRegistry() { return BOT_REGISTRY; }
 function getSelectableBots() {
-  return getOrderedBotRegistry().filter(b =>
+  return BOT_REGISTRY.filter(b =>
     b.selectable !== false &&
     b.implemented !== false
   );
