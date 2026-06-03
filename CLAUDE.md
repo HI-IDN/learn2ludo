@@ -1,4 +1,4 @@
-# Learn2Ludo — Claude Guidelines
+# Learn2Ludo — Agent Guidelines
 
 ## Project overview
 
@@ -18,17 +18,20 @@ sass static/styles/main.scss static/styles/css/main.css --style=compressed
 
 ## Git workflow
 
-- Only commit when the user confirms something is working as expected.
-- Before starting a new feature, remind the user to confirm the current state so we can commit first.
-- Write commit messages on the user's behalf when they give the go-ahead.
+- Commit often at useful checkpoints; do not wait for user confirmation before committing completed work.
+- Before starting a new feature, commit the current completed work first so progress is easy to inspect or undo.
+- Write commit messages on the user's behalf.
+- Include the connected issue number in commit messages with `refs #N`.
+- Use `closes #N` only after the user confirms the issue is working and gives the go-ahead to close it.
+- After each commit, add a short GitHub issue comment explaining how the commit relates to the issue.
 
 ## GitHub issues
 
 - Every feature, bug fix, or improvement should have a corresponding GitHub issue.
 - Before starting any non-trivial work, check whether an issue already exists (`gh issue list`). If not, recommend creating one — but confirm with the user first to avoid duplicates.
 - Minor UI/UX polish items (cosmetic tweaks, label changes, small layout adjustments) can be grouped into a single umbrella issue rather than filed individually.
-- Reference issues in commit messages (`refs #N`, `closes #N`) so work is traceable.
-- **Never close an issue** (via comment, label, or `gh issue close`) without confirming with the user first. Use `closes #N` in commit messages only after the user says the feature is working and gives the go-ahead to commit.
+- Reference issues in commit messages so work is traceable.
+- **Never close an issue** (via comment, label, `closes #N`, or `gh issue close`) without confirming with the user first.
 
 ## Code style
 
