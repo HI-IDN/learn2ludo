@@ -111,9 +111,16 @@
 
 .bot-builder-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   gap: 8px;
   margin-top: 12px;
+}
+
+.bot-builder-save-status {
+  color: $color-text-3;
+  font-size: 11px;
+  margin-right: auto;
 }
 
 @media (max-width: 700px) {

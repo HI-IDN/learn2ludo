@@ -107,6 +107,11 @@ function renderBotBuilderCard() {
             </div>
             <div class="bot-builder-controls">${rows}</div>
             <div class="bot-builder-actions">
+              <span class="bot-builder-save-status" id="bot-builder-save-status"></span>
+              <button class="btn btn-sm btn-primary" type="button" onclick="botBuilderSave()">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Save Bot
+              </button>
               <button class="btn btn-sm" type="button" onclick="botBuilderReset()">
                 <i class="fa-solid fa-rotate-left"></i>
                 Reset
@@ -186,6 +191,14 @@ function botBuilderSetDraftDescription(value) {
   botBuilderRefreshDraft();
 }
 
+function botBuilderSave() {
+  const bot = buildSavedUserBot();
+  settings.saved_user_bots = Array.isArray(settings.saved_user_bots) ? settings.saved_user_bots : [];
+  settings.saved_user_bots.push(bot);
+  persistSettings();
+  botBuilderSetSaveStatus(`Saved ${bot.id}`);
+}
+
 function botBuilderReset() {
   settings.user_bot_weights = defaultUserBotWeights();
   persistSettings();
@@ -213,6 +226,45 @@ function botBuilderRefreshDraft() {
 
 function botBuilderDraftDescriptionText(draft) {
   return draft.tldr || 'User-defined composite dispatching rule';
+}
+
+function buildSavedUserBot() {
+  const draft = getUserBotDraft();
+  const createdAt = new Date().toISOString();
+  return {
+    id: uniqueUserBotId(),
+    name: draft.name.trim() || null,
+    tldr: draft.tldr.trim() || null,
+    description: draft.description.trim() || null,
+    template: 'user-defined-composite-dispatching-rule',
+    profile: botProfileText(getUserBotWeights()),
+    weights: getUserBotWeights(),
+    created_at: createdAt,
+  };
+}
+
+function uniqueUserBotId() {
+  const existing = new Set((settings.saved_user_bots || []).map(bot => bot.id));
+  let id = '';
+  do {
+    id = `bot-${randomBotIdSuffix()}`;
+  } while (existing.has(id));
+  return id;
+}
+
+function randomBotIdSuffix() {
+  const bytes = new Uint8Array(4);
+  if (window.crypto?.getRandomValues) {
+    window.crypto.getRandomValues(bytes);
+    return [...bytes].map(byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+  return `${Date.now().toString(36)}-${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0')}`;
+}
+
+function botBuilderSetSaveStatus(text) {
+  const status = document.getElementById('bot-builder-save-status');
+  if (!status) return;
+  status.textContent = text;
 }
 
 function formatBotWeight(value) {
