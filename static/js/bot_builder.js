@@ -137,9 +137,9 @@ function renderBotBuilderCard() {
             <label class="bot-builder-field bot-builder-field--description">
               <span>Description</span>
               <textarea
-              maxlength="180"
+              maxlength="360"
               placeholder="Describe the kind of bot you hope to create."
-              rows="3"
+              rows="5"
               oninput="botBuilderSetDraftDescription(this.value)"
             >${escapeBotText(draft.description)}</textarea>
             </label>
@@ -181,7 +181,7 @@ function botBuilderSetDraftTldr(value) {
 
 function botBuilderSetDraftDescription(value) {
   settings.user_bot_draft = settings.user_bot_draft || {};
-  settings.user_bot_draft.description = String(value || '').slice(0, 180);
+  settings.user_bot_draft.description = String(value || '').slice(0, 360);
   persistSettings();
   botBuilderRefreshDraft();
 }
@@ -212,9 +212,7 @@ function botBuilderRefreshDraft() {
 }
 
 function botBuilderDraftDescriptionText(draft) {
-  const tldr = draft.tldr || 'User-defined composite dispatching rule';
-  const description = draft.description || 'Describe the kind of bot you hope to create.';
-  return `${tldr} — ${description}`;
+  return draft.tldr || 'User-defined composite dispatching rule';
 }
 
 function formatBotWeight(value) {
