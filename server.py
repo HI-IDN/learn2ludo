@@ -142,7 +142,6 @@ class SaveCustomBotRequest(BaseModel):
     tldr: str
     description: str
     weights: dict
-    profile: str = ""
     template: str = ""
     created_at: str = ""
 

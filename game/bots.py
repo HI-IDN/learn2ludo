@@ -470,8 +470,7 @@ def get_bot_info() -> list[dict]:
     for custom in load_custom_bots():
         bot_id = custom.get("id")
         if bot_id and bot_id not in seen:
-            focus = custom.get("focus") or custom.get("profile") or ""
-            bots.append({**custom, "focus": focus, "type": "weighted", "status": "Custom", "implemented": True, "selectable": True})
+            bots.append({**custom, "type": "weighted", "status": "Custom", "implemented": True, "selectable": True})
             seen.add(bot_id)
 
     return bots

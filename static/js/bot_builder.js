@@ -281,7 +281,6 @@ function buildSavedUserBot() {
     tldr: draft.tldr.trim() || null,
     description: draft.description.trim() || null,
     template: 'user-defined-composite-dispatching-rule',
-    focus: botProfileText(getUserBotWeights()),
     weights: getUserBotWeights(),
     created_at: createdAt,
   };

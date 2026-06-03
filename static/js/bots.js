@@ -316,7 +316,7 @@ function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '
               ${botStatusBadge(b)}
             </div>
             <div class="bot-card-desc">${botCardDescription(b)}</div>
-            ${b.focus ? `<div class="bot-card-focus">${b.focus}</div>` : ''}
+            ${botCardFocus(b) ? `<div class="bot-card-focus">${botCardFocus(b)}</div>` : ''}
           </div>
         </div>`).join('')
     : '';
@@ -351,6 +351,12 @@ function botIsPlanned(bot) {
 
 function botCardDescription(bot) {
   return [bot?.epithet, bot?.description].filter(Boolean).join(' — ');
+}
+
+function botCardFocus(bot) {
+  if (bot?.focus) return bot.focus;
+  if (bot?.weights && typeof botProfileText === 'function') return botProfileText(bot.weights);
+  return '';
 }
 
 // ---- Auto-play loop --------------------------------------------------------
