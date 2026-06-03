@@ -157,6 +157,8 @@ function openProfileRegistration() {
   if (consentEl) consentEl.checked = false;
   const parentEl = document.getElementById('reg-parent-check');
   if (parentEl) parentEl.checked = false;
+  const ageConfirmEl = document.getElementById('reg-age-confirm-check');
+  if (ageConfirmEl) ageConfirmEl.checked = false;
   const leaderEl = document.getElementById('reg-leaderboard-check');
   if (leaderEl) leaderEl.checked = false;
   modal.removeAttribute('hidden');
@@ -190,14 +192,12 @@ function regSelectIcon(ic) {
   _updateRegSubmit();
 }
 
-function _needsParentalConsent(age) {
-  return age === 'Under 13' || age === 'Prefer not to say';
-}
-
 function _updateRegParent() {
   const age = document.getElementById('reg-age-select')?.value;
-  const row = document.getElementById('reg-parent-row');
-  if (row) row.hidden = !_needsParentalConsent(age);
+  const parentRow  = document.getElementById('reg-parent-row');
+  const confirmRow = document.getElementById('reg-age-confirm-row');
+  if (parentRow)  parentRow.hidden  = age !== 'Under 13';
+  if (confirmRow) confirmRow.hidden = age !== 'Prefer not to say';
   _updateRegSubmit();
 }
 
@@ -207,9 +207,9 @@ function _updateRegSubmit() {
   const username = document.getElementById('reg-username')?.value.trim();
   const age      = document.getElementById('reg-age-select')?.value;
   const consent  = document.getElementById('reg-consent-check')?.checked;
-  const needsParent = _needsParentalConsent(age);
-  const parentOk = !needsParent || document.getElementById('reg-parent-check')?.checked;
-  btn.disabled = !(_regIcon && username && age && consent && parentOk);
+  const parentOk  = age !== 'Under 13'         || document.getElementById('reg-parent-check')?.checked;
+  const confirmOk = age !== 'Prefer not to say' || document.getElementById('reg-age-confirm-check')?.checked;
+  btn.disabled = !(_regIcon && username && age && consent && parentOk && confirmOk);
 }
 
 function _regUsernameError(msg) {

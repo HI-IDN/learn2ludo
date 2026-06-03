@@ -73,13 +73,23 @@
       </div>
 
       <!-- Parental consent (Under 13 only) -->
-      <div class="reg-section reg-parent-row" id="reg-parent-row" hidden>
+      <div class="reg-section" id="reg-parent-row" hidden>
         <div class="reg-consent-box reg-consent-box--warning">
           <p><strong>Parental or guardian consent required.</strong>
           If you are under 13, a parent or legal guardian must approve your participation before you continue.</p>
           <label class="reg-check-label">
             <input type="checkbox" id="reg-parent-check" onchange="_updateRegSubmit()">
             <span>A parent or guardian has given permission for me to participate in this research study.</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Age confirmation (Prefer not to say only) -->
+      <div class="reg-section" id="reg-age-confirm-row" hidden>
+        <div class="reg-consent-box reg-consent-box--warning">
+          <label class="reg-check-label">
+            <input type="checkbox" id="reg-age-confirm-check" onchange="_updateRegSubmit()">
+            <span>I confirm that I am 13 years of age or older.</span>
           </label>
         </div>
       </div>
