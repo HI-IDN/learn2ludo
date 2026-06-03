@@ -300,7 +300,7 @@ function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '
   const botCards = bots.length
     ? bots.map(b => `
         <div class="bot-card${botIsPlanned(b) ? ' bot-card--planned' : ''}${b.status === 'Custom' ? ' bot-card--custom' : ''}">
-          ${b.status === 'Custom' ? `<button class="bot-card-delete" title="Delete bot" onclick="botDeleteCustom('${b.id}', '${b.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+          ${b.type === 'CDR' && b.designer ? `<button class="bot-card-delete" title="Delete bot" onclick="botDeleteCustom('${b.id}', '${b.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>` : ''}
           <div class="bot-card-icon"><i class="fa-solid fa-robot"></i></div>
           <div class="bot-card-body">
             <div class="bot-card-title">
@@ -309,6 +309,7 @@ function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '
             </div>
             <div class="bot-card-desc">${botCardDescription(b)}</div>
             ${botCardFocus(b) ? `<div class="bot-card-focus">${botCardFocus(b)}</div>` : ''}
+            ${b.designer ? `<div class="bot-card-designer">by ${b.designer}</div>` : ''}
           </div>
         </div>`).join('')
     : '';

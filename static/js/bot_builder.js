@@ -149,7 +149,7 @@ function renderBotBuilderCard() {
               <textarea
               maxlength="360"
               placeholder="Describe the kind of bot you hope to create."
-              rows="9"
+              rows="4"
               oninput="botBuilderSetDraftDescription(this.value)"
             >${escapeBotText(draft.description)}</textarea>
             </label>
