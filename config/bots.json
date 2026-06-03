@@ -41,26 +41,6 @@
       "selectable": true
     },
     {
-      "id": "apollo",
-      "name": "Apollo",
-      "type": "weighted",
-      "epithet": "God of Order",
-      "description": "Balanced weighted bot combining capture, safety, progress, and activation.",
-      "template": "template-CDR",
-      "status": "Template",
-      "selectable": true
-    },
-    {
-      "id": "user-weighted",
-      "name": "Build-a-bot",
-      "type": "weighted",
-      "epithet": "User CDR",
-      "description": "Custom weighted bot configured with sliders.",
-      "template": "user-CDR",
-      "status": "Custom",
-      "selectable": true
-    },
-    {
       "id": "hermes",
       "name": "Hermes",
       "type": "heuristic",
@@ -88,6 +68,16 @@
       "description": "Gets pawns out of the yard whenever possible.",
       "template": "template-SDR",
       "status": "Available",
+      "selectable": true
+    },
+    {
+      "id": "apollo",
+      "name": "Apollo",
+      "type": "weighted",
+      "epithet": "God of Order",
+      "description": "Balanced weighted bot combining capture, safety, progress, and activation.",
+      "template": "template-CDR",
+      "status": "Template",
       "selectable": true
     }
   ]
