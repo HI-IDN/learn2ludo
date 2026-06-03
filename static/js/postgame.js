@@ -25,6 +25,21 @@ function _removePostgameUI() {
   if (bw) bw.style.display = '';
 }
 
+// ── Replay entry point (no reflection, called from replay.js) ───────────────
+
+function showReplayStats(replayData) {
+  if (_postgameShown) return;
+  _postgameShown = true;
+  _reflections   = [];
+  _playerStats   = replayData.player_stats || null;
+  if (!_playerStats) { _postgameShown = false; return; }
+  // Sync gameState fields needed by _mountStats / _buildStatsPanel
+  if (replayData.winner !== undefined)       gameState.winner        = replayData.winner;
+  if (replayData.winner_color !== undefined) gameState.winner_color  = replayData.winner_color;
+  if (replayData.winners !== undefined)      gameState.winners       = replayData.winners;
+  _mountStats();
+}
+
 // ── Entry point (called from renderGame) ────────────────────────────────────
 
 function maybeShowPostGame() {
@@ -285,10 +300,11 @@ function _buildStatTable(stats) {
     { label: 'Captured',           key: 'captures_suffered' },
     { label: 'Blockades formed',   key: 'blockades_formed' },
     { label: 'Blocked',            key: 'times_blocked' },
-    { label: 'Pawns finished',     key: 'pawns_finished' },
-    { label: '— Forfeit: no pawn out', key: 'forfeit_no_pawn',   cls: 'indent' },
-    { label: '— Forfeit: blockade',    key: 'forfeit_blockade',  cls: 'indent' },
-    { label: '— Forfeit: need exact',  key: 'forfeit_no_exact',  cls: 'indent' },
+    { label: 'Pawns finished',         key: 'pawns_finished' },
+    { label: 'Forfeit turns',           key: '_forfeit_total',    derived: s => (s.forfeit_no_pawn||0)+(s.forfeit_blockade||0)+(s.forfeit_no_exact||0) },
+    { label: '— no pawn out yet',       key: 'forfeit_no_pawn',   cls: 'indent' },
+    { label: '— blocked by opponent',   key: 'forfeit_blockade',  cls: 'indent' },
+    { label: '— need exact roll',       key: 'forfeit_no_exact',  cls: 'indent' },
   ];
 
   const header = `<div class="pg-stat-row pg-stat-head">
@@ -300,7 +316,7 @@ function _buildStatTable(stats) {
     <div class="pg-stat-row${row.cls ? ' '+row.cls : ''}">
       <span class="pg-stat-label">${row.label}</span>
       ${stats.map(s => {
-        const v = s[row.key];
+        const v = row.derived ? row.derived(s) : s[row.key];
         return `<span>${v == null ? '—' : row.fmt ? row.fmt(v) : v}</span>`;
       }).join('')}
     </div>

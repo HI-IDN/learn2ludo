@@ -102,6 +102,7 @@ function loadReplayJson(data) {
   if (typeof clearPregameMode === 'function') clearPregameMode();
   if (typeof resetMoveJustificationFrequency === 'function') resetMoveJustificationFrequency();
   if (typeof setCurrentActionMode === 'function') setCurrentActionMode(true);
+  if (typeof resetPostGame === 'function') resetPostGame();
   replayData = normalizeReplayData(data);
   applyReplaySettings(replayData);
   replaySnapshots = buildReplaySnapshots(replayData);
@@ -136,6 +137,14 @@ async function replayStep(delta) {
 
 async function replayStepBy(delta, { animate = true } = {}) {
   if (!replaySnapshots.length) return;
+  const atEnd = replayIndex >= replaySnapshots.length - 1;
+  if (delta > 0 && atEnd) {
+    // One step past the last event → show stats (n+1 is stats)
+    if (typeof showReplayStats === 'function' && replayData?.player_stats) {
+      showReplayStats(replayData);
+    }
+    return;
+  }
   const nextIndex = Math.max(0, Math.min(replaySnapshots.length - 1, replayIndex + delta));
   if (nextIndex === replayIndex) return;
   if (animate && delta > 0) await animateReplayAdvance(nextIndex, true);
