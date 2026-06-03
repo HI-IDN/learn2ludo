@@ -97,10 +97,10 @@ function renderBotBuilderCard() {
       <div class="bot-card-icon"><i class="fa-solid fa-sliders"></i></div>
       <div class="bot-card-body">
         <div class="bot-card-title">
-          <div class="bot-card-name">Your Bot</div>
+          <div class="bot-card-name">Build-a-bot</div>
           <span class="bot-card-status">Custom</span>
         </div>
-        <div class="bot-card-desc">User CDR — Apollo's weight values, ready to adjust.</div>
+        <div class="bot-card-desc">User CDR — choose weighted dispatching rules with sliders.</div>
         <div class="bot-builder-help">
           Each weight must be between -1.00 and +1.00. Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
         </div>
@@ -119,6 +119,10 @@ function renderBotBuilderCard() {
           <label class="bot-builder-field bot-builder-field--id">
             <span>Label</span>
             <input type="text" value="${escapeBotText(draft.label)}" readonly>
+          </label>
+          <label class="bot-builder-field bot-builder-field--template">
+            <span>Template</span>
+            <input type="text" value="Weighted CDR" readonly>
           </label>
           <label class="bot-builder-field bot-builder-field--description">
             <span>Description</span>

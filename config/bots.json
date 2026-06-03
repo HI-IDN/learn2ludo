@@ -52,11 +52,11 @@
     },
     {
       "id": "user-weighted",
-      "name": "Your Bot",
+      "name": "Build-a-bot",
       "type": "weighted",
       "epithet": "User CDR",
       "description": "Custom weighted bot configured with sliders.",
-      "focus": "Profile starts from Apollo, then follows the slider weights.",
+      "focus": "Template: Weighted CDR.",
       "status": "Custom",
       "selectable": true
     },
