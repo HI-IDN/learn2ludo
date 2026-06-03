@@ -125,9 +125,18 @@
 
 .bot-builder-draft-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
   grid-column: 1 / -1;
   margin-top: 4px;
+}
+
+.bot-builder-hint {
+  color: $color-text-3;
+  font-size: 11px;
+  font-style: italic;
+  flex: 1;
 }
 
 @media (max-width: 700px) {

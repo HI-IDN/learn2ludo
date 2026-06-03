@@ -147,13 +147,13 @@ function renderBotBuilderCard() {
             >${escapeBotText(draft.description)}</textarea>
             </label>
             <div class="bot-builder-draft-actions">
+              ${saveValid ? '' : `<em class="bot-builder-hint" id="bot-builder-hint">${botBuilderSaveTooltip()}</em>`}
               <button
                 class="btn btn-sm btn-primary"
                 id="bot-builder-save-btn"
                 type="button"
                 onclick="botBuilderSave()"
                 ${saveValid ? '' : 'disabled'}
-                title="${botBuilderSaveTooltip()}"
               >
                 <i class="fa-solid fa-floppy-disk"></i>
                 Save Bot
@@ -229,7 +229,20 @@ function botBuilderRefreshSaveBtn() {
   if (!btn) return;
   const valid = botBuilderDraftValid();
   btn.disabled = !valid;
-  btn.title = botBuilderSaveTooltip();
+  const hint = document.getElementById('bot-builder-hint');
+  if (valid) {
+    if (hint) hint.remove();
+  } else {
+    if (hint) hint.textContent = botBuilderSaveTooltip();
+    else {
+      const actions = btn.parentElement;
+      const em = document.createElement('em');
+      em.id = 'bot-builder-hint';
+      em.className = 'bot-builder-hint';
+      em.textContent = botBuilderSaveTooltip();
+      actions.insertBefore(em, btn);
+    }
+  }
 }
 
 async function botBuilderSave() {
