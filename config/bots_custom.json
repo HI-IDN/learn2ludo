@@ -2,11 +2,11 @@
   "bots": [
     {
       "id": "bot-4f565ceb",
-      "name": "TestBot",
+      "name": "Deleted TestBot",
       "type": "CDR",
       "tldr": "A test bot",
-      "description": "This is a test description",
-      "designer": "",
+      "description": "This is a test description. This bot is deleted and shouldn't be displayed.",
+      "designer": "helgaingim",
       "weights": {},
       "created_at": "2026-06-03T12:38:03.109Z",
       "_is_deleted": true
@@ -17,7 +17,7 @@
       "type": "CDR",
       "tldr": "Aggressive retaliator",
       "description": "Focuses on capturing opponents whenever possible.",
-      "designer": "",
+      "designer": "helgaingim",
       "weights": {
         "capture": 0.8,
         "safety": -0.2,
@@ -32,13 +32,24 @@
       "type": "CDR",
       "tldr": "Brute force progress",
       "description": "Charges ahead with maximum progress weight.",
-      "designer": "",
+      "designer": "helgaingim",
       "weights": {
         "capture": 0.4,
         "progress": 0.8,
         "blockade": 0.5
       },
       "created_at": "2026-06-03T12:38:58.666Z"
+    },
+    {
+      "id": "bot-b55ad37f",
+      "name": "Anti-Ares",
+      "tldr": "Passifist",
+      "description": "Actively avoids captures.",
+      "weights": {
+        "capture": -1
+      },
+      "designer": "helgaingim",
+      "created_at": "2026-06-03T13:31:12.652Z"
     }
   ]
 }
