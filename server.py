@@ -39,7 +39,8 @@ app.add_middleware(
 # State
 # ---------------------------------------------------------------------------
 CONFIG_PATH = Path(__file__).parent / "config" / "tabs.json"
-STATS_PATH = Path(__file__).parent / "config" / "stats.json"
+STATS_PATH  = Path(__file__).parent / "config" / "stats.json"
+GAMES_DIR   = Path(__file__).parent / "data" / "games"
 
 active_game: Optional[GameSession] = None
 active_env: Optional[LudoEnv] = None
@@ -64,6 +65,20 @@ def load_stats() -> dict:
 
 def save_stats(stats: dict):
     STATS_PATH.write_text(json.dumps(stats, indent=2))
+
+
+def save_game_record(session: GameSession):
+    """Write full enriched game JSON to data/games/ (gitignored)."""
+    GAMES_DIR.mkdir(parents=True, exist_ok=True)
+    state = session.to_dict()
+    state["v"] = 2
+    state["player_stats"] = session.compute_player_stats()
+    cfg = state["config"]
+    label = f"{cfg['player_count']}p{cfg['board']['yard_count']}y{cfg['board']['pawns_per_player']}pw"
+    ts = time.strftime("%Y%m%dT%H%M%S", time.gmtime())
+    path = GAMES_DIR / f"{ts}_{label}.json"
+    path.write_text(json.dumps(state, indent=2))
+    return str(path)
 
 
 # ---------------------------------------------------------------------------
@@ -266,7 +281,11 @@ def make_move(req: MoveRequest):
         )
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return {"events": events, "game": active_game.to_dict()}
+    game_dict = active_game.to_dict()
+    if active_game.winner is not None:
+        game_dict["player_stats"] = active_game.compute_player_stats()
+        save_game_record(active_game)
+    return {"events": events, "game": game_dict}
 
 
 @app.post("/api/game/skip")
@@ -274,7 +293,29 @@ def skip_turn():
     if not active_game:
         raise HTTPException(status_code=404, detail="No active game")
     active_game.skip_turn()
-    return active_game.to_dict()
+    game_dict = active_game.to_dict()
+    if active_game.winner is not None:
+        game_dict["player_stats"] = active_game.compute_player_stats()
+        save_game_record(active_game)
+    return game_dict
+
+
+class ReflectionsRequest(BaseModel):
+    reflections: list
+
+
+@app.post("/api/game/reflections", status_code=200)
+def save_reflections(req: ReflectionsRequest):
+    """Append player reflections to the most-recently saved game JSON."""
+    if not GAMES_DIR.exists():
+        return {"ok": False, "detail": "No game records found"}
+    files = sorted(GAMES_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if not files:
+        return {"ok": False, "detail": "No game file to attach reflections to"}
+    data = json.loads(files[0].read_text())
+    data["reflections"] = req.reflections
+    files[0].write_text(json.dumps(data, indent=2))
+    return {"ok": True}
 
 
 # ---------------------------------------------------------------------------

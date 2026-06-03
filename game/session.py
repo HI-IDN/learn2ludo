@@ -34,6 +34,8 @@ class GameSession:
         self._yard_roll_count = 0
         self.starting_player  = self.game.player
         self.round_count      = 1
+        self._move_counts: dict[int, int] = {}
+        self._leader_move_counts: dict[int, int] = {}
         self.history.append({
             "type": "game_start",
             "player": self.starting_player,
@@ -116,6 +118,7 @@ class GameSession:
                 "valid_moves":   self._valid_moves_list(),
                 "blocked_pawns": blocked,
             })
+            self._log_safe_haven_events(self.game.player, valid)
 
         return value
 
@@ -132,6 +135,13 @@ class GameSession:
         piece_idx = self._global_piece_idx(pi, lidx)
         moving_pawn_id = self._pawn_id_for_piece(pi, lidx)
         from_pos = pc.pos
+
+        # Track whether player moved their furthest-ahead pawn (for risk_score)
+        active = [p for p in self.gp.pieces if p.player == pi and not p.finished and p.pos >= 0]
+        is_leader_move = bool(active) and pc.pos == max(p.pos for p in active)
+        self._move_counts[pi] = self._move_counts.get(pi, 0) + 1
+        self._leader_move_counts[pi] = self._leader_move_counts.get(pi, 0) + (1 if is_leader_move else 0)
+
         captured = self.gp.move(pc)
         self.history.append({
             "type": "move",
@@ -161,6 +171,21 @@ class GameSession:
                 "by_pawn_id":       moving_pawn_id,
                 "cell":             abs_cell,
             })
+        # blockade_formed: destination now has ≥2 friendly pawns
+        if pc.pos >= 0 and not pc.finished:
+            friendly_at_dest = sum(
+                1 for p in self.gp.pieces
+                if p.player == pi and p.pos == pc.pos and not p.finished
+            )
+            if friendly_at_dest >= 2:
+                self.history.append({
+                    "type":    "blockade_formed",
+                    "player":  pi,
+                    "piece":   piece_idx,
+                    "pawn_id": moving_pawn_id,
+                    "cell":    pc.pos,
+                })
+
         w = self.gp.has_winner()
         if w is not None and self._finishing_round_player is None:
             if self.equal_rounds:
@@ -309,6 +334,140 @@ class GameSession:
                 "pawn_id": self._pawn_id_for_piece(player_idx, local_idx),
             })
         return result
+
+    def _log_safe_haven_events(self, player: int, valid_pieces: list):
+        """Emit almost_capture and safe_haven_protected for each valid move that
+        would land on an opponent pawn sitting on a safe haven."""
+        g = self.game
+        r = g.last_roll
+        slot = g.slots[player]
+        safe = g.board.safe_havens
+
+        for pc in valid_pieces:
+            if pc.pos == -1:
+                target_pos = 0
+            else:
+                target_pos = pc.pos + r
+            if target_pos >= g.board.track_size - 1:
+                continue
+            abs_target = (target_pos + g.board.starts[slot]) % g.board.track_size
+            if abs_target not in safe:
+                continue
+            # Find opponent pawns sitting on this safe haven
+            for opp in g.board.safe_havens:
+                if opp != abs_target:
+                    continue
+                targets = [
+                    o for o in self.gp.pieces
+                    if o.player != player and o.pos >= 0
+                    and o.pos < g.board.track_size - 1
+                    and self.gp._abs(o) == abs_target
+                ]
+                for opp_pc in targets:
+                    opp_pieces = [p for p in self.gp.pieces if p.player == opp_pc.player]
+                    opp_lidx = next(i for i, p in enumerate(opp_pieces) if p is opp_pc)
+                    opp_gidx = opp_pc.player * g.config.board.pawns_per_player + opp_lidx
+                    opp_pawn = self._pawn_id_for_piece(opp_pc.player, opp_lidx)
+                    player_pieces = [p for p in self.gp.pieces if p.player == player]
+                    pc_lidx = next(i for i, p in enumerate(player_pieces) if p is pc)
+                    self.history.append({
+                        "type":           "almost_capture",
+                        "attacker":       player,
+                        "attacker_pawn_id": self._pawn_id_for_piece(player, pc_lidx),
+                        "target_player":  opp_pc.player,
+                        "target_piece":   opp_gidx,
+                        "target_pawn_id": opp_pawn,
+                        "cell":           abs_target,
+                    })
+                    self.history.append({
+                        "type":       "safe_haven_protected",
+                        "player":     opp_pc.player,
+                        "piece":      opp_gidx,
+                        "pawn_id":    opp_pawn,
+                        "cell":       abs_target,
+                        "attacker":   player,
+                    })
+
+    def compute_player_stats(self) -> list:
+        """Derive per-player stats from history. Returns a list indexed by player."""
+        n = self.game.config.player_count
+        stats = [{
+            "player": i,
+            "color": self._color_for_player(i),
+            "rolls": 0,
+            "dice_distribution": {str(k): 0 for k in range(1, 7)},
+            "dice_total": 0,
+            "sixes": 0,
+            "captures_made": 0,
+            "captures_suffered": 0,
+            "blockades_formed": 0,
+            "times_blocked": 0,
+            "almost_captures": 0,
+            "times_safe_haven_protected": 0,
+            "turns_skipped": 0,
+            "pawns_finished": 0,
+            # for axis computation
+            "_moves": 0,
+            "_leader_moves": 0,
+        } for i in range(n)]
+
+        for ev in self.history:
+            t = ev.get("type")
+            p = ev.get("player")
+
+            if t in ("roll", "yard_roll") and p is not None:
+                s = stats[p]
+                s["rolls"] += 1
+                d = ev.get("dice", 0)
+                s["dice_total"] += d
+                s["dice_distribution"][str(d)] = s["dice_distribution"].get(str(d), 0) + 1
+                if d == 6:
+                    s["sixes"] += 1
+                if t == "roll" and not ev.get("valid_moves") and not ev.get("blocked_pawns"):
+                    s["turns_skipped"] += 1
+
+            elif t == "capture":
+                stats[ev["by_player"]]["captures_made"] += 1
+                stats[ev["captured_player"]]["captures_suffered"] += 1
+
+            elif t == "blockade_formed" and p is not None:
+                stats[p]["blockades_formed"] += 1
+
+            elif t == "blocked" and p is not None:
+                stats[p]["times_blocked"] += 1
+
+            elif t == "almost_capture":
+                stats[ev["attacker"]]["almost_captures"] += 1
+
+            elif t == "safe_haven_protected":
+                stats[ev["player"]]["times_safe_haven_protected"] += 1
+
+            elif t == "move" and p is not None:
+                stats[p]["_moves"] += 1
+
+        # Compute pawns finished
+        pawns_per = self.game.config.board.pawns_per_player
+        for i in range(n):
+            finished = sum(1 for pc in self.gp.pieces if pc.player == i and pc.finished)
+            stats[i]["pawns_finished"] = finished
+
+        # Derived fields
+        for s in stats:
+            rolls = s["rolls"]
+            s["dice_avg"] = round(s["dice_total"] / rolls, 3) if rolls else 0
+            s["luck_score"] = round(s["dice_avg"] - 3.5, 3)
+            s["sixes_pct"] = round(s["sixes"] / rolls * 100, 1) if rolls else 0
+            # aggression: captures / (captures + thwarted-by-safe-haven)
+            opps = s["captures_made"] + s["almost_captures"]
+            s["aggression_score"] = round(s["captures_made"] / opps, 3) if opps else 0.5
+            i = s["player"]
+            moves = self._move_counts.get(i, 0)
+            leader = self._leader_move_counts.get(i, 0)
+            s["risk_score"] = round(leader / moves, 3) if moves else None
+            del s["_moves"]
+            del s["_leader_moves"]
+
+        return stats
 
     def _resolve_piece_ref(self, piece_idx: int | None, pawn_id_value: str | None) -> tuple[int, int]:
         pawns = self.game.config.board.pawns_per_player

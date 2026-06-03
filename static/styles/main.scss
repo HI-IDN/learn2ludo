@@ -42,3 +42,4 @@
 @use "features/replay";       // .replay-controls, replay step buttons
 @use "features/glossary";     // .glossary-search, .glossary-entry, .glossary-letter
 @use "features/move-justification"; // prompt shown before optional human moves
+@use "features/postgame";           // reflection + stats overlay shown after game ends
