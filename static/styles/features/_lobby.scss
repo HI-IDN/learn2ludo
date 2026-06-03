@@ -424,13 +424,6 @@
 
 // ---- Footer -----------------------------------------------------------------
 
-.lobby-controls-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
 .lobby-yard-control {
   display: flex;
   flex-direction: column;
@@ -438,23 +431,93 @@
   gap: 4px;
 }
 
-// ── Board mini-preview ────────────────────────────────────────────────────────
+// ── Board Setup collapsible section ───────────────────────────────────────────
 
-.lobby-board-preview {
-  display: flex;
-  justify-content: center;
-  padding: 8px 0 0;
+.lobby-board-section {
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  background: $color-bg-alt;
+  overflow: hidden;
 }
 
-.lobby-preview-wrap {
+.lobby-board-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: $color-text;
+  user-select: none;
+
+  &::-webkit-details-marker { display: none; }
+
+  > span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    i { color: $color-teal; }
+  }
+
+  .lobby-board-summary-state {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 400;
+    color: $color-text-2;
+  }
+
+  .lobby-board-chevron {
+    font-size: 11px;
+    color: $color-text-3;
+    transition: transform 0.2s;
+  }
+}
+
+.lobby-board-section[open] .lobby-board-chevron {
+  transform: rotate(180deg);
+}
+
+.lobby-board-section-body {
+  border-top: 1px solid $border-light;
+  padding: 20px;
+}
+
+.lobby-board-inner {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.lobby-controls-col {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  gap: 20px;
+  flex-shrink: 0;
 }
 
-.lobby-preview-svg {
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.07));
+// Mini board preview — real board SVG cloned and scaled
+.lobby-board-preview {
+  width: 200px;
+  height: 200px;
+  flex-shrink: 0;
+  border-radius: $radius;
+  overflow: hidden;
+  background: $color-bg-raised;
+  border: 1px solid $border-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    display: block;
+    width: 200px !important;
+    height: 200px !important;
+    // The board SVG has a fixed viewBox (e.g. 480×480); let it scale down
+    max-width: 200px;
+    max-height: 200px;
+  }
 }
 
 .lobby-preview-hint {

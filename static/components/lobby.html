@@ -2,41 +2,61 @@
 <div class="panel" id="panel-lobby">
   <div class="lobby-wrap">
 
+    <!-- ── Player slots ──────────────────────────────────────────────── -->
     <div class="lobby-header">
       <div class="lobby-title">
         <span class="lobby-title-main">Player Setup</span>
         <span class="lobby-title-sub">Click a slot to activate or deactivate it</span>
       </div>
-      <div class="lobby-controls-row">
-        <div class="lobby-yard-control">
-          <span class="lobby-yard-label">Board shape</span>
-          <div class="lobby-stepper">
-            <button class="stepper-btn" onclick="lobbyChangeYards(-1)"><i class="fa-solid fa-minus"></i></button>
-            <span class="stepper-val" id="lobby-yard-display">4</span>
-            <button class="stepper-btn" onclick="lobbyChangeYards(+1)"><i class="fa-solid fa-plus"></i></button>
-          </div>
-          <span class="lobby-yard-shape" id="lobby-yard-shape">cross</span>
-        </div>
-        <div class="lobby-yard-control">
-          <span class="lobby-yard-label">Pawns</span>
-          <div class="lobby-stepper">
-            <button class="stepper-btn" onclick="lobbyChangePawns(-1)"><i class="fa-solid fa-minus"></i></button>
-            <span class="stepper-val" id="lobby-pawns-display">4</span>
-            <button class="stepper-btn" onclick="lobbyChangePawns(+1)"><i class="fa-solid fa-plus"></i></button>
-          </div>
-          <span class="lobby-yard-shape" id="lobby-pawns-shape">per player</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="lobby-board-preview" id="lobby-board-preview">
-      <!-- injected by renderLobbyBoardPreview() -->
     </div>
 
     <div class="lobby-slots" id="lobby-slots">
       <!-- injected by renderLobbySlots() -->
     </div>
 
+    <!-- ── Board setup (collapsible) ────────────────────────────────── -->
+    <details class="lobby-board-section" id="lobby-board-details">
+      <summary class="lobby-board-summary">
+        <span><i class="fa-solid fa-chess-board"></i> Board Setup</span>
+        <span class="lobby-board-summary-state" id="lobby-board-summary-state"></span>
+        <i class="fa-solid fa-chevron-down lobby-board-chevron"></i>
+      </summary>
+
+      <div class="lobby-board-section-body">
+        <div class="lobby-board-inner">
+
+          <!-- Steppers -->
+          <div class="lobby-controls-col">
+            <div class="lobby-yard-control">
+              <span class="lobby-yard-label">Board shape</span>
+              <div class="lobby-stepper">
+                <button class="stepper-btn" onclick="lobbyChangeYards(-1)"><i class="fa-solid fa-minus"></i></button>
+                <span class="stepper-val" id="lobby-yard-display">4</span>
+                <button class="stepper-btn" onclick="lobbyChangeYards(+1)"><i class="fa-solid fa-plus"></i></button>
+              </div>
+              <span class="lobby-yard-shape" id="lobby-yard-shape">cross</span>
+            </div>
+            <div class="lobby-yard-control">
+              <span class="lobby-yard-label">Pawns</span>
+              <div class="lobby-stepper">
+                <button class="stepper-btn" onclick="lobbyChangePawns(-1)"><i class="fa-solid fa-minus"></i></button>
+                <span class="stepper-val" id="lobby-pawns-display">4</span>
+                <button class="stepper-btn" onclick="lobbyChangePawns(+1)"><i class="fa-solid fa-plus"></i></button>
+              </div>
+              <span class="lobby-yard-shape">per player</span>
+            </div>
+          </div>
+
+          <!-- Mini board preview -->
+          <div class="lobby-board-preview" id="lobby-board-preview">
+            <!-- cloned from #ludo-board by renderLobbyBoardPreview() -->
+          </div>
+
+        </div>
+      </div>
+    </details>
+
+    <!-- ── Footer ────────────────────────────────────────────────────── -->
     <div class="lobby-footer">
       <button class="btn btn-primary" onclick="startFromLobby()">
         <i class="ti ti-play"></i>

@@ -46,78 +46,42 @@ function renderLobbyYardControl() {
   if (shape) shape.textContent = YARD_SHAPES[n] ?? n + '-gon';
   const pd = document.getElementById('lobby-pawns-display');
   if (pd) pd.textContent = p;
+  // Update summary badge
+  const badge = document.getElementById('lobby-board-summary-state');
+  if (badge) badge.textContent = `${YARD_SHAPES[n] ?? n + '-gon'} · ${p} pawn${p !== 1 ? 's' : ''}`;
 }
 
-// ── Board mini-preview ────────────────────────────────────────────────────────
+// ── Board mini-preview (clone of the real board SVG) ─────────────────────────
 
 function renderLobbyBoardPreview() {
   const wrap = document.getElementById('lobby-board-preview');
   if (!wrap) return;
 
-  const active   = lobbyActiveSlots();
-  const yardCount = settings.board_yard_count ?? 4;
-  const pawns    = settings.pawns_per_player ?? 4;
-  const size     = 200;
-  const cx       = size / 2;
-  const cy       = size / 2;
-  const r        = 72;
+  const src = document.getElementById('ludo-board');
+  if (!src || !src.innerHTML.trim()) {
+    wrap.innerHTML = '<p class="lobby-preview-hint" style="padding:20px">Board preview renders after first draw.</p>';
+    return;
+  }
 
-  // Angles: start at top (-90°), go clockwise
-  const angleStep = (2 * Math.PI) / yardCount;
-  const startAngle = -Math.PI / 2;
+  const clone = src.cloneNode(true);
+  clone.removeAttribute('id');
 
-  const circles = Array.from({length: yardCount}, (_, i) => {
-    const slotIdx   = i;
-    const playerIdx = active.indexOf(slotIdx);
-    const isActive  = playerIdx !== -1;
-    const colorName = PLAYER_COLORS[slotIdx] || 'blue';
-    const color     = COLORS[colorName] || '#888';
-    const angle     = startAngle + i * angleStep;
-    const x         = cx + r * Math.cos(angle);
-    const y         = cy + r * Math.sin(angle);
+  // Get the real rendered size of the source SVG
+  const srcW = src.getBoundingClientRect().width || 480;
+  const previewSize = 200;
+  const scale = previewSize / srcW;
 
-    const profile = isActive && typeof getSlotProfile === 'function' ? getSlotProfile(playerIdx) : null;
-    const icon    = isActive
-      ? (getPlayerType(playerIdx) !== 'human' ? 'fa-robot' : (profile?.icon || 'fa-user'))
-      : null;
+  clone.style.cssText = `display:block; transform:scale(${scale}); transform-origin:top left; flex-shrink:0;`;
+  clone.setAttribute('width', srcW);
+  clone.setAttribute('height', srcW);
 
-    // Pawn dots
-    const dotR    = 3.5;
-    const dotRing = 16;
-    const dots    = Array.from({length: Math.min(pawns, 6)}, (_, d) => {
-      const da = (2 * Math.PI / Math.min(pawns, 6)) * d - Math.PI / 2;
-      return `<circle cx="${(dotRing * Math.cos(da)).toFixed(1)}" cy="${(dotRing * Math.sin(da)).toFixed(1)}" r="${dotR}" fill="rgba(255,255,255,0.55)"/>`;
-    }).join('');
+  // Outer div collapses the visual footprint to the scaled size
+  const scaler = document.createElement('div');
+  scaler.style.cssText = `width:${previewSize}px; height:${previewSize}px; overflow:hidden; flex-shrink:0;`;
+  scaler.appendChild(clone);
 
-    const label = colorName.charAt(0).toUpperCase() + colorName.slice(1);
-
-    return `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)})" style="cursor:default">
-      <circle r="22" fill="${isActive ? color : '#ccc'}" opacity="${isActive ? '1' : '0.3'}"/>
-      ${isActive ? dots : ''}
-      <text y="34" text-anchor="middle" font-size="9" fill="${isActive ? color : '#999'}" font-family="Jost,sans-serif" font-weight="600">${label}</text>
-    </g>`;
-  });
-
-  // Track ring (thin outline polygon)
-  const pts = Array.from({length: yardCount}, (_, i) => {
-    const angle = startAngle + i * angleStep;
-    return `${(cx + r * Math.cos(angle)).toFixed(1)},${(cy + r * Math.sin(angle)).toFixed(1)}`;
-  }).join(' ');
-
-  // Center info
-  const pawnLabel = `${pawns} pawn${pawns !== 1 ? 's' : ''}`;
-  const shapeLabel = YARD_SHAPES[yardCount] ?? `${yardCount}-player`;
-
-  wrap.innerHTML = `
-    <div class="lobby-preview-wrap">
-      <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" class="lobby-preview-svg">
-        <polygon points="${pts}" fill="none" stroke="#ddd" stroke-width="1.5" stroke-dasharray="4 3"/>
-        ${circles.join('')}
-        <text x="${cx}" y="${cy - 6}" text-anchor="middle" font-size="10" fill="#888" font-family="Jost,sans-serif">${shapeLabel}</text>
-        <text x="${cx}" y="${cy + 10}" text-anchor="middle" font-size="9" fill="#bbb" font-family="Jost,sans-serif">${pawnLabel}</text>
-      </svg>
-      <p class="lobby-preview-hint">Play order goes clockwise. Drag slots to reorder.</p>
-    </div>`;
+  wrap.innerHTML = '';
+  wrap.appendChild(scaler);
 }
 
 function lobbyActiveSlots() {
@@ -204,7 +168,8 @@ function renderLobbySlots() {
 
   renderLobbyHint(active);
   renderLobbyYardControl();
-  renderLobbyBoardPreview();
+  // Preview is cloned from the real board — defer so drawBoard() finishes first
+  setTimeout(renderLobbyBoardPreview, 50);
 }
 
 function renderLobbyHint(active) {
