@@ -177,6 +177,93 @@
   filter: drop-shadow(0 0 2px rgba(0,0,0,0.6));
 }
 
+.bot-avatar,
+.player-order-avatar,
+.settings-player-avatar,
+.pawn-options-avatar,
+.action-avatar-symbol,
+.pg-reflect-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.bot-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.bot-avatar--duo {
+  gap: 2px;
+}
+
+.bot-avatar--duo .bot-avatar-img {
+  width: 70%;
+  height: 70%;
+}
+
+.bot-avatar--duo .bot-avatar-img--secondary {
+  width: 48%;
+  height: 48%;
+  opacity: 0.75;
+}
+
+.bot-avatar--badged {
+  position: relative;
+}
+
+.bot-avatar--badged .bot-avatar-img {
+  width: 90%;
+  height: 90%;
+}
+
+.bot-avatar-badge {
+  position: absolute;
+  right: -5px;
+  bottom: -3px;
+  font-size: 0.36em;
+  color: currentColor;
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.85);
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 1px rgba(0,0,0,0.35));
+}
+
+.bot-avatar--lobby,
+.action-avatar-symbol {
+  width: 38px;
+  height: 38px;
+  color: rgba(255,255,255,0.9);
+}
+
+.bot-avatar--lobby .bot-avatar-img,
+.action-avatar-symbol .bot-avatar-img {
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+.bot-avatar--lobby .bot-avatar-badge,
+.action-avatar-symbol .bot-avatar-badge {
+  color: #fff;
+  -webkit-text-stroke-color: rgba(0,0,0,0.55);
+}
+
+.bot-avatar--card {
+  width: 24px;
+  height: 24px;
+  color: $color-primary;
+}
+
+.bot-avatar--card .bot-avatar-badge {
+  font-size: 0.42em;
+}
+
+.action-avatar-symbol {
+  font-size: 22px;
+}
+
 // ── Icon picker popover ───────────────────────────────────────────────────────
 
 #icon-picker-popover {
@@ -337,11 +424,44 @@
 
 // ---- Footer -----------------------------------------------------------------
 
+.lobby-controls-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
 .lobby-yard-control {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
+}
+
+// ── Board mini-preview ────────────────────────────────────────────────────────
+
+.lobby-board-preview {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 0;
+}
+
+.lobby-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.lobby-preview-svg {
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.07));
+}
+
+.lobby-preview-hint {
+  font-size: 11px;
+  color: $color-text-3;
+  margin: 0;
+  text-align: center;
 }
 
 .lobby-yard-label {

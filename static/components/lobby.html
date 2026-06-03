@@ -7,15 +7,30 @@
         <span class="lobby-title-main">Player Setup</span>
         <span class="lobby-title-sub">Click a slot to activate or deactivate it</span>
       </div>
-      <div class="lobby-yard-control">
-        <span class="lobby-yard-label">Board shape</span>
-        <div class="lobby-stepper">
-          <button class="stepper-btn" onclick="lobbyChangeYards(-1)"><i class="fa-solid fa-minus"></i></button>
-          <span class="stepper-val" id="lobby-yard-display">4</span>
-          <button class="stepper-btn" onclick="lobbyChangeYards(+1)"><i class="fa-solid fa-plus"></i></button>
+      <div class="lobby-controls-row">
+        <div class="lobby-yard-control">
+          <span class="lobby-yard-label">Board shape</span>
+          <div class="lobby-stepper">
+            <button class="stepper-btn" onclick="lobbyChangeYards(-1)"><i class="fa-solid fa-minus"></i></button>
+            <span class="stepper-val" id="lobby-yard-display">4</span>
+            <button class="stepper-btn" onclick="lobbyChangeYards(+1)"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <span class="lobby-yard-shape" id="lobby-yard-shape">cross</span>
         </div>
-        <span class="lobby-yard-shape" id="lobby-yard-shape">cross</span>
+        <div class="lobby-yard-control">
+          <span class="lobby-yard-label">Pawns</span>
+          <div class="lobby-stepper">
+            <button class="stepper-btn" onclick="lobbyChangePawns(-1)"><i class="fa-solid fa-minus"></i></button>
+            <span class="stepper-val" id="lobby-pawns-display">4</span>
+            <button class="stepper-btn" onclick="lobbyChangePawns(+1)"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <span class="lobby-yard-shape" id="lobby-pawns-shape">per player</span>
+        </div>
       </div>
+    </div>
+
+    <div class="lobby-board-preview" id="lobby-board-preview">
+      <!-- injected by renderLobbyBoardPreview() -->
     </div>
 
     <div class="lobby-slots" id="lobby-slots">

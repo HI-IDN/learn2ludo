@@ -359,22 +359,19 @@ function gameHasStarted() {
 
 function requestNewGame(){
   gameStartingPlayer=null;
-  // Use the current game's slots so the pregame matches the Players panel.
-  // Fall back to lobby slots when there's no active game.
-  const slots = gameState?.slots ?? (typeof lobbyActiveSlots==='function' ? lobbyActiveSlots() : null);
   if(gameInProgress()&&gameHasStarted()){
     const ctrl = document.getElementById('new-game-control');
-    if(!ctrl) { showPregame(slots); return; }
+    if(!ctrl) { switchTab('lobby'); return; }
     ctrl.innerHTML = `
       <div class="new-game-confirm">
         <span class="new-game-confirm-msg"><i class="fa-solid fa-triangle-exclamation"></i> Abandon current game?</span>
         <div class="new-game-confirm-btns">
-          <button class="btn btn-danger btn-sm" onclick="cancelNewGame();showPregame(${JSON.stringify(slots)})">Yes, new game</button>
+          <button class="btn btn-danger btn-sm" onclick="cancelNewGame();switchTab('lobby')">Yes, go to Setup</button>
           <button class="btn btn-sm" onclick="cancelNewGame()">Cancel</button>
         </div>
       </div>`;
   } else {
-    showPregame(slots);
+    switchTab('lobby');
   }
 }
 
@@ -765,8 +762,10 @@ function renderPlayers(){
     const timeStr=_gameStartTime?`<span class="player-order-dot"> · </span><span class="player-order-time">${_formatPlayerTime(liveMs)}</span>`:'';
     const sortedPieces=[...p.pieces].sort((a,b)=>{const r=q=>q.finished?2:!q.in_yard?1:0;return r(b)-r(a);});
     const nameTitle=gamePlayerNameTitle(p.index);
-    const _picon=gamePlayerType(p.index)!=='human'?'fa-robot':(typeof getPlayerIcon==='function'?getPlayerIcon(p.index):'fa-face-smile');
-    return `<div class="player-order-row-min${isCurrent?' current':''}"><i class="fa-solid ${_picon}" style="color:${col}"></i><div><span class="player-order-name" ${nameTitle?`title="${escapeAttr(nameTitle)}"`:''}>${gamePlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}${timeStr}</div><div class="player-order-pawns">${sortedPieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
+    const avatar=typeof playerAvatarHtml==='function'
+      ? playerAvatarHtml(p.index, { className: 'player-order-avatar', color: col })
+      : `<span class="player-order-avatar" style="color:${col}"><i class="fa-solid ${gamePlayerType(p.index)!=='human'?'fa-robot':(typeof getPlayerIcon==='function'?getPlayerIcon(p.index):'fa-face-smile')}"></i></span>`;
+    return `<div class="player-order-row-min${isCurrent?' current':''}">${avatar}<div><span class="player-order-name" ${nameTitle?`title="${escapeAttr(nameTitle)}"`:''}>${gamePlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}${timeStr}</div><div class="player-order-pawns">${sortedPieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
   }).join('');
   // Round subtitle
   const sub=document.getElementById('players-subtitle');
@@ -790,12 +789,14 @@ function renderPlayerSlots() {
       const colorName = PLAYER_COLORS[slot] || 'blue';
       const color = COLORS[colorName] || COLORS.blue;
       const type = getPlayerType(i);
-      const icon = type !== 'human' ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(i) : 'fa-face-smile');
+      const avatar = typeof playerAvatarHtml === 'function'
+        ? playerAvatarHtml(i, { className: 'settings-player-avatar', color })
+        : `<span class="settings-player-avatar" style="color:${color}"><i class="fa-solid ${type !== 'human' ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(i) : 'fa-face-smile')}"></i></span>`;
       const options = PLAYER_COLORS.slice(0, settings.board_yard_count || 4)
         .map((name, idx) => `<option value="${idx}" ${idx === slot ? 'selected' : ''}>${name}</option>`).join('');
       return `
         <div class="form-row player-slot-row ${enabled ? '' : 'disabled-color-row'}">
-          <label><i class="fa-solid ${icon}" style="color:${color}" aria-hidden="true"></i> ${getPlayerName(i)} color</label>
+          <label>${avatar} ${getPlayerName(i)} color</label>
           <select id="player-slot-${i}" onchange="setExplicitSlot(${i}, this.value)" ${enabled ? '' : 'disabled'}>
             ${options}
           </select>
@@ -817,10 +818,12 @@ function renderPlayerTypes(){
     const color = COLORS[colorName] || COLORS.blue;
     const humanName = settings.player_names?.[i] || DEFAULT_HUMAN_NAMES[i] || `Player ${i+1}`;
     const botName = settings.bot_names?.[i] || botDisplayName(i);
-    const icon = isHuman ? 'fa-user' : 'fa-robot';
+    const avatar = typeof playerAvatarHtml === 'function'
+      ? playerAvatarHtml(i, { className: 'settings-player-avatar', color })
+      : `<span class="settings-player-avatar" style="color:${color}"><i class="fa-solid ${isHuman ? 'fa-user' : 'fa-robot'}"></i></span>`;
     return `<div class="player-config-row" draggable="false" data-player="${i}">
       <div class="player-config-main">
-        <i class="fa-solid ${icon}" style="color:${color}" aria-hidden="true"></i>
+        ${avatar}
         <div class="player-config-fields">
           <div class="form-row compact-row">
             <label>Player ${i+1}</label>

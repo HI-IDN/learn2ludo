@@ -38,9 +38,10 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 # State
 # ---------------------------------------------------------------------------
-CONFIG_PATH = Path(__file__).parent / "config" / "tabs.json"
-STATS_PATH  = Path(__file__).parent / "config" / "stats.json"
-GAMES_DIR   = Path(__file__).parent / "data" / "games"
+CONFIG_PATH   = Path(__file__).parent / "config" / "tabs.json"
+STATS_PATH    = Path(__file__).parent / "config" / "stats.json"
+GAMES_DIR     = Path(__file__).parent / "data" / "games"
+PLAYERS_PATH  = Path(__file__).parent / "data" / "players.json"
 
 active_game: Optional[GameSession] = None
 active_env: Optional[LudoEnv] = None
@@ -140,6 +141,53 @@ def update_tabs(body: TabUpdate):
     cfg = load_config()
     cfg["tabs"] = body.tabs
     save_config(cfg)
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# Players registry API  (UUID + icon only — no username stored server-side)
+# ---------------------------------------------------------------------------
+class PlayerRegisterRequest(BaseModel):
+    id: str
+    icon: str
+    age_range: str
+    consent_ts: int
+    leaderboard_opt_in: bool = False
+
+
+def load_players() -> list:
+    if PLAYERS_PATH.exists():
+        try:
+            return json.loads(PLAYERS_PATH.read_text()).get("players", [])
+        except Exception:
+            return []
+    return []
+
+
+def save_players(players: list):
+    PLAYERS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    PLAYERS_PATH.write_text(json.dumps({"players": players}, indent=2))
+
+
+@app.post("/api/players/register", status_code=201)
+def register_player(req: PlayerRegisterRequest):
+    """Persist a consented player's UUID, icon, age range and consent timestamp.
+    No username is stored server-side."""
+    players = load_players()
+    # Upsert: update existing record if UUID already registered
+    existing = next((p for p in players if p["id"] == req.id), None)
+    record = {
+        "id": req.id,
+        "icon": req.icon,
+        "age_range": req.age_range,
+        "consent_ts": req.consent_ts,
+        "leaderboard_opt_in": req.leaderboard_opt_in,
+    }
+    if existing:
+        players = [record if p["id"] == req.id else p for p in players]
+    else:
+        players.append(record)
+    save_players(players)
     return {"ok": True}
 
 

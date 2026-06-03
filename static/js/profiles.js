@@ -291,9 +291,11 @@ function submitRegistration() {
     const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
       ? crypto.randomUUID()
       : Date.now().toString(36) + Math.random().toString(36).slice(2);
-    profiles.push({ id, username, icon: _regIcon, age_range: age, consent_ts: Date.now(), leaderboard_opt_in: leaderboard });
+    const newProfile = { id, username, icon: _regIcon, age_range: age, consent_ts: Date.now(), leaderboard_opt_in: leaderboard };
+    profiles.push(newProfile);
     saveProfiles(profiles);
     markSessionConsented(id);
+    _serverRegisterProfile(newProfile);
   }
 
   closeProfileRegistration();
@@ -337,6 +339,8 @@ function submitReconsent() {
   if (!document.getElementById('reconsent-check')?.checked) return;
   if (!_reconsentId) { closeReconsent(); return; }
   markSessionConsented(_reconsentId);
+  const _rp = getProfileById(_reconsentId);
+  if (_rp) _serverRegisterProfile(_rp);
   const cb = _reconsentCallback;
   const id = _reconsentId;
   closeReconsent();
@@ -382,6 +386,22 @@ function lobbyPickProfile(slotIdx, profileId) {
   } else {
     openReconsent(profileId, id => { setSlotProfile(playerIdx, id); renderLobbySlots(); });
   }
+}
+
+// ── Server registration ───────────────────────────────────────────────────────
+
+function _serverRegisterProfile(profile) {
+  fetch('/api/players/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      id: profile.id,
+      icon: profile.icon,
+      age_range: profile.age_range,
+      consent_ts: profile.consent_ts,
+      leaderboard_opt_in: profile.leaderboard_opt_in
+    })
+  }).catch(() => {}); // best-effort; local data is source of truth
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
