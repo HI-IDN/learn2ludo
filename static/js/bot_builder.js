@@ -97,10 +97,10 @@ function renderBotBuilderCard() {
       <div class="bot-card-icon"><i class="fa-solid fa-sliders"></i></div>
       <div class="bot-card-body">
         <div class="bot-card-title">
-          <div class="bot-card-name">Build-a-bot</div>
+          <div class="bot-card-name" id="bot-builder-draft-name">${escapeBotText(draft.name)}</div>
           <span class="bot-card-status">Custom</span>
         </div>
-        <div class="bot-card-desc">User CDR — choose weighted dispatching rules with sliders.</div>
+        <div class="bot-card-desc" id="bot-builder-draft-desc">${escapeBotText(botBuilderDraftDescriptionText(draft))}</div>
         <div class="bot-builder-help">
           Each weight must be between -1.00 and +1.00. Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
         </div>
@@ -116,13 +116,14 @@ function renderBotBuilderCard() {
               oninput="botBuilderSetDraftName(this.value)"
             >
           </label>
-          <label class="bot-builder-field bot-builder-field--id">
-            <span>Label</span>
-            <input type="text" value="${escapeBotText(draft.label)}" readonly>
-          </label>
-          <label class="bot-builder-field bot-builder-field--template">
-            <span>Template</span>
-            <input type="text" value="Weighted CDR" readonly>
+          <label class="bot-builder-field bot-builder-field--tldr">
+            <span>TLDR</span>
+            <input
+              type="text"
+              maxlength="32"
+              value="${escapeBotText(draft.tldr)}"
+              oninput="botBuilderSetDraftTldr(this.value)"
+            >
           </label>
           <label class="bot-builder-field bot-builder-field--description">
             <span>Description</span>
@@ -153,13 +154,9 @@ function botBuilderSetWeight(key, rawValue) {
 
 function getUserBotDraft() {
   settings.user_bot_draft = settings.user_bot_draft || {};
-  if (!settings.user_bot_draft.label) {
-    settings.user_bot_draft.label = `.${cryptoRandomLabel()}`;
-    persistSettings();
-  }
   return {
     name: settings.user_bot_draft.name || 'My Bot',
-    label: settings.user_bot_draft.label,
+    tldr: settings.user_bot_draft.tldr || 'Weighted CDR',
     description: settings.user_bot_draft.description || '',
   };
 }
@@ -168,12 +165,21 @@ function botBuilderSetDraftName(value) {
   settings.user_bot_draft = settings.user_bot_draft || {};
   settings.user_bot_draft.name = String(value || '').slice(0, 18);
   persistSettings();
+  botBuilderRefreshDraft();
+}
+
+function botBuilderSetDraftTldr(value) {
+  settings.user_bot_draft = settings.user_bot_draft || {};
+  settings.user_bot_draft.tldr = String(value || '').slice(0, 32);
+  persistSettings();
+  botBuilderRefreshDraft();
 }
 
 function botBuilderSetDraftDescription(value) {
   settings.user_bot_draft = settings.user_bot_draft || {};
   settings.user_bot_draft.description = String(value || '').slice(0, 180);
   persistSettings();
+  botBuilderRefreshDraft();
 }
 
 function botBuilderReset() {
@@ -193,6 +199,19 @@ function botBuilderRefreshValues() {
   });
   const profile = document.getElementById('bot-builder-profile');
   if (profile) profile.textContent = botProfileText(weights);
+}
+
+function botBuilderRefreshDraft() {
+  const draft = getUserBotDraft();
+  const name = document.getElementById('bot-builder-draft-name');
+  const desc = document.getElementById('bot-builder-draft-desc');
+  if (name) name.textContent = draft.name;
+  if (desc) desc.textContent = botBuilderDraftDescriptionText(draft);
+}
+
+function botBuilderDraftDescriptionText(draft) {
+  const description = draft.description || 'Describe the bot you want to create.';
+  return `${draft.tldr} — ${description}`;
 }
 
 function formatBotWeight(value) {
@@ -235,15 +254,6 @@ function botProfileText(weights = getUserBotWeights()) {
     const separator = prev - next >= BOT_PROFILE_STRONG_GAP ? ' ≫ ' : ' ≥ ';
     return `${text}${separator}${part}`;
   }, '')}`;
-}
-
-function cryptoRandomLabel() {
-  const bytes = new Uint8Array(3);
-  if (window.crypto?.getRandomValues) {
-    window.crypto.getRandomValues(bytes);
-    return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-  return Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
 }
 
 function escapeBotText(value) {
