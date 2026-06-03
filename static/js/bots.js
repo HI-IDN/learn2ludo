@@ -8,13 +8,14 @@ const FALLBACK_BOTS = [
   { id: 'ares', name: 'Ares', type: 'heuristic', epithet: 'God of War', description: 'Looks for chances to send opponent pawns back to their yard.', focus: 'Values disruption: a capture can slow one opponent more than a small advance helps Ares.', status: 'Available', selectable: true, implemented: true },
   { id: 'athena', name: 'Athena', type: 'heuristic', epithet: 'Goddess of Wisdom', description: 'Keeps pawns safe before looking for other moves.', focus: 'Compares current danger with landing-square danger, preferring moves that reduce exposure.', status: 'Available', selectable: true, implemented: true },
   { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Prefers the most progressed pawn, especially when a move brings it nearer to the home stretch.', status: 'Available', selectable: true, implemented: true },
-  { id: 'apollo', name: 'Apollo', type: 'weighted-template', epithet: 'God of Order', description: 'Example weighted bot combining the simple heuristic features.', focus: 'Student-created bot template: tune weights for capture, safety, progress, and spread.', status: 'Example', selectable: false, implemented: false },
+  { id: 'apollo', name: 'Apollo', type: 'weighted', epithet: 'God of Order', description: 'Balanced weighted bot combining capture, safety, progress, and activation.', focus: '30% Ares capture, 35% Athena safety, 25% Hestia progress, and 10% Artemis activation.', status: 'Available', selectable: true, implemented: true },
   { id: 'hermes', name: 'Hermes', type: 'heuristic', epithet: 'God of Travel', description: 'Keeps pawns distributed across the board.', focus: 'Avoids clustering by choosing moves that increase distance from friendly pawns already in play.', status: 'Available', selectable: true, implemented: true },
   { id: 'hephaestus', name: 'Hephaestus', type: 'heuristic', epithet: 'God of the Forge', description: 'Builds defensive stacks with friendly pawns.', focus: 'Looks for moves that land on another friendly pawn to form a blockade.', status: 'Available', selectable: true, implemented: true },
   { id: 'artemis', name: 'Artemis', type: 'heuristic', epithet: 'Goddess of the Hunt', description: 'Gets pawns out of the yard whenever possible.', focus: 'Prioritises activating new pawns so more pieces can join the chase.', status: 'Available', selectable: true, implemented: true },
 ];
 
 let BOT_REGISTRY = FALLBACK_BOTS;
+const BOT_TYPE_ORDER = ['baseline', 'heuristic', 'weighted-template', 'weighted', 'trained'];
 
 async function loadBotRegistry() {
   try {
@@ -24,8 +25,20 @@ async function loadBotRegistry() {
   } catch { /* keep fallback */ }
 }
 
+function botTypeOrder(bot) {
+  const idx = BOT_TYPE_ORDER.indexOf(bot?.type || 'heuristic');
+  return idx === -1 ? BOT_TYPE_ORDER.length : idx;
+}
+
+function getOrderedBotRegistry() {
+  return BOT_REGISTRY
+    .map((bot, index) => ({ bot, index }))
+    .sort((a, b) => botTypeOrder(a.bot) - botTypeOrder(b.bot) || a.index - b.index)
+    .map(item => item.bot);
+}
+
 function getBotRegistry() { return BOT_REGISTRY; }
-function getSelectableBots() { return BOT_REGISTRY.filter(b => b.selectable !== false && b.implemented !== false); }
+function getSelectableBots() { return getOrderedBotRegistry().filter(b => b.selectable !== false && b.implemented !== false); }
 
 function botEpithet(bot) {
   return bot?.epithet || '';
@@ -57,10 +70,16 @@ function runBotPolicyLocal(botId, validMoves) {
   if (botId === 'ares') return _aresLocal(validMoves);
   if (botId === 'athena') return _chooseByLocalFeature(validMoves, f => [f.riskReduction, f.safety, -f.risk]);
   if (botId === 'hestia') return _chooseByLocalFeature(validMoves, f => f.progress);
+  if (botId === 'apollo') return _chooseByLocalFeature(validMoves, _apolloLocalScore);
   if (botId === 'hermes') return _chooseByLocalFeature(validMoves, f => f.spread);
   if (botId === 'hephaestus') return _chooseByLocalFeature(validMoves, f => f.blockade);
   if (botId === 'artemis') return _chooseByLocalFeature(validMoves, f => f.activation);
   return _erisLocal(validMoves);
+}
+
+function _apolloLocalScore(f) {
+  const athenaScore = (f.riskReduction * 0.45) + (f.safety * 0.35) + ((1 - f.risk) * 0.20);
+  return (f.capture * 0.30) + (athenaScore * 0.35) + (f.progress * 0.25) + (f.activation * 0.10);
 }
 
 function _erisLocal(validMoves) {
@@ -232,10 +251,11 @@ function renderBotsPage() {
   const wrap = document.getElementById('bots-sections');
   if (!wrap) return;
 
-  const baseline   = BOT_REGISTRY.filter(b => b.type === 'baseline');
-  const heuristics = BOT_REGISTRY.filter(b => b.type === 'heuristic' || !b.type);
-  const weighted   = BOT_REGISTRY.filter(b => b.type === 'weighted-template' || b.type === 'weighted');
-  const trained    = BOT_REGISTRY.filter(b => b.type === 'trained');
+  const ordered    = getOrderedBotRegistry();
+  const baseline   = ordered.filter(b => b.type === 'baseline');
+  const heuristics = ordered.filter(b => b.type === 'heuristic' || !b.type);
+  const weighted   = ordered.filter(b => b.type === 'weighted-template' || b.type === 'weighted');
+  const trained    = ordered.filter(b => b.type === 'trained');
 
   wrap.innerHTML = `
     ${botSection('Baseline', 'No strategy — useful for comparison', baseline)}

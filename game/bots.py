@@ -324,11 +324,70 @@ class ArtemisBot(BotPolicy):
         return choose_by_feature(valid_moves, game_state, lambda _move, f: f.activation)
 
 
+APOLLO_WEIGHTS = {
+    "ares_capture": 0.30,
+    "athena_safety": 0.35,
+    "hestia_progress": 0.25,
+    "artemis_activation": 0.10,
+}
+
+
+def _single_active_weight(weights: dict) -> str | None:
+    active = [name for name, value in weights.items() if value > 0]
+    return active[0] if len(active) == 1 else None
+
+
+def apollo_score(features: MoveFeatures, weights: dict | None = None) -> float:
+    weights = weights or APOLLO_WEIGHTS
+    athena_score = (
+        (features.risk_reduction * 0.45) +
+        (features.safety * 0.35) +
+        ((1.0 - features.risk) * 0.20)
+    )
+    return (
+        (features.capture * weights.get("ares_capture", 0.0)) +
+        (athena_score * weights.get("athena_safety", 0.0)) +
+        (features.progress * weights.get("hestia_progress", 0.0)) +
+        (features.activation * weights.get("artemis_activation", 0.0))
+    )
+
+
+class ApolloBot(BotPolicy):
+    id          = "apollo"
+    name        = "Apollo"
+    type        = "weighted"
+    description = "God of Order — balances capture, safety, progress, and activation"
+
+    def __init__(self, weights: dict | None = None):
+        self.weights = weights or APOLLO_WEIGHTS
+
+    def choose_move(self, valid_moves, game_state=None):
+        match _single_active_weight(self.weights):
+            case "ares_capture":
+                return REGISTRY["ares"].choose_move(valid_moves, game_state)
+            case "athena_safety":
+                return REGISTRY["athena"].choose_move(valid_moves, game_state)
+            case "hestia_progress":
+                return REGISTRY["hestia"].choose_move(valid_moves, game_state)
+            case "artemis_activation":
+                return REGISTRY["artemis"].choose_move(valid_moves, game_state)
+        return choose_by_feature(valid_moves, game_state, lambda _move, f: apollo_score(f, self.weights))
+
+
 # ---------------------------------------------------------------------------
 # Registry — add new bots here; RL bots will register themselves on load
 # ---------------------------------------------------------------------------
 
-_BUILTIN: list[BotPolicy] = [ErisBot(), AresBot(), AthenaBot(), HestiaBot(), HermesBot(), HephaestusBot(), ArtemisBot()]
+_BUILTIN: list[BotPolicy] = [
+    ErisBot(),
+    AresBot(),
+    AthenaBot(),
+    HestiaBot(),
+    ApolloBot(),
+    HermesBot(),
+    HephaestusBot(),
+    ArtemisBot(),
+]
 REGISTRY: dict[str, BotPolicy] = {b.id: b for b in _BUILTIN}
 
 

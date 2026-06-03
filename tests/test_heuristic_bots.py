@@ -1,4 +1,4 @@
-from game.bots import REGISTRY, move_features
+from game.bots import REGISTRY, ApolloBot, MoveFeatures, apollo_score, move_features
 
 
 def state(players, safe_havens=None):
@@ -116,3 +116,104 @@ def test_artemis_prefers_activating_yard_pawns():
     ], game_state)
 
     assert move["pawn_id"] == "R1"
+
+
+def test_apollo_prefers_weighted_capture_over_plain_progress():
+    game_state = state([
+        {"index": 0, "pieces": [piece(0, "R1", 2, 2), piece(1, "R2", 30, 30)]},
+        {"index": 1, "pieces": [piece(0, "G1", 44, 5)]},
+    ])
+    move = REGISTRY["apollo"].choose_move([
+        {"piece_idx": 0, "pawn_id": "R1", "target": 5},
+        {"piece_idx": 1, "pawn_id": "R2", "target": 36},
+    ], game_state)
+
+    assert move["pawn_id"] == "R1"
+
+
+def test_apollo_uses_safety_and_activation_when_capture_is_unavailable():
+    game_state = state([
+        {"index": 0, "pieces": [piece(0, "R1", -1, None, in_yard=True), piece(1, "R2", 18, 18)]},
+        {"index": 1, "pieces": [piece(0, "G1", 7, 20)]},
+    ], safe_havens=[0])
+    move = REGISTRY["apollo"].choose_move([
+        {"piece_idx": 0, "pawn_id": "R1", "target": 0},
+        {"piece_idx": 1, "pawn_id": "R2", "target": 19},
+    ], game_state)
+
+    assert move["pawn_id"] == "R1"
+
+
+def test_apollo_accepts_custom_weight_combinations():
+    game_state = state([
+        {"index": 0, "pieces": [piece(0, "R1", -1, None, in_yard=True), piece(1, "R2", 30, 30)]},
+    ])
+    bot = ApolloBot({"hestia_progress": 1.0, "artemis_activation": -1.0})
+    move = bot.choose_move([
+        {"piece_idx": 0, "pawn_id": "R1", "target": 0},
+        {"piece_idx": 1, "pawn_id": "R2", "target": 36},
+    ], game_state)
+
+    assert move["pawn_id"] == "R2"
+
+
+def test_apollo_single_weight_dispatches_like_matching_sdr():
+    cases = [
+        (
+            "ares",
+            "ares_capture",
+            state([
+                {"index": 0, "pieces": [piece(0, "R1", 2, 2), piece(1, "R2", 30, 30)]},
+                {"index": 1, "pieces": [piece(0, "G1", 44, 5)]},
+            ]),
+            [
+                {"piece_idx": 0, "pawn_id": "R1", "target": 5},
+                {"piece_idx": 1, "pawn_id": "R2", "target": 36},
+            ],
+        ),
+        (
+            "athena",
+            "athena_safety",
+            state([
+                {"index": 0, "pieces": [piece(0, "R1", 4, 4), piece(1, "R2", -1, None, in_yard=True)]},
+                {"index": 1, "pieces": [piece(0, "G1", 40, 1)]},
+            ], safe_havens=[8]),
+            [
+                {"piece_idx": 0, "pawn_id": "R1", "target": 8},
+                {"piece_idx": 1, "pawn_id": "R2", "target": 0},
+            ],
+        ),
+        (
+            "hestia",
+            "hestia_progress",
+            state([
+                {"index": 0, "pieces": [piece(0, "R1", 30, 30), piece(1, "R2", 5, 5)]},
+            ]),
+            [
+                {"piece_idx": 0, "pawn_id": "R1", "target": 34},
+                {"piece_idx": 1, "pawn_id": "R2", "target": 11},
+            ],
+        ),
+        (
+            "artemis",
+            "artemis_activation",
+            state([
+                {"index": 0, "pieces": [piece(0, "R1", -1, None, in_yard=True), piece(1, "R2", 8, 8)]},
+            ]),
+            [
+                {"piece_idx": 0, "pawn_id": "R1", "target": 0},
+                {"piece_idx": 1, "pawn_id": "R2", "target": 12},
+            ],
+        ),
+    ]
+
+    for sdr_id, weight_id, game_state, valid_moves in cases:
+        apollo = ApolloBot({weight_id: 100.0})
+
+        assert apollo.choose_move(valid_moves, game_state) == REGISTRY[sdr_id].choose_move(valid_moves, game_state)
+
+
+def test_apollo_missing_weights_default_to_zero():
+    features = MoveFeatures(capture=1.0, progress=0.5, activation=1.0)
+
+    assert apollo_score(features, {"hestia_progress": 2.0}) == 1.0
