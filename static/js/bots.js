@@ -4,19 +4,19 @@
 // JS policies are offline fallbacks only — do not add game logic here.
 
 const FALLBACK_BOTS = [
-  { id: 'eris',        name: 'Eris',        type: 'baseline',  epithet: 'Goddess of Discord',      description: 'Chooses from valid moves without using strategy.',                             template: 'template-SDR', status: 'Available', selectable: true, implemented: true },
-  { id: 'ares',        name: 'Ares',        type: 'heuristic', epithet: 'God of War',               description: 'Looks for chances to send opponent pawns back to their yard.',              template: 'template-SDR', status: 'Available', selectable: true, implemented: true },
-  { id: 'athena',      name: 'Athena',      type: 'heuristic', epithet: 'Goddess of Wisdom',        description: 'Keeps pawns safe before looking for other moves.',                           template: 'template-SDR', status: 'Available', selectable: true, implemented: true },
-  { id: 'hestia',      name: 'Hestia',      type: 'heuristic', epithet: 'Goddess of the Hearth',    description: 'Brings pawns home as directly as possible.',                                 template: 'template-SDR', status: 'Available', selectable: true, implemented: true },
-  { id: 'apollo',      name: 'Apollo',      type: 'weighted',  epithet: 'God of Order',             description: 'Balanced weighted bot combining capture, safety, progress, and activation.', template: 'template-CDR', status: 'Template',  selectable: true, implemented: true },
-  { id: 'user-weighted', name: 'Build-a-bot', type: 'weighted', epithet: 'User CDR',               description: 'Custom weighted bot configured with sliders.',                               template: 'user-CDR',     status: 'Custom',    selectable: true, implemented: true },
-  { id: 'hermes',      name: 'Hermes',      type: 'heuristic', epithet: 'God of Travel',            description: 'Keeps pawns distributed across the board.',                                  template: 'template-SDR', status: 'Available', selectable: true, implemented: true },
-  { id: 'hephaestus',  name: 'Hephaestus',  type: 'heuristic', epithet: 'God of the Forge',        description: 'Builds defensive stacks with friendly pawns.',                               template: 'template-SDR', status: 'Available', selectable: true, implemented: true },
-  { id: 'artemis',     name: 'Artemis',     type: 'heuristic', epithet: 'Goddess of the Hunt',      description: 'Gets pawns out of the yard whenever possible.',                              template: 'template-SDR', status: 'Available', selectable: true, implemented: true },
+  { id: 'eris',          name: 'Eris',        type: 'baseline', tldr: 'Goddess of Discord',      description: 'Chooses from valid moves without using strategy.',                             status: 'Available', implemented: true },
+  { id: 'ares',          name: 'Ares',        type: 'SDR',      tldr: 'God of War',               description: 'Looks for chances to send opponent pawns back to their yard.',              status: 'Available', implemented: true },
+  { id: 'athena',        name: 'Athena',      type: 'SDR',      tldr: 'Goddess of Wisdom',        description: 'Keeps pawns safe before looking for other moves.',                           status: 'Available', implemented: true },
+  { id: 'hestia',        name: 'Hestia',      type: 'SDR',      tldr: 'Goddess of the Hearth',    description: 'Brings pawns home as directly as possible.',                                 status: 'Available', implemented: true },
+  { id: 'apollo',        name: 'Apollo',      type: 'CDR',      tldr: 'God of Order',             description: 'Balanced weighted bot combining capture, safety, progress, and activation.', status: 'Template',  implemented: true },
+  { id: 'user-weighted', name: 'Build-a-bot', type: 'CDR',      tldr: 'User CDR',                 description: 'Custom weighted bot configured with sliders.',                               status: 'Custom',    implemented: true },
+  { id: 'hermes',        name: 'Hermes',      type: 'SDR',      tldr: 'God of Travel',            description: 'Keeps pawns distributed across the board.',                                  status: 'Available', implemented: true },
+  { id: 'hephaestus',    name: 'Hephaestus',  type: 'SDR',      tldr: 'God of the Forge',        description: 'Builds defensive stacks with friendly pawns.',                               status: 'Available', implemented: true },
+  { id: 'artemis',       name: 'Artemis',     type: 'SDR',      tldr: 'Goddess of the Hunt',      description: 'Gets pawns out of the yard whenever possible.',                              status: 'Available', implemented: true },
 ];
 
 let BOT_REGISTRY = FALLBACK_BOTS;
-const BOT_TYPE_ORDER = ['baseline', 'heuristic', 'weighted-template', 'weighted', 'trained'];
+const BOT_TYPE_ORDER = ['baseline', 'SDR', 'CDR', 'trained'];
 
 async function loadBotRegistry() {
   try {
@@ -40,15 +40,11 @@ function getOrderedBotRegistry() {
 
 function getBotRegistry() { return BOT_REGISTRY; }
 function getSelectableBots() {
-  return BOT_REGISTRY.filter(b =>
-    b.selectable !== false &&
-    b.implemented !== false
-  );
+  return BOT_REGISTRY.filter(b => b.implemented !== false && !b._is_deleted);
 }
 
 function botLobbyLabel(bot) {
-  const sub = bot?.epithet || bot?.tldr || '';
-  return sub ? `${bot.name} (${sub})` : bot.name;
+  return bot?.tldr ? `${bot.name} (${bot.tldr})` : bot.name;
 }
 
 // ---- Server-side policy (primary) ------------------------------------------
@@ -272,8 +268,8 @@ function renderBotsPage() {
 
   const ordered    = getOrderedBotRegistry();
   const baseline   = ordered.filter(b => b.type === 'baseline');
-  const heuristics = ordered.filter(b => b.type === 'heuristic' || !b.type);
-  const weighted   = ordered.filter(b => b.type === 'weighted-template' || b.type === 'weighted');
+  const heuristics = ordered.filter(b => b.type === 'SDR');
+  const weighted   = ordered.filter(b => b.type === 'CDR');
   const trained    = ordered.filter(b => b.type === 'trained');
   const botBuilder = typeof renderBotBuilderCard === 'function' ? renderBotBuilderCard() : '';
 
@@ -346,7 +342,7 @@ function botIsPlanned(bot) {
 }
 
 function botCardDescription(bot) {
-  return [bot?.epithet, bot?.description].filter(Boolean).join(' — ');
+  return [bot?.tldr, bot?.description].filter(Boolean).join(' — ');
 }
 
 function botCardFocus(bot) {

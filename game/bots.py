@@ -233,9 +233,8 @@ class BotPolicy(ABC):
         return {
             "id": self.id,
             "name": self.name,
-            "type": getattr(self, "type", "heuristic"),
+            "type": getattr(self, "type", "SDR"),
             "description": self.description,
-            "selectable": True,
             "implemented": True,
         }
 
@@ -284,7 +283,7 @@ def delete_custom_bot(bot_id: str) -> bool:
 class ErisBot(BotPolicy):
     id          = "eris"
     name        = "Eris"
-    type        = "heuristic"
+    type        = "SDR"
     description = "Goddess of Discord — moves at random"
 
     def choose_move(self, valid_moves, game_state=None):
@@ -294,7 +293,7 @@ class ErisBot(BotPolicy):
 class AresBot(BotPolicy):
     id          = "ares"
     name        = "Ares"
-    type        = "heuristic"
+    type        = "SDR"
     description = "God of War — captures enemy pawns when possible, else random"
 
     def choose_move(self, valid_moves, game_state=None):
@@ -304,7 +303,7 @@ class AresBot(BotPolicy):
 class AthenaBot(BotPolicy):
     id          = "athena"
     name        = "Athena"
-    type        = "heuristic"
+    type        = "SDR"
     description = "Goddess of Wisdom — keeps pawns safe first"
 
     def choose_move(self, valid_moves, game_state=None):
@@ -318,7 +317,7 @@ class AthenaBot(BotPolicy):
 class HestiaBot(BotPolicy):
     id          = "hestia"
     name        = "Hestia"
-    type        = "heuristic"
+    type        = "SDR"
     description = "Goddess of the Hearth — brings pawns home first"
 
     def choose_move(self, valid_moves, game_state=None):
@@ -328,7 +327,7 @@ class HestiaBot(BotPolicy):
 class HermesBot(BotPolicy):
     id          = "hermes"
     name        = "Hermes"
-    type        = "heuristic"
+    type        = "SDR"
     description = "God of Travel — spreads pawns across the board"
 
     def choose_move(self, valid_moves, game_state=None):
@@ -338,7 +337,7 @@ class HermesBot(BotPolicy):
 class HephaestusBot(BotPolicy):
     id          = "hephaestus"
     name        = "Hephaestus"
-    type        = "heuristic"
+    type        = "SDR"
     description = "God of the Forge — builds friendly blockades"
 
     def choose_move(self, valid_moves, game_state=None):
@@ -348,7 +347,7 @@ class HephaestusBot(BotPolicy):
 class ArtemisBot(BotPolicy):
     id          = "artemis"
     name        = "Artemis"
-    type        = "heuristic"
+    type        = "SDR"
     description = "Goddess of the Hunt — gets pawns into play"
 
     def choose_move(self, valid_moves, game_state=None):
@@ -388,7 +387,7 @@ def apollo_score(features: MoveFeatures, weights: dict | None = None) -> float:
 class ApolloBot(BotPolicy):
     id          = "apollo"
     name        = "Apollo"
-    type        = "weighted"
+    type        = "CDR"
     description = "God of Order — balances capture, safety, progress, and activation"
 
     def __init__(self, weights: dict | None = None):
@@ -414,7 +413,7 @@ class ApolloBot(BotPolicy):
 class UserWeightedBot(ApolloBot):
     id          = "user-weighted"
     name        = "Your Bot"
-    type        = "weighted"
+    type        = "CDR"
     description = "User-created CDR — uses slider-configured weights"
 
 
@@ -456,7 +455,6 @@ def get_bot_info() -> list[dict]:
         info = {
             **entry,
             "implemented": implemented,
-            "selectable": bool(entry.get("selectable", implemented)) and implemented,
         }
         bots.append(info)
         seen.add(bot_id)
@@ -468,7 +466,7 @@ def get_bot_info() -> list[dict]:
     for custom in load_custom_bots():
         bot_id = custom.get("id")
         if bot_id and bot_id not in seen:
-            bots.append({**custom, "type": "weighted", "status": "Custom", "implemented": True, "selectable": True})
+            bots.append({**custom, "type": "CDR", "status": "Custom", "implemented": True})
             seen.add(bot_id)
 
     return bots

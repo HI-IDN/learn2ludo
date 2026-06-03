@@ -153,6 +153,16 @@ function renderBotBuilderCard() {
               oninput="botBuilderSetDraftDescription(this.value)"
             >${escapeBotText(draft.description)}</textarea>
             </label>
+            <label class="bot-builder-field bot-builder-field--designer">
+              <span>Designer</span>
+              <input
+              type="text"
+              maxlength="100"
+              placeholder="Who designed this bot?"
+              value="${escapeBotText(draft.designer)}"
+              oninput="botBuilderSetDraftDesigner(this.value)"
+            >
+            </label>
             <div class="bot-builder-draft-actions">
               ${saveValid ? '' : `<em class="bot-builder-hint" id="bot-builder-hint">${botBuilderSaveTooltip()}</em>`}
               <button
@@ -186,7 +196,14 @@ function getUserBotDraft() {
     name: settings.user_bot_draft.name || '',
     tldr: settings.user_bot_draft.tldr || '',
     description: settings.user_bot_draft.description || '',
+    designer: settings.user_bot_draft.designer || '',
   };
+}
+
+function botBuilderSetDraftDesigner(value) {
+  settings.user_bot_draft = settings.user_bot_draft || {};
+  settings.user_bot_draft.designer = String(value || '').slice(0, 100);
+  persistSettings();
 }
 
 function botBuilderDraftValid(draft) {
@@ -271,7 +288,7 @@ async function botBuilderSave() {
     botBuilderSetSaveStatus('Save failed — server unreachable');
     return;
   }
-  settings.user_bot_draft = { name: '', tldr: '', description: '' };
+  settings.user_bot_draft = { name: '', tldr: '', description: '', designer: '' };
   settings.user_bot_weights = defaultUserBotWeights();
   persistSettings();
   await loadBotRegistry();
@@ -322,9 +339,10 @@ function buildSavedUserBot() {
   return {
     id: uniqueUserBotId(),
     name: draft.name.trim(),
+    type: 'CDR',
     tldr: draft.tldr.trim(),
     description: draft.description.trim(),
-    template: 'user-CDR',
+    designer: draft.designer.trim(),
     weights,
     created_at: new Date().toISOString(),
   };

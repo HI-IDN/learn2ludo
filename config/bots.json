@@ -4,81 +4,65 @@
       "id": "eris",
       "name": "Eris",
       "type": "baseline",
-      "epithet": "Goddess of Discord",
+      "tldr": "Goddess of Discord",
       "description": "Chooses from valid moves without using strategy.",
-      "template": "template-SDR",
-      "status": "Available",
-      "selectable": true
+      "status": "Available"
     },
     {
       "id": "ares",
       "name": "Ares",
-      "type": "heuristic",
-      "epithet": "God of War",
+      "type": "SDR",
+      "tldr": "God of War",
       "description": "Looks for chances to send opponent pawns back to their yard.",
-      "template": "template-SDR",
-      "status": "Available",
-      "selectable": true
+      "status": "Available"
     },
     {
       "id": "athena",
       "name": "Athena",
-      "type": "heuristic",
-      "epithet": "Goddess of Wisdom",
+      "type": "SDR",
+      "tldr": "Goddess of Wisdom",
       "description": "Keeps pawns safe before looking for other moves.",
-      "template": "template-SDR",
-      "status": "Available",
-      "selectable": true
+      "status": "Available"
     },
     {
       "id": "hestia",
       "name": "Hestia",
-      "type": "heuristic",
-      "epithet": "Goddess of the Hearth",
+      "type": "SDR",
+      "tldr": "Goddess of the Hearth",
       "description": "Brings pawns home as directly as possible.",
-      "template": "template-SDR",
-      "status": "Available",
-      "selectable": true
+      "status": "Available"
     },
     {
       "id": "hermes",
       "name": "Hermes",
-      "type": "heuristic",
-      "epithet": "God of Travel",
+      "type": "SDR",
+      "tldr": "God of Travel",
       "description": "Keeps pawns distributed across the board.",
-      "template": "template-SDR",
-      "status": "Available",
-      "selectable": true
+      "status": "Available"
     },
     {
       "id": "hephaestus",
       "name": "Hephaestus",
-      "type": "heuristic",
-      "epithet": "God of the Forge",
+      "type": "SDR",
+      "tldr": "God of the Forge",
       "description": "Builds defensive stacks with friendly pawns.",
-      "template": "template-SDR",
-      "status": "Available",
-      "selectable": true
+      "status": "Available"
     },
     {
       "id": "artemis",
       "name": "Artemis",
-      "type": "heuristic",
-      "epithet": "Goddess of the Hunt",
+      "type": "SDR",
+      "tldr": "Goddess of the Hunt",
       "description": "Gets pawns out of the yard whenever possible.",
-      "template": "template-SDR",
-      "status": "Available",
-      "selectable": true
+      "status": "Available"
     },
     {
       "id": "apollo",
       "name": "Apollo",
-      "type": "weighted",
-      "epithet": "God of Order",
+      "type": "CDR",
+      "tldr": "God of Order",
       "description": "Balanced weighted bot combining capture, safety, progress, and activation.",
-      "template": "template-CDR",
-      "status": "Template",
-      "selectable": true
+      "status": "Template"
     }
   ]
 }

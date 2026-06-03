@@ -3,9 +3,10 @@
     {
       "id": "bot-4f565ceb",
       "name": "TestBot",
+      "type": "CDR",
       "tldr": "A test bot",
       "description": "This is a test description",
-      "template": "user-CDR",
+      "designer": "",
       "weights": {},
       "created_at": "2026-06-03T12:38:03.109Z",
       "_is_deleted": true
@@ -13,9 +14,10 @@
     {
       "id": "bot-a61e342c",
       "name": "Nemesis",
+      "type": "CDR",
       "tldr": "Aggressive retaliator",
       "description": "Focuses on capturing opponents whenever possible.",
-      "template": "user-CDR",
+      "designer": "",
       "weights": {
         "capture": 0.8,
         "safety": -0.2,
@@ -27,9 +29,10 @@
     {
       "id": "bot-da507911",
       "name": "Heracles",
+      "type": "CDR",
       "tldr": "Brute force progress",
       "description": "Charges ahead with maximum progress weight.",
-      "template": "user-CDR",
+      "designer": "",
       "weights": {
         "capture": 0.4,
         "progress": 0.8,
