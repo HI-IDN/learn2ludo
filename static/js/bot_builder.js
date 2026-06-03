@@ -101,9 +101,9 @@ function renderBotBuilderCard() {
         <div class="bot-builder-layout">
           <div class="bot-builder-main">
             <div class="bot-card-title">
-              <div class="bot-card-name" id="bot-builder-draft-name">${escapeBotText(draft.name || 'Build-a-bot')}</div>
+              <div class="bot-card-name">Build-a-bot</div>
             </div>
-            <div class="bot-card-desc" id="bot-builder-draft-desc">${escapeBotText(botBuilderDraftDescriptionText(draft))}</div>
+            <div class="bot-card-desc">User-defined composite dispatching rule</div>
             <div class="bot-builder-help">
               Each weight must be between -1.00 and +1.00. Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
             </div>
