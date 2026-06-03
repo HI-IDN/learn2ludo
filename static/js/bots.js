@@ -46,13 +46,9 @@ function getSelectableBots() {
   );
 }
 
-function botEpithet(bot) {
-  return bot?.epithet || '';
-}
-
 function botLobbyLabel(bot) {
-  const epithet = botEpithet(bot);
-  return epithet ? `${bot.name} (${epithet})` : bot.name;
+  const sub = bot?.epithet || bot?.tldr || '';
+  return sub ? `${bot.name} (${sub})` : bot.name;
 }
 
 // ---- Server-side policy (primary) ------------------------------------------

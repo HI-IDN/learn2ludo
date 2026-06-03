@@ -121,7 +121,7 @@ function renderBotBuilderCard() {
               <span>Name</span>
               <input
               type="text"
-              maxlength="18"
+              maxlength="10"
               placeholder="Build-a-bot"
               value="${escapeBotText(draft.name)}"
               oninput="botBuilderSetDraftName(this.value)"
@@ -131,8 +131,8 @@ function renderBotBuilderCard() {
               <span>TLDR</span>
               <input
               type="text"
-              maxlength="32"
-              placeholder="User-defined composite dispatching rule"
+              maxlength="25"
+              placeholder="User-defined composite rule"
               value="${escapeBotText(draft.tldr)}"
               oninput="botBuilderSetDraftTldr(this.value)"
             >
@@ -203,7 +203,7 @@ function botBuilderSaveTooltip() {
 
 function botBuilderSetDraftName(value) {
   settings.user_bot_draft = settings.user_bot_draft || {};
-  settings.user_bot_draft.name = String(value || '').slice(0, 18);
+  settings.user_bot_draft.name = String(value || '').slice(0, 10);
   persistSettings();
   botBuilderRefreshDraft();
   botBuilderRefreshSaveBtn();
@@ -211,7 +211,7 @@ function botBuilderSetDraftName(value) {
 
 function botBuilderSetDraftTldr(value) {
   settings.user_bot_draft = settings.user_bot_draft || {};
-  settings.user_bot_draft.tldr = String(value || '').slice(0, 32);
+  settings.user_bot_draft.tldr = String(value || '').slice(0, 25);
   persistSettings();
   botBuilderRefreshDraft();
   botBuilderRefreshSaveBtn();
