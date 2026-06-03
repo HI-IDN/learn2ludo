@@ -13,6 +13,35 @@
   width: 100%;
 }
 
+.bot-builder-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bot-builder-toggle {
+  background: none;
+  border: none;
+  color: $color-text-3;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+
+  &:hover { color: $color-text; }
+}
+
+.bot-builder-card--collapsed .bot-builder-header {
+  margin-bottom: 0;
+}
+
+.bot-builder-card--collapsed .bot-builder-layout {
+  display: none;
+}
+
 .bot-builder-layout {
   display: grid;
   grid-template-columns: minmax(560px, 0.62fr) minmax(320px, 0.38fr);

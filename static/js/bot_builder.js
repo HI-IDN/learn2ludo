@@ -94,16 +94,23 @@ function renderBotBuilderCard() {
 
   const saveValid = botBuilderDraftValid(draft);
 
+  const collapsed = settings.bot_builder_collapsed ?? false;
+
   return `
-    <div class="bot-card bot-builder-card">
+    <div class="bot-card bot-builder-card${collapsed ? ' bot-builder-card--collapsed' : ''}">
       <div class="bot-card-icon"><i class="fa-solid fa-sliders"></i></div>
       <div class="bot-card-body">
+        <div class="bot-builder-header">
+          <div>
+            <div class="bot-card-name">Build-a-bot</div>
+            <div class="bot-card-desc">User-defined composite dispatching rule</div>
+          </div>
+          <button class="bot-builder-toggle" type="button" onclick="botBuilderToggleCollapse()" title="${collapsed ? 'Expand' : 'Collapse'}">
+            <i class="fa-solid fa-chevron-${collapsed ? 'down' : 'up'}"></i>
+          </button>
+        </div>
         <div class="bot-builder-layout">
           <div class="bot-builder-main">
-            <div class="bot-card-title">
-              <div class="bot-card-name">Build-a-bot</div>
-            </div>
-            <div class="bot-card-desc">User-defined composite dispatching rule</div>
             <div class="bot-builder-help">
               Each weight must be between -1.00 and +1.00. Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
             </div>
@@ -160,6 +167,7 @@ function renderBotBuilderCard() {
               </button>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>`;
@@ -268,6 +276,12 @@ async function botBuilderSave() {
   settings.user_bot_weights = defaultUserBotWeights();
   persistSettings();
   await loadBotRegistry();
+  renderBotsPage();
+}
+
+function botBuilderToggleCollapse() {
+  settings.bot_builder_collapsed = !(settings.bot_builder_collapsed ?? false);
+  persistSettings();
   renderBotsPage();
 }
 
