@@ -9,6 +9,17 @@
   grid-column: 1 / -1;
 }
 
+.bot-builder-card .bot-card-body {
+  width: 100%;
+}
+
+.bot-builder-layout {
+  display: grid;
+  grid-template-columns: minmax(560px, 0.62fr) minmax(320px, 0.38fr);
+  gap: 24px;
+  align-items: flex-start;
+}
+
 .bot-builder-help {
   color: $color-text-3;
   font-size: 11px;
@@ -25,9 +36,8 @@
 
 .bot-builder-draft {
   display: grid;
-  grid-template-columns: minmax(150px, 210px) minmax(170px, 260px) 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 12px;
 }
 
 .bot-builder-field {
@@ -109,6 +119,10 @@
 @media (max-width: 700px) {
   .bot-builder-card {
     grid-column: 1 / -1;
+  }
+
+  .bot-builder-layout {
+    grid-template-columns: 1fr;
   }
 
   .bot-builder-row {

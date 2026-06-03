@@ -96,48 +96,52 @@ function renderBotBuilderCard() {
     <div class="bot-card bot-builder-card">
       <div class="bot-card-icon"><i class="fa-solid fa-sliders"></i></div>
       <div class="bot-card-body">
-        <div class="bot-card-title">
-          <div class="bot-card-name" id="bot-builder-draft-name">${escapeBotText(draft.name)}</div>
-          <span class="bot-card-status">Custom</span>
-        </div>
-        <div class="bot-card-desc" id="bot-builder-draft-desc">${escapeBotText(botBuilderDraftDescriptionText(draft))}</div>
-        <div class="bot-builder-help">
-          Each weight must be between -1.00 and +1.00. Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
-        </div>
-        <div class="bot-builder-draft">
-          <label class="bot-builder-field bot-builder-field--name">
-            <span>Name</span>
-            <input
-              type="text"
-              maxlength="18"
-              value="${escapeBotText(draft.name)}"
-              oninput="botBuilderSetDraftName(this.value)"
-            >
-          </label>
-          <label class="bot-builder-field bot-builder-field--tldr">
-            <span>TLDR</span>
-            <input
-              type="text"
-              maxlength="32"
-              value="${escapeBotText(draft.tldr)}"
-              oninput="botBuilderSetDraftTldr(this.value)"
-            >
-          </label>
-          <label class="bot-builder-field bot-builder-field--description">
-            <span>Description</span>
-            <textarea
-              maxlength="180"
-              rows="3"
-              oninput="botBuilderSetDraftDescription(this.value)"
-            >${escapeBotText(draft.description)}</textarea>
-          </label>
-        </div>
-        <div class="bot-builder-controls">${rows}</div>
-        <div class="bot-builder-actions">
-          <button class="btn btn-sm" type="button" onclick="botBuilderReset()">
-            <i class="fa-solid fa-rotate-left"></i>
-            Reset
-          </button>
+        <div class="bot-builder-layout">
+          <div class="bot-builder-main">
+            <div class="bot-card-title">
+              <div class="bot-card-name" id="bot-builder-draft-name">${escapeBotText(draft.name)}</div>
+              <span class="bot-card-status">Custom</span>
+            </div>
+            <div class="bot-card-desc" id="bot-builder-draft-desc">${escapeBotText(botBuilderDraftDescriptionText(draft))}</div>
+            <div class="bot-builder-help">
+              Each weight must be between -1.00 and +1.00. Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
+            </div>
+            <div class="bot-builder-controls">${rows}</div>
+            <div class="bot-builder-actions">
+              <button class="btn btn-sm" type="button" onclick="botBuilderReset()">
+                <i class="fa-solid fa-rotate-left"></i>
+                Reset
+              </button>
+            </div>
+          </div>
+          <div class="bot-builder-draft">
+            <label class="bot-builder-field bot-builder-field--name">
+              <span>Name</span>
+              <input
+                type="text"
+                maxlength="18"
+                value="${escapeBotText(draft.name)}"
+                oninput="botBuilderSetDraftName(this.value)"
+              >
+            </label>
+            <label class="bot-builder-field bot-builder-field--tldr">
+              <span>TLDR</span>
+              <input
+                type="text"
+                maxlength="32"
+                value="${escapeBotText(draft.tldr)}"
+                oninput="botBuilderSetDraftTldr(this.value)"
+              >
+            </label>
+            <label class="bot-builder-field bot-builder-field--description">
+              <span>Description</span>
+              <textarea
+                maxlength="180"
+                rows="3"
+                oninput="botBuilderSetDraftDescription(this.value)"
+              >${escapeBotText(draft.description)}</textarea>
+            </label>
+          </div>
         </div>
       </div>
     </div>`;
