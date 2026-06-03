@@ -1,253 +1,269 @@
 @use "../base/variables" as *;
 
-// ── Shared overlay shell ─────────────────────────────────────────────────────
+// ── Toggle strip (Board | Stats) ─────────────────────────────────────────────
 
-.postgame-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+#postgame-toggle {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 900;
-  padding: 16px;
-  overflow-y: auto;
+  gap: 4px;
+  padding: 6px 8px 0;
+  border-bottom: 1px solid $border-light;
+  background: $color-bg-alt;
+  flex-shrink: 0;
 }
 
-.postgame-card {
-  background: $color-bg-alt;
-  border-radius: $radius-lg;
-  padding: 28px 24px 24px;
-  width: 100%;
-  max-width: 480px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+.pg-tog-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border: none;
+  border-radius: $radius $radius 0 0;
+  background: transparent;
+  color: $color-text-2;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+
+  &:hover { background: $color-bg; color: $color-text; }
+
+  &.active {
+    background: $color-bg;
+    color: $color-primary;
+    box-shadow: inset 0 -2px 0 $color-primary;
+  }
+}
+
+// ── Reflection card ───────────────────────────────────────────────────────────
+
+#postgame-reflection {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
+  padding: 24px 20px;
+  height: 100%;
+  overflow-y: auto;
+  background: $color-bg-alt;
 }
 
-.postgame-stats-card {
-  max-width: 600px;
-}
-
-// ── Reflection phase ─────────────────────────────────────────────────────────
-
-.postgame-player-badge {
+.pg-reflect-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   font-weight: 700;
-  font-size: 15px;
-  color: var(--player-color);
-  background: color-mix(in srgb, var(--player-color) 12%, transparent);
+  font-size: 14px;
+  color: var(--pc);
+  background: color-mix(in srgb, var(--pc) 12%, transparent);
   border-radius: 999px;
-  padding: 6px 14px;
+  padding: 5px 14px;
   width: fit-content;
 }
 
-.postgame-title {
-  font-size: 20px;
+.pg-reflect-title {
+  font-size: 18px;
   font-weight: 700;
   color: $color-text;
   margin: 0;
 }
 
-.postgame-subtitle {
+.pg-reflect-sub {
   font-size: 13px;
   color: $color-text-2;
-  margin: -12px 0 0;
+  margin: -10px 0 0;
 }
 
-.reflection-axis {
+.pg-axis {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.axis-label {
+.pg-axis-labels {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
   font-weight: 600;
-  color: $color-text-2;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-
-  .axis-lo { color: $color-danger; }
-  .axis-hi { color: $color-primary; }
 }
 
-.axis-pips {
+.pg-pips {
   display: flex;
   gap: 8px;
 }
 
-.pip-btn {
+.pg-pip {
   flex: 1;
   aspect-ratio: 1;
   border-radius: $radius;
   border: 2px solid $border-medium;
   background: $color-bg;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: $color-text-2;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
 
   &:hover { border-color: $color-primary; color: $color-primary; }
-
-  &.selected {
-    background: $color-primary;
-    border-color: $color-primary;
-    color: #fff;
-  }
+  &.sel   { background: $color-primary; border-color: $color-primary; color: #fff; }
 }
 
-.reflection-actions {
+.pg-reflect-actions {
   display: flex;
   gap: 10px;
-  margin-top: 4px;
-
-  #reflection-next { flex: 1; }
+  #r-next { flex: 1; }
 }
 
-// ── Stats overlay ────────────────────────────────────────────────────────────
+// ── Stats panel ───────────────────────────────────────────────────────────────
 
-.postgame-winner-banner {
-  background: color-mix(in srgb, var(--winner-color) 14%, transparent);
-  border: 2px solid color-mix(in srgb, var(--winner-color) 40%, transparent);
-  border-radius: $radius;
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--winner-color);
-
-  i { font-size: 22px; }
-}
-
-.postgame-sections {
+#postgame-stats {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 16px;
+  overflow-y: auto;
+  height: 100%;
+  background: $color-bg-alt;
 }
 
-.postgame-section {
-  .section-title {
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: $color-text-2;
-    margin: 0 0 10px;
-  }
-
-  .section-hint {
-    font-size: 12px;
-    color: $color-text-3;
-    margin: -6px 0 10px;
-  }
+.pg-winner-banner {
+  background: color-mix(in srgb, var(--wc) 14%, transparent);
+  border: 2px solid color-mix(in srgb, var(--wc) 35%, transparent);
+  border-radius: $radius;
+  padding: 12px 16px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--wc);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-// Stats table
-
-.stats-table {
+.pg-section {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  font-size: 13px;
+  gap: 10px;
 }
 
-.stats-row {
+.pg-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pg-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-text-2;
+}
+
+.pg-section-hint {
+  font-size: 12px;
+  color: $color-text-3;
+  margin: -4px 0 0;
+}
+
+// ── Radio group ───────────────────────────────────────────────────────────────
+
+.pg-radio-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pg-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+// ── Histogram ─────────────────────────────────────────────────────────────────
+
+.pg-histogram {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  height: 100px;
+  padding-bottom: 24px; // room for face labels
+  position: relative;
+}
+
+.pg-bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.pg-bars {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 80px;
+  width: 100%;
+}
+
+.pg-bar {
+  flex: 1;
+  height: var(--h, 0%);
+  min-height: 2px;
+  background: var(--bc, #888);
+  border-radius: 3px 3px 0 0;
+  align-self: flex-end;
+  transition: height 0.3s ease;
+}
+
+.pg-bar-face {
+  font-size: 16px;
+  position: absolute;
+  bottom: -20px;
+}
+
+// ── Stat table ────────────────────────────────────────────────────────────────
+
+.pg-stat-table {
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pg-stat-row {
   display: grid;
-  grid-template-columns: 1fr repeat(var(--player-cols, 4), 1fr);
+  grid-template-columns: 1fr repeat(var(--cols, 4), 60px);
   gap: 4px;
   padding: 4px 6px;
   border-radius: 6px;
 
   &:nth-child(even) { background: $color-bg; }
 
-  &.stats-header {
+  &.pg-stat-head {
     font-weight: 700;
-    font-size: 12px;
-    color: $color-text-2;
+    font-size: 11px;
     background: none;
   }
-
-  .stat-row-label {
-    color: $color-text-2;
-    font-size: 12px;
-  }
 }
 
-// Dice distribution
+.pg-stat-label {
+  color: $color-text-2;
+}
 
-.dice-dist-grid {
+// ── Scatter plot ──────────────────────────────────────────────────────────────
+
+.pg-scatter-wrap {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.dice-dist-player {
-  flex: 1;
-  min-width: 100px;
-}
-
-.dice-dist-name {
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.dice-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 60px;
-}
-
-.dice-bar-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  flex: 1;
-}
-
-.dice-bar {
-  width: 100%;
-  height: var(--bar-h, 0%);
-  background: var(--bar-color, #888);
-  border-radius: 3px 3px 0 0;
-  min-height: 2px;
-  align-self: flex-end;
-}
-
-.dice-bar-label { font-size: 13px; }
-.dice-bar-count { font-size: 10px; color: $color-text-3; }
-
-// X-Y scatter
-
-.scatter-wrap {
-  position: relative;
-  display: inline-block;
-}
-
-.scatter-axis-x {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: $color-text-3;
-  margin-top: 2px;
-  width: 260px;
-}
-
-.scatter-axis-y {
-  position: absolute;
-  top: 0;
-  left: -52px;
+.pg-scatter-y-labels {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -255,15 +271,15 @@
   font-size: 11px;
   color: $color-text-3;
   text-align: right;
-  width: 48px;
+  width: 52px;
+  padding: 4px 0;
 }
 
-// ── Shared footer ─────────────────────────────────────────────────────────────
-
-.postgame-footer {
+.pg-scatter-x-labels {
   display: flex;
-  gap: 10px;
-  padding-top: 4px;
-
-  #postgame-again { flex: 1; }
+  justify-content: space-between;
+  font-size: 11px;
+  color: $color-text-3;
+  width: 260px;
+  margin-top: 4px;
 }
