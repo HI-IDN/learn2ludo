@@ -87,6 +87,18 @@
           </div>
         </details>
 
+        <details class="glossary-entry" data-term="composite dispatching rule cdr">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Composite dispatching rule (CDR)</span>
+            <span class="glossary-short">A decision rule made by combining several simpler dispatching rules with weights.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            In scheduling literature, a composite dispatching rule combines multiple priorities into one score. Apollo is Learn2Ludo's CDR example: it combines simple rules such as capture, safety, progress, and activation. If one Apollo weight is set to 100 and the rest to 0, Apollo behaves like that matching simple rule.
+            <p class="glossary-example"><strong>Example:</strong> Apollo with only the capture weight enabled behaves like Ares.</p>
+          </div>
+        </details>
+
       </div>
 
       <!-- D -->
@@ -102,6 +114,18 @@
           <div class="glossary-detail">
             A deterministic bot always picks the same move when it faces the same game situation. This makes it predictable and easy to reason about. Contrast with stochastic behaviour, where the same situation can lead to different choices.
             <p class="glossary-example"><strong>Example:</strong> A greedy bot that always captures if a capture is available is deterministic.</p>
+          </div>
+        </details>
+
+        <details class="glossary-entry" data-term="dispatching rule">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Dispatching rule</span>
+            <span class="glossary-short">A rule that ranks the available actions and dispatches the best one next.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            In scheduling literature, a dispatching rule decides which job should be handled next from the jobs currently available. In Learn2Ludo, a dispatching rule decides which legal move a bot should make from the moves currently available.
+            <p class="glossary-example"><strong>Example:</strong> "Choose a capturing move if one exists" is a dispatching rule.</p>
           </div>
         </details>
 
@@ -248,6 +272,17 @@
           </div>
         </details>
 
+        <details class="glossary-entry" data-term="round">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Round</span>
+            <span class="glossary-short">One full pass through the player order, where each active player gets a turn.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            A round is complete once every active player has had one turn in the current player order. Extra turns from special rules can make a round contain more actions, but the round concept is still useful for comparing progress across players.
+          </div>
+        </details>
+
       </div>
 
       <!-- S -->
@@ -262,6 +297,18 @@
           </summary>
           <div class="glossary-detail">
             Safe squares are marked on the board and provide protection. Any pawn resting on a safe square is immune to capture. The home column (the coloured stretch before home) is always safe. Some rule sets also designate star squares or starting squares as safe.
+          </div>
+        </details>
+
+        <details class="glossary-entry" data-term="simple dispatching rule sdr">
+          <summary class="glossary-summary">
+            <span class="glossary-term">Simple dispatching rule (SDR)</span>
+            <span class="glossary-short">A single-priority rule that ranks the legal moves and picks the best one.</span>
+            <i class="ti ti-chevron-down glossary-chevron"></i>
+          </summary>
+          <div class="glossary-detail">
+            A simple dispatching rule uses one clear priority to choose an action. In Learn2Ludo, bots such as Ares, Athena, Hestia, and Artemis are SDRs: each is a dispatching rule focused on one idea, such as capturing, staying safe, making progress, or activating a pawn.
+            <p class="glossary-example"><strong>Example:</strong> Hestia is an SDR because it prefers the move that brings a pawn closest to home.</p>
           </div>
         </details>
 
@@ -329,7 +376,7 @@
             <i class="ti ti-chevron-down glossary-chevron"></i>
           </summary>
           <div class="glossary-detail">
-            The weighted bot assigns a numerical importance (weight) to each feature. To evaluate a move, it multiplies each feature value by its weight and sums the results. The move with the highest total score wins. Weights can be tuned on the Bots page.
+            The weighted bot assigns a numerical importance (weight) to each feature or dispatching rule. To evaluate a move, it combines those weighted priorities into one score. The move with the highest total score wins. Apollo is the example weighted bot; student-created weighted bots will use sliders to build their own composite dispatching rules.
           </div>
         </details>
 
