@@ -60,7 +60,9 @@ function renderLobbySlots() {
     const isHuman    = type === 'human';
     const profile    = isActive && isHuman && typeof getSlotProfile === 'function' ? getSlotProfile(playerIdx) : null;
     const canRemove  = isActive && active.length > 2;
-    const avatarIcon = !isActive || !isHuman ? 'fa-robot' : (typeof getPlayerIcon === 'function' ? getPlayerIcon(playerIdx) : 'fa-face-smile');
+    const avatarIcon = !isActive || !isHuman
+      ? (isActive ? 'fa-robot' : 'fa-user')
+      : (profile ? (typeof getPlayerIcon === 'function' ? getPlayerIcon(playerIdx) : 'fa-face-smile') : 'fa-user');
 
     return `
       <div class="lobby-slot ${isActive ? 'slot-active' : 'slot-inactive'}"
@@ -136,10 +138,12 @@ function lobbyToggleSlot(slotIdx) {
 
 function lobbyBotSelect(slotIdx, playerIdx) {
   const bots = typeof getSelectableBots === 'function' ? getSelectableBots() : (typeof getBotRegistry === 'function' ? getBotRegistry() : []);
-  const current = settings.bot_ids?.[playerIdx] ?? (bots[0]?.id || 'eris');
-  const options = bots.map(b =>
-    `<option value="${b.id}" ${b.id === current ? 'selected' : ''}>${typeof botLobbyLabel === 'function' ? botLobbyLabel(b) : b.name}</option>`
-  ).join('');
+  const current = settings.bot_ids?.[playerIdx] ?? null;
+  const options = [
+    `<option value="">— pick a bot —</option>`,
+    ...bots.map(b =>
+      `<option value="${b.id}" ${b.id === current ? 'selected' : ''}>${typeof botLobbyLabel === 'function' ? botLobbyLabel(b) : b.name}</option>`)
+  ].join('');
   return `<select class="lobby-bot-select"
     onchange="lobbySetBotId(${slotIdx}, this.value)"
     onclick="event.stopPropagation()">
@@ -152,11 +156,7 @@ function lobbySetType(slotIdx, type) {
   if (playerIdx === -1) return;
   settings.player_types = settings.player_types || {};
   settings.player_types[playerIdx] = type === 'human' ? 'human' : 'random';
-  // persist default bot id so getPlayerName doesn't fall back to "Bot"
-  if (type !== 'human' && !settings.bot_ids?.[playerIdx]) {
-    const bots = typeof getSelectableBots === 'function' ? getSelectableBots() : (typeof getBotRegistry === 'function' ? getBotRegistry() : []);
-    if (bots.length) { settings.bot_ids = settings.bot_ids || {}; settings.bot_ids[playerIdx] = bots[0].id; }
-  }
+  if (type === 'human') { settings.bot_ids = settings.bot_ids || {}; delete settings.bot_ids[playerIdx]; }
   persistSettings();
   renderLobbySlots();
 }
@@ -178,23 +178,24 @@ function lobbySetName(slotIdx, v) {
   if (typeof renderPlayers === 'function') renderPlayers();
 }
 
-function lobbyHumansMissingProfile() {
+function lobbyValidationError() {
   const active = lobbyActiveSlots();
-  return active.filter(slotIdx => {
+  for (const slotIdx of active) {
     const playerIdx = active.indexOf(slotIdx);
-    return getPlayerType(playerIdx) === 'human' &&
-      typeof getSlotProfile === 'function' && !getSlotProfile(playerIdx);
-  });
+    if (getPlayerType(playerIdx) === 'human' && typeof getSlotProfile === 'function' && !getSlotProfile(playerIdx))
+      return 'Each human player must select a profile. <a href="#" onclick="event.preventDefault();switchTab(\'profiles\')">Go to Players tab</a>';
+    if (getPlayerType(playerIdx) !== 'human' && !settings.bot_ids?.[playerIdx])
+      return `Select a bot for the ${PLAYER_COLORS[slotIdx] || 'player'} slot.`;
+  }
+  return null;
 }
 
 function startFromLobby() {
-  const missing = lobbyHumansMissingProfile();
-  if (missing.length) {
+  const err = lobbyValidationError();
+  if (err) {
     const hint = document.getElementById('lobby-hint');
     if (hint) hint.innerHTML = `<div class="lobby-hint lobby-hint--warn">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-      Each human player must select a profile before starting.
-      <a href="#" onclick="event.preventDefault();switchTab('profiles')">Go to Players tab</a>
+      <i class="fa-solid fa-triangle-exclamation"></i> ${err}
     </div>`;
     return;
   }

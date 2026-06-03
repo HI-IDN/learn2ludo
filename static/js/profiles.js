@@ -108,6 +108,9 @@ function renderProfiles() {
     const ready = isSessionConsented(p.id);
     return `
       <div class="profile-card${ready ? ' profile-card--ready' : ''}">
+        <button class="profile-card-edit" onclick="openProfileEdit('${p.id}')" title="Edit player">
+          <i class="fa-solid fa-pen"></i>
+        </button>
         <button class="profile-card-delete" onclick="deleteProfile('${p.id}')" title="Remove player">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -143,12 +146,18 @@ function deleteProfile(id) {
 
 // ── Registration modal ────────────────────────────────────────────────────────
 
-let _regIcon = null;
+let _regIcon    = null;
+let _editingId  = null; // non-null when editing an existing profile
 
 function openProfileRegistration() {
-  _regIcon = null;
+  _editingId = null;
+  _regIcon   = null;
   const modal = document.getElementById('profile-reg-modal');
   if (!modal) return;
+  const titleEl = modal.querySelector('#reg-modal-title');
+  if (titleEl) titleEl.textContent = 'New Player Registration';
+  const submitEl = document.getElementById('reg-submit-btn');
+  if (submitEl) submitEl.innerHTML = '<i class="fa-solid fa-user-check"></i> Register';
   const usernameEl = document.getElementById('reg-username');
   if (usernameEl) usernameEl.value = '';
   const ageEl = document.getElementById('reg-age-select');
@@ -161,6 +170,40 @@ function openProfileRegistration() {
   if (ageConfirmEl) ageConfirmEl.checked = false;
   const leaderEl = document.getElementById('reg-leaderboard-check');
   if (leaderEl) leaderEl.checked = false;
+  // Show consent section for new registrations, hide for edits
+  const consentSection = document.getElementById('reg-consent-section');
+  if (consentSection) consentSection.hidden = false;
+  modal.removeAttribute('hidden');
+  _renderRegIcons();
+  _updateRegParent();
+  _updateRegSubmit();
+  usernameEl?.focus();
+}
+
+function openProfileEdit(profileId) {
+  const profile = getProfileById(profileId);
+  if (!profile) return;
+  _editingId = profileId;
+  _regIcon   = profile.icon;
+  const modal = document.getElementById('profile-reg-modal');
+  if (!modal) return;
+  const titleEl = modal.querySelector('#reg-modal-title');
+  if (titleEl) titleEl.textContent = 'Edit Player';
+  const submitEl = document.getElementById('reg-submit-btn');
+  if (submitEl) submitEl.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save changes';
+  const usernameEl = document.getElementById('reg-username');
+  if (usernameEl) usernameEl.value = profile.username;
+  const ageEl = document.getElementById('reg-age-select');
+  if (ageEl) ageEl.value = profile.age_range;
+  const leaderEl = document.getElementById('reg-leaderboard-check');
+  if (leaderEl) leaderEl.checked = !!profile.leaderboard_opt_in;
+  // Consent is already on file — hide the consent/age-gate sections in edit mode
+  const consentSection = document.getElementById('reg-consent-section');
+  if (consentSection) consentSection.hidden = true;
+  const parentEl = document.getElementById('reg-parent-check');
+  if (parentEl) parentEl.checked = true; // gates already passed at registration
+  const ageConfirmEl = document.getElementById('reg-age-confirm-check');
+  if (ageConfirmEl) ageConfirmEl.checked = true;
   modal.removeAttribute('hidden');
   _renderRegIcons();
   _updateRegParent();
@@ -218,28 +261,39 @@ function _regUsernameError(msg) {
 }
 
 function submitRegistration() {
-  const username  = document.getElementById('reg-username')?.value.trim();
-  const age       = document.getElementById('reg-age-select')?.value;
-  const consent   = document.getElementById('reg-consent-check')?.checked;
+  const username    = document.getElementById('reg-username')?.value.trim();
+  const age         = document.getElementById('reg-age-select')?.value;
   const leaderboard = document.getElementById('reg-leaderboard-check')?.checked ?? false;
 
-  if (!_regIcon || !username || !age || !consent) return;
+  if (!_regIcon || !username || !age) return;
 
   const profiles = loadProfiles();
-  if (profiles.some(p => p.username.toLowerCase() === username.toLowerCase())) {
+  const duplicate = profiles.find(p => p.username.toLowerCase() === username.toLowerCase() && p.id !== _editingId);
+  if (duplicate) {
     _regUsernameError('That name is already taken. Choose another.');
     document.getElementById('reg-username')?.focus();
     return;
   }
   _regUsernameError('');
 
-  const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
-    ? crypto.randomUUID()
-    : Date.now().toString(36) + Math.random().toString(36).slice(2);
+  if (_editingId) {
+    // Edit existing profile — preserve consent_ts and id
+    const idx = profiles.findIndex(p => p.id === _editingId);
+    if (idx !== -1) {
+      profiles[idx] = { ...profiles[idx], username, icon: _regIcon, age_range: age, leaderboard_opt_in: leaderboard };
+      saveProfiles(profiles);
+    }
+  } else {
+    const consent = document.getElementById('reg-consent-check')?.checked;
+    if (!consent) return;
+    const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : Date.now().toString(36) + Math.random().toString(36).slice(2);
+    profiles.push({ id, username, icon: _regIcon, age_range: age, consent_ts: Date.now(), leaderboard_opt_in: leaderboard });
+    saveProfiles(profiles);
+    markSessionConsented(id);
+  }
 
-  profiles.push({ id, username, icon: _regIcon, age_range: age, consent_ts: Date.now(), leaderboard_opt_in: leaderboard });
-  saveProfiles(profiles);
-  markSessionConsented(id);
   closeProfileRegistration();
   renderProfiles();
   if (typeof renderLobbySlots === 'function') renderLobbySlots();
