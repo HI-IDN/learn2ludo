@@ -499,7 +499,7 @@
   flex-shrink: 0;
 }
 
-// Mini board preview — real board SVG cloned and scaled
+// Mini board preview — real board SVG cloned and scaled via viewBox
 .lobby-board-preview {
   width: 200px;
   height: 200px;
@@ -508,17 +508,12 @@
   overflow: hidden;
   background: $color-bg-raised;
   border: 1px solid $border-light;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
+  // Override any inline style board.js sets on the SVG element
   svg {
-    display: block;
+    display: block !important;
     width: 200px !important;
     height: 200px !important;
-    // The board SVG has a fixed viewBox (e.g. 480×480); let it scale down
-    max-width: 200px;
-    max-height: 200px;
   }
 }
 

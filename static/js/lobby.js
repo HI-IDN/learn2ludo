@@ -36,6 +36,7 @@ function lobbyChangePawns(delta) {
   if (el) el.value = next;
   renderLobbySlots();
   drawBoard();
+  setTimeout(renderLobbyBoardPreview, 80);
 }
 
 function renderLobbyYardControl() {
@@ -72,23 +73,14 @@ function renderLobbyBoardPreview() {
 
   const clone = src.cloneNode(true);
   clone.removeAttribute('id');
-
-  // Get the real rendered size of the source SVG
-  const srcW = src.getBoundingClientRect().width || 480;
-  const previewSize = 200;
-  const scale = previewSize / srcW;
-
-  clone.style.cssText = `display:block; transform:scale(${scale}); transform-origin:top left; flex-shrink:0;`;
-  clone.setAttribute('width', srcW);
-  clone.setAttribute('height', srcW);
-
-  // Outer div collapses the visual footprint to the scaled size
-  const scaler = document.createElement('div');
-  scaler.style.cssText = `width:${previewSize}px; height:${previewSize}px; overflow:hidden; flex-shrink:0;`;
-  scaler.appendChild(clone);
+  // Force 200×200 — overrides any inline size board.js may have set
+  clone.setAttribute('width', '200');
+  clone.setAttribute('height', '200');
+  clone.style.cssText = 'display:block;width:200px;height:200px;';
+  clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
   wrap.innerHTML = '';
-  wrap.appendChild(scaler);
+  wrap.appendChild(clone);
 }
 
 function lobbyActiveSlots() {
