@@ -307,13 +307,13 @@ async function botDeleteCustom(botId, botName) {
 function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '') {
   const botCards = bots.length
     ? bots.map(b => `
-        <div class="bot-card${botIsPlanned(b) ? ' bot-card--planned' : ''}">
+        <div class="bot-card${botIsPlanned(b) ? ' bot-card--planned' : ''}${b.status === 'Custom' ? ' bot-card--custom' : ''}">
+          ${b.status === 'Custom' ? `<button class="bot-card-delete" title="Delete bot" onclick="botDeleteCustom('${b.id}', '${b.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>` : ''}
           <div class="bot-card-icon"><i class="fa-solid fa-robot"></i></div>
           <div class="bot-card-body">
             <div class="bot-card-title">
               <div class="bot-card-name">${b.name}</div>
               ${botStatusBadge(b)}
-              ${b.status === 'Custom' ? `<button class="bot-card-delete" title="Delete bot" onclick="botDeleteCustom('${b.id}', '${b.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
             <div class="bot-card-desc">${botCardDescription(b)}</div>
             ${b.focus ? `<div class="bot-card-focus">${b.focus}</div>` : ''}
