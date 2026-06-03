@@ -1,295 +1,117 @@
-# 🎲 Learn2Ludo
+# Learn2Ludo
 
-*A modular playground for board games, simulation, and AI experimentation.*
-
-Learn2Ludo combines:
-
-* 🧠 a Python game engine
-* 🌐 a lightweight web server
-* 🎮 a browser-based frontend
-* ⚙️ configurable gameplay rules
-* 🤖 reinforcement learning experimentation tools
-
-The project is designed to separate gameplay logic, visualization, experimentation, and AI workflows into clean modular layers.
+A browser-based Ludo game with a Python/FastAPI backend, vanilla JS frontend, configurable rules, heuristic bots, and an experimental reinforcement learning layer.
 
 ---
 
-# 🏛️ Historical Background
+## Prerequisites
 
-Ludo traces its origins to the ancient Indian game **Pachisi**, a cross-and-circle race game played for centuries across South Asia. The modern commercial version was patented in **England in 1896** by Alfred Coller under the name **Ludo**, derived from the Latin phrase:
-
-> *Ludo* — “I play”
-
-Over time, the game evolved into an international family of related designs, including:
-
-* 🇮🇳 **Pachisi**
-* 🇺🇸 **Parcheesi**
-* 🇩🇪 **Mensch ärgere Dich nicht**
-* 🇺🇸 **Sorry!**
-
-Each variation preserves the same core tension:
-
-* 🎲 chance from dice/cards
-* 🏁 racing toward home
-* ⚔️ capturing opponents
-* 🧠 tactical positioning
-* 😈 occasional chaos
-
-Despite its simple rules, Ludo creates surprisingly rich strategic and probabilistic behavior — making it a useful sandbox for:
-
-* AI experimentation,
-* reinforcement learning,
-* simulation,
-* and human–computer interaction.
-
-Digital versions of Ludo experienced a major resurgence during the 2020s, particularly in mobile and online multiplayer formats.
-
-*Source: Wikipedia – Ludo*
+| Tool | Version | Notes |
+|---|---|---|
+| Python | 3.12+ | |
+| pip | any | comes with Python |
+| Node.js / npm | any | only needed to compile SCSS |
+| Sass | 1.x | `npm install -g sass` |
 
 ---
 
-# 📦 Project Structure
+## Quick start
 
-```text id="a5nlw2"
-config/                     Runtime configuration and persistent data
-game/                       Core engine, rules, gameplay logic
-rl/                         Reinforcement learning environment
-static/                     Browser frontend (HTML, JS, CSS)
-server.py                   Backend API and web server
-```
+### 1. Clone
 
----
-
-# 🧩 Frontend Structure
-
-The frontend is modularized into reusable components.
-
-```text id="ecjlwm"
-static/
-├── components/             HTML fragments loaded dynamically
-├── css/                    Styling layers
-├── js/                     Frontend logic
-├── config/                 Frontend runtime settings
-├── index.html              Main frontend entrypoint
-└── theme.css               Global theme variables
-```
-
-Key frontend files:
-
-* `loader.js` → dynamically injects HTML components
-* `app.js` → game UI logic
-* `sound.js` → lightweight audio system
-* `board.css` → board rendering styles
-* `controls.css` → UI/control styling
-
----
-
-# 🚀 Quick Start
-
-## 1️⃣ Clone the repository
-
-```bash id="u6ktgq"
-git clone <repository-url>
+```bash
+git clone https://github.com/HI-IDN/learn2ludo.git
 cd learn2ludo
 ```
 
----
+### 2. Virtual environment
 
-## 2️⃣ Create a virtual environment
-
-### Windows (PowerShell)
-
-```powershell id="ywdrxz"
+```bash
+# Windows (PowerShell)
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-```
 
-### Windows (MSYS2 / Git Bash)
-
-```bash id="rhlcz7"
-python -m venv .venv
-source .venv/Scripts/activate
-```
-
-### Linux / macOS
-
-```bash id="we3q76"
+# macOS / Linux
 python -m venv .venv
 source .venv/bin/activate
 ```
 
----
+### 3. Install Python dependencies
 
-## 3️⃣ Install dependencies
-
-```bash id="8vt5es"
+```bash
 pip install -r requirements.txt
 ```
 
-Optional editable install:
+### 4. Run the server
 
-```bash id="8gwy0h"
-pip install -e .
+**Just run it:**
+```bash
+python -m uvicorn server:app --port 8000
 ```
 
----
-
-# 🌐 Running the Server
-
-Start the development server:
-
-```bash id="o6pyot"
-python server.py
+**Development mode** (auto-reloads on Python file changes):
+```bash
+python -m uvicorn server:app --reload --port 8000
 ```
 
-or directly with uvicorn:
+### 5. Open the app
 
-```bash id="4ut91x"
-uvicorn server:app --reload
 ```
-
----
-
-# 🎮 Open the App
-
-Open in browser:
-
-```text id="1lgm9v"
-http://localhost:8000/static/index.html
-```
-
-If using the root route:
-
-```text id="d5u79j"
 http://localhost:8000
 ```
 
 ---
 
-# 🎲 Gameplay Philosophy
+## CSS / SCSS
 
-Learn2Ludo is intentionally designed to support:
+Styles are written in SCSS and must be compiled to CSS. Run this after any style change:
 
-* classic Ludo rules,
-* configurable house rules,
-* deterministic simulation,
-* and AI experimentation.
-
-The engine separates:
-
-* rules,
-* gameplay state,
-* rendering,
-* and training infrastructure.
-
-This makes it easier to:
-
-* prototype rule variants,
-* benchmark bots,
-* replay games,
-* or test RL agents.
-
----
-
-# 💾 Saved Game JSON
-
-Saved games include a `history` array of replay events. Move events keep the existing flat history shape and include justification metadata:
-
-```json
-{
-  "type": "move",
-  "player": 0,
-  "piece": 2,
-  "pawn_id": "R3",
-  "from": 14,
-  "to": 18,
-  "justification": "This pawn is closest to home.",
-  "timestamp": "2026-06-01T10:32:00Z"
-}
+```bash
+sass static/styles/main.scss static/styles/css/main.css --style=compressed
 ```
 
-Moves without a player-entered reason store `"justification": null`. Older saved games without these fields still load; missing move metadata is normalized to `null` during replay/load handling.
+Install Sass once via npm if you don't have it:
 
----
-
-# ⚙️ Configurable Rules
-
-Examples of configurable gameplay settings include:
-
-* 🎨 player color assignment
-* 🔊 sound and animation settings
-* 🛡️ safe-square visualization
-* 🎞️ movement animation speed
-* 🎲 repeated-roll behavior
-* 🤖 bot/human player mixes
-
-The frontend persists many UI settings locally.
-
----
-
-# 🤖 Reinforcement Learning
-
-Experimental RL tooling lives in:
-
-```text id="p4dkb8"
-rl/
+```bash
+npm install -g sass
 ```
 
-The current structure is intended to support:
+---
 
-* scripted bots,
-* self-play,
-* policy learning,
-* evaluation environments,
-* and future training pipelines.
+## Project structure
+
+```
+config/         Runtime configuration and saved aggregate stats
+data/           Local game records (gitignored — full JSON per game)
+game/           Core engine, rules, session logic, bots
+rl/             Reinforcement learning environment
+static/
+  components/   HTML fragments loaded dynamically
+  js/           Frontend modules (app.js, lobby.js, board.js, …)
+  styles/       SCSS source and compiled CSS
+  index.html    Frontend entry point
+server.py       FastAPI backend — game API, static serving
+requirements.txt
+```
 
 ---
 
-# 🧪 Testing
+## Running tests
 
-Run all tests:
-
-```bash id="5w9qg6"
+```bash
 pytest
 ```
 
-Run specific modules:
-
-```bash id="x8yot7"
+Specific modules:
+```bash
 pytest game/test_engine.py
 pytest game/test_gameplay.py
 ```
 
 ---
 
-# 🧠 High-Level Architecture
+## Background
 
-```text id="0yzv4m"
-engine → gameplay → server API → browser UI
-                     ↘
-                       RL environment
-```
+Ludo descends from the ancient Indian game **Pachisi**. The modern commercial version was patented in England in 1896 under the name *Ludo* (Latin: "I play"). Related variants include Parcheesi, Mensch ärgere Dich nicht, and Sorry!.
 
----
-
-# 🎯 Goals
-
-Learn2Ludo is intended as:
-
-* a playable game,
-* a teaching/demo platform,
-* a simulation sandbox,
-* and an AI experimentation environment.
-
-The architecture favors:
-
-* modularity,
-* readability,
-* extensibility,
-* and iterative experimentation.
-
----
-
-# 📜 License
-
-Released under the [MIT License](LICENSE).
+Despite simple rules, Ludo produces rich probabilistic and strategic behaviour — making it a useful sandbox for AI experimentation, reinforcement learning, and human–computer interaction research.
