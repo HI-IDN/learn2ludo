@@ -1,0 +1,85 @@
+{
+  "bots": [
+    {
+      "id": "bot-4f565ceb",
+      "name": "TestBot",
+      "tldr": "A test bot",
+      "description": "This is a test description",
+      "weights": {
+        "ares_capture": 0,
+        "athena_safety": 0,
+        "hestia_progress": 0,
+        "hermes_spread": 0,
+        "hephaestus_blockade": 0,
+        "artemis_activation": 0
+      },
+      "template": "user-CDR",
+      "created_at": "2026-06-03T12:38:03.109Z",
+      "_is_deleted": true
+    },
+    {
+      "id": "bot-a61e342c",
+      "name": "Nemesis",
+      "tldr": "Aggressive retaliator",
+      "description": "Focuses on capturing opponents whenever possible.",
+      "weights": {
+        "ares_capture": 0.8,
+        "athena_safety": -0.2,
+        "hestia_progress": 0.6,
+        "hermes_spread": 0,
+        "hephaestus_blockade": 0,
+        "artemis_activation": 1
+      },
+      "template": "user-CDR",
+      "created_at": "2026-06-03T12:38:26.726Z"
+    },
+    {
+      "id": "bot-da507911",
+      "name": "Heracles",
+      "tldr": "Brute force progress",
+      "description": "Charges ahead with maximum progress weight.",
+      "weights": {
+        "ares_capture": 0.4,
+        "athena_safety": 0,
+        "hestia_progress": 0.8,
+        "hermes_spread": 0,
+        "hephaestus_blockade": 0.5,
+        "artemis_activation": 0
+      },
+      "template": "user-CDR",
+      "created_at": "2026-06-03T12:38:58.666Z"
+    },
+    {
+      "id": "bot-0f28e6c6",
+      "name": "asdf as",
+      "tldr": "sda fdsa",
+      "description": "asd asdf",
+      "weights": {
+        "ares_capture": 0,
+        "athena_safety": 0,
+        "hestia_progress": 0,
+        "hermes_spread": 0,
+        "hephaestus_blockade": 0,
+        "artemis_activation": 0
+      },
+      "template": "user-CDR",
+      "created_at": "2026-06-03T12:52:15.820Z"
+    },
+    {
+      "id": "bot-48f23567",
+      "name": "dasf",
+      "tldr": "adsf",
+      "description": "df",
+      "weights": {
+        "ares_capture": 0,
+        "athena_safety": 0,
+        "hestia_progress": 0,
+        "hermes_spread": 0.6,
+        "hephaestus_blockade": 0,
+        "artemis_activation": 0
+      },
+      "template": "user-defined-composite-dispatching-rule",
+      "created_at": "2026-06-03T12:52:23.335Z"
+    }
+  ]
+}
