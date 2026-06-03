@@ -79,7 +79,17 @@ function renderLobbySlots() {
             : ''}
           <div class="lobby-slot-avatar">
             ${botSvg
-              ? `<img src="${botSvg}" class="lobby-avatar-svg" alt="">`
+              ? (assignedBot.icon2
+                  ? `<span class="lobby-avatar-duo">
+                       <img src="${botSvg}" class="lobby-avatar-svg" alt="">
+                       <img src="${assignedBot.icon2}" class="lobby-avatar-svg lobby-avatar-svg--spear" alt="">
+                     </span>`
+                  : assignedBot.icon_overlay
+                    ? `<span class="lobby-avatar-badged">
+                         <img src="${botSvg}" class="lobby-avatar-svg" alt="">
+                         <i class="fa-solid ${assignedBot.icon_overlay} lobby-avatar-badge"></i>
+                       </span>`
+                    : `<img src="${botSvg}" class="lobby-avatar-svg" alt="">`)
               : `<i class="fa-solid ${avatarIcon} lobby-avatar-icon"></i>`}
           </div>
           <div class="lobby-slot-tag">${colorName}</div>

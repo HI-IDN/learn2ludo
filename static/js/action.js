@@ -41,7 +41,9 @@ function renderCurrentAction() {
     return;
   }
   if (_winners.length) {
-    if (avatarIcon) avatarIcon.className = 'action-avatar-icon fa-solid fa-crown';
+    if (avatarIcon) avatarIcon.hidden = true;
+    const laurel = document.getElementById('action-avatar-laurel');
+    if (laurel) laurel.hidden = false;
     cardTop.style.background = winnerBannerBackground(_winners);
     const names = winnerNamesForBanner(_winners);
     name.textContent = names.join(' & ') + (_winners.length > 1 ? ' win!' : ' wins!');
@@ -56,6 +58,9 @@ function renderCurrentAction() {
     return;
   }
   delete cardTop.dataset.winSoundPlayed;
+  if (avatarIcon) avatarIcon.hidden = false;
+  const laurel = document.getElementById('action-avatar-laurel');
+  if (laurel) laurel.hidden = true;
 
   name.textContent = `${winnerPlayerName(cp)}'s turn`;
 

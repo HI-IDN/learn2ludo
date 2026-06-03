@@ -144,6 +144,39 @@
   opacity: 0.9;
 }
 
+// Ares: soldier + spear side by side
+.lobby-avatar-duo {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  .lobby-avatar-svg { width: 26px; height: 26px; }
+  .lobby-avatar-svg--spear { width: 18px; height: 18px; opacity: 0.75; }
+}
+
+// Hephaestus / Apollo: SVG with FA badge overlay at lower-right
+.lobby-avatar-badged {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+
+  .lobby-avatar-svg { width: 34px; height: 34px; }
+}
+
+.lobby-avatar-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -4px;
+  font-size: 11px;
+  color: #fff;
+  -webkit-text-stroke: 1.5px rgba(0,0,0,0.55);
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.6));
+}
+
 // ── Icon picker popover ───────────────────────────────────────────────────────
 
 #icon-picker-popover {

@@ -24,6 +24,8 @@ submitted.</p>
 <p><strong>Ethics approval:</strong> This study is conducted in accordance with the University of
 Iceland's research ethics guidelines. Questions about your rights as a participant may be directed to
 the research team.</p>
+<p><a href="https://english.hi.is/about-ui/policies/policies-ui/research-data-policy" target="_blank" rel="noopener">
+University of Iceland Research Data Policy ↗</a></p>
 `;
 
 // ── Storage ──────────────────────────────────────────────────────────────────

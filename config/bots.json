@@ -6,7 +6,7 @@
       "type": "baseline",
       "tldr": "Goddess of Discord",
       "description": "Chooses from valid moves without using strategy.",
-      "icon": "/static/icons/spear.svg",
+      "icon": "/static/icons/goddess.svg",
       "status": "Available"
     },
     {
@@ -16,6 +16,7 @@
       "tldr": "God of War",
       "description": "Looks for chances to send opponent pawns back to their yard.",
       "icon": "/static/icons/soldier.svg",
+      "icon2": "/static/icons/spear.svg",
       "status": "Available"
     },
     {
@@ -33,7 +34,7 @@
       "type": "SDR",
       "tldr": "Goddess of the Hearth",
       "description": "Brings pawns home as directly as possible.",
-      "icon": "/static/icons/laurel.svg",
+      "icon": "/static/icons/goddess.svg",
       "status": "Available"
     },
     {
@@ -51,7 +52,8 @@
       "type": "SDR",
       "tldr": "God of the Forge",
       "description": "Builds defensive stacks with friendly pawns.",
-      "icon": "/static/icons/trident.svg",
+      "icon": "/static/icons/god.svg",
+      "icon_overlay": "fa-dumbbell",
       "status": "Available"
     },
     {
@@ -60,7 +62,7 @@
       "type": "SDR",
       "tldr": "Goddess of the Hunt",
       "description": "Gets pawns out of the yard whenever possible.",
-      "icon": "/static/icons/pegasus.svg",
+      "icon": "/static/icons/goddess.svg",
       "status": "Available"
     },
     {
@@ -70,6 +72,7 @@
       "tldr": "God of Order",
       "description": "Balanced weighted bot combining capture, safety, progress, and activation.",
       "icon": "/static/icons/god.svg",
+      "icon_overlay": "fa-scale-balanced",
       "status": "Template"
     }
   ]
