@@ -42,8 +42,7 @@ function getBotRegistry() { return BOT_REGISTRY; }
 function getSelectableBots() {
   return getOrderedBotRegistry().filter(b =>
     b.selectable !== false &&
-    b.implemented !== false &&
-    (b.id !== 'user-weighted' || typeof userBotIsAvailable !== 'function' || userBotIsAvailable())
+    b.implemented !== false
   );
 }
 

@@ -1,5 +1,3 @@
-const USER_BOT_ID = 'user-weighted';
-
 const USER_BOT_WEIGHT_DEFS = [
   {
     key: 'ares_capture',
@@ -57,31 +55,7 @@ function getUserBotWeights() {
   };
 }
 
-function userBotIsAvailable() {
-  return settings?.user_bot_deleted !== true;
-}
-
 function renderBotBuilderCard() {
-  if (!userBotIsAvailable()) {
-    return `
-      <div class="bot-card bot-builder-card bot-builder-card--empty">
-        <div class="bot-card-icon"><i class="fa-solid fa-sliders"></i></div>
-        <div class="bot-card-body">
-          <div class="bot-card-title">
-            <div class="bot-card-name">Your Bot</div>
-            <span class="bot-card-status">Deleted</span>
-          </div>
-          <div class="bot-card-desc">Start a new slider draft when you are ready to build another CDR.</div>
-          <div class="bot-builder-actions">
-            <button class="btn btn-sm btn-primary" type="button" onclick="botBuilderCreate()">
-              <i class="fa-solid fa-plus"></i>
-              New
-            </button>
-          </div>
-        </div>
-      </div>`;
-  }
-
   const weights = getUserBotWeights();
   const rows = USER_BOT_WEIGHT_DEFS.map(def => {
     const value = weights[def.key] ?? 0;
@@ -119,10 +93,6 @@ function renderBotBuilderCard() {
         <div class="bot-builder-summary" id="bot-builder-summary">${userBotSummary(weights)}</div>
         <div class="bot-builder-controls">${rows}</div>
         <div class="bot-builder-actions">
-          <button class="btn btn-sm btn-danger" type="button" onclick="botBuilderDelete()">
-            <i class="fa-solid fa-trash"></i>
-            Delete
-          </button>
           <button class="btn btn-sm" type="button" onclick="botBuilderReset()">
             <i class="fa-solid fa-rotate-left"></i>
             Reset
@@ -133,7 +103,6 @@ function renderBotBuilderCard() {
 }
 
 function botBuilderSetWeight(key, rawValue) {
-  settings.user_bot_deleted = false;
   settings.user_bot_weights = getUserBotWeights();
   settings.user_bot_weights[key] = Number(rawValue) || 0;
   persistSettings();
@@ -141,31 +110,9 @@ function botBuilderSetWeight(key, rawValue) {
 }
 
 function botBuilderReset() {
-  settings.user_bot_deleted = false;
   settings.user_bot_weights = defaultUserBotWeights();
   persistSettings();
   renderBotsPage();
-}
-
-function botBuilderDelete() {
-  settings.user_bot_deleted = true;
-  delete settings.user_bot_weights;
-  if (settings.bot_ids) {
-    Object.keys(settings.bot_ids).forEach(playerIdx => {
-      if (settings.bot_ids[playerIdx] === USER_BOT_ID) delete settings.bot_ids[playerIdx];
-    });
-  }
-  persistSettings();
-  renderBotsPage();
-  if (typeof renderLobbySlots === 'function') renderLobbySlots();
-}
-
-function botBuilderCreate() {
-  settings.user_bot_deleted = false;
-  settings.user_bot_weights = defaultUserBotWeights();
-  persistSettings();
-  renderBotsPage();
-  if (typeof renderLobbySlots === 'function') renderLobbySlots();
 }
 
 function botBuilderRefreshValues() {
