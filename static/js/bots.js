@@ -283,9 +283,15 @@ function renderBotsPage() {
 
   wrap.innerHTML = `
     ${botSection('Baseline', 'No strategy — useful for comparison', baseline)}
-    ${botSection('Heuristics', 'Rule-based opponents — no training required', heuristics)}
-    ${botSection('Build-a-bot', 'Combine heuristic features with sliders to make a weighted CDR', weighted.filter(b => b.id !== 'user-weighted'), true, botBuilder)}
-    ${botSection('Trained Models', 'RL agents produced by the Train tab', trained, true)}
+    <div class="bots-group">
+      <div class="bots-group-header">
+        <div class="bots-group-title">Heuristics</div>
+        <div class="bots-group-desc">A heuristic bot follows a hand-crafted dispatching rule: given the legal moves, it scores each one and picks the best. No learning involved — the rule is written by a human. Rules can be simple (one objective) or composite (several objectives weighted together).</div>
+      </div>
+      ${botSection('Simple Priority Dispatching Rules', 'Hand-crafted — single objective', heuristics)}
+      ${botSection('Composite Dispatching Rules', 'Combine simple rules with weights to shape a new strategy', weighted.filter(b => b.id !== 'user-weighted'), true, botBuilder)}
+    </div>
+    ${botSection('Trained Models', 'RL agents — the computer learns the dispatching rule from experience', trained, true)}
   `;
 }
 
