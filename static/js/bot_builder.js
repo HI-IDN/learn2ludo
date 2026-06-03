@@ -1,41 +1,41 @@
 const USER_BOT_WEIGHT_DEFS = [
   {
-    key: 'ares_capture',
+    key: 'capture',
     label: 'Ares',
     rule: 'Capture',
     description: 'Prefer moves that send an opponent pawn back to the yard.',
     defaultValue: 0,
   },
   {
-    key: 'athena_safety',
+    key: 'safety',
     label: 'Athena',
     rule: 'Safety',
     description: 'Prefer moves that reduce danger or land in protected places.',
     defaultValue: 0,
   },
   {
-    key: 'hestia_progress',
+    key: 'progress',
     label: 'Hestia',
     rule: 'Progress',
     description: 'Prefer moves that bring pawns closer to home.',
     defaultValue: 0,
   },
   {
-    key: 'hermes_spread',
+    key: 'spread',
     label: 'Hermes',
     rule: 'Spread',
     description: 'Prefer moves that keep friendly pawns less clustered.',
     defaultValue: 0,
   },
   {
-    key: 'hephaestus_blockade',
+    key: 'blockade',
     label: 'Hephaestus',
     rule: 'Blockade',
     description: 'Prefer moves that land on friendly pawns.',
     defaultValue: 0,
   },
   {
-    key: 'artemis_activation',
+    key: 'activation',
     label: 'Artemis',
     rule: 'Activation',
     description: 'Prefer moves that bring new pawns out of the yard.',
@@ -153,7 +153,7 @@ function renderBotBuilderCard() {
                 type="button"
                 onclick="botBuilderSave()"
                 ${saveValid ? '' : 'disabled'}
-                title="${saveValid ? 'Save this bot configuration' : 'Fill in Name, TLDR, and Description to save'}"
+                title="${botBuilderSaveTooltip()}"
               >
                 <i class="fa-solid fa-floppy-disk"></i>
                 Save Bot
@@ -170,6 +170,7 @@ function botBuilderSetWeight(key, rawValue) {
   settings.user_bot_weights[key] = normalizeBotWeight(rawValue);
   persistSettings();
   botBuilderRefreshValues();
+  botBuilderRefreshSaveBtn();
 }
 
 function getUserBotDraft() {
@@ -183,7 +184,21 @@ function getUserBotDraft() {
 
 function botBuilderDraftValid(draft) {
   draft = draft || getUserBotDraft();
-  return !!(draft.name.trim() && draft.tldr.trim() && draft.description.trim());
+  if (!draft.name.trim() || !draft.tldr.trim() || !draft.description.trim()) return false;
+  const weights = getUserBotWeights();
+  const nonzero = USER_BOT_WEIGHT_DEFS.filter(d => Math.abs(weights[d.key] || 0) > 0.001);
+  return nonzero.length >= 2;
+}
+
+function botBuilderSaveTooltip() {
+  const draft = getUserBotDraft();
+  if (!draft.name.trim() || !draft.tldr.trim() || !draft.description.trim())
+    return 'Fill in Name, TLDR, and Description to save';
+  const weights = getUserBotWeights();
+  const nonzero = USER_BOT_WEIGHT_DEFS.filter(d => Math.abs(weights[d.key] || 0) > 0.001);
+  if (nonzero.length === 0) return 'Set at least two weights — all-zero is just Eris';
+  if (nonzero.length === 1) return 'Set at least two weights — a single feature duplicates an existing bot';
+  return 'Save this bot configuration';
 }
 
 function botBuilderSetDraftName(value) {
@@ -214,7 +229,7 @@ function botBuilderRefreshSaveBtn() {
   if (!btn) return;
   const valid = botBuilderDraftValid();
   btn.disabled = !valid;
-  btn.title = valid ? 'Save this bot configuration' : 'Fill in Name, TLDR, and Description to save';
+  btn.title = botBuilderSaveTooltip();
 }
 
 async function botBuilderSave() {
@@ -274,15 +289,18 @@ function botBuilderDraftDescriptionText(draft) {
 
 function buildSavedUserBot() {
   const draft = getUserBotDraft();
-  const createdAt = new Date().toISOString();
+  const allWeights = getUserBotWeights();
+  const weights = Object.fromEntries(
+    Object.entries(allWeights).filter(([, v]) => Math.abs(v) > 0.001)
+  );
   return {
     id: uniqueUserBotId(),
-    name: draft.name.trim() || null,
-    tldr: draft.tldr.trim() || null,
-    description: draft.description.trim() || null,
+    name: draft.name.trim(),
+    tldr: draft.tldr.trim(),
+    description: draft.description.trim(),
     template: 'user-CDR',
-    weights: getUserBotWeights(),
-    created_at: createdAt,
+    weights,
+    created_at: new Date().toISOString(),
   };
 }
 

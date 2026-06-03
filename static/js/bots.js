@@ -96,12 +96,12 @@ function _userWeightedLocalScore(f) {
   const weights = typeof getUserBotWeights === 'function' ? getUserBotWeights() : {};
   const athenaScore = (f.riskReduction * 0.45) + (f.safety * 0.35) + ((1 - f.risk) * 0.20);
   return (
-    (f.capture * (weights.ares_capture ?? 0)) +
-    (athenaScore * (weights.athena_safety ?? 0)) +
-    (f.progress * (weights.hestia_progress ?? 0)) +
-    (f.spread * (weights.hermes_spread ?? 0)) +
-    (f.blockade * (weights.hephaestus_blockade ?? 0)) +
-    (f.activation * (weights.artemis_activation ?? 0))
+    (f.capture * (weights.capture ?? 0)) +
+    (athenaScore * (weights.safety ?? 0)) +
+    (f.progress * (weights.progress ?? 0)) +
+    (f.spread * (weights.spread ?? 0)) +
+    (f.blockade * (weights.blockade ?? 0)) +
+    (f.activation * (weights.activation ?? 0))
   );
 }
 

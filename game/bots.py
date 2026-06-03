@@ -356,12 +356,10 @@ class ArtemisBot(BotPolicy):
 
 
 APOLLO_WEIGHTS = {
-    "ares_capture": 0.30,
-    "athena_safety": 0.35,
-    "hestia_progress": 0.25,
-    "hermes_spread": 0.0,
-    "hephaestus_blockade": 0.0,
-    "artemis_activation": 0.10,
+    "capture": 0.30,
+    "safety": 0.35,
+    "progress": 0.25,
+    "activation": 0.10,
 }
 
 
@@ -378,12 +376,12 @@ def apollo_score(features: MoveFeatures, weights: dict | None = None) -> float:
         ((1.0 - features.risk) * 0.20)
     )
     return (
-        (features.capture * weights.get("ares_capture", 0.0)) +
-        (athena_score * weights.get("athena_safety", 0.0)) +
-        (features.progress * weights.get("hestia_progress", 0.0)) +
-        (features.spread * weights.get("hermes_spread", 0.0)) +
-        (features.blockade * weights.get("hephaestus_blockade", 0.0)) +
-        (features.activation * weights.get("artemis_activation", 0.0))
+        (features.capture * weights.get("capture", 0.0)) +
+        (athena_score * weights.get("safety", 0.0)) +
+        (features.progress * weights.get("progress", 0.0)) +
+        (features.spread * weights.get("spread", 0.0)) +
+        (features.blockade * weights.get("blockade", 0.0)) +
+        (features.activation * weights.get("activation", 0.0))
     )
 
 
@@ -398,17 +396,17 @@ class ApolloBot(BotPolicy):
 
     def choose_move(self, valid_moves, game_state=None):
         match _single_active_weight(self.weights):
-            case "ares_capture":
+            case "capture":
                 return REGISTRY["ares"].choose_move(valid_moves, game_state)
-            case "athena_safety":
+            case "safety":
                 return REGISTRY["athena"].choose_move(valid_moves, game_state)
-            case "hestia_progress":
+            case "progress":
                 return REGISTRY["hestia"].choose_move(valid_moves, game_state)
-            case "hermes_spread":
+            case "spread":
                 return REGISTRY["hermes"].choose_move(valid_moves, game_state)
-            case "hephaestus_blockade":
+            case "blockade":
                 return REGISTRY["hephaestus"].choose_move(valid_moves, game_state)
-            case "artemis_activation":
+            case "activation":
                 return REGISTRY["artemis"].choose_move(valid_moves, game_state)
         return choose_by_feature(valid_moves, game_state, lambda _move, f: apollo_score(f, self.weights))
 

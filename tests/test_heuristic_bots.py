@@ -148,7 +148,7 @@ def test_apollo_accepts_custom_weight_combinations():
     game_state = state([
         {"index": 0, "pieces": [piece(0, "R1", -1, None, in_yard=True), piece(1, "R2", 30, 30)]},
     ])
-    bot = ApolloBot({"hestia_progress": 1.0, "artemis_activation": -1.0})
+    bot = ApolloBot({"progress": 1.0, "activation": -1.0})
     move = bot.choose_move([
         {"piece_idx": 0, "pawn_id": "R1", "target": 0},
         {"piece_idx": 1, "pawn_id": "R2", "target": 36},
@@ -161,7 +161,7 @@ def test_apollo_single_weight_dispatches_like_matching_sdr():
     cases = [
         (
             "ares",
-            "ares_capture",
+            "capture",
             state([
                 {"index": 0, "pieces": [piece(0, "R1", 2, 2), piece(1, "R2", 30, 30)]},
                 {"index": 1, "pieces": [piece(0, "G1", 44, 5)]},
@@ -173,7 +173,7 @@ def test_apollo_single_weight_dispatches_like_matching_sdr():
         ),
         (
             "athena",
-            "athena_safety",
+            "safety",
             state([
                 {"index": 0, "pieces": [piece(0, "R1", 4, 4), piece(1, "R2", -1, None, in_yard=True)]},
                 {"index": 1, "pieces": [piece(0, "G1", 40, 1)]},
@@ -185,7 +185,7 @@ def test_apollo_single_weight_dispatches_like_matching_sdr():
         ),
         (
             "hestia",
-            "hestia_progress",
+            "progress",
             state([
                 {"index": 0, "pieces": [piece(0, "R1", 30, 30), piece(1, "R2", 5, 5)]},
             ]),
@@ -196,7 +196,7 @@ def test_apollo_single_weight_dispatches_like_matching_sdr():
         ),
         (
             "hermes",
-            "hermes_spread",
+            "spread",
             state([
                 {"index": 0, "pieces": [piece(0, "R1", 10, 10), piece(1, "R2", 11, 11)]},
             ]),
@@ -207,7 +207,7 @@ def test_apollo_single_weight_dispatches_like_matching_sdr():
         ),
         (
             "hephaestus",
-            "hephaestus_blockade",
+            "blockade",
             state([
                 {"index": 0, "pieces": [piece(0, "R1", 8, 8), piece(1, "R2", 4, 4)]},
             ]),
@@ -218,7 +218,7 @@ def test_apollo_single_weight_dispatches_like_matching_sdr():
         ),
         (
             "artemis",
-            "artemis_activation",
+            "activation",
             state([
                 {"index": 0, "pieces": [piece(0, "R1", -1, None, in_yard=True), piece(1, "R2", 8, 8)]},
             ]),
@@ -238,14 +238,14 @@ def test_apollo_single_weight_dispatches_like_matching_sdr():
 def test_apollo_missing_weights_default_to_zero():
     features = MoveFeatures(capture=1.0, progress=0.5, activation=1.0)
 
-    assert apollo_score(features, {"hestia_progress": 2.0}) == 1.0
+    assert apollo_score(features, {"progress": 2.0}) == 1.0
 
 
 def test_user_weighted_bot_uses_custom_slider_weights():
     game_state = state([
         {"index": 0, "pieces": [piece(0, "R1", 10, 10), piece(1, "R2", 11, 11)]},
     ])
-    bot = UserWeightedBot({"hermes_spread": 100.0})
+    bot = UserWeightedBot({"spread": 100.0})
     move = bot.choose_move([
         {"piece_idx": 1, "pawn_id": "R2", "target": 12},
         {"piece_idx": 1, "pawn_id": "R2", "target": 30},
