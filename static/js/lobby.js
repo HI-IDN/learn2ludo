@@ -60,7 +60,10 @@ function renderLobbySlots() {
     const isHuman    = type === 'human';
     const profile    = isActive && isHuman && typeof getSlotProfile === 'function' ? getSlotProfile(playerIdx) : null;
     const canRemove  = isActive && active.length > 2;
-    const avatarIcon = !isActive || !isHuman
+    const botRegistry = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+    const assignedBot = !isHuman && isActive ? botRegistry.find(b => b.id === settings.bot_ids?.[playerIdx]) : null;
+    const botSvg      = assignedBot?.icon || null;
+    const avatarIcon  = !isActive || !isHuman
       ? (isActive ? 'fa-robot' : 'fa-user')
       : (profile ? (typeof getPlayerIcon === 'function' ? getPlayerIcon(playerIdx) : 'fa-face-smile') : 'fa-user');
 
@@ -75,7 +78,9 @@ function renderLobbySlots() {
                </button>`
             : ''}
           <div class="lobby-slot-avatar">
-            <i class="fa-solid ${avatarIcon} lobby-avatar-icon"></i>
+            ${botSvg
+              ? `<img src="${botSvg}" class="lobby-avatar-svg" alt="">`
+              : `<i class="fa-solid ${avatarIcon} lobby-avatar-icon"></i>`}
           </div>
           <div class="lobby-slot-tag">${colorName}</div>
         </div>
@@ -165,8 +170,10 @@ function lobbySetBotId(slotIdx, botId) {
   const playerIdx = lobbyActiveSlots().indexOf(slotIdx);
   if (playerIdx === -1) return;
   settings.bot_ids = settings.bot_ids || {};
-  settings.bot_ids[playerIdx] = botId;
+  if (botId) settings.bot_ids[playerIdx] = botId;
+  else delete settings.bot_ids[playerIdx];
   persistSettings();
+  renderLobbySlots();
 }
 
 function lobbySetName(slotIdx, v) {

@@ -136,6 +136,14 @@
   color: rgba(255,255,255,0.9);
 }
 
+.lobby-avatar-svg {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
 // ── Icon picker popover ───────────────────────────────────────────────────────
 
 #icon-picker-popover {
