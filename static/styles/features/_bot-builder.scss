@@ -32,7 +32,7 @@
 
 .bot-builder-row {
   display: grid;
-  grid-template-columns: minmax(96px, 132px) minmax(120px, 1fr) 52px;
+  grid-template-columns: minmax(96px, 132px) minmax(120px, 1fr) 82px;
   align-items: center;
   gap: 10px;
 }
@@ -61,11 +61,13 @@
   accent-color: $color-primary;
 }
 
-.bot-builder-value {
+.bot-builder-number {
   color: $color-text-2;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  padding: 5px 6px;
+  text-align: center;
+  width: 82px;
 }
 
 .bot-builder-actions {
@@ -81,7 +83,7 @@
   }
 
   .bot-builder-row {
-    grid-template-columns: 1fr 42px;
+    grid-template-columns: 1fr 82px;
   }
 
   .bot-builder-slider {

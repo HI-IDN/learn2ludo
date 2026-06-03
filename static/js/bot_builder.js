@@ -67,6 +67,7 @@ function renderBotBuilderCard() {
         </span>
         <input
           class="bot-builder-slider"
+          id="bot-builder-slider-${def.key}"
           type="range"
           min="-1"
           max="1"
@@ -74,7 +75,17 @@ function renderBotBuilderCard() {
           value="${value.toFixed(2)}"
           oninput="botBuilderSetWeight('${def.key}', this.value)"
         >
-        <output class="bot-builder-value" id="bot-builder-value-${def.key}">${formatBotWeight(value)}</output>
+        <input
+          class="bot-builder-number"
+          id="bot-builder-number-${def.key}"
+          type="number"
+          min="-1"
+          max="1"
+          step="0.05"
+          value="${value.toFixed(2)}"
+          oninput="botBuilderSetWeight('${def.key}', this.value)"
+          onblur="botBuilderRefreshValues()"
+        >
       </label>`;
   }).join('');
 
@@ -88,7 +99,7 @@ function renderBotBuilderCard() {
         </div>
         <div class="bot-card-desc">User CDR — Apollo's weight values, ready to adjust.</div>
         <div class="bot-builder-help">
-          Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
+          Each weight must be between -1.00 and +1.00. Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
         </div>
         <div class="bot-builder-summary" id="bot-builder-summary">${userBotSummary(weights)}</div>
         <div class="bot-builder-controls">${rows}</div>
@@ -104,7 +115,7 @@ function renderBotBuilderCard() {
 
 function botBuilderSetWeight(key, rawValue) {
   settings.user_bot_weights = getUserBotWeights();
-  settings.user_bot_weights[key] = Number(rawValue) || 0;
+  settings.user_bot_weights[key] = normalizeBotWeight(rawValue);
   persistSettings();
   botBuilderRefreshValues();
 }
@@ -119,8 +130,10 @@ function botBuilderRefreshValues() {
   const weights = getUserBotWeights();
   USER_BOT_WEIGHT_DEFS.forEach(def => {
     const value = weights[def.key] ?? 0;
-    const out = document.getElementById(`bot-builder-value-${def.key}`);
-    if (out) out.textContent = formatBotWeight(value);
+    const slider = document.getElementById(`bot-builder-slider-${def.key}`);
+    const number = document.getElementById(`bot-builder-number-${def.key}`);
+    if (slider) slider.value = value.toFixed(2);
+    if (number) number.value = value.toFixed(2);
   });
   const summary = document.getElementById('bot-builder-summary');
   if (summary) summary.textContent = userBotSummary(weights);
@@ -129,6 +142,12 @@ function botBuilderRefreshValues() {
 function formatBotWeight(value) {
   const numeric = Number(value || 0);
   return `${numeric >= 0 ? '+' : ''}${numeric.toFixed(2)}`;
+}
+
+function normalizeBotWeight(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(-1, Math.min(1, numeric));
 }
 
 function userBotSummary(weights = getUserBotWeights()) {
