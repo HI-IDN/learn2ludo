@@ -410,6 +410,17 @@ def root():
     return FileResponse(STATIC_DIR / "index.html")
 
 
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class NoCacheStaticMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/static/js/") or request.url.path.startswith("/static/styles/"):
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+        return response
+
+app.add_middleware(NoCacheStaticMiddleware)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 

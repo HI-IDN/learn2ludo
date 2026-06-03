@@ -429,6 +429,7 @@ async function newGame(startingPlayer=0){
   if(typeof resetMoveJustificationFrequency==='function') resetMoveJustificationFrequency();
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture();
   if(typeof resetBotState==='function') resetBotState();
+  if(typeof resetPostGame==='function') resetPostGame();
   const payload=buildNewGamePayload();
   payload.config.starting_player=startingPlayer;
   try{
@@ -726,6 +727,7 @@ function renderGame(){
   }
   if(_lastTurnPlayer!==_cp) _lastTurnPlayer=_cp;
   drawBoard(); renderCurrentAction(); renderPlayers(); renderPawnOptions(); renderMoveHistory(); updateSaveGameButton();
+  if(typeof maybeShowPostGame==='function') maybeShowPostGame();
   captureLiveTimelineSnapshot();
   if(typeof isReplayActive==='function'&&isReplayActive()){
     if(typeof updateReplayControls==='function') updateReplayControls();
@@ -761,7 +763,8 @@ function renderPlayers(){
     const timeStr=_gameStartTime?`<span class="player-order-dot"> · </span><span class="player-order-time">${_formatPlayerTime(liveMs)}</span>`:'';
     const sortedPieces=[...p.pieces].sort((a,b)=>{const r=q=>q.finished?2:!q.in_yard?1:0;return r(b)-r(a);});
     const nameTitle=gamePlayerNameTitle(p.index);
-    return `<div class="player-order-row-min${isCurrent?' current':''}"><i class="fa-solid ${gamePlayerType(p.index)!=='human'?'fa-robot':'fa-user'}" style="color:${col}"></i><div><span class="player-order-name" ${nameTitle?`title="${escapeAttr(nameTitle)}"`:''}>${gamePlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}${timeStr}</div><div class="player-order-pawns">${sortedPieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
+    const _picon=gamePlayerType(p.index)!=='human'?'fa-robot':(typeof getPlayerIcon==='function'?getPlayerIcon(p.index):'fa-face-smile');
+    return `<div class="player-order-row-min${isCurrent?' current':''}"><i class="fa-solid ${_picon}" style="color:${col}"></i><div><span class="player-order-name" ${nameTitle?`title="${escapeAttr(nameTitle)}"`:''}>${gamePlayerName(p.index)}</span><span class="player-order-dot"> · </span><span class="player-order-color">${p.color}</span>${ordinal}${timeStr}</div><div class="player-order-pawns">${sortedPieces.map(pc=>`<span class="player-order-pawn${pc.finished?' done':(!pc.in_yard?' active':'')}" style="--player-color:${col}"></span>`).join('')}</div></div>`;
   }).join('');
   // Round subtitle
   const sub=document.getElementById('players-subtitle');
@@ -785,7 +788,7 @@ function renderPlayerSlots() {
       const colorName = PLAYER_COLORS[slot] || 'blue';
       const color = COLORS[colorName] || COLORS.blue;
       const type = getPlayerType(i);
-      const icon = type !== 'human' ? 'fa-robot' : 'fa-user';
+      const icon = type !== 'human' ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(i) : 'fa-face-smile');
       const options = PLAYER_COLORS.slice(0, settings.board_yard_count || 4)
         .map((name, idx) => `<option value="${idx}" ${idx === slot ? 'selected' : ''}>${name}</option>`).join('');
       return `

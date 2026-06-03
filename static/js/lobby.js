@@ -71,8 +71,10 @@ function renderLobbySlots() {
                  <i class="fa-solid fa-xmark"></i>
                </button>`
             : ''}
-          <div class="lobby-slot-avatar">
-            <i class="fa-solid ${isActive && !isHuman ? 'fa-robot' : 'fa-user'} lobby-avatar-icon"></i>
+          <div class="lobby-slot-avatar${isActive && isHuman ? ' lobby-avatar-clickable' : ''}"
+               ${isActive && isHuman ? `onclick="event.stopPropagation(); openIconPicker(${playerIdx}, this)"` : ''}>
+            <i class="fa-solid ${isActive && !isHuman ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(playerIdx) : 'fa-face-smile')} lobby-avatar-icon"></i>
+            ${isActive && isHuman ? `<span class="lobby-avatar-hint"><i class="fa-solid fa-pen"></i></span>` : ''}
           </div>
           <div class="lobby-slot-tag">${colorName}</div>
         </div>

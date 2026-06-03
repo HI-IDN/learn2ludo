@@ -30,7 +30,7 @@ function renderCurrentAction() {
   cardTop.classList.remove('idle');
   cardTop.style.backgroundImage = '';
   cardTop.style.background = color;
-  if (avatarIcon) avatarIcon.className = `action-avatar-icon fa-solid ${actionPlayerType(cp) !== 'human' ? 'fa-robot' : 'fa-user'}`;
+  if (avatarIcon) avatarIcon.className = `action-avatar-icon fa-solid ${actionPlayerType(cp) !== 'human' ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(cp) : 'fa-face-smile')}`;
 
   const _winners = winnerPlayersForBanner();
   if (tentativeReplayWinner) {

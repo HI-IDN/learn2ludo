@@ -105,11 +105,71 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+
+  &.lobby-avatar-clickable {
+    cursor: pointer;
+    &:hover { background: rgba(0,0,0,0.38); }
+    &:hover .lobby-avatar-hint { opacity: 1; }
+  }
+}
+
+.lobby-avatar-hint {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  font-size: 9px;
+  color: #fff;
 }
 
 .lobby-avatar-icon {
   font-size: 26px;
   color: rgba(255,255,255,0.9);
+}
+
+// ── Icon picker popover ───────────────────────────────────────────────────────
+
+#icon-picker-popover {
+  position: fixed;
+  z-index: 1000;
+  background: $color-bg-alt;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+  padding: 10px;
+}
+
+.icon-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  width: 216px;
+}
+
+.icon-pick-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background: $color-bg;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  transition: background 0.1s, border-color 0.1s;
+
+  &:hover { background: $color-bg-raised; border-color: $border-medium; }
+  &.selected { border-color: $color-primary; background: $accent-tint; }
 }
 
 .lobby-slot-tag {

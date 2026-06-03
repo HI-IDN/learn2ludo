@@ -80,7 +80,7 @@ function _promptReflection(players, idx) {
   const color  = gameState.players[playerIdx]?.color || 'blue';
   const name   = gamePlayerName(playerIdx);
   const hex    = COLORS[color] || '#888';
-  const icon   = isBot ? 'fa-robot' : 'fa-user';
+  const icon   = isBot ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(playerIdx) : 'fa-face-smile');
   const title  = isBot ? `How did ${escapeAttr(name)} play?` : 'How did you play?';
   const sub    = isBot ? `Rate this bot's play before seeing the stats.` : 'Rate yourself before seeing the stats.';
   const btnLbl = idx < players.length - 1 ? 'Next' : 'See stats';
@@ -273,7 +273,12 @@ function _buildStatTable(stats, captureMatrix, blockMatrix) {
 
   const header = `<div class="pg-stat-row pg-stat-head">
     <span></span><span class="pg-exp-col">Exp.</span>
-    ${stats.map(s=>`<span style="color:${COLORS[s.color]||'#888'}">${escapeAttr(gamePlayerName(s.player))}</span>`).join('')}
+    ${stats.map(s => {
+      const ic = typeof playerIconClass==='function' ? playerIconClass(s.player) : 'fa-face-smile';
+      return `<span style="color:${COLORS[s.color]||'#888'}" title="${escapeAttr(gamePlayerName(s.player))}">
+        <i class="fa-solid ${ic}"></i>
+      </span>`;
+    }).join('')}
   </div>`;
 
   const sep = label => `<div class="pg-stat-sep"><span>${label}</span></div>`;
