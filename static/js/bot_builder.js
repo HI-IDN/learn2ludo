@@ -99,7 +99,7 @@ function renderBotBuilderCard() {
         <div class="bot-builder-layout">
           <div class="bot-builder-main">
             <div class="bot-card-title">
-              <div class="bot-card-name" id="bot-builder-draft-name">${escapeBotText(draft.name)}</div>
+              <div class="bot-card-name" id="bot-builder-draft-name">${escapeBotText(draft.name || 'Build-a-bot')}</div>
               <span class="bot-card-status">Custom</span>
             </div>
             <div class="bot-card-desc" id="bot-builder-draft-desc">${escapeBotText(botBuilderDraftDescriptionText(draft))}</div>
@@ -118,28 +118,31 @@ function renderBotBuilderCard() {
             <label class="bot-builder-field bot-builder-field--name">
               <span>Name</span>
               <input
-                type="text"
-                maxlength="18"
-                value="${escapeBotText(draft.name)}"
-                oninput="botBuilderSetDraftName(this.value)"
-              >
+              type="text"
+              maxlength="18"
+              placeholder="My Bot"
+              value="${escapeBotText(draft.name)}"
+              oninput="botBuilderSetDraftName(this.value)"
+            >
             </label>
             <label class="bot-builder-field bot-builder-field--tldr">
               <span>TLDR</span>
               <input
-                type="text"
-                maxlength="32"
-                value="${escapeBotText(draft.tldr)}"
-                oninput="botBuilderSetDraftTldr(this.value)"
-              >
+              type="text"
+              maxlength="32"
+              placeholder="User-defined CDR"
+              value="${escapeBotText(draft.tldr)}"
+              oninput="botBuilderSetDraftTldr(this.value)"
+            >
             </label>
             <label class="bot-builder-field bot-builder-field--description">
               <span>Description</span>
               <textarea
-                maxlength="180"
-                rows="3"
-                oninput="botBuilderSetDraftDescription(this.value)"
-              >${escapeBotText(draft.description)}</textarea>
+              maxlength="180"
+              placeholder="Describe the kind of bot you hope to create."
+              rows="3"
+              oninput="botBuilderSetDraftDescription(this.value)"
+            >${escapeBotText(draft.description)}</textarea>
             </label>
           </div>
         </div>
@@ -157,8 +160,8 @@ function botBuilderSetWeight(key, rawValue) {
 function getUserBotDraft() {
   settings.user_bot_draft = settings.user_bot_draft || {};
   return {
-    name: settings.user_bot_draft.name || 'My Bot',
-    tldr: settings.user_bot_draft.tldr || 'Weighted CDR',
+    name: settings.user_bot_draft.name || '',
+    tldr: settings.user_bot_draft.tldr || '',
     description: settings.user_bot_draft.description || '',
   };
 }
@@ -205,13 +208,14 @@ function botBuilderRefreshDraft() {
   const draft = getUserBotDraft();
   const name = document.getElementById('bot-builder-draft-name');
   const desc = document.getElementById('bot-builder-draft-desc');
-  if (name) name.textContent = draft.name;
+  if (name) name.textContent = draft.name || 'Build-a-bot';
   if (desc) desc.textContent = botBuilderDraftDescriptionText(draft);
 }
 
 function botBuilderDraftDescriptionText(draft) {
-  const description = draft.description || 'Describe the bot you want to create.';
-  return `${draft.tldr} — ${description}`;
+  const tldr = draft.tldr || 'User-defined CDR';
+  const description = draft.description || 'Describe the kind of bot you hope to create.';
+  return `${tldr} — ${description}`;
 }
 
 function formatBotWeight(value) {
