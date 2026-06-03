@@ -332,9 +332,9 @@ function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '
 }
 
 function botStatusBadge(bot) {
-  return bot?.status && bot.status !== 'Available'
-    ? `<span class="bot-card-status">${bot.status}</span>`
-    : '';
+  if (bot?.type !== 'CDR') return '';
+  const label = bot.designer ? 'Custom' : 'Template';
+  return `<span class="bot-card-status">${label}</span>`;
 }
 
 function botIsPlanned(bot) {

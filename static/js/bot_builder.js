@@ -206,23 +206,26 @@ function botBuilderSetDraftDesigner(value) {
   persistSettings();
 }
 
+function _botBuilderWeightIssue() {
+  const weights = getUserBotWeights();
+  const nonzero = USER_BOT_WEIGHT_DEFS.filter(d => Math.abs(weights[d.key] || 0) > 0.001);
+  if (nonzero.length === 0) return 'Set at least one weight — all-zero is just Eris';
+  if (nonzero.length === 1 && (weights[nonzero[0].key] || 0) > 0)
+    return 'A single positive weight duplicates an existing bot — add a second or use a negative weight';
+  return null;
+}
+
 function botBuilderDraftValid(draft) {
   draft = draft || getUserBotDraft();
   if (!draft.name.trim() || !draft.tldr.trim() || !draft.description.trim()) return false;
-  const weights = getUserBotWeights();
-  const nonzero = USER_BOT_WEIGHT_DEFS.filter(d => Math.abs(weights[d.key] || 0) > 0.001);
-  return nonzero.length >= 2;
+  return _botBuilderWeightIssue() === null;
 }
 
 function botBuilderSaveTooltip() {
   const draft = getUserBotDraft();
   if (!draft.name.trim() || !draft.tldr.trim() || !draft.description.trim())
     return 'Fill in Name, TLDR, and Description to save';
-  const weights = getUserBotWeights();
-  const nonzero = USER_BOT_WEIGHT_DEFS.filter(d => Math.abs(weights[d.key] || 0) > 0.001);
-  if (nonzero.length === 0) return 'Set at least two weights — all-zero is just Eris';
-  if (nonzero.length === 1) return 'Set at least two weights — a single feature duplicates an existing bot';
-  return 'Save this bot configuration';
+  return _botBuilderWeightIssue() ?? 'Save this bot configuration';
 }
 
 function botBuilderSetDraftName(value) {
@@ -303,6 +306,7 @@ function botBuilderToggleCollapse() {
 
 function botBuilderReset() {
   settings.user_bot_weights = defaultUserBotWeights();
+  settings.user_bot_draft = { name: '', tldr: '', description: '', designer: '' };
   persistSettings();
   renderBotsPage();
 }
