@@ -56,10 +56,11 @@ function renderLobbySlots() {
     const playerIdx = active.indexOf(slotIdx);
     const colorName = PLAYER_COLORS[slotIdx] || 'blue';
     const color     = COLORS[colorName] || COLORS.blue;
-    const type      = isActive ? getPlayerType(playerIdx) : 'human';
-    const isHuman   = type === 'human';
-    const name      = isActive ? getPlayerName(playerIdx) : '';
-    const canRemove = isActive && active.length > 2;
+    const type       = isActive ? getPlayerType(playerIdx) : 'human';
+    const isHuman    = type === 'human';
+    const profile    = isActive && isHuman && typeof getSlotProfile === 'function' ? getSlotProfile(playerIdx) : null;
+    const canRemove  = isActive && active.length > 2;
+    const avatarIcon = !isActive || !isHuman ? 'fa-robot' : (typeof getPlayerIcon === 'function' ? getPlayerIcon(playerIdx) : 'fa-face-smile');
 
     return `
       <div class="lobby-slot ${isActive ? 'slot-active' : 'slot-inactive'}"
@@ -71,10 +72,8 @@ function renderLobbySlots() {
                  <i class="fa-solid fa-xmark"></i>
                </button>`
             : ''}
-          <div class="lobby-slot-avatar${isActive && isHuman ? ' lobby-avatar-clickable' : ''}"
-               ${isActive && isHuman ? `onclick="event.stopPropagation(); openIconPicker(${playerIdx}, this)"` : ''}>
-            <i class="fa-solid ${isActive && !isHuman ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(playerIdx) : 'fa-face-smile')} lobby-avatar-icon"></i>
-            ${isActive && isHuman ? `<span class="lobby-avatar-hint"><i class="fa-solid fa-pen"></i></span>` : ''}
+          <div class="lobby-slot-avatar">
+            <i class="fa-solid ${avatarIcon} lobby-avatar-icon"></i>
           </div>
           <div class="lobby-slot-tag">${colorName}</div>
         </div>
@@ -91,8 +90,8 @@ function renderLobbySlots() {
             </button>
           </div>
           ${!isHuman ? lobbyBotSelect(slotIdx, playerIdx) : (typeof lobbyProfileSelect === 'function' ? lobbyProfileSelect(slotIdx, playerIdx) : '')}
-          ${isHuman && typeof getSlotProfile === 'function' && !getSlotProfile(playerIdx)
-            ? `<p class="lobby-no-profile-hint"><a href="#" onclick="event.preventDefault();switchTab('profiles')">Register first</a> to add a human player.</p>`
+          ${isHuman && typeof loadProfiles === 'function' && !loadProfiles().length
+            ? `<p class="lobby-no-profile-hint">No players yet — <a href="#" onclick="event.preventDefault();switchTab('profiles')">go to Players tab</a>.</p>`
             : ''}
         </div>` : `
         <div class="lobby-slot-body lobby-slot-add">
@@ -179,7 +178,26 @@ function lobbySetName(slotIdx, v) {
   if (typeof renderPlayers === 'function') renderPlayers();
 }
 
+function lobbyHumansMissingProfile() {
+  const active = lobbyActiveSlots();
+  return active.filter(slotIdx => {
+    const playerIdx = active.indexOf(slotIdx);
+    return getPlayerType(playerIdx) === 'human' &&
+      typeof getSlotProfile === 'function' && !getSlotProfile(playerIdx);
+  });
+}
+
 function startFromLobby() {
+  const missing = lobbyHumansMissingProfile();
+  if (missing.length) {
+    const hint = document.getElementById('lobby-hint');
+    if (hint) hint.innerHTML = `<div class="lobby-hint lobby-hint--warn">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      Each human player must select a profile before starting.
+      <a href="#" onclick="event.preventDefault();switchTab('profiles')">Go to Players tab</a>
+    </div>`;
+    return;
+  }
   const active = lobbyActiveSlots();
   settings.num_players = active.length;
   persistSettings();

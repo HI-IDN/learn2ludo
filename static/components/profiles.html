@@ -43,7 +43,7 @@
         <label class="reg-label" for="reg-username">Player name <span class="reg-required">*</span></label>
         <p class="reg-hint">Short name shown during gameplay (max 10 characters).</p>
         <input id="reg-username" class="reg-input" type="text" maxlength="10"
-          placeholder="e.g. Freyja"
+          placeholder="e.g. Pallas"
           oninput="_updateRegSubmit()" autocomplete="off" spellcheck="false">
         <p class="reg-error" id="reg-username-error"></p>
       </div>
@@ -60,7 +60,7 @@
       <div class="reg-section">
         <label class="reg-label" for="reg-age-select">Age range <span class="reg-required">*</span></label>
         <p class="reg-hint">Required for research correlation. Your exact age is never stored.</p>
-        <select id="reg-age-select" class="reg-select" onchange="_updateRegParent()">
+        <select id="reg-age-select" class="reg-select" onchange="_updateRegParent(); _updateRegSubmit()">
           <option value="">— select —</option>
           <option>Under 13</option>
           <option>13–17</option>

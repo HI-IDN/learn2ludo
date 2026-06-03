@@ -407,6 +407,12 @@
 
   i { color: #F5CF47; flex-shrink: 0; }
   strong { color: #ccc; }
+
+  &--warn {
+    color: $color-danger;
+    i { color: $color-danger; }
+    a { color: $color-danger; font-weight: 600; }
+  }
 }
 
 // ---- Responsive -------------------------------------------------------------

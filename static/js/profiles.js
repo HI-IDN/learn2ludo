@@ -190,10 +190,14 @@ function regSelectIcon(ic) {
   _updateRegSubmit();
 }
 
+function _needsParentalConsent(age) {
+  return age === 'Under 13' || age === 'Prefer not to say';
+}
+
 function _updateRegParent() {
   const age = document.getElementById('reg-age-select')?.value;
   const row = document.getElementById('reg-parent-row');
-  if (row) row.hidden = age !== 'Under 13';
+  if (row) row.hidden = !_needsParentalConsent(age);
   _updateRegSubmit();
 }
 
@@ -203,7 +207,7 @@ function _updateRegSubmit() {
   const username = document.getElementById('reg-username')?.value.trim();
   const age      = document.getElementById('reg-age-select')?.value;
   const consent  = document.getElementById('reg-consent-check')?.checked;
-  const needsParent = age === 'Under 13';
+  const needsParent = _needsParentalConsent(age);
   const parentOk = !needsParent || document.getElementById('reg-parent-check')?.checked;
   btn.disabled = !(_regIcon && username && age && consent && parentOk);
 }
