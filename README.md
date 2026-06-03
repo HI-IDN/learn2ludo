@@ -6,12 +6,13 @@ A browser-based Ludo game with a Python/FastAPI backend, vanilla JS frontend, co
 
 ## Prerequisites
 
-| Tool | Version | Notes |
+| Tool | Tested on | Notes |
 |---|---|---|
-| Python | 3.12+ | |
-| pip | any | comes with Python |
-| Node.js / npm | any | only needed to compile SCSS |
-| Sass | 1.x | `npm install -g sass` |
+| Python | 3.12.10 | 3.10+ should work |
+| pip | — | comes with Python |
+| Node.js | 22.8.0 | only needed to compile SCSS |
+| npm | 10.8.2 | comes with Node.js |
+| Sass | 1.69.5 | `npm install -g sass` |
 
 ---
 
