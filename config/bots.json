@@ -47,7 +47,7 @@
       "epithet": "God of Order",
       "description": "Balanced weighted bot combining capture, safety, progress, and activation.",
       "focus": "Profile: +0.35 Safety ≥ +0.30 Capture ≥ +0.25 Progress ≫ +0.10 Activation.",
-      "status": "Available",
+      "status": "Template",
       "selectable": true
     },
     {
