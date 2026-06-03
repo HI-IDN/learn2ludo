@@ -100,7 +100,6 @@ function renderBotBuilderCard() {
           <div class="bot-builder-main">
             <div class="bot-card-title">
               <div class="bot-card-name" id="bot-builder-draft-name">${escapeBotText(draft.name || 'Build-a-bot')}</div>
-              <span class="bot-card-status">Custom</span>
             </div>
             <div class="bot-card-desc" id="bot-builder-draft-desc">${escapeBotText(botBuilderDraftDescriptionText(draft))}</div>
             <div class="bot-builder-help">
@@ -120,7 +119,7 @@ function renderBotBuilderCard() {
               <input
               type="text"
               maxlength="18"
-              placeholder="My Bot"
+              placeholder="Build-a-bot"
               value="${escapeBotText(draft.name)}"
               oninput="botBuilderSetDraftName(this.value)"
             >
@@ -130,7 +129,7 @@ function renderBotBuilderCard() {
               <input
               type="text"
               maxlength="32"
-              placeholder="User-defined CDR"
+              placeholder="User-defined composite dispatching rule"
               value="${escapeBotText(draft.tldr)}"
               oninput="botBuilderSetDraftTldr(this.value)"
             >
@@ -213,7 +212,7 @@ function botBuilderRefreshDraft() {
 }
 
 function botBuilderDraftDescriptionText(draft) {
-  const tldr = draft.tldr || 'User-defined CDR';
+  const tldr = draft.tldr || 'User-defined composite dispatching rule';
   const description = draft.description || 'Describe the kind of bot you hope to create.';
   return `${tldr} — ${description}`;
 }
