@@ -431,57 +431,59 @@
   gap: 4px;
 }
 
-// ── Board Setup collapsible section ───────────────────────────────────────────
+// ── Unified collapsible section (Board Setup + Player Setup) ─────────────────
 
-.lobby-board-section {
+.lobby-section {
   border: 1px solid $border-light;
   border-radius: $radius-lg;
   background: $color-bg-alt;
   overflow: hidden;
+
+  &[open] .lobby-section-chevron { transform: rotate(180deg); }
+  &[open] .lobby-section-body    { display: block; }
 }
 
-.lobby-board-summary {
+.lobby-section-summary {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 20px;
+  gap: 12px;
+  padding: 18px 24px;
   cursor: pointer;
   list-style: none;
-  font-size: 14px;
-  font-weight: 700;
-  color: $color-text;
   user-select: none;
 
   &::-webkit-details-marker { display: none; }
-
-  > span:first-child {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    i { color: $color-teal; }
-  }
-
-  .lobby-board-summary-state {
-    flex: 1;
-    font-size: 12px;
-    font-weight: 400;
-    color: $color-text-2;
-  }
-
-  .lobby-board-chevron {
-    font-size: 11px;
-    color: $color-text-3;
-    transition: transform 0.2s;
-  }
 }
 
-.lobby-board-section[open] .lobby-board-chevron {
-  transform: rotate(180deg);
+.lobby-section-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: $color-text;
 }
 
-.lobby-board-section-body {
+.lobby-section-badge {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 400;
+  color: $color-text-2;
+}
+
+.lobby-section-chevron {
+  font-size: 11px;
+  color: $color-text-3;
+  transition: transform 0.2s;
+}
+
+.lobby-section-body {
   border-top: 1px solid $border-light;
-  padding: 20px;
+  padding: 20px 24px;
+}
+
+.lobby-section-sub {
+  font-size: 13px;
+  color: $color-text-2;
+  margin: 0 0 16px;
 }
 
 .lobby-board-inner {

@@ -2,30 +2,15 @@
 <div class="panel" id="panel-lobby">
   <div class="lobby-wrap">
 
-    <!-- ── Player slots ──────────────────────────────────────────────── -->
-    <div class="lobby-header">
-      <div class="lobby-title">
-        <span class="lobby-title-main">Player Setup</span>
-        <span class="lobby-title-sub">Click a slot to activate or deactivate it</span>
-      </div>
-    </div>
-
-    <div class="lobby-slots" id="lobby-slots">
-      <!-- injected by renderLobbySlots() -->
-    </div>
-
-    <!-- ── Board setup (collapsible) ────────────────────────────────── -->
-    <details class="lobby-board-section" id="lobby-board-details">
-      <summary class="lobby-board-summary">
-        <span><i class="fa-solid fa-chess-board"></i> Board Setup</span>
-        <span class="lobby-board-summary-state" id="lobby-board-summary-state"></span>
-        <i class="fa-solid fa-chevron-down lobby-board-chevron"></i>
+    <!-- ── Board Setup (collapsed by default) ───────────────────────── -->
+    <details class="lobby-section" id="lobby-board-details">
+      <summary class="lobby-section-summary">
+        <span class="lobby-section-title">Board Setup</span>
+        <span class="lobby-section-badge" id="lobby-board-summary-state">cross · 4 pawns</span>
+        <i class="fa-solid fa-chevron-down lobby-section-chevron"></i>
       </summary>
-
-      <div class="lobby-board-section-body">
+      <div class="lobby-section-body">
         <div class="lobby-board-inner">
-
-          <!-- Steppers -->
           <div class="lobby-controls-col">
             <div class="lobby-yard-control">
               <span class="lobby-yard-label">Board shape</span>
@@ -46,23 +31,35 @@
               <span class="lobby-yard-shape">per player</span>
             </div>
           </div>
-
-          <!-- Mini board preview -->
           <div class="lobby-board-preview" id="lobby-board-preview">
             <!-- cloned from #ludo-board by renderLobbyBoardPreview() -->
           </div>
-
         </div>
       </div>
     </details>
 
-    <!-- ── Footer ────────────────────────────────────────────────────── -->
+    <!-- ── Player Setup (open by default) ───────────────────────────── -->
+    <details class="lobby-section" id="lobby-players-details" open>
+      <summary class="lobby-section-summary">
+        <span class="lobby-section-title">Player Setup</span>
+        <span class="lobby-section-badge" id="lobby-players-summary-state">4 players</span>
+        <i class="fa-solid fa-chevron-down lobby-section-chevron"></i>
+      </summary>
+      <div class="lobby-section-body">
+        <p class="lobby-section-sub">Click a slot to activate or deactivate it</p>
+        <div class="lobby-slots" id="lobby-slots">
+          <!-- injected by renderLobbySlots() -->
+        </div>
+        <div id="lobby-hint"></div>
+      </div>
+    </details>
+
+    <!-- ── Start Game ────────────────────────────────────────────────── -->
     <div class="lobby-footer">
       <button class="btn btn-primary" onclick="startFromLobby()">
         <i class="ti ti-play"></i>
         Start Game
       </button>
-      <div id="lobby-hint"></div>
     </div>
 
   </div>

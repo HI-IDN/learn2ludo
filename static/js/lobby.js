@@ -46,9 +46,15 @@ function renderLobbyYardControl() {
   if (shape) shape.textContent = YARD_SHAPES[n] ?? n + '-gon';
   const pd = document.getElementById('lobby-pawns-display');
   if (pd) pd.textContent = p;
-  // Update summary badge
-  const badge = document.getElementById('lobby-board-summary-state');
-  if (badge) badge.textContent = `${YARD_SHAPES[n] ?? n + '-gon'} · ${p} pawn${p !== 1 ? 's' : ''}`;
+  const boardBadge = document.getElementById('lobby-board-summary-state');
+  if (boardBadge) boardBadge.textContent = `${YARD_SHAPES[n] ?? n + '-gon'} · ${p} pawn${p !== 1 ? 's' : ''}`;
+}
+
+function renderLobbyPlayersBadge(active) {
+  const badge = document.getElementById('lobby-players-summary-state');
+  if (!badge) return;
+  const n = (active ?? lobbyActiveSlots()).length;
+  badge.textContent = `${n} player${n !== 1 ? 's' : ''}`;
 }
 
 // ── Board mini-preview (clone of the real board SVG) ─────────────────────────
@@ -168,6 +174,7 @@ function renderLobbySlots() {
 
   renderLobbyHint(active);
   renderLobbyYardControl();
+  renderLobbyPlayersBadge(active);
   // Preview is cloned from the real board — defer so drawBoard() finishes first
   setTimeout(renderLobbyBoardPreview, 50);
 }
