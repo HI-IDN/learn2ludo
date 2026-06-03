@@ -1,6 +1,6 @@
-const STUDENT_BOT_ID = 'student-weighted';
+const USER_BOT_ID = 'user-weighted';
 
-const STUDENT_BOT_WEIGHT_DEFS = [
+const USER_BOT_WEIGHT_DEFS = [
   {
     key: 'ares_capture',
     label: 'Ares',
@@ -27,14 +27,14 @@ const STUDENT_BOT_WEIGHT_DEFS = [
     label: 'Hermes',
     rule: 'Spread',
     description: 'Prefer moves that keep friendly pawns less clustered.',
-    defaultValue: 0.00,
+    defaultValue: 0,
   },
   {
     key: 'hephaestus_blockade',
     label: 'Hephaestus',
     rule: 'Blockade',
     description: 'Prefer moves that land on friendly pawns.',
-    defaultValue: 0.00,
+    defaultValue: 0,
   },
   {
     key: 'artemis_activation',
@@ -45,24 +45,24 @@ const STUDENT_BOT_WEIGHT_DEFS = [
   },
 ];
 
-function defaultStudentBotWeights() {
-  return Object.fromEntries(STUDENT_BOT_WEIGHT_DEFS.map(def => [def.key, def.defaultValue]));
+function defaultUserBotWeights() {
+  return Object.fromEntries(USER_BOT_WEIGHT_DEFS.map(def => [def.key, def.defaultValue]));
 }
 
-function getStudentBotWeights() {
-  const saved = settings?.student_bot_weights || {};
+function getUserBotWeights() {
+  const saved = settings?.user_bot_weights || {};
   return {
-    ...defaultStudentBotWeights(),
+    ...defaultUserBotWeights(),
     ...Object.fromEntries(Object.entries(saved).map(([key, value]) => [key, Number(value) || 0])),
   };
 }
 
-function studentBotIsAvailable() {
-  return settings?.student_bot_deleted !== true;
+function userBotIsAvailable() {
+  return settings?.user_bot_deleted !== true;
 }
 
 function renderBotBuilderCard() {
-  if (!studentBotIsAvailable()) {
+  if (!userBotIsAvailable()) {
     return `
       <div class="bot-card bot-builder-card bot-builder-card--empty">
         <div class="bot-card-icon"><i class="fa-solid fa-sliders"></i></div>
@@ -82,8 +82,8 @@ function renderBotBuilderCard() {
       </div>`;
   }
 
-  const weights = getStudentBotWeights();
-  const rows = STUDENT_BOT_WEIGHT_DEFS.map(def => {
+  const weights = getUserBotWeights();
+  const rows = USER_BOT_WEIGHT_DEFS.map(def => {
     const value = weights[def.key] ?? 0;
     return `
       <label class="bot-builder-row" title="${def.description}">
@@ -94,10 +94,10 @@ function renderBotBuilderCard() {
         <input
           class="bot-builder-slider"
           type="range"
-          min="-2"
-          max="2"
-          step="0.1"
-          value="${value.toFixed(1)}"
+          min="-1"
+          max="1"
+          step="0.05"
+          value="${value.toFixed(2)}"
           oninput="botBuilderSetWeight('${def.key}', this.value)"
         >
         <output class="bot-builder-value" id="bot-builder-value-${def.key}">${formatBotWeight(value)}</output>
@@ -112,8 +112,11 @@ function renderBotBuilderCard() {
           <div class="bot-card-name">Your Bot</div>
           <span class="bot-card-status">Custom</span>
         </div>
-        <div class="bot-card-desc">Student CDR — combine Apollo-style dispatching rules with sliders.</div>
-        <div class="bot-builder-summary" id="bot-builder-summary">${studentBotSummary(weights)}</div>
+        <div class="bot-card-desc">User CDR — Apollo's weight values, ready to adjust.</div>
+        <div class="bot-builder-help">
+          Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
+        </div>
+        <div class="bot-builder-summary" id="bot-builder-summary">${userBotSummary(weights)}</div>
         <div class="bot-builder-controls">${rows}</div>
         <div class="bot-builder-actions">
           <button class="btn btn-sm btn-danger" type="button" onclick="botBuilderDelete()">
@@ -130,26 +133,26 @@ function renderBotBuilderCard() {
 }
 
 function botBuilderSetWeight(key, rawValue) {
-  settings.student_bot_deleted = false;
-  settings.student_bot_weights = getStudentBotWeights();
-  settings.student_bot_weights[key] = Number(rawValue) || 0;
+  settings.user_bot_deleted = false;
+  settings.user_bot_weights = getUserBotWeights();
+  settings.user_bot_weights[key] = Number(rawValue) || 0;
   persistSettings();
   botBuilderRefreshValues();
 }
 
 function botBuilderReset() {
-  settings.student_bot_deleted = false;
-  settings.student_bot_weights = defaultStudentBotWeights();
+  settings.user_bot_deleted = false;
+  settings.user_bot_weights = defaultUserBotWeights();
   persistSettings();
   renderBotsPage();
 }
 
 function botBuilderDelete() {
-  settings.student_bot_deleted = true;
-  delete settings.student_bot_weights;
+  settings.user_bot_deleted = true;
+  delete settings.user_bot_weights;
   if (settings.bot_ids) {
     Object.keys(settings.bot_ids).forEach(playerIdx => {
-      if (settings.bot_ids[playerIdx] === STUDENT_BOT_ID) delete settings.bot_ids[playerIdx];
+      if (settings.bot_ids[playerIdx] === USER_BOT_ID) delete settings.bot_ids[playerIdx];
     });
   }
   persistSettings();
@@ -158,34 +161,35 @@ function botBuilderDelete() {
 }
 
 function botBuilderCreate() {
-  settings.student_bot_deleted = false;
-  settings.student_bot_weights = defaultStudentBotWeights();
+  settings.user_bot_deleted = false;
+  settings.user_bot_weights = defaultUserBotWeights();
   persistSettings();
   renderBotsPage();
   if (typeof renderLobbySlots === 'function') renderLobbySlots();
 }
 
 function botBuilderRefreshValues() {
-  const weights = getStudentBotWeights();
-  STUDENT_BOT_WEIGHT_DEFS.forEach(def => {
+  const weights = getUserBotWeights();
+  USER_BOT_WEIGHT_DEFS.forEach(def => {
     const value = weights[def.key] ?? 0;
     const out = document.getElementById(`bot-builder-value-${def.key}`);
     if (out) out.textContent = formatBotWeight(value);
   });
   const summary = document.getElementById('bot-builder-summary');
-  if (summary) summary.textContent = studentBotSummary(weights);
+  if (summary) summary.textContent = userBotSummary(weights);
 }
 
 function formatBotWeight(value) {
-  return Number(value || 0).toFixed(1);
+  const numeric = Number(value || 0);
+  return `${numeric >= 0 ? '+' : ''}${numeric.toFixed(2)}`;
 }
 
-function studentBotSummary(weights = getStudentBotWeights()) {
-  const active = STUDENT_BOT_WEIGHT_DEFS
+function userBotSummary(weights = getUserBotWeights()) {
+  const active = USER_BOT_WEIGHT_DEFS
     .filter(def => Math.abs(weights[def.key] || 0) > 0.001)
     .sort((a, b) => Math.abs(weights[b.key]) - Math.abs(weights[a.key]))
     .slice(0, 3)
-    .map(def => `${def.rule} ${formatBotWeight(weights[def.key])}`);
+    .map(def => `${formatBotWeight(weights[def.key])} ${def.label} ${def.rule}`);
 
   return active.length ? active.join(' · ') : 'All weights are zero: tied moves fall back to random choice.';
 }

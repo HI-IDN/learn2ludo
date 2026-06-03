@@ -145,7 +145,7 @@ class BotMoveRequest(BaseModel):
 
 @app.post("/api/game/bot-move")
 def bot_move(req: BotMoveRequest):
-    if req.bot_id == "student-weighted":
+    if req.bot_id == "user-weighted":
         move = ApolloBot(req.weights or None).choose_move(req.valid_moves, req.game_state or None)
         if move is None:
             raise HTTPException(status_code=400, detail="No valid moves")

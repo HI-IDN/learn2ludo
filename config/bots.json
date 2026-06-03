@@ -46,17 +46,17 @@
       "type": "weighted",
       "epithet": "God of Order",
       "description": "Balanced weighted bot combining capture, safety, progress, and activation.",
-      "focus": "30% Ares capture, 35% Athena safety, 25% Hestia progress, and 10% Artemis activation.",
+      "focus": "+0.30 Ares capture, +0.35 Athena safety, +0.25 Hestia progress, and +0.10 Artemis activation.",
       "status": "Available",
       "selectable": true
     },
     {
-      "id": "student-weighted",
+      "id": "user-weighted",
       "name": "Your Bot",
       "type": "weighted",
-      "epithet": "Student CDR",
+      "epithet": "User CDR",
       "description": "Custom weighted bot configured with sliders.",
-      "focus": "Adjust the sliders next to Apollo to combine simple dispatching rules.",
+      "focus": "Starts from Apollo: +0.30 Ares capture, +0.35 Athena safety, +0.25 Hestia progress, and +0.10 Artemis activation.",
       "status": "Custom",
       "selectable": true
     },

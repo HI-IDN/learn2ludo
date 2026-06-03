@@ -10,9 +10,18 @@
 }
 
 .bot-builder-summary {
+  color: $color-text-2;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.bot-builder-help {
   color: $color-text-3;
   font-size: 11px;
-  margin-top: 4px;
+  line-height: 1.45;
+  margin-top: 6px;
+  max-width: 720px;
 }
 
 .bot-builder-controls {
@@ -23,7 +32,7 @@
 
 .bot-builder-row {
   display: grid;
-  grid-template-columns: minmax(96px, 132px) minmax(120px, 1fr) 42px;
+  grid-template-columns: minmax(96px, 132px) minmax(120px, 1fr) 52px;
   align-items: center;
   gap: 10px;
 }

@@ -8,8 +8,8 @@ const FALLBACK_BOTS = [
   { id: 'ares', name: 'Ares', type: 'heuristic', epithet: 'God of War', description: 'Looks for chances to send opponent pawns back to their yard.', focus: 'Values disruption: a capture can slow one opponent more than a small advance helps Ares.', status: 'Available', selectable: true, implemented: true },
   { id: 'athena', name: 'Athena', type: 'heuristic', epithet: 'Goddess of Wisdom', description: 'Keeps pawns safe before looking for other moves.', focus: 'Compares current danger with landing-square danger, preferring moves that reduce exposure.', status: 'Available', selectable: true, implemented: true },
   { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Prefers the most progressed pawn, especially when a move brings it nearer to the home stretch.', status: 'Available', selectable: true, implemented: true },
-  { id: 'apollo', name: 'Apollo', type: 'weighted', epithet: 'God of Order', description: 'Balanced weighted bot combining capture, safety, progress, and activation.', focus: '30% Ares capture, 35% Athena safety, 25% Hestia progress, and 10% Artemis activation.', status: 'Available', selectable: true, implemented: true },
-  { id: 'student-weighted', name: 'Your Bot', type: 'weighted', epithet: 'Student CDR', description: 'Custom weighted bot configured with sliders.', focus: 'Adjust the sliders next to Apollo to combine simple dispatching rules.', status: 'Custom', selectable: true, implemented: true },
+  { id: 'apollo', name: 'Apollo', type: 'weighted', epithet: 'God of Order', description: 'Balanced weighted bot combining capture, safety, progress, and activation.', focus: '+0.30 Ares capture, +0.35 Athena safety, +0.25 Hestia progress, and +0.10 Artemis activation.', status: 'Available', selectable: true, implemented: true },
+  { id: 'user-weighted', name: 'Your Bot', type: 'weighted', epithet: 'User CDR', description: 'Custom weighted bot configured with sliders.', focus: 'Starts from Apollo: +0.30 Ares capture, +0.35 Athena safety, +0.25 Hestia progress, and +0.10 Artemis activation.', status: 'Custom', selectable: true, implemented: true },
   { id: 'hermes', name: 'Hermes', type: 'heuristic', epithet: 'God of Travel', description: 'Keeps pawns distributed across the board.', focus: 'Avoids clustering by choosing moves that increase distance from friendly pawns already in play.', status: 'Available', selectable: true, implemented: true },
   { id: 'hephaestus', name: 'Hephaestus', type: 'heuristic', epithet: 'God of the Forge', description: 'Builds defensive stacks with friendly pawns.', focus: 'Looks for moves that land on another friendly pawn to form a blockade.', status: 'Available', selectable: true, implemented: true },
   { id: 'artemis', name: 'Artemis', type: 'heuristic', epithet: 'Goddess of the Hunt', description: 'Gets pawns out of the yard whenever possible.', focus: 'Prioritises activating new pawns so more pieces can join the chase.', status: 'Available', selectable: true, implemented: true },
@@ -43,7 +43,7 @@ function getSelectableBots() {
   return getOrderedBotRegistry().filter(b =>
     b.selectable !== false &&
     b.implemented !== false &&
-    (b.id !== 'student-weighted' || typeof studentBotIsAvailable !== 'function' || studentBotIsAvailable())
+    (b.id !== 'user-weighted' || typeof userBotIsAvailable !== 'function' || userBotIsAvailable())
   );
 }
 
@@ -59,8 +59,8 @@ function botLobbyLabel(bot) {
 // ---- Server-side policy (primary) ------------------------------------------
 
 async function runBotPolicy(botId, validMoves) {
-  const weights = botId === 'student-weighted' && typeof getStudentBotWeights === 'function'
-    ? getStudentBotWeights()
+  const weights = botId === 'user-weighted' && typeof getUserBotWeights === 'function'
+    ? getUserBotWeights()
     : {};
   try {
     const r = await fetch('/api/game/bot-move', {
@@ -81,7 +81,7 @@ function runBotPolicyLocal(botId, validMoves) {
   if (botId === 'athena') return _chooseByLocalFeature(validMoves, f => [f.riskReduction, f.safety, -f.risk]);
   if (botId === 'hestia') return _chooseByLocalFeature(validMoves, f => f.progress);
   if (botId === 'apollo') return _chooseByLocalFeature(validMoves, _apolloLocalScore);
-  if (botId === 'student-weighted') return _chooseByLocalFeature(validMoves, _studentWeightedLocalScore);
+  if (botId === 'user-weighted') return _chooseByLocalFeature(validMoves, _userWeightedLocalScore);
   if (botId === 'hermes') return _chooseByLocalFeature(validMoves, f => f.spread);
   if (botId === 'hephaestus') return _chooseByLocalFeature(validMoves, f => f.blockade);
   if (botId === 'artemis') return _chooseByLocalFeature(validMoves, f => f.activation);
@@ -93,8 +93,8 @@ function _apolloLocalScore(f) {
   return (f.capture * 0.30) + (athenaScore * 0.35) + (f.progress * 0.25) + (f.activation * 0.10);
 }
 
-function _studentWeightedLocalScore(f) {
-  const weights = typeof getStudentBotWeights === 'function' ? getStudentBotWeights() : {};
+function _userWeightedLocalScore(f) {
+  const weights = typeof getUserBotWeights === 'function' ? getUserBotWeights() : {};
   const athenaScore = (f.riskReduction * 0.45) + (f.safety * 0.35) + ((1 - f.risk) * 0.20);
   return (
     (f.capture * (weights.ares_capture ?? 0)) +
@@ -285,7 +285,7 @@ function renderBotsPage() {
   wrap.innerHTML = `
     ${botSection('Baseline', 'No strategy — useful for comparison', baseline)}
     ${botSection('Heuristics', 'Rule-based opponents — no training required', heuristics)}
-    ${botSection('Create your own weighted bot', 'Combine heuristic features with sliders — Apollo is the example template', weighted.filter(b => b.id !== 'student-weighted'), true, botBuilder)}
+    ${botSection('Create your own weighted bot', 'Combine heuristic features with sliders — Apollo is the example template', weighted.filter(b => b.id !== 'user-weighted'), true, botBuilder)}
     ${botSection('Trained Models', 'RL agents produced by the Train tab', trained, true)}
   `;
 }

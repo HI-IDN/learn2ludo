@@ -382,11 +382,11 @@ class ApolloBot(BotPolicy):
         return choose_by_feature(valid_moves, game_state, lambda _move, f: apollo_score(f, self.weights))
 
 
-class StudentWeightedBot(ApolloBot):
-    id          = "student-weighted"
+class UserWeightedBot(ApolloBot):
+    id          = "user-weighted"
     name        = "Your Bot"
     type        = "weighted"
-    description = "Student-created CDR — uses slider-configured weights"
+    description = "User-created CDR — uses slider-configured weights"
 
 
 # ---------------------------------------------------------------------------
@@ -399,7 +399,7 @@ _BUILTIN: list[BotPolicy] = [
     AthenaBot(),
     HestiaBot(),
     ApolloBot(),
-    StudentWeightedBot(),
+    UserWeightedBot(),
     HermesBot(),
     HephaestusBot(),
     ArtemisBot(),
