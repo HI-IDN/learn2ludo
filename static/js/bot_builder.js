@@ -4,21 +4,21 @@ const USER_BOT_WEIGHT_DEFS = [
     label: 'Ares',
     rule: 'Capture',
     description: 'Prefer moves that send an opponent pawn back to the yard.',
-    defaultValue: 0.30,
+    defaultValue: 0,
   },
   {
     key: 'athena_safety',
     label: 'Athena',
     rule: 'Safety',
     description: 'Prefer moves that reduce danger or land in protected places.',
-    defaultValue: 0.35,
+    defaultValue: 0,
   },
   {
     key: 'hestia_progress',
     label: 'Hestia',
     rule: 'Progress',
     description: 'Prefer moves that bring pawns closer to home.',
-    defaultValue: 0.25,
+    defaultValue: 0,
   },
   {
     key: 'hermes_spread',
@@ -39,7 +39,7 @@ const USER_BOT_WEIGHT_DEFS = [
     label: 'Artemis',
     rule: 'Activation',
     description: 'Prefer moves that bring new pawns out of the yard.',
-    defaultValue: 0.10,
+    defaultValue: 0,
   },
 ];
 
