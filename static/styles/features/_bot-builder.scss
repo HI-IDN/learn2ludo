@@ -9,11 +9,17 @@
   grid-column: 1 / -1;
 }
 
-.bot-builder-summary {
+.bot-builder-profile {
   color: $color-text-2;
   font-size: 12px;
   font-weight: 700;
   margin-top: 4px;
+}
+
+.bot-builder-tie-note {
+  color: $color-text-3;
+  font-size: 11px;
+  margin-top: 3px;
 }
 
 .bot-builder-help {
@@ -28,6 +34,42 @@
   display: grid;
   gap: 8px;
   margin-top: 12px;
+}
+
+.bot-builder-draft {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) minmax(120px, 160px) 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.bot-builder-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span {
+    color: $color-text-3;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  input,
+  textarea {
+    border-radius: 8px;
+    font-size: 12px;
+    padding: 7px 8px;
+  }
+
+  textarea {
+    min-height: 58px;
+    resize: vertical;
+  }
+}
+
+.bot-builder-field--description {
+  grid-column: span 1;
 }
 
 .bot-builder-row {
@@ -84,6 +126,10 @@
 
   .bot-builder-row {
     grid-template-columns: 1fr 82px;
+  }
+
+  .bot-builder-draft {
+    grid-template-columns: 1fr;
   }
 
   .bot-builder-slider {

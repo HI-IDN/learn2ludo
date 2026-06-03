@@ -43,6 +43,8 @@ const USER_BOT_WEIGHT_DEFS = [
   },
 ];
 
+const BOT_PROFILE_STRONG_GAP = 0.10;
+
 function defaultUserBotWeights() {
   return Object.fromEntries(USER_BOT_WEIGHT_DEFS.map(def => [def.key, def.defaultValue]));
 }
@@ -57,6 +59,7 @@ function getUserBotWeights() {
 
 function renderBotBuilderCard() {
   const weights = getUserBotWeights();
+  const draft = getUserBotDraft();
   const rows = USER_BOT_WEIGHT_DEFS.map(def => {
     const value = weights[def.key] ?? 0;
     return `
@@ -101,7 +104,31 @@ function renderBotBuilderCard() {
         <div class="bot-builder-help">
           Each weight must be between -1.00 and +1.00. Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
         </div>
-        <div class="bot-builder-summary" id="bot-builder-summary">${userBotSummary(weights)}</div>
+        <div class="bot-builder-profile" id="bot-builder-profile">${botProfileText(weights)}</div>
+        <div class="bot-builder-tie-note">≡ means indifference, ≥ means weak preference, and ≫ means strong preference. Equal final move scores are broken by a random choice with equal chance.</div>
+        <div class="bot-builder-draft">
+          <label class="bot-builder-field bot-builder-field--name">
+            <span>Name</span>
+            <input
+              type="text"
+              maxlength="18"
+              value="${escapeBotText(draft.name)}"
+              oninput="botBuilderSetDraftName(this.value)"
+            >
+          </label>
+          <label class="bot-builder-field bot-builder-field--id">
+            <span>Label</span>
+            <input type="text" value="${escapeBotText(draft.label)}" readonly>
+          </label>
+          <label class="bot-builder-field bot-builder-field--description">
+            <span>Description</span>
+            <textarea
+              maxlength="180"
+              rows="3"
+              oninput="botBuilderSetDraftDescription(this.value)"
+            >${escapeBotText(draft.description)}</textarea>
+          </label>
+        </div>
         <div class="bot-builder-controls">${rows}</div>
         <div class="bot-builder-actions">
           <button class="btn btn-sm" type="button" onclick="botBuilderReset()">
@@ -120,6 +147,31 @@ function botBuilderSetWeight(key, rawValue) {
   botBuilderRefreshValues();
 }
 
+function getUserBotDraft() {
+  settings.user_bot_draft = settings.user_bot_draft || {};
+  if (!settings.user_bot_draft.label) {
+    settings.user_bot_draft.label = `.${cryptoRandomLabel()}`;
+    persistSettings();
+  }
+  return {
+    name: settings.user_bot_draft.name || 'My Bot',
+    label: settings.user_bot_draft.label,
+    description: settings.user_bot_draft.description || '',
+  };
+}
+
+function botBuilderSetDraftName(value) {
+  settings.user_bot_draft = settings.user_bot_draft || {};
+  settings.user_bot_draft.name = String(value || '').slice(0, 18);
+  persistSettings();
+}
+
+function botBuilderSetDraftDescription(value) {
+  settings.user_bot_draft = settings.user_bot_draft || {};
+  settings.user_bot_draft.description = String(value || '').slice(0, 180);
+  persistSettings();
+}
+
 function botBuilderReset() {
   settings.user_bot_weights = defaultUserBotWeights();
   persistSettings();
@@ -135,8 +187,8 @@ function botBuilderRefreshValues() {
     if (slider) slider.value = value.toFixed(2);
     if (number) number.value = value.toFixed(2);
   });
-  const summary = document.getElementById('bot-builder-summary');
-  if (summary) summary.textContent = userBotSummary(weights);
+  const profile = document.getElementById('bot-builder-profile');
+  if (profile) profile.textContent = botProfileText(weights);
 }
 
 function formatBotWeight(value) {
@@ -150,12 +202,50 @@ function normalizeBotWeight(value) {
   return Math.max(-1, Math.min(1, numeric));
 }
 
-function userBotSummary(weights = getUserBotWeights()) {
+function botProfileText(weights = getUserBotWeights()) {
   const active = USER_BOT_WEIGHT_DEFS
     .filter(def => Math.abs(weights[def.key] || 0) > 0.001)
-    .sort((a, b) => Math.abs(weights[b.key]) - Math.abs(weights[a.key]))
-    .slice(0, 3)
-    .map(def => `${formatBotWeight(weights[def.key])} ${def.label} ${def.rule}`);
+    .map(def => ({ ...def, weight: weights[def.key] || 0 }))
+    .sort((a, b) => b.weight - a.weight);
 
-  return active.length ? active.join(' · ') : 'All weights are zero: tied moves fall back to random choice.';
+  if (!active.length) return 'Profile: all legal moves tie; random choice like Eris.';
+
+  const groups = [];
+  active.forEach(item => {
+    const last = groups[groups.length - 1];
+    if (last && Math.abs(last[0].weight - item.weight) < 0.001) {
+      last.push(item);
+    } else {
+      groups.push([item]);
+    }
+  });
+
+  const parts = groups.map(group => group
+    .map(item => `${formatBotWeight(item.weight)} ${item.rule}`)
+    .join(' ≡ '));
+
+  return `Profile: ${parts.reduce((text, part, index) => {
+    if (index === 0) return part;
+    const prev = groups[index - 1][0].weight;
+    const next = groups[index][0].weight;
+    const separator = prev - next >= BOT_PROFILE_STRONG_GAP ? ' ≫ ' : ' ≥ ';
+    return `${text}${separator}${part}`;
+  }, '')}`;
+}
+
+function cryptoRandomLabel() {
+  const bytes = new Uint8Array(3);
+  if (window.crypto?.getRandomValues) {
+    window.crypto.getRandomValues(bytes);
+    return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  return Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0');
+}
+
+function escapeBotText(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
 }
