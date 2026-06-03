@@ -6,7 +6,7 @@
       "type": "baseline",
       "epithet": "Goddess of Discord",
       "description": "Chooses from valid moves without using strategy.",
-      "focus": "Useful as a baseline for comparing whether another strategy is actually helping.",
+      "focus": "Profile: None (pure random).",
       "status": "Available",
       "selectable": true
     },
@@ -16,7 +16,7 @@
       "type": "heuristic",
       "epithet": "God of War",
       "description": "Looks for chances to send opponent pawns back to their yard.",
-      "focus": "Values disruption: a capture can slow one opponent more than a small advance helps Ares.",
+      "focus": "Profile: +1.00 Capture.",
       "status": "Available",
       "selectable": true
     },
@@ -26,7 +26,7 @@
       "type": "heuristic",
       "epithet": "Goddess of Wisdom",
       "description": "Keeps pawns safe before looking for other moves.",
-      "focus": "Compares current danger with landing-square danger, preferring moves that reduce exposure.",
+      "focus": "Profile: +1.00 Safety.",
       "status": "Available",
       "selectable": true
     },
@@ -36,7 +36,7 @@
       "type": "heuristic",
       "epithet": "Goddess of the Hearth",
       "description": "Brings pawns home as directly as possible.",
-      "focus": "Prefers the most progressed pawn, especially when a move brings it nearer to the home stretch.",
+      "focus": "Profile: +1.00 Progress.",
       "status": "Available",
       "selectable": true
     },
@@ -66,7 +66,7 @@
       "type": "heuristic",
       "epithet": "God of Travel",
       "description": "Keeps pawns distributed across the board.",
-      "focus": "Avoids clustering by choosing moves that increase distance from friendly pawns already in play.",
+      "focus": "Profile: +1.00 Spread.",
       "status": "Available",
       "selectable": true
     },
@@ -76,7 +76,7 @@
       "type": "heuristic",
       "epithet": "God of the Forge",
       "description": "Builds defensive stacks with friendly pawns.",
-      "focus": "Looks for moves that land on another friendly pawn to form a blockade.",
+      "focus": "Profile: +1.00 Blockade.",
       "status": "Available",
       "selectable": true
     },
@@ -86,7 +86,7 @@
       "type": "heuristic",
       "epithet": "Goddess of the Hunt",
       "description": "Gets pawns out of the yard whenever possible.",
-      "focus": "Prioritises activating new pawns so more pieces can join the chase.",
+      "focus": "Profile: +1.00 Activation.",
       "status": "Available",
       "selectable": true
     }

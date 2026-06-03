@@ -104,8 +104,6 @@ function renderBotBuilderCard() {
         <div class="bot-builder-help">
           Each weight must be between -1.00 and +1.00. Weights do not need to add up. Positive values prefer a rule, negative values avoid it, and zero ignores it. If every weight is zero, every legal move ties and the bot chooses randomly like Eris.
         </div>
-        <div class="bot-builder-profile" id="bot-builder-profile">${botProfileText(weights)}</div>
-        <div class="bot-builder-tie-note">≡ means indifference, ≥ means weak preference, and ≫ means strong preference. Equal final move scores are broken by a random choice with equal chance.</div>
         <div class="bot-builder-draft">
           <label class="bot-builder-field bot-builder-field--name">
             <span>Name</span>
@@ -197,8 +195,6 @@ function botBuilderRefreshValues() {
     if (slider) slider.value = value.toFixed(2);
     if (number) number.value = value.toFixed(2);
   });
-  const profile = document.getElementById('bot-builder-profile');
-  if (profile) profile.textContent = botProfileText(weights);
 }
 
 function botBuilderRefreshDraft() {

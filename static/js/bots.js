@@ -4,15 +4,15 @@
 // JS policies are offline fallbacks only — do not add game logic here.
 
 const FALLBACK_BOTS = [
-  { id: 'eris', name: 'Eris', type: 'baseline', epithet: 'Goddess of Discord', description: 'Chooses from valid moves without using strategy.', focus: 'Useful as a baseline for comparing whether another strategy is actually helping.', status: 'Available', selectable: true, implemented: true },
-  { id: 'ares', name: 'Ares', type: 'heuristic', epithet: 'God of War', description: 'Looks for chances to send opponent pawns back to their yard.', focus: 'Values disruption: a capture can slow one opponent more than a small advance helps Ares.', status: 'Available', selectable: true, implemented: true },
-  { id: 'athena', name: 'Athena', type: 'heuristic', epithet: 'Goddess of Wisdom', description: 'Keeps pawns safe before looking for other moves.', focus: 'Compares current danger with landing-square danger, preferring moves that reduce exposure.', status: 'Available', selectable: true, implemented: true },
-  { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Prefers the most progressed pawn, especially when a move brings it nearer to the home stretch.', status: 'Available', selectable: true, implemented: true },
+  { id: 'eris', name: 'Eris', type: 'baseline', epithet: 'Goddess of Discord', description: 'Chooses from valid moves without using strategy.', focus: 'Profile: None (pure random).', status: 'Available', selectable: true, implemented: true },
+  { id: 'ares', name: 'Ares', type: 'heuristic', epithet: 'God of War', description: 'Looks for chances to send opponent pawns back to their yard.', focus: 'Profile: +1.00 Capture.', status: 'Available', selectable: true, implemented: true },
+  { id: 'athena', name: 'Athena', type: 'heuristic', epithet: 'Goddess of Wisdom', description: 'Keeps pawns safe before looking for other moves.', focus: 'Profile: +1.00 Safety.', status: 'Available', selectable: true, implemented: true },
+  { id: 'hestia', name: 'Hestia', type: 'heuristic', epithet: 'Goddess of the Hearth', description: 'Brings pawns home as directly as possible.', focus: 'Profile: +1.00 Progress.', status: 'Available', selectable: true, implemented: true },
   { id: 'apollo', name: 'Apollo', type: 'weighted', epithet: 'God of Order', description: 'Balanced weighted bot combining capture, safety, progress, and activation.', focus: 'Profile: +0.35 Safety ≥ +0.30 Capture ≥ +0.25 Progress ≫ +0.10 Activation.', status: 'Available', selectable: true, implemented: true },
   { id: 'user-weighted', name: 'Build-a-bot', type: 'weighted', epithet: 'User CDR', description: 'Custom weighted bot configured with sliders.', focus: 'Template: Weighted CDR.', status: 'Custom', selectable: true, implemented: true },
-  { id: 'hermes', name: 'Hermes', type: 'heuristic', epithet: 'God of Travel', description: 'Keeps pawns distributed across the board.', focus: 'Avoids clustering by choosing moves that increase distance from friendly pawns already in play.', status: 'Available', selectable: true, implemented: true },
-  { id: 'hephaestus', name: 'Hephaestus', type: 'heuristic', epithet: 'God of the Forge', description: 'Builds defensive stacks with friendly pawns.', focus: 'Looks for moves that land on another friendly pawn to form a blockade.', status: 'Available', selectable: true, implemented: true },
-  { id: 'artemis', name: 'Artemis', type: 'heuristic', epithet: 'Goddess of the Hunt', description: 'Gets pawns out of the yard whenever possible.', focus: 'Prioritises activating new pawns so more pieces can join the chase.', status: 'Available', selectable: true, implemented: true },
+  { id: 'hermes', name: 'Hermes', type: 'heuristic', epithet: 'God of Travel', description: 'Keeps pawns distributed across the board.', focus: 'Profile: +1.00 Spread.', status: 'Available', selectable: true, implemented: true },
+  { id: 'hephaestus', name: 'Hephaestus', type: 'heuristic', epithet: 'God of the Forge', description: 'Builds defensive stacks with friendly pawns.', focus: 'Profile: +1.00 Blockade.', status: 'Available', selectable: true, implemented: true },
+  { id: 'artemis', name: 'Artemis', type: 'heuristic', epithet: 'Goddess of the Hunt', description: 'Gets pawns out of the yard whenever possible.', focus: 'Profile: +1.00 Activation.', status: 'Available', selectable: true, implemented: true },
 ];
 
 let BOT_REGISTRY = FALLBACK_BOTS;
