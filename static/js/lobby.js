@@ -183,8 +183,16 @@ function renderLobbySlots() {
             </button>
           </div>
           ${!isHuman ? lobbyBotSelect(slotIdx, playerIdx) : (typeof lobbyProfileSelect === 'function' ? lobbyProfileSelect(slotIdx, playerIdx) : '')}
-          ${isHuman && typeof loadProfiles === 'function' && !loadProfiles().length
-            ? `<p class="lobby-no-profile-hint">No players yet — <a href="#" onclick="event.preventDefault();switchTab('profiles')">go to Players tab</a>.</p>`
+          ${isHuman && typeof loadProfiles === 'function'
+            ? (() => {
+                const all = loadProfiles();
+                const ready = all.filter(p => typeof isSessionConsented === 'function' && isSessionConsented(p.id));
+                if (!all.length)
+                  return `<p class="lobby-no-profile-hint">No players yet — <a href="#" onclick="event.preventDefault();switchTab('profiles')">go to Players tab</a>.</p>`;
+                if (!ready.length)
+                  return `<p class="lobby-no-profile-hint"><a href="#" onclick="event.preventDefault();switchTab('profiles')">Select yourself</a> in the Players tab first.</p>`;
+                return '';
+              })()
             : ''}
         </div>` : `
         <div class="lobby-slot-body lobby-slot-add">

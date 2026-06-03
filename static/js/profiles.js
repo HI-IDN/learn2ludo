@@ -353,19 +353,20 @@ function submitReconsent() {
 
 function lobbyProfileSelect(slotIdx, playerIdx) {
   cleanStaleProfileIds();
-  const profiles  = loadProfiles();
-  const currentId = settings.profile_ids?.[playerIdx];
-  const usedIds   = new Set(
+  const allProfiles = loadProfiles();
+  const currentId   = settings.profile_ids?.[playerIdx];
+  const usedIds     = new Set(
     Object.entries(settings.profile_ids || {})
       .filter(([k]) => Number(k) !== playerIdx)
       .map(([, v]) => v)
   );
+  // Only show players who have consented this session
+  const profiles = allProfiles.filter(p => isSessionConsented(p.id) || p.id === currentId);
   const options = [
     `<option value="">— pick player —</option>`,
     ...profiles.map(p => {
       const inUse = usedIds.has(p.id) && p.id !== currentId;
-      const tick  = isSessionConsented(p.id) ? ' ✓' : '';
-      return `<option value="${p.id}"${p.id === currentId ? ' selected' : ''}${inUse ? ' disabled' : ''}>${escapeAttr(p.username)}${tick}${inUse ? ' (in use)' : ''}</option>`;
+      return `<option value="${p.id}"${p.id === currentId ? ' selected' : ''}${inUse ? ' disabled' : ''}>${escapeAttr(p.username)}${inUse ? ' (in use)' : ''}</option>`;
     })
   ].join('');
 
