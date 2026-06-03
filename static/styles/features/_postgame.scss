@@ -255,6 +255,17 @@
   color: $color-text-2;
 }
 
+.pg-stat-row.indent .pg-stat-label {
+  padding-left: 12px;
+  color: $color-text-3;
+  font-size: 11px;
+}
+
+.pg-stat-row.pg-self-row {
+  background: $accent-tint;
+  .pg-stat-label { color: $color-primary; font-weight: 600; }
+}
+
 // ── Scatter plot ──────────────────────────────────────────────────────────────
 
 .pg-scatter-wrap {

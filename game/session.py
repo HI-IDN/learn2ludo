@@ -404,7 +404,9 @@ class GameSession:
             "times_blocked": 0,
             "almost_captures": 0,
             "times_safe_haven_protected": 0,
-            "turns_skipped": 0,
+            "forfeit_no_pawn": 0,
+            "forfeit_blockade": 0,
+            "forfeit_no_exact": 0,
             "pawns_finished": 0,
             # for axis computation
             "_moves": 0,
@@ -423,8 +425,12 @@ class GameSession:
                 s["dice_distribution"][str(d)] = s["dice_distribution"].get(str(d), 0) + 1
                 if d == 6:
                     s["sixes"] += 1
-                if t == "roll" and not ev.get("valid_moves") and not ev.get("blocked_pawns"):
-                    s["turns_skipped"] += 1
+                # Forfeit: last yard-roll attempt (exhausted all tries, no 6)
+                if t == "yard_roll" and ev.get("attempt") == ev.get("max_attempts"):
+                    s["forfeit_no_pawn"] += 1
+                # Forfeit: no valid moves, no blocker, not all in yard → need exact roll
+                if t == "roll" and not ev.get("valid_moves") and ev.get("no_exact_roll"):
+                    s["forfeit_no_exact"] += 1
 
             elif t == "capture":
                 stats[ev["by_player"]]["captures_made"] += 1
@@ -435,6 +441,7 @@ class GameSession:
 
             elif t == "blocked" and p is not None:
                 stats[p]["times_blocked"] += 1
+                stats[p]["forfeit_blockade"] += 1
 
             elif t == "almost_capture":
                 stats[ev["attacker"]]["almost_captures"] += 1

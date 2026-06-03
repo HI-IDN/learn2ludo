@@ -39,84 +39,98 @@ function maybeShowPostGame() {
 
 // ── Reflection phase ─────────────────────────────────────────────────────────
 
-function _humanPlayersInOrder() {
+function _isCustomBot(i) {
+  const registry = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+  const botId = settings.bot_ids?.[i];
+  const bot = registry.find(b => b.id === botId);
+  return !!bot?.designer;
+}
+
+function _reflectionPlayersInOrder() {
   const n = gameState.num_players || 1;
-  return Array.from({length: n}, (_, i) => i).filter(i => gamePlayerType(i) === 'human');
+  return Array.from({length: n}, (_, i) => i)
+    .filter(i => gamePlayerType(i) === 'human' || _isCustomBot(i));
 }
 
 function _startReflectionPhase() {
-  const humans = _humanPlayersInOrder();
-  if (!humans.length) { _mountStats(); return; }
-  _showReflectionCard(humans, 0);
+  const players = _reflectionPlayersInOrder();
+  if (!players.length) { _mountStats(); return; }
+  _showReflectionCard(players, 0);
 }
 
 function _boardArea() { return document.getElementById('board-area'); }
 function _boardWrap()  { return document.getElementById('board-wrap'); }
 
-function _showReflectionCard(humans, idx) {
-  if (idx >= humans.length) { _mountStats(); return; }
+function _showReflectionCard(players, idx) {
+  if (idx >= players.length) { _mountStats(); return; }
 
-  const playerIdx = humans[idx];
+  const playerIdx = players[idx];
+  const isBot     = gamePlayerType(playerIdx) !== 'human';
   const color     = gameState.players[playerIdx]?.color || 'blue';
   const name      = gamePlayerName(playerIdx);
   const hex       = COLORS[color] || '#888';
+  const icon      = isBot ? 'fa-robot' : 'fa-user';
+  const title     = isBot ? `How did ${escapeAttr(name)} play?` : 'How did you play?';
+  const sub       = isBot
+    ? 'Rate this bot\'s play style before seeing the stats.'
+    : 'Rate yourself before seeing the stats.';
+  const nextLabel = idx < players.length - 1 ? 'Next' : 'See stats';
 
   _boardWrap().style.display = 'none';
   document.getElementById('postgame-reflection')?.remove();
+
+  const axis = (id, lo, hi) => `
+    <div class="pg-axis">
+      <div class="pg-axis-labels"><span style="color:${hex}">${lo}</span><span style="color:#8A91A0">${hi}</span></div>
+      <div class="pg-pips" id="${id}">
+        ${[1,2,3,4,5].map(v=>`<button class="pg-pip" data-v="${v}">${v}</button>`).join('')}
+      </div>
+    </div>`;
 
   const el = document.createElement('div');
   el.id = 'postgame-reflection';
   el.innerHTML = `
     <div class="pg-reflect-badge" style="--pc:${hex}">
-      <i class="fa-solid fa-user"></i> ${escapeAttr(name)}
+      <i class="fa-solid ${icon}"></i> ${escapeAttr(name)}
     </div>
-    <h2 class="pg-reflect-title">How did you play?</h2>
-    <p class="pg-reflect-sub">Rate yourself before seeing the stats.</p>
-
-    <div class="pg-axis">
-      <div class="pg-axis-labels"><span style="color:${hex}">Aggressive</span><span style="color:#8A91A0">Passive</span></div>
-      <div class="pg-pips" id="r-aggressive">
-        ${[1,2,3,4,5].map(v=>`<button class="pg-pip" data-v="${v}">${v}</button>`).join('')}
-      </div>
-    </div>
-
-    <div class="pg-axis">
-      <div class="pg-axis-labels"><span style="color:${hex}">Risky</span><span style="color:#8A91A0">Cautious</span></div>
-      <div class="pg-pips" id="r-risky">
-        ${[1,2,3,4,5].map(v=>`<button class="pg-pip" data-v="${v}">${v}</button>`).join('')}
-      </div>
-    </div>
-
+    <h2 class="pg-reflect-title">${title}</h2>
+    <p class="pg-reflect-sub">${sub}</p>
+    ${axis('r-aggressive', 'Aggressive', 'Passive')}
+    ${axis('r-risky',      'Risky',      'Cautious')}
+    ${axis('r-lucky',      'Lucky',      'Unlucky')}
     <div class="pg-reflect-actions">
-      <button class="btn btn-primary" id="r-next" disabled>
-        ${idx < humans.length - 1 ? 'Next player' : 'See stats'}
-      </button>
+      <button class="btn btn-primary" id="r-next" disabled>${nextLabel}</button>
       <button class="btn btn-ghost" id="r-skip">Skip</button>
     </div>
   `;
   _boardArea().appendChild(el);
 
-  let agg = null, risk = null;
+  let agg = null, risk = null, lucky = null;
   const nextBtn = el.querySelector('#r-next');
+  const allSet  = () => agg && risk && lucky;
 
-  el.querySelectorAll('#r-aggressive .pg-pip').forEach(b => b.addEventListener('click', () => {
-    el.querySelectorAll('#r-aggressive .pg-pip').forEach(x => x.classList.remove('sel'));
-    b.classList.add('sel'); agg = +b.dataset.v;
-    if (agg && risk) nextBtn.disabled = false;
-  }));
-  el.querySelectorAll('#r-risky .pg-pip').forEach(b => b.addEventListener('click', () => {
-    el.querySelectorAll('#r-risky .pg-pip').forEach(x => x.classList.remove('sel'));
-    b.classList.add('sel'); risk = +b.dataset.v;
-    if (agg && risk) nextBtn.disabled = false;
-  }));
+  ['r-aggressive', 'r-risky', 'r-lucky'].forEach(axisId => {
+    el.querySelectorAll(`#${axisId} .pg-pip`).forEach(b => b.addEventListener('click', () => {
+      el.querySelectorAll(`#${axisId} .pg-pip`).forEach(x => x.classList.remove('sel'));
+      b.classList.add('sel');
+      if (axisId === 'r-aggressive') agg   = +b.dataset.v;
+      if (axisId === 'r-risky')      risk  = +b.dataset.v;
+      if (axisId === 'r-lucky')      lucky = +b.dataset.v;
+      nextBtn.disabled = !allSet();
+    }));
+  });
 
   nextBtn.addEventListener('click', () => {
-    _reflections.push({ player: playerIdx, color, name, self_aggressive: agg, self_risky: risk, skipped: false, timestamp: new Date().toISOString() });
-    _showReflectionCard(humans, idx + 1);
+    _reflections.push({ player: playerIdx, color, name, is_bot: isBot,
+      self_aggressive: agg, self_risky: risk, self_lucky: lucky,
+      skipped: false, timestamp: new Date().toISOString() });
+    _showReflectionCard(players, idx + 1);
   });
   el.querySelector('#r-skip').addEventListener('click', () => {
-    _reflections.push({ player: playerIdx, color, name, self_aggressive: null, self_risky: null, skipped: true, timestamp: new Date().toISOString() });
-    _showReflectionCard(humans, idx + 1);
+    _reflections.push({ player: playerIdx, color, name, is_bot: isBot,
+      self_aggressive: null, self_risky: null, self_lucky: null,
+      skipped: true, timestamp: new Date().toISOString() });
+    _showReflectionCard(players, idx + 1);
   });
 }
 
@@ -263,15 +277,18 @@ function _drawHistogram(playerFilter) {
 
 function _buildStatTable(stats) {
   const rows = [
-    { label: 'Rolls',         key: 'rolls' },
-    { label: 'Avg dice',      key: 'dice_avg' },
-    { label: 'Luck (avg−3.5)',key: 'luck_score', fmt: v => (v>0?'+':'')+v },
-    { label: 'Sixes',         key: 'sixes_pct',  fmt: v => v+'%' },
-    { label: 'Captures made', key: 'captures_made' },
-    { label: 'Captured',      key: 'captures_suffered' },
-    { label: 'Blockades',     key: 'blockades_formed' },
-    { label: 'Blocked',       key: 'times_blocked' },
-    { label: 'Pawns finished',key: 'pawns_finished' },
+    { label: 'Rolls',              key: 'rolls' },
+    { label: 'Avg dice',           key: 'dice_avg' },
+    { label: 'Luck (avg−3.5)',     key: 'luck_score',          fmt: v => (v>0?'+':'')+v },
+    { label: 'Sixes',              key: 'sixes_pct',            fmt: v => v+'%' },
+    { label: 'Captures made',      key: 'captures_made' },
+    { label: 'Captured',           key: 'captures_suffered' },
+    { label: 'Blockades formed',   key: 'blockades_formed' },
+    { label: 'Blocked',            key: 'times_blocked' },
+    { label: 'Pawns finished',     key: 'pawns_finished' },
+    { label: '— Forfeit: no pawn out', key: 'forfeit_no_pawn',   cls: 'indent' },
+    { label: '— Forfeit: blockade',    key: 'forfeit_blockade',  cls: 'indent' },
+    { label: '— Forfeit: need exact',  key: 'forfeit_no_exact',  cls: 'indent' },
   ];
 
   const header = `<div class="pg-stat-row pg-stat-head">
@@ -280,7 +297,7 @@ function _buildStatTable(stats) {
   </div>`;
 
   const body = rows.map(row => `
-    <div class="pg-stat-row">
+    <div class="pg-stat-row${row.cls ? ' '+row.cls : ''}">
       <span class="pg-stat-label">${row.label}</span>
       ${stats.map(s => {
         const v = s[row.key];
@@ -289,7 +306,21 @@ function _buildStatTable(stats) {
     </div>
   `).join('');
 
-  return header + body;
+  // Self-rated luck row — only if any reflection has self_lucky
+  const luckyRatings = _reflections.filter(r => !r.skipped && r.self_lucky != null);
+  const luckyRow = luckyRatings.length ? `
+    <div class="pg-stat-row pg-self-row">
+      <span class="pg-stat-label">Self-rated luck</span>
+      ${stats.map(s => {
+        const ref = luckyRatings.find(r => r.player === s.player);
+        if (!ref) return '<span>—</span>';
+        const label = ['','Lucky','Somewhat lucky','Neutral','Somewhat unlucky','Unlucky'][ref.self_lucky] || ref.self_lucky;
+        return `<span title="${label}">${ref.self_lucky}</span>`;
+      }).join('')}
+    </div>
+  ` : '';
+
+  return header + body + luckyRow;
 }
 
 // ── Scatter plot ──────────────────────────────────────────────────────────────
