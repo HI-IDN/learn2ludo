@@ -120,6 +120,20 @@
   gap: 8px;
 }
 
+.bot-card-delete {
+  background: none;
+  border: none;
+  color: $color-text-3;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  margin-left: auto;
+  padding: 3px 5px;
+  border-radius: 4px;
+
+  &:hover { color: #e05; }
+}
+
 .bot-card-status {
   border: 1px solid $border-medium;
   border-radius: 999px;

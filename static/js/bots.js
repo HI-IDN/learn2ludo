@@ -295,6 +295,15 @@ function renderBotsPage() {
   `;
 }
 
+async function botDeleteCustom(botId, botName) {
+  if (!confirm(`Delete "${botName}"? This cannot be undone.`)) return;
+  try {
+    await fetch(`/api/bots/custom/${encodeURIComponent(botId)}`, { method: 'DELETE' });
+  } catch { /* ignore */ }
+  await loadBotRegistry();
+  renderBotsPage();
+}
+
 function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '') {
   const botCards = bots.length
     ? bots.map(b => `
@@ -304,6 +313,7 @@ function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '
             <div class="bot-card-title">
               <div class="bot-card-name">${b.name}</div>
               ${botStatusBadge(b)}
+              ${b.status === 'Custom' ? `<button class="bot-card-delete" title="Delete bot" onclick="botDeleteCustom('${b.id}', '${b.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
             <div class="bot-card-desc">${botCardDescription(b)}</div>
             ${b.focus ? `<div class="bot-card-focus">${b.focus}</div>` : ''}

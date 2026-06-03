@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 
 from game.engine import GameConfig, BoardConfig
 from game.session import GameSession
-from game.bots import ApolloBot, get_bot_info, REGISTRY as BOT_REGISTRY
+from game.bots import ApolloBot, get_bot_info, save_custom_bot, delete_custom_bot, load_custom_bots, REGISTRY as BOT_REGISTRY
 from rl.environment import LudoEnv, TrainingSession, OPPONENT_POLICIES
 
 app = FastAPI(title="Ludo RL")
@@ -136,6 +136,33 @@ def list_bots():
     return {"bots": get_bot_info()}
 
 
+class SaveCustomBotRequest(BaseModel):
+    id: str
+    name: str
+    tldr: str
+    description: str
+    weights: dict
+    profile: str = ""
+    template: str = ""
+    created_at: str = ""
+
+
+@app.post("/api/bots/custom", status_code=201)
+def create_custom_bot(req: SaveCustomBotRequest):
+    if not req.name.strip() or not req.tldr.strip() or not req.description.strip():
+        raise HTTPException(status_code=422, detail="name, tldr, and description are required")
+    bot = req.model_dump()
+    save_custom_bot(bot)
+    return {"ok": True, "id": bot["id"]}
+
+
+@app.delete("/api/bots/custom/{bot_id}")
+def remove_custom_bot(bot_id: str):
+    if not delete_custom_bot(bot_id):
+        raise HTTPException(status_code=404, detail=f"Custom bot not found: {bot_id}")
+    return {"ok": True}
+
+
 class BotMoveRequest(BaseModel):
     bot_id: str
     valid_moves: list
@@ -153,6 +180,12 @@ def bot_move(req: BotMoveRequest):
 
     bot = BOT_REGISTRY.get(req.bot_id)
     if not bot:
+        custom = next((b for b in load_custom_bots() if b.get("id") == req.bot_id), None)
+        if custom:
+            move = ApolloBot(custom.get("weights") or {}).choose_move(req.valid_moves, req.game_state or None)
+            if move is None:
+                raise HTTPException(status_code=400, detail="No valid moves")
+            return move
         raise HTTPException(status_code=404, detail=f"Unknown bot: {req.bot_id}")
     move = bot.choose_move(req.valid_moves, req.game_state or None)
     if move is None:

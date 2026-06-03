@@ -17,6 +17,7 @@ from pathlib import Path
 
 
 BOTS_CONFIG_PATH = Path(__file__).resolve().parents[1] / "config" / "bots.json"
+BOTS_CUSTOM_PATH = Path(__file__).resolve().parents[1] / "config" / "bots_custom.json"
 
 
 @dataclass(frozen=True)
@@ -246,6 +247,36 @@ def load_bot_catalog() -> list[dict]:
     return data.get("bots", [])
 
 
+def load_custom_bots() -> list[dict]:
+    if not BOTS_CUSTOM_PATH.exists():
+        return []
+    data = json.loads(BOTS_CUSTOM_PATH.read_text(encoding="utf-8"))
+    return [b for b in data.get("bots", []) if not b.get("_is_deleted")]
+
+
+def save_custom_bot(bot: dict) -> None:
+    if BOTS_CUSTOM_PATH.exists():
+        data = json.loads(BOTS_CUSTOM_PATH.read_text(encoding="utf-8"))
+    else:
+        data = {"bots": []}
+    data["bots"].append(bot)
+    BOTS_CUSTOM_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def delete_custom_bot(bot_id: str) -> bool:
+    if not BOTS_CUSTOM_PATH.exists():
+        return False
+    data = json.loads(BOTS_CUSTOM_PATH.read_text(encoding="utf-8"))
+    found = False
+    for bot in data.get("bots", []):
+        if bot.get("id") == bot_id:
+            bot["_is_deleted"] = True
+            found = True
+    if found:
+        BOTS_CUSTOM_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    return found
+
+
 # ---------------------------------------------------------------------------
 # Heuristic bots
 # ---------------------------------------------------------------------------
@@ -435,4 +466,11 @@ def get_bot_info() -> list[dict]:
     for bot_id, bot in REGISTRY.items():
         if bot_id not in seen:
             bots.append(bot.to_info())
+
+    for custom in load_custom_bots():
+        bot_id = custom.get("id")
+        if bot_id and bot_id not in seen:
+            bots.append({**custom, "type": "weighted", "status": "Custom", "implemented": True, "selectable": True})
+            seen.add(bot_id)
+
     return bots

@@ -92,6 +92,8 @@ function renderBotBuilderCard() {
       </label>`;
   }).join('');
 
+  const saveValid = botBuilderDraftValid(draft);
+
   return `
     <div class="bot-card bot-builder-card">
       <div class="bot-card-icon"><i class="fa-solid fa-sliders"></i></div>
@@ -108,10 +110,6 @@ function renderBotBuilderCard() {
             <div class="bot-builder-controls">${rows}</div>
             <div class="bot-builder-actions">
               <span class="bot-builder-save-status" id="bot-builder-save-status"></span>
-              <button class="btn btn-sm btn-primary" type="button" onclick="botBuilderSave()">
-                <i class="fa-solid fa-floppy-disk"></i>
-                Save Bot
-              </button>
               <button class="btn btn-sm" type="button" onclick="botBuilderReset()">
                 <i class="fa-solid fa-rotate-left"></i>
                 Reset
@@ -148,6 +146,19 @@ function renderBotBuilderCard() {
               oninput="botBuilderSetDraftDescription(this.value)"
             >${escapeBotText(draft.description)}</textarea>
             </label>
+            <div class="bot-builder-draft-actions">
+              <button
+                class="btn btn-sm btn-primary"
+                id="bot-builder-save-btn"
+                type="button"
+                onclick="botBuilderSave()"
+                ${saveValid ? '' : 'disabled'}
+                title="${saveValid ? 'Save this bot configuration' : 'Fill in Name, TLDR, and Description to save'}"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+                Save Bot
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -170,11 +181,17 @@ function getUserBotDraft() {
   };
 }
 
+function botBuilderDraftValid(draft) {
+  draft = draft || getUserBotDraft();
+  return !!(draft.name.trim() && draft.tldr.trim() && draft.description.trim());
+}
+
 function botBuilderSetDraftName(value) {
   settings.user_bot_draft = settings.user_bot_draft || {};
   settings.user_bot_draft.name = String(value || '').slice(0, 18);
   persistSettings();
   botBuilderRefreshDraft();
+  botBuilderRefreshSaveBtn();
 }
 
 function botBuilderSetDraftTldr(value) {
@@ -182,21 +199,48 @@ function botBuilderSetDraftTldr(value) {
   settings.user_bot_draft.tldr = String(value || '').slice(0, 32);
   persistSettings();
   botBuilderRefreshDraft();
+  botBuilderRefreshSaveBtn();
 }
 
 function botBuilderSetDraftDescription(value) {
   settings.user_bot_draft = settings.user_bot_draft || {};
   settings.user_bot_draft.description = String(value || '').slice(0, 360);
   persistSettings();
-  botBuilderRefreshDraft();
+  botBuilderRefreshSaveBtn();
 }
 
-function botBuilderSave() {
+function botBuilderRefreshSaveBtn() {
+  const btn = document.getElementById('bot-builder-save-btn');
+  if (!btn) return;
+  const valid = botBuilderDraftValid();
+  btn.disabled = !valid;
+  btn.title = valid ? 'Save this bot configuration' : 'Fill in Name, TLDR, and Description to save';
+}
+
+async function botBuilderSave() {
+  const draft = getUserBotDraft();
+  if (!botBuilderDraftValid(draft)) return;
   const bot = buildSavedUserBot();
-  settings.saved_user_bots = Array.isArray(settings.saved_user_bots) ? settings.saved_user_bots : [];
-  settings.saved_user_bots.push(bot);
+  try {
+    const r = await fetch('/api/bots/custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bot),
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      botBuilderSetSaveStatus(`Error: ${err.detail || r.status}`);
+      return;
+    }
+  } catch {
+    botBuilderSetSaveStatus('Save failed — server unreachable');
+    return;
+  }
+  settings.user_bot_draft = { name: '', tldr: '', description: '' };
+  settings.user_bot_weights = defaultUserBotWeights();
   persistSettings();
-  botBuilderSetSaveStatus(`Saved ${bot.id}`);
+  await loadBotRegistry();
+  renderBotsPage();
 }
 
 function botBuilderReset() {

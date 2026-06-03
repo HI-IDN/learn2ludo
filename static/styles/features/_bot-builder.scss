@@ -123,6 +123,13 @@
   margin-right: auto;
 }
 
+.bot-builder-draft-actions {
+  display: flex;
+  justify-content: flex-end;
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
+
 @media (max-width: 700px) {
   .bot-builder-card {
     grid-column: 1 / -1;
