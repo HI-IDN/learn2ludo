@@ -35,6 +35,7 @@ function lobbyChangePawns(delta) {
   const el = document.getElementById('board-pawns-per-player');
   if (el) el.value = next;
   renderLobbySlots();
+  drawBoard();
 }
 
 function renderLobbyYardControl() {
