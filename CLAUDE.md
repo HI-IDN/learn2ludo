@@ -7,6 +7,12 @@ The RL training layer lives in `rl/` and the game engine in `game/`.
 
 ## Running the app
 
+**Just run it:**
+```
+python -m uvicorn server:app --port 8000
+```
+
+**Development mode** (auto-reloads on Python file changes):
 ```
 python -m uvicorn server:app --reload --port 8000
 ```
