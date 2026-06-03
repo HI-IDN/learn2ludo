@@ -40,7 +40,7 @@ function getOrderedBotRegistry() {
 
 function getBotRegistry() { return BOT_REGISTRY; }
 function getSelectableBots() {
-  return BOT_REGISTRY.filter(b => b.implemented !== false && !b._is_deleted);
+  return BOT_REGISTRY.filter(b => b.implemented !== false && !b._is_deleted && b.id !== 'user-weighted');
 }
 
 function botLobbyLabel(bot) {
