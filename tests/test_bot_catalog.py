@@ -24,6 +24,12 @@ def test_bot_catalog_includes_available_and_planned_bots():
     assert by_id["apollo"]["implemented"] is True
     assert by_id["apollo"]["id"] in REGISTRY
 
+    assert by_id["student-weighted"]["type"] == "weighted"
+    assert by_id["student-weighted"]["status"] == "Custom"
+    assert by_id["student-weighted"]["selectable"] is True
+    assert by_id["student-weighted"]["implemented"] is True
+    assert by_id["student-weighted"]["id"] in REGISTRY
+
     assert by_id["hephaestus"]["selectable"] is True
     assert by_id["hephaestus"]["implemented"] is True
     assert by_id["hephaestus"]["id"] in REGISTRY

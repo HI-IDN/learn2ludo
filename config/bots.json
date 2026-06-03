@@ -51,6 +51,16 @@
       "selectable": true
     },
     {
+      "id": "student-weighted",
+      "name": "Your Bot",
+      "type": "weighted",
+      "epithet": "Student CDR",
+      "description": "Custom weighted bot configured with sliders.",
+      "focus": "Adjust the sliders next to Apollo to combine simple dispatching rules.",
+      "status": "Custom",
+      "selectable": true
+    },
+    {
       "id": "hermes",
       "name": "Hermes",
       "type": "heuristic",

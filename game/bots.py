@@ -328,6 +328,8 @@ APOLLO_WEIGHTS = {
     "ares_capture": 0.30,
     "athena_safety": 0.35,
     "hestia_progress": 0.25,
+    "hermes_spread": 0.0,
+    "hephaestus_blockade": 0.0,
     "artemis_activation": 0.10,
 }
 
@@ -348,6 +350,8 @@ def apollo_score(features: MoveFeatures, weights: dict | None = None) -> float:
         (features.capture * weights.get("ares_capture", 0.0)) +
         (athena_score * weights.get("athena_safety", 0.0)) +
         (features.progress * weights.get("hestia_progress", 0.0)) +
+        (features.spread * weights.get("hermes_spread", 0.0)) +
+        (features.blockade * weights.get("hephaestus_blockade", 0.0)) +
         (features.activation * weights.get("artemis_activation", 0.0))
     )
 
@@ -369,9 +373,20 @@ class ApolloBot(BotPolicy):
                 return REGISTRY["athena"].choose_move(valid_moves, game_state)
             case "hestia_progress":
                 return REGISTRY["hestia"].choose_move(valid_moves, game_state)
+            case "hermes_spread":
+                return REGISTRY["hermes"].choose_move(valid_moves, game_state)
+            case "hephaestus_blockade":
+                return REGISTRY["hephaestus"].choose_move(valid_moves, game_state)
             case "artemis_activation":
                 return REGISTRY["artemis"].choose_move(valid_moves, game_state)
         return choose_by_feature(valid_moves, game_state, lambda _move, f: apollo_score(f, self.weights))
+
+
+class StudentWeightedBot(ApolloBot):
+    id          = "student-weighted"
+    name        = "Your Bot"
+    type        = "weighted"
+    description = "Student-created CDR — uses slider-configured weights"
 
 
 # ---------------------------------------------------------------------------
@@ -384,6 +399,7 @@ _BUILTIN: list[BotPolicy] = [
     AthenaBot(),
     HestiaBot(),
     ApolloBot(),
+    StudentWeightedBot(),
     HermesBot(),
     HephaestusBot(),
     ArtemisBot(),

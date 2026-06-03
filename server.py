@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 
 from game.engine import GameConfig, BoardConfig
 from game.session import GameSession
-from game.bots import get_bot_info, REGISTRY as BOT_REGISTRY
+from game.bots import ApolloBot, get_bot_info, REGISTRY as BOT_REGISTRY
 from rl.environment import LudoEnv, TrainingSession, OPPONENT_POLICIES
 
 app = FastAPI(title="Ludo RL")
@@ -140,10 +140,17 @@ class BotMoveRequest(BaseModel):
     bot_id: str
     valid_moves: list
     game_state: dict = {}
+    weights: dict = {}
 
 
 @app.post("/api/game/bot-move")
 def bot_move(req: BotMoveRequest):
+    if req.bot_id == "student-weighted":
+        move = ApolloBot(req.weights or None).choose_move(req.valid_moves, req.game_state or None)
+        if move is None:
+            raise HTTPException(status_code=400, detail="No valid moves")
+        return move
+
     bot = BOT_REGISTRY.get(req.bot_id)
     if not bot:
         raise HTTPException(status_code=404, detail=f"Unknown bot: {req.bot_id}")

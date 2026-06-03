@@ -1,4 +1,4 @@
-from game.bots import REGISTRY, ApolloBot, MoveFeatures, apollo_score, move_features
+from game.bots import REGISTRY, ApolloBot, MoveFeatures, StudentWeightedBot, apollo_score, move_features
 
 
 def state(players, safe_havens=None):
@@ -195,6 +195,28 @@ def test_apollo_single_weight_dispatches_like_matching_sdr():
             ],
         ),
         (
+            "hermes",
+            "hermes_spread",
+            state([
+                {"index": 0, "pieces": [piece(0, "R1", 10, 10), piece(1, "R2", 11, 11)]},
+            ]),
+            [
+                {"piece_idx": 1, "pawn_id": "R2", "target": 12},
+                {"piece_idx": 1, "pawn_id": "R2", "target": 30},
+            ],
+        ),
+        (
+            "hephaestus",
+            "hephaestus_blockade",
+            state([
+                {"index": 0, "pieces": [piece(0, "R1", 8, 8), piece(1, "R2", 4, 4)]},
+            ]),
+            [
+                {"piece_idx": 1, "pawn_id": "R2", "target": 8},
+                {"piece_idx": 1, "pawn_id": "R2", "target": 10},
+            ],
+        ),
+        (
             "artemis",
             "artemis_activation",
             state([
@@ -217,3 +239,16 @@ def test_apollo_missing_weights_default_to_zero():
     features = MoveFeatures(capture=1.0, progress=0.5, activation=1.0)
 
     assert apollo_score(features, {"hestia_progress": 2.0}) == 1.0
+
+
+def test_student_weighted_bot_uses_custom_slider_weights():
+    game_state = state([
+        {"index": 0, "pieces": [piece(0, "R1", 10, 10), piece(1, "R2", 11, 11)]},
+    ])
+    bot = StudentWeightedBot({"hermes_spread": 100.0})
+    move = bot.choose_move([
+        {"piece_idx": 1, "pawn_id": "R2", "target": 12},
+        {"piece_idx": 1, "pawn_id": "R2", "target": 30},
+    ], game_state)
+
+    assert move["target"] == 30
