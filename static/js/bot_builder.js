@@ -211,21 +211,23 @@ function _botBuilderWeightIssue() {
   const nonzero = USER_BOT_WEIGHT_DEFS.filter(d => Math.abs(weights[d.key] || 0) > 0.001);
   if (nonzero.length === 0) return 'Set at least one weight — all-zero is just Eris';
   if (nonzero.length === 1 && (weights[nonzero[0].key] || 0) > 0)
-    return 'A single positive weight duplicates an existing bot — add a second or use a negative weight';
+    return 'A single positive weight duplicates a SDR — add a second or use a negative weight';
   return null;
 }
 
 function botBuilderDraftValid(draft) {
   draft = draft || getUserBotDraft();
-  if (!draft.name.trim() || !draft.tldr.trim() || !draft.description.trim()) return false;
-  return _botBuilderWeightIssue() === null;
+  if (_botBuilderWeightIssue()) return false;
+  return !!(draft.name.trim() && draft.tldr.trim() && draft.description.trim());
 }
 
 function botBuilderSaveTooltip() {
+  const weightIssue = _botBuilderWeightIssue();
+  if (weightIssue) return weightIssue;
   const draft = getUserBotDraft();
   if (!draft.name.trim() || !draft.tldr.trim() || !draft.description.trim())
     return 'Fill in Name, TLDR, and Description to save';
-  return _botBuilderWeightIssue() ?? 'Save this bot configuration';
+  return 'Save this bot configuration';
 }
 
 function botBuilderSetDraftName(value) {
