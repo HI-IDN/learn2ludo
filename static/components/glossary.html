@@ -94,7 +94,7 @@
             <i class="ti ti-chevron-down glossary-chevron"></i>
           </summary>
           <div class="glossary-detail">
-            In scheduling literature, a composite dispatching rule combines multiple priorities into one score. Apollo is Learn2Ludo's CDR example: it combines simple rules such as capture, safety, progress, and activation. If one Apollo weight is set to 100 and the rest to 0, Apollo behaves like that matching simple rule.
+            In scheduling literature, a composite dispatching rule combines multiple priorities into one score. A CDR is a dispatching-rule version of a weighted decision: it uses weights to decide which available job, action, or move should go next. Apollo is Learn2Ludo's CDR example: it combines simple rules such as capture, safety, progress, and activation. If one Apollo weight is set to 100 and the rest to 0, Apollo behaves like that matching simple rule.
             <p class="glossary-example"><strong>Example:</strong> Apollo with only the capture weight enabled behaves like Ares.</p>
           </div>
         </details>
@@ -387,7 +387,7 @@
             <i class="ti ti-chevron-down glossary-chevron"></i>
           </summary>
           <div class="glossary-detail">
-            Rather than treating all considerations as equal, a weighted decision multiplies each factor by its weight before combining them. Higher-weight factors dominate the final score. This lets you control which aspects of the game the bot prioritises.
+            Rather than treating all considerations as equal, a weighted decision multiplies each factor by its weight before combining them. Higher-weight factors dominate the final score. A composite dispatching rule is a weighted decision used specifically to choose the next item from the available options.
             <p class="glossary-example"><strong>Example:</strong> If "capture opponent" has weight 10 and "advance pawn" has weight 1, the bot will almost always prefer capturing over advancing.</p>
           </div>
         </details>
