@@ -36,6 +36,9 @@ class GameSession:
         self.round_count      = 1
         self._move_counts: dict[int, int] = {}
         self._leader_move_counts: dict[int, int] = {}
+        # Count turns started per player; starting player's first turn = 1
+        self._turn_counts: dict[int, int] = {i: 0 for i in range(cfg.player_count)}
+        self._turn_counts[self.starting_player] = 1
         self.history.append({
             "type": "game_start",
             "player": self.starting_player,
@@ -45,6 +48,7 @@ class GameSession:
     def _next_turn(self):
         """Advance to the next player and increment round when starting player comes back."""
         self.game.next()
+        self._turn_counts[self.game.player] = self._turn_counts.get(self.game.player, 0) + 1
         if self.game.player == self.starting_player:
             self.round_count += 1
             if self._finishing_round_player is not None:
@@ -452,23 +456,34 @@ class GameSession:
             elif t == "move" and p is not None:
                 stats[p]["_moves"] += 1
 
-        # Compute pawns finished
-        pawns_per = self.game.config.board.pawns_per_player
+        # Compute pawn progress at game end
+        finish_pos = self.gp.home_entry + self.gp.home_len - 1
         for i in range(n):
-            finished = sum(1 for pc in self.gp.pieces if pc.player == i and pc.finished)
-            stats[i]["pawns_finished"] = finished
+            pieces_i = [pc for pc in self.gp.pieces if pc.player == i]
+            finished     = sum(1 for pc in pieces_i if pc.finished)
+            in_yard      = sum(1 for pc in pieces_i if not pc.finished and pc.pos == -1)
+            on_track     = sum(1 for pc in pieces_i if not pc.finished and 0 <= pc.pos < self.gp.home_entry)
+            home_stretch = sum(1 for pc in pieces_i if not pc.finished and pc.pos >= self.gp.home_entry)
+            non_done = [pc for pc in pieces_i if not pc.finished]
+            spaces = [finish_pos - pc.pos if pc.pos >= 0 else finish_pos + 1 for pc in non_done]
+            stats[i]["pawns_finished"]    = finished
+            stats[i]["pawns_in_yard"]     = in_yard
+            stats[i]["pawns_on_track"]    = on_track
+            stats[i]["pawns_home_stretch"]= home_stretch
+            stats[i]["avg_spaces_remaining"] = round(sum(spaces) / len(spaces), 1) if spaces else 0
 
         # Derived fields
         for s in stats:
+            i = s["player"]
             rolls = s["rolls"]
-            s["dice_avg"] = round(s["dice_total"] / rolls, 3) if rolls else 0
+            s["turns"]      = self._turn_counts.get(i, 0)
+            s["rounds"]     = self.round_count
+            s["dice_avg"]   = round(s["dice_total"] / rolls, 3) if rolls else 0
             s["luck_score"] = round(s["dice_avg"] - 3.5, 3)
-            s["sixes_pct"] = round(s["sixes"] / rolls * 100, 1) if rolls else 0
-            # aggression: captures / (captures + thwarted-by-safe-haven)
+            s["sixes_pct"]  = round(s["sixes"] / rolls * 100, 1) if rolls else 0
             opps = s["captures_made"] + s["almost_captures"]
             s["aggression_score"] = round(s["captures_made"] / opps, 3) if opps else 0.5
-            i = s["player"]
-            moves = self._move_counts.get(i, 0)
+            moves  = self._move_counts.get(i, 0)
             leader = self._leader_move_counts.get(i, 0)
             s["risk_score"] = round(leader / moves, 3) if moves else None
             del s["_moves"]

@@ -86,23 +86,6 @@
   justify-content: center;
   align-items: center;
   overflow: hidden;
-
-  // When postgame UI is active the area switches to column layout filling height
-  &:has(#postgame-toggle) {
-    justify-content: flex-start;
-    align-items: stretch;
-    border: 1px solid $border-light;
-    border-radius: 16px;
-    background: $color-bg-alt;
-    overflow: hidden;
-
-    #board-wrap {
-      flex: 1;
-      border-radius: 0;
-      border: none;
-      max-height: none;
-    }
-  }
 }
 
 #side-panel {

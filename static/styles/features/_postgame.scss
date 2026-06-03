@@ -1,47 +1,28 @@
 @use "../base/variables" as *;
 
-// ── Toggle strip (Board | Stats) ─────────────────────────────────────────────
+// ── Reflection modal (small, centered, private) ───────────────────────────────
 
-#postgame-toggle {
+#pg-reflection-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
   display: flex;
-  gap: 4px;
-  padding: 6px 8px 0;
-  border-bottom: 1px solid $border-light;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  padding: 16px;
+}
+
+.pg-reflect-card {
   background: $color-bg-alt;
-  flex-shrink: 0;
-}
-
-.pg-tog-btn {
-  flex: 1;
-  padding: 6px 12px;
-  border: none;
-  border-radius: $radius $radius 0 0;
-  background: transparent;
-  color: $color-text-2;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, color 0.12s;
-
-  &:hover { background: $color-bg; color: $color-text; }
-
-  &.active {
-    background: $color-bg;
-    color: $color-primary;
-    box-shadow: inset 0 -2px 0 $color-primary;
-  }
-}
-
-// ── Reflection card ───────────────────────────────────────────────────────────
-
-#postgame-reflection {
+  border-radius: $radius-lg;
+  padding: 24px 20px 20px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 24px 20px;
-  height: 100%;
-  overflow-y: auto;
-  background: $color-bg-alt;
+  gap: 16px;
 }
 
 .pg-reflect-badge {
@@ -58,28 +39,28 @@
 }
 
 .pg-reflect-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
   color: $color-text;
   margin: 0;
 }
 
 .pg-reflect-sub {
-  font-size: 13px;
+  font-size: 12px;
   color: $color-text-2;
-  margin: -10px 0 0;
+  margin: -8px 0 0;
 }
 
 .pg-axis {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .pg-axis-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -87,16 +68,16 @@
 
 .pg-pips {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .pg-pip {
   flex: 1;
   aspect-ratio: 1;
-  border-radius: $radius;
+  border-radius: 8px;
   border: 2px solid $border-medium;
   background: $color-bg;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: $color-text-2;
   cursor: pointer;
@@ -108,39 +89,45 @@
 
 .pg-reflect-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   #r-next { flex: 1; }
 }
 
-// ── Stats panel ───────────────────────────────────────────────────────────────
+// ── Stats side panel ──────────────────────────────────────────────────────────
 
-#postgame-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 16px;
-  overflow-y: auto;
-  height: 100%;
-  background: $color-bg-alt;
+#pg-side-header {
+  flex-shrink: 0;
+  padding: 0 0 12px;
 }
 
 .pg-winner-banner {
   background: color-mix(in srgb, var(--wc) 14%, transparent);
   border: 2px solid color-mix(in srgb, var(--wc) 35%, transparent);
   border-radius: $radius;
-  padding: 12px 16px;
-  font-size: 18px;
+  padding: 10px 14px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--wc);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
+
+#pg-stats-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-right: 2px;
+}
+
+// ── Sections ──────────────────────────────────────────────────────────────────
 
 .pg-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .pg-section-head {
@@ -148,7 +135,7 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .pg-section-title {
@@ -160,37 +147,53 @@
 }
 
 .pg-section-hint {
-  font-size: 12px;
+  font-size: 11px;
   color: $color-text-3;
-  margin: -4px 0 0;
 }
-
-// ── Radio group ───────────────────────────────────────────────────────────────
 
 .pg-radio-group {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .pg-radio-label {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 3px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
 }
 
 // ── Histogram ─────────────────────────────────────────────────────────────────
 
-.pg-histogram {
+.pg-histogram-outer {
   display: flex;
   gap: 6px;
+  align-items: stretch;
+}
+
+.pg-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 20px; // align with bar area (above face labels)
+  font-size: 9px;
+  color: $color-text-3;
+  text-align: right;
+  min-width: 20px;
+}
+
+.pg-histogram {
+  display: flex;
+  gap: 4px;
   align-items: flex-end;
-  height: 100px;
-  padding-bottom: 24px; // room for face labels
+  flex: 1;
+  padding-bottom: 20px; // room for face labels
   position: relative;
+  border-left: 1px solid $border-light;
+  border-bottom: 1px solid $border-light;
 }
 
 .pg-bar-group {
@@ -198,7 +201,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
   position: relative;
 }
 
@@ -214,14 +216,14 @@
   flex: 1;
   height: var(--h, 0%);
   min-height: 2px;
-  background: var(--bc, #888);
+  background: var(--bc, #{$color-primary});
   border-radius: 3px 3px 0 0;
   align-self: flex-end;
   transition: height 0.3s ease;
 }
 
 .pg-bar-face {
-  font-size: 16px;
+  font-size: 14px;
   position: absolute;
   bottom: -20px;
 }
@@ -229,68 +231,159 @@
 // ── Stat table ────────────────────────────────────────────────────────────────
 
 .pg-stat-table {
-  font-size: 12px;
+  font-size: 11px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+}
+
+.pg-stat-sep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 2px;
+  color: $color-text-3;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: $border-light;
+  }
+  &::before { flex: 0 0 0; }
 }
 
 .pg-stat-row {
   display: grid;
-  grid-template-columns: 1fr repeat(var(--cols, 4), 60px);
-  gap: 4px;
-  padding: 4px 6px;
-  border-radius: 6px;
+  // label + exp column + N player columns
+  grid-template-columns: 1fr 36px repeat(var(--cols, 4), 1fr);
+  gap: 2px;
+  padding: 3px 4px;
+  border-radius: 4px;
 
   &:nth-child(even) { background: $color-bg; }
-
   &.pg-stat-head {
     font-weight: 700;
-    font-size: 11px;
+    font-size: 10px;
+    color: $color-text-2;
     background: none;
+    padding-bottom: 2px;
   }
+  &.indent .pg-stat-label { padding-left: 10px; color: $color-text-3; font-size: 10px; }
+  &.pg-self-row { background: $accent-tint; .pg-stat-label { color: $color-primary; font-weight: 600; } }
 }
 
-.pg-stat-label {
-  color: $color-text-2;
-}
+.pg-stat-label { color: $color-text-2; }
 
-.pg-stat-row.indent .pg-stat-label {
-  padding-left: 12px;
+.pg-exp-col {
   color: $color-text-3;
-  font-size: 11px;
-}
-
-.pg-stat-row.pg-self-row {
-  background: $accent-tint;
-  .pg-stat-label { color: $color-primary; font-weight: 600; }
-}
-
-// ── Scatter plot ──────────────────────────────────────────────────────────────
-
-.pg-scatter-wrap {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.pg-scatter-y-labels {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 260px;
-  font-size: 11px;
-  color: $color-text-3;
+  font-size: 10px;
   text-align: right;
-  width: 52px;
-  padding: 4px 0;
+}
+
+// ── Matrices ──────────────────────────────────────────────────────────────────
+
+.pg-matrices {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.pg-matrix-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.pg-matrix-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: $color-text-3;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.pg-matrix {
+  border-collapse: collapse;
+  font-size: 11px;
+  width: 100%;
+
+  th, td {
+    padding: 3px 5px;
+    text-align: center;
+    border: 1px solid $border-light;
+  }
+  th { font-weight: 700; background: $color-bg; }
+  .pg-matrix-diag { color: $color-text-3; background: $color-bg; }
+  .pg-matrix-row-label { font-weight: 600; text-align: left; }
+  .pg-matrix-hit { font-weight: 700; color: $color-danger; }
+}
+
+// ── Scatter + descriptions ────────────────────────────────────────────────────
+
+.pg-scatter-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
 }
 
 .pg-scatter-x-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 10px;
   color: $color-text-3;
-  width: 260px;
-  margin-top: 4px;
+  width: 200px;
+  margin-top: 3px;
+}
+
+.pg-scatter-y-labels-row {
+  display: flex;
+  font-size: 10px;
+  color: $color-text-3;
+  width: 200px;
+}
+
+.pg-scatter-descriptions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.pg-desc-row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pg-desc-name {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pg-desc-text {
+  font-size: 11px;
+  color: $color-text-2;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.pg-footer {
+  padding: 8px 0 4px;
+  display: flex;
+  gap: 8px;
+}
+
+// ── Side panel in postgame mode ───────────────────────────────────────────────
+
+#side-panel:has(#pg-side-header) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
