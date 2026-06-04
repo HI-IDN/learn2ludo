@@ -179,9 +179,23 @@ function renderProfiles() {
 
 // ── Delete ────────────────────────────────────────────────────────────────────
 
-function deleteProfile(id) {
+async function deleteProfile(id) {
   const profile = getProfileById(id);
-  if (!confirm(`Remove player "${profileDisplayName(profile) || id}"?`)) return;
+  const customBots = profileCustomBots(id);
+  const botMessage = customBots.length
+    ? `\n\nThis will also delete ${customBots.length === 1 ? 'their custom bot' : `their ${customBots.length} custom bots`}:\n${customBots.map(b => `- ${b.name || b.id}`).join('\n')}`
+    : '';
+  if (!confirm(`Remove player "${profileDisplayName(profile) || id}"?${botMessage}`)) return;
+  try {
+    const r = await fetch(`/api/players/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!r.ok && !(r.status === 404 && !customBots.length)) {
+      alert('Could not delete this player. Please try again.');
+      return;
+    }
+  } catch {
+    alert('Could not delete this player. Please try again.');
+    return;
+  }
   saveProfiles(loadProfiles().filter(p => p.id !== id));
   if (settings.profile_ids) {
     for (const k of Object.keys(settings.profile_ids)) {
@@ -191,6 +205,17 @@ function deleteProfile(id) {
   }
   renderProfiles();
   if (typeof renderLobbySlots === 'function') renderLobbySlots();
+  if (customBots.length && typeof loadBotRegistry === 'function') await loadBotRegistry();
+  if (typeof renderBotsPage === 'function') renderBotsPage();
+}
+
+function profileCustomBots(profileId) {
+  const registry = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+  return registry.filter(bot =>
+    bot?.designer === profileId &&
+    bot?._is_deleted !== true &&
+    (bot.status === 'Custom' || bot.type === 'CDR')
+  );
 }
 
 // ── Registration modal ────────────────────────────────────────────────────────

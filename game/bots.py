@@ -277,6 +277,20 @@ def delete_custom_bot(bot_id: str) -> bool:
     return found
 
 
+def delete_custom_bots_by_designer(designer_id: str) -> int:
+    if not designer_id or not BOTS_CUSTOM_PATH.exists():
+        return 0
+    data = json.loads(BOTS_CUSTOM_PATH.read_text(encoding="utf-8"))
+    deleted = 0
+    for bot in data.get("bots", []):
+        if bot.get("designer") == designer_id and not bot.get("_is_deleted"):
+            bot["_is_deleted"] = True
+            deleted += 1
+    if deleted:
+        BOTS_CUSTOM_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    return deleted
+
+
 # ---------------------------------------------------------------------------
 # Heuristic bots
 # ---------------------------------------------------------------------------

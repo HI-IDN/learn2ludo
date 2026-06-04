@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 
 from game.engine import GameConfig, BoardConfig
 from game.session import GameSession
-from game.bots import ApolloBot, get_bot_info, save_custom_bot, delete_custom_bot, load_custom_bots, REGISTRY as BOT_REGISTRY
+from game.bots import ApolloBot, get_bot_info, save_custom_bot, delete_custom_bot, delete_custom_bots_by_designer, load_custom_bots, REGISTRY as BOT_REGISTRY
 from rl.environment import LudoEnv, TrainingSession, OPPONENT_POLICIES
 
 app = FastAPI(title="Ludo RL")
@@ -195,6 +195,17 @@ def register_player(req: PlayerRegisterRequest):
     players[req.id] = record
     save_players(players)
     return {"ok": True}
+
+
+@app.delete("/api/players/{player_id}")
+def delete_player(player_id: str):
+    players = load_players()
+    if player_id not in players:
+        raise HTTPException(status_code=404, detail=f"Player not found: {player_id}")
+    del players[player_id]
+    save_players(players)
+    deleted_bots = delete_custom_bots_by_designer(player_id)
+    return {"ok": True, "deleted_bots": deleted_bots}
 
 
 # ---------------------------------------------------------------------------

@@ -1,6 +1,9 @@
+import json
+
 from fastapi.testclient import TestClient
 
 import server
+from game import bots
 
 
 def test_register_player_stores_anonymous_user_by_uuid(tmp_path, monkeypatch):
@@ -55,3 +58,40 @@ def test_register_player_update_preserves_joined_timestamp(tmp_path, monkeypatch
     assert user["last_consent_ts"] == 1717443600000
     assert user["icon"] == "fa-face-grin"
     assert user["age_range"] == "30-44"
+
+
+def test_delete_player_removes_player_and_marks_custom_bots_deleted(tmp_path, monkeypatch):
+    players_path = tmp_path / "players.json"
+    custom_bots_path = tmp_path / "bots_custom.json"
+    monkeypatch.setattr(server, "PLAYERS_PATH", players_path)
+    monkeypatch.setattr(bots, "BOTS_CUSTOM_PATH", custom_bots_path)
+    monkeypatch.setattr(server, "delete_custom_bots_by_designer", bots.delete_custom_bots_by_designer)
+
+    players_path.write_text("""{
+      "users": {
+        "player-uuid-1": {
+          "id": "player-uuid-1",
+          "icon": "fa-face-smile",
+          "age_range": "18-29",
+          "joined_ts": 1717440000000,
+          "last_consent_ts": 1717440000000,
+          "leaderboard_opt_in": true
+        }
+      }
+    }""")
+    custom_bots_path.write_text("""{
+      "bots": [
+        {"id": "bot-1", "name": "One", "designer": "player-uuid-1"},
+        {"id": "bot-2", "name": "Two", "designer": "someone-else"}
+      ]
+    }""")
+
+    with TestClient(server.app) as client:
+        r = client.delete("/api/players/player-uuid-1")
+        assert r.status_code == 200
+        assert r.json()["deleted_bots"] == 1
+        assert client.get("/api/players").json()["users"] == {}
+
+    saved_bots = json.loads(custom_bots_path.read_text())
+    assert saved_bots["bots"][0]["_is_deleted"] is True
+    assert "_is_deleted" not in saved_bots["bots"][1]
