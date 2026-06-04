@@ -163,7 +163,7 @@
         </div>
       </div>
 
-      <!-- SAVE / REPLAY -->
+      <!-- SAVE -->
       <div class="side-footer">
         <div class="replay-controls">
           <div class="replay-controls-row">
@@ -175,19 +175,6 @@
             <div id="save-game-control">
               <button class="btn btn-sm" id="save-game-btn" onclick="requestSaveGame()" disabled title="Save game to server">
                 <i class="ti ti-device-floppy"></i> Save game
-              </button>
-            </div>
-            <div id="load-replay-control">
-              <input type="file"
-                     id="replay-json-input"
-                     accept="application/json,.json"
-                     onchange="loadReplayJsonFile(this.files?.[0])"
-                     hidden>
-              <button class="btn btn-sm"
-                      id="load-replay-json-btn"
-                      onclick="requestLoadReplayJson()"
-                      title="Load replay JSON">
-                <i class="fa-solid fa-folder-open"></i> Replay
               </button>
             </div>
           </div>
