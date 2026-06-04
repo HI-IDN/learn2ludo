@@ -8,35 +8,38 @@
     "player_count": 4,
     "yard_count": 4,
     "winner": 2,
-    "winner_color": "yellow",
     "players": [
       {
         "index": 0,
-        "color": null,
+        "color": "red",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 1,
-        "color": null,
+        "color": "green",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 2,
-        "color": null,
+        "color": "yellow",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 3,
-        "color": null,
+        "color": "blue",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       }
     ],
     "justification_count": 0
@@ -50,21 +53,22 @@
     "player_count": 2,
     "yard_count": 4,
     "winner": 0,
-    "winner_color": "red",
     "players": [
       {
         "index": 0,
-        "color": null,
+        "color": "red",
         "type": "random",
+        "human_id": null,
         "bot_id": "bot-38f81ec2",
-        "human_icon": null
+        "designer_uuid": "c64fe787-5658-43a2-8f3c-03bab308ee9d"
       },
       {
         "index": 1,
-        "color": null,
+        "color": "yellow",
         "type": "random",
+        "human_id": null,
         "bot_id": "ares",
-        "human_icon": null
+        "designer_uuid": null
       }
     ],
     "justification_count": 0
@@ -78,35 +82,38 @@
     "player_count": 4,
     "yard_count": 4,
     "winner": 2,
-    "winner_color": "yellow",
     "players": [
       {
         "index": 0,
-        "color": null,
+        "color": "red",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 1,
-        "color": null,
+        "color": "green",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 2,
-        "color": null,
+        "color": "yellow",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 3,
-        "color": null,
+        "color": "blue",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       }
     ],
     "justification_count": 0
@@ -120,35 +127,38 @@
     "player_count": 4,
     "yard_count": 4,
     "winner": 2,
-    "winner_color": "yellow",
     "players": [
       {
         "index": 0,
-        "color": null,
+        "color": "red",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 1,
-        "color": null,
+        "color": "green",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 2,
-        "color": null,
+        "color": "yellow",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 3,
-        "color": null,
+        "color": "blue",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       }
     ],
     "justification_count": 0
@@ -162,35 +172,38 @@
     "player_count": 4,
     "yard_count": 4,
     "winner": 2,
-    "winner_color": "yellow",
     "players": [
       {
         "index": 0,
         "color": "red",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 1,
         "color": "green",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 2,
         "color": "yellow",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 3,
         "color": "blue",
         "type": null,
+        "human_id": null,
         "bot_id": null,
-        "human_icon": null
+        "designer_uuid": null
       }
     ],
     "justification_count": 0
@@ -204,35 +217,38 @@
     "player_count": 4,
     "yard_count": 4,
     "winner": 0,
-    "winner_color": "red",
     "players": [
       {
         "index": 0,
         "color": "red",
         "type": "human",
+        "human_id": "10525ee0-3242-4e0c-8860-db1ccc82d68f",
         "bot_id": null,
-        "human_icon": "fa-face-angry"
+        "designer_uuid": null
       },
       {
         "index": 1,
         "color": "green",
         "type": "bot",
+        "human_id": null,
         "bot_id": "hermes",
-        "human_icon": null
+        "designer_uuid": null
       },
       {
         "index": 2,
         "color": "yellow",
         "type": "human",
+        "human_id": "c64fe787-5658-43a2-8f3c-03bab308ee9d",
         "bot_id": null,
-        "human_icon": "fa-face-grin-tongue"
+        "designer_uuid": null
       },
       {
         "index": 3,
         "color": "blue",
         "type": "bot",
+        "human_id": null,
         "bot_id": "bot-a61e342c",
-        "human_icon": null
+        "designer_uuid": "c64fe787-5658-43a2-8f3c-03bab308ee9d"
       }
     ],
     "justification_count": 7

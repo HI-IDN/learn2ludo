@@ -24,50 +24,36 @@ SUMMARY_PATH       = ROOT / "data" / "games_summary.json"
 PLAYERS_PATH       = ROOT / "data" / "players.json"
 
 
-def load_player_registry() -> dict:
-    if not PLAYERS_PATH.exists():
-        return {}
-    try:
-        raw = json.loads(PLAYERS_PATH.read_text())
-        if isinstance(raw, dict) and "users" in raw:
-            return raw["users"]
-        if isinstance(raw, dict):
-            return raw
-        return {p["id"]: p for p in raw if p.get("id")}
-    except Exception:
-        return {}
-
-
-def extract_meta(filename: str, data: dict, player_registry: dict) -> dict:
+def extract_meta(filename: str, data: dict) -> dict:
     cfg   = data.get("config", {})
     board = cfg.get("board", {})
     refs  = data.get("players_registry") or data.get("player_refs") or []
     players = []
+    color_by_index = {p.get("index"): p.get("color") for p in data.get("players", []) if p.get("index") is not None}
     for p in refs:
-        human_id = p.get("human_id")
-        pr = player_registry.get(human_id, {}) if human_id else {}
+        idx = p.get("player_index")
         players.append({
-            "index":      p.get("player_index"),
-            "color":      p.get("color"),
-            "type":       p.get("type"),
-            "bot_id":     p.get("bot_id"),
-            "human_icon": pr.get("icon"),
+            "index":         idx,
+            "color":         p.get("color") or color_by_index.get(idx),
+            "type":          p.get("type"),
+            "human_id":      p.get("human_id") or p.get("player_uuid") or None,
+            "bot_id":        p.get("bot_id") or None,
+            "designer_uuid": p.get("designer_uuid") or None,
         })
     justification_count = sum(
         1 for h in data.get("history", [])
         if h.get("type") == "move" and h.get("justification")
     )
     return {
-        "filename":           filename,
-        "name":               data.get("_name") or None,
-        "incomplete":         bool(data.get("_incomplete")),
-        "started_at_ms":      data.get("started_at_ms"),
-        "finished_at_ms":     data.get("finished_at_ms"),
-        "player_count":       data.get("num_players") or cfg.get("player_count"),
-        "yard_count":         board.get("yard_count"),
-        "winner":             data.get("winner"),
-        "winner_color":       data.get("winner_color"),
-        "players":            players,
+        "filename":            filename,
+        "name":                data.get("_name") or None,
+        "incomplete":          bool(data.get("_incomplete")),
+        "started_at_ms":       data.get("started_at_ms"),
+        "finished_at_ms":      data.get("finished_at_ms"),
+        "player_count":        data.get("num_players") or cfg.get("player_count"),
+        "yard_count":          board.get("yard_count"),
+        "winner":              data.get("winner"),
+        "players":             players,
         "justification_count": justification_count,
     }
 
@@ -89,7 +75,6 @@ def main():
         except Exception as e:
             print(f"Warning: could not read existing summary ({e}), starting fresh")
 
-    player_registry = load_player_registry()
     all_files = list(GAMES_DIR.glob("*.json"))
     print(f"Found {len(all_files)} game files")
 
@@ -101,7 +86,7 @@ def main():
             continue
         try:
             data = json.loads(f.read_text())
-            meta = extract_meta(f.name, data, player_registry)
+            meta = extract_meta(f.name, data)
             if already_present:
                 # Preserve manually-set name if the file doesn't have one
                 if not meta["name"] and summary[f.name].get("name"):

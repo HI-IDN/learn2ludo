@@ -88,20 +88,22 @@ def _save_games_summary(summary: dict):
     GAMES_SUMMARY_PATH.write_text(json.dumps(summary, indent=2))
 
 
-def _extract_game_meta(filename: str, data: dict, player_registry: dict) -> dict:
+def _extract_game_meta(filename: str, data: dict) -> dict:
     cfg = data.get("config", {})
     board = cfg.get("board", {})
     refs = data.get("players_registry") or data.get("player_refs") or []
     players = []
+    # Build a color lookup from the game's players array (keyed by index)
+    color_by_index = {p.get("index"): p.get("color") for p in data.get("players", []) if p.get("index") is not None}
     for p in refs:
-        human_id = p.get("human_id")
-        pr = player_registry.get(human_id, {}) if human_id else {}
+        idx = p.get("player_index")
         players.append({
-            "index": p.get("player_index"),
-            "color": p.get("color"),
-            "type": p.get("type"),
-            "bot_id": p.get("bot_id"),
-            "human_icon": pr.get("icon"),
+            "index":         idx,
+            "color":         p.get("color") or color_by_index.get(idx),
+            "type":          p.get("type"),
+            "human_id":      p.get("human_id") or p.get("player_uuid") or None,
+            "bot_id":        p.get("bot_id") or None,
+            "designer_uuid": p.get("designer_uuid") or None,
         })
     justification_count = sum(
         1 for h in data.get("history", [])
@@ -116,19 +118,15 @@ def _extract_game_meta(filename: str, data: dict, player_registry: dict) -> dict
         "player_count": data.get("num_players") or cfg.get("player_count"),
         "yard_count": board.get("yard_count"),
         "winner": data.get("winner"),
-        "winner_color": data.get("winner_color"),
         "players": players,
         "justification_count": justification_count,
     }
 
 
 def _upsert_game_summary(filename: str, data: dict):
-    player_registry = _load_player_registry()
     with _summary_lock:
         summary = _load_games_summary()
         summary[filename] = _extract_game_meta(filename, data)
-        # strip players from summary to keep it lean; re-add with registry
-        summary[filename] = _extract_game_meta(filename, data, player_registry)
         _save_games_summary(summary)
 
 
@@ -766,12 +764,11 @@ def rebuild_games_summary(request: Request):
     if not GAMES_DIR.exists():
         _save_games_summary({})
         return {"rebuilt": 0}
-    player_registry = _load_player_registry()
     summary = {}
     for f in GAMES_DIR.glob("*.json"):
         try:
             data = json.loads(f.read_text())
-            summary[f.name] = _extract_game_meta(f.name, data, player_registry)
+            summary[f.name] = _extract_game_meta(f.name, data)
         except Exception:
             pass
     with _summary_lock:
