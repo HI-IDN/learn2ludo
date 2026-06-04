@@ -759,6 +759,8 @@ function setAutoPlaySpeed(speed) {
   if (gameState) {
     renderGame();
     if (speed !== 'off') {
+      if (typeof _pg !== 'undefined' && _pg && typeof _maybeTriggerAutoPreRoll === 'function')
+        _maybeTriggerAutoPreRoll();
       _kickAutoPlay(true);
       _tryAutoResolveForcedHumanMove(true);
     }

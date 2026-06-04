@@ -88,6 +88,19 @@ def _save_games_summary(summary: dict):
     GAMES_SUMMARY_PATH.write_text(json.dumps(summary, indent=2))
 
 
+def _game_round_count(data: dict) -> int | None:
+    value = data.get("round_count")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+    for row in data.get("player_stats") or []:
+        rounds = row.get("rounds") if isinstance(row, dict) else None
+        if isinstance(rounds, int):
+            return rounds
+    return None
+
+
 def _extract_game_meta(filename: str, data: dict) -> dict:
     cfg = data.get("config", {})
     board = cfg.get("board", {})
@@ -117,6 +130,7 @@ def _extract_game_meta(filename: str, data: dict) -> dict:
         "finished_at_ms": data.get("finished_at_ms"),
         "player_count": data.get("num_players") or cfg.get("player_count"),
         "yard_count": board.get("yard_count"),
+        "round_count": _game_round_count(data),
         "winner": data.get("winner"),
         "players": players,
         "justification_count": justification_count,
@@ -787,6 +801,20 @@ def delete_game(filename: str, request: Request):
 def list_games():
     with _summary_lock:
         summary = _load_games_summary()
+        changed = False
+        for filename, meta in list(summary.items()):
+            if meta.get("round_count") is not None:
+                continue
+            path = GAMES_DIR / filename
+            if not path.exists():
+                continue
+            try:
+                summary[filename] = _extract_game_meta(filename, json.loads(path.read_text()))
+                changed = True
+            except Exception:
+                pass
+        if changed:
+            _save_games_summary(summary)
     games = sorted(summary.values(), key=lambda g: g.get("finished_at_ms") or g.get("started_at_ms") or 0, reverse=True)
     return {"games": games}
 
