@@ -44,47 +44,86 @@
           Raw board positions are hard to reason about directly. <strong>Features</strong> translate the game state into a set of numbers, one per move, that capture what matters strategically.
           Each feature answers one question about a candidate move.
         </p>
+
+        <div class="howto-type-legend">
+          <span class="howto-type-legend-label">Type notation:</span>
+          <span><span class="howto-range mono">{0, 1}</span> binary — 1 = True, 0 = False</span>
+          <span><span class="howto-range mono">[0, 1]</span> normalised real</span>
+          <span><span class="howto-range math">ℝ</span> real (pos. or neg.)</span>
+          <span><span class="howto-range math">ℤ</span> integer</span>
+          <span><span class="howto-range math">ℤ⁺</span> positive integer</span>
+        </div>
+
         <div class="howto-feature-grid">
           <div class="howto-feature-card">
-            <span class="howto-feature-name">Capture</span>
+            <div class="howto-feature-header">
+              <span class="howto-feature-name">Capture</span>
+              <span class="howto-range mono">{0, 1}</span>
+            </div>
             <span class="howto-feature-desc">Does this move land on an opponent's pawn and send it back to their yard?</span>
-            <span class="howto-feature-range">{0, 1}</span>
+            <span class="howto-feature-example">e.g. <strong>1</strong> if captures, <strong>0</strong> otherwise</span>
           </div>
           <div class="howto-feature-card">
-            <span class="howto-feature-name">Risk</span>
+            <div class="howto-feature-header">
+              <span class="howto-feature-name">Risk</span>
+              <span class="howto-range mono">[0, 1]</span>
+            </div>
             <span class="howto-feature-desc">Fraction of the opponent's dice outcomes that would reach this square next turn.</span>
-            <span class="howto-feature-range">[0, 1]</span>
+            <span class="howto-feature-example">e.g. <strong>0.33</strong> — 2 of 6 outcomes threaten the destination</span>
           </div>
           <div class="howto-feature-card">
-            <span class="howto-feature-name">Risk reduction</span>
-            <span class="howto-feature-desc">Change in exposure to capture: negative means the move increases risk.</span>
-            <span class="howto-feature-range">ℝ</span>
+            <div class="howto-feature-header">
+              <span class="howto-feature-name">Risk reduction</span>
+              <span class="howto-range math">ℝ</span>
+            </div>
+            <span class="howto-feature-desc">Change in exposure to capture versus staying put. Negative means the move increases risk.</span>
+            <span class="howto-feature-example">e.g. <strong>−0.17</strong> — move adds one threatening die face</span>
           </div>
           <div class="howto-feature-card">
-            <span class="howto-feature-name">Progress</span>
-            <span class="howto-feature-desc">Steps advanced toward home, normalised by track length.</span>
-            <span class="howto-feature-range">[0, 1]</span>
+            <div class="howto-feature-header">
+              <span class="howto-feature-name">Progress</span>
+              <span class="howto-range mono">[0, 1]</span>
+            </div>
+            <span class="howto-feature-desc">Steps advanced toward home, divided by total track length.</span>
+            <span class="howto-feature-example">e.g. <strong>0.12</strong> — moving 6 steps on a 52-cell track</span>
           </div>
           <div class="howto-feature-card">
-            <span class="howto-feature-name">Safety</span>
-            <span class="howto-feature-desc">Does the destination land on a safe square?</span>
-            <span class="howto-feature-range">{0, 1}</span>
+            <div class="howto-feature-header">
+              <span class="howto-feature-name">Safety</span>
+              <span class="howto-range mono">{0, 1}</span>
+            </div>
+            <span class="howto-feature-desc">Does the destination land on a safe square where captures are not allowed?</span>
+            <span class="howto-feature-example">e.g. <strong>1</strong> on a safe haven, <strong>0</strong> on a normal square</span>
           </div>
           <div class="howto-feature-card">
-            <span class="howto-feature-name">Blockade</span>
-            <span class="howto-feature-desc">Does this move stack with a friendly pawn to form a blockade?</span>
-            <span class="howto-feature-range">{0, 1}</span>
+            <div class="howto-feature-header">
+              <span class="howto-feature-name">Blockade</span>
+              <span class="howto-range mono">{0, 1}</span>
+            </div>
+            <span class="howto-feature-desc">Does this move stack with a friendly pawn, blocking opponents from passing?</span>
+            <span class="howto-feature-example">e.g. <strong>1</strong> if two friendly pawns share a square, <strong>0</strong> otherwise</span>
           </div>
           <div class="howto-feature-card">
-            <span class="howto-feature-name">Spread</span>
-            <span class="howto-feature-desc">Pairwise distance between friendly pawns after the move, normalised.</span>
-            <span class="howto-feature-range">[0, 1]</span>
+            <div class="howto-feature-header">
+              <span class="howto-feature-name">Spread</span>
+              <span class="howto-range mono">[0, 1]</span>
+            </div>
+            <span class="howto-feature-desc">Mean pairwise track distance between your pawns after the move, normalised by the maximum possible distance.</span>
+            <span class="howto-feature-example">e.g. <strong>0.84</strong> — pawns well spread; <strong>0.20</strong> — pawns clustered</span>
           </div>
           <div class="howto-feature-card">
-            <span class="howto-feature-name">Activation</span>
+            <div class="howto-feature-header">
+              <span class="howto-feature-name">Activation</span>
+              <span class="howto-range mono">{0, 1}</span>
+            </div>
             <span class="howto-feature-desc">Does this move bring a pawn out of the yard for the first time?</span>
-            <span class="howto-feature-range">{0, 1}</span>
+            <span class="howto-feature-example">e.g. <strong>1</strong> when a yard pawn first enters the track, <strong>0</strong> otherwise</span>
           </div>
+        </div>
+
+        <div class="howto-callout">
+          <i class="ti ti-calculator"></i>
+          <span><strong>Normalisation.</strong> Before the weighted sum is computed all features are mapped to [0, 1]. Features that are already bounded (binary, Risk, Progress, Spread) need no adjustment. Unbounded features like Risk reduction are divided by the largest absolute value seen across all candidate moves in the current turn — so the most extreme option always scores ±1 and the scale is consistent with every other feature. This is why a weight of 0.8 on Capture means the same as 0.8 on any other feature.</span>
         </div>
       </div>
     </div>

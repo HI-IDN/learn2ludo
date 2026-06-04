@@ -138,21 +138,64 @@
   border-radius: $radius;
 }
 
-.howto-feature-name  { font-size: 13px; font-weight: 700; color: $color-text; }
-.howto-feature-desc  { font-size: 12px; color: $color-text-2; line-height: 1.5; }
+// ---- Type legend ------------------------------------------------------------
 
-.howto-feature-range {
-  margin-top: 4px;
+.howto-type-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 10px 14px;
+  background: $color-bg;
+  border: 1px solid $border-light;
+  border-radius: $radius;
   font-size: 12px;
-  font-weight: 600;
-  font-family: $font-mono;
-  padding: 2px 8px;
+  color: $color-text-2;
+}
+
+.howto-type-legend-label {
+  font-weight: 700;
+  color: $color-text;
+  margin-right: 4px;
+}
+
+// ---- Range badge (shared base) ----------------------------------------------
+
+.howto-range {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
   border-radius: 4px;
-  align-self: flex-start;
+  border: 1px solid $border-light;
   background: $color-bg-raised;
   color: $color-primary;
-  border: 1px solid $border-light;
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &.mono { font-family: $font-mono; letter-spacing: 0.02em; }
+  &.math { font-family: 'STIX Two Math', 'Times New Roman', Georgia, serif; font-size: 13px; }
+}
+
+// ---- Feature card internals -------------------------------------------------
+
+.howto-feature-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.howto-feature-name  { font-size: 13px; font-weight: 700; color: $color-text; }
+.howto-feature-desc  { font-size: 12px; color: $color-text-2; line-height: 1.5; }
+.howto-feature-example {
+  font-size: 11px;
+  color: $color-text-2;
+  padding: 4px 8px;
+  background: $accent-tint;
+  border-radius: 4px;
+  font-style: italic;
 }
 
 // ---- Formula ----------------------------------------------------------------
