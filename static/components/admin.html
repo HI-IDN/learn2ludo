@@ -1,25 +1,159 @@
 <!-- ADMIN -->
   <div class="panel" id="panel-admin">
+
+    <!-- Header -->
     <div style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
       <h1 style="font-size:22px; font-weight:700;">Admin</h1>
       <span class="badge badge-purple" id="admin-auth-badge">locked</span>
+      <button id="admin-logout-btn" class="btn btn-ghost" style="display:none; margin-left:auto;" onclick="doAdminLogout()">
+        <i class="ti ti-logout"></i> Log out
+      </button>
     </div>
+
+    <!-- Locked state -->
     <div id="admin-locked-msg" class="card" style="background:var(--bg2); max-width:400px;">
       <p style="font-size:14px; font-weight:600; margin-bottom:4px;">Admin access required</p>
-      <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">Enter the admin password to manage tabs and settings.</p>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">Enter the admin password to manage settings and tabs.</p>
       <div class="alert" id="admin-alert"></div>
       <div style="display:flex; gap:8px;">
         <input type="password" id="admin-pw" placeholder="Password…" style="flex:1;" onkeydown="if(event.key==='Enter')doAdminLogin()">
         <button class="btn btn-primary" onclick="doAdminLogin()">Unlock</button>
       </div>
     </div>
+
+    <!-- Unlocked panel -->
     <div id="admin-panel" style="display:none;">
-      <div class="alert alert-success" id="admin-save-ok">Settings saved.</div>
+      <div class="alert alert-success" id="admin-save-ok" style="display:none;">Settings saved.</div>
+
+      <!-- ── Game rules ───────────────────────────────────────────── -->
+      <p class="section-title">Game rules</p>
+      <div class="settings-grid" style="margin-bottom:32px;">
+        <div class="settings-card">
+          <h2>Rules</h2>
+          <div class="rule-row">
+            <div>
+              <div class="rule-name">Consecutive sixes before turn ends</div>
+              <div class="rule-desc">A player may move this many rolled sixes; after that, they do not roll again</div>
+            </div>
+            <input type="number" id="rule-max-sixes" min="1" value="3" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+          </div>
+          <div class="rule-row">
+            <div>
+              <div class="rule-name">Roll attempts from empty board</div>
+              <div class="rule-desc">If a player has no pawn in play, allow this many rolls to enter; recommended: 3</div>
+            </div>
+            <input type="number" id="rule-empty-board-rolls" min="1" value="3" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+          </div>
+          <div class="rule-row">
+            <div><div class="rule-name">Safe squares</div><div class="rule-desc">Marked squares protect from capture</div></div>
+            <label class="toggle"><input type="checkbox" id="rule-safe" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="rule-row">
+            <div><div class="rule-name">Equal number of rounds</div><div class="rule-desc">After a player wins, continue until the first player would start the next round.</div></div>
+            <label class="toggle"><input type="checkbox" id="rule-equal-turns" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="rule-row">
+            <div><div class="rule-name">Continue after first winner</div><div class="rule-desc">Keep playing to determine 2nd, 3rd, and 4th place</div></div>
+            <label class="toggle"><input type="checkbox" id="rule-continue-places" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h2>Board configuration</h2>
+          <div class="rule-row">
+            <div>
+              <div class="rule-name">Number of yards</div>
+              <div class="rule-desc">One yard per player; also sets the maximum number of players</div>
+            </div>
+            <input type="number" id="board-yard-count" min="2" max="6" value="4" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+          </div>
+          <div class="rule-row">
+            <div>
+              <div class="rule-name">Track length <span style="font-size:11px;color:var(--text3)">(fixed at 52)</span></div>
+              <div class="rule-desc">Must be divisible by number of yards</div>
+            </div>
+            <input type="number" id="board-track-size" value="52" disabled style="width:72px; padding:4px 8px; font-size:12px; opacity:0.5;">
+          </div>
+          <div class="rule-row">
+            <div>
+              <div class="rule-name">Safe haven offset</div>
+              <div class="rule-desc">Cells before the start cell that are also marked safe (default 7 = local position 2)</div>
+            </div>
+            <input type="number" id="board-safe-offset" min="1" value="7" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+          </div>
+          <div class="rule-row">
+            <div>
+              <div class="rule-name">Home stretch length <span style="font-size:11px;color:var(--text3)">(fixed at 6)</span></div>
+            </div>
+            <input type="number" id="board-home-length" value="6" disabled style="width:72px; padding:4px 8px; font-size:12px; opacity:0.5;">
+          </div>
+          <div class="rule-row">
+            <div>
+              <div class="rule-name">Pawns per player</div>
+              <div class="rule-desc">Number of pieces each player controls</div>
+            </div>
+            <input type="number" id="board-pawns-per-player" min="1" max="8" value="4" onchange="saveSettings()" style="width:72px; padding:4px 8px; font-size:12px;">
+          </div>
+          <div class="rule-row">
+            <div>
+              <div class="rule-name">Stack pawns in home stretch</div>
+              <div class="rule-desc">First pawn takes the last space; next pawns fill the spaces before it</div>
+            </div>
+            <label class="toggle"><input type="checkbox" id="board-stack-home" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="board-config-warning" class="board-config-warning"></div>
+        </div>
+
+        <div class="settings-card">
+          <h2>Display</h2>
+          <div class="rule-row">
+            <div><div class="rule-name">Show valid moves</div><div class="rule-desc">Highlight clickable pieces</div></div>
+            <label class="toggle"><input type="checkbox" id="set-show-moves" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="rule-row">
+            <div><div class="rule-name">Show board indices</div><div class="rule-desc">Label the main track positions for debugging and teaching</div></div>
+            <label class="toggle"><input type="checkbox" id="set-show-cell-numbers" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h2>Move justifications</h2>
+          <div class="rule-row">
+            <div>
+              <div class="rule-name">Prompt frequency</div>
+              <div class="rule-desc">Ask for a reason only on eligible human moves with at least two choices</div>
+            </div>
+            <select id="move-justification-frequency" class="settings-select" onchange="saveSettings()">
+              <option value="always">Always</option>
+              <option value="every-n">Every N moves</option>
+              <option value="random">Sporadic</option>
+              <option value="off">Off</option>
+            </select>
+          </div>
+          <div class="rule-row" id="move-justification-every-row">
+            <div>
+              <div class="rule-name">Every N eligible moves</div>
+              <div class="rule-desc">For example, 2 prompts every second eligible move</div>
+            </div>
+            <input type="number" id="move-justification-every-n" class="settings-number" min="1" value="2" onchange="saveSettings()">
+          </div>
+          <div class="rule-row" id="move-justification-sporadic-row">
+            <div>
+              <div class="rule-name">Sporadic chance</div>
+              <div class="rule-desc">Percent chance to prompt on each eligible move</div>
+            </div>
+            <input type="number" id="move-justification-sporadic-chance" class="settings-number" min="0" max="100" value="35" onchange="saveSettings()">
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tab visibility ──────────────────────────────────────── -->
       <p class="section-title">Tab visibility &amp; defaults</p>
-      <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">Control which tabs are available and whether they are visible by default for new users.</p>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">Control which tabs are available and whether they are visible by default.</p>
       <div id="tab-config-list"></div>
       <div style="display:flex; gap:8px; margin-top:20px;">
-        <button class="btn btn-primary" onclick="saveTabConfig()"><i class="ti ti-device-floppy"></i> Save changes</button>
+        <button class="btn btn-primary" onclick="saveTabConfig()"><i class="ti ti-device-floppy"></i> Save tab changes</button>
       </div>
-    </div>
-  </div>
+
+    </div><!-- /#admin-panel -->
+  </div><!-- /#panel-admin -->

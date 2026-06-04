@@ -354,7 +354,6 @@ async function loadTabs(){
   catch{ tabConfig=[
     {id:'lobby',label:'Players',icon:'ti-users',enabled:true,default_visible:true,order:0},
     {id:'play',label:'Play',icon:'ti-dice',enabled:true,default_visible:true,order:1},
-    {id:'settings',label:'Settings',icon:'ti-settings',enabled:true,default_visible:true,order:2},
     {id:'train',label:'Train',icon:'ti-brain',enabled:true,default_visible:false,order:3},
     {id:'stats',label:'Stats & Replay',icon:'ti-chart-bar',enabled:true,default_visible:true,order:4},
     {id:'bots',label:'Bots',icon:'ti-robot',enabled:true,default_visible:false,order:5},
@@ -379,9 +378,20 @@ async function doAdminLogin(){
     document.getElementById('admin-panel').style.display='block';
     document.getElementById('admin-auth-badge').textContent='unlocked';
     document.getElementById('admin-auth-badge').className='badge badge-green';
+    document.getElementById('admin-logout-btn').style.display='';
     renderTabs();
     switchTab('admin');
   } catch(e) { if(alert){ alert.textContent='Login failed.'; alert.style.display='block'; } }
+}
+function doAdminLogout(){
+  adminToken = null;
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('admin-locked-msg').style.display='block';
+  document.getElementById('admin-auth-badge').textContent='locked';
+  document.getElementById('admin-auth-badge').className='badge badge-purple';
+  document.getElementById('admin-logout-btn').style.display='none';
+  document.getElementById('admin-pw').value='';
+  renderTabs();
 }
 async function doOverlayLogin(){
   await doAdminLogin();

@@ -31,11 +31,10 @@
       "id": "settings",
       "label": "Settings",
       "icon": "ti-settings",
-      "enabled": true,
-      "default_visible": true,
-      "admin_only": true,
+      "enabled": false,
+      "default_visible": false,
       "order": 2,
-      "description": "Board rules and players"
+      "description": "Board rules and players — merged into Admin panel"
     },
     {
       "id": "train",
