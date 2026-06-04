@@ -23,6 +23,37 @@ const FACE_ICONS = (() => {
 })();
 
 const DEFAULT_FACE_ICON = 'fa-face-smile';
+const STATIC_ASSET_VERSION = (() => {
+  try {
+    return new URL(document.currentScript?.src || '', window.location.href).searchParams.get('v') || '4';
+  } catch {
+    return '4';
+  }
+})();
+
+function iconEscapeAttr(value) {
+  return String(value ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function iconEscapeCssUrl(value) {
+  return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function botForPlayer(playerIdx) {
+  if (typeof settings === 'undefined') return null;
+  const registry = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+  const botId = settings.bot_ids?.[playerIdx];
+  const name = typeof gamePlayerName === 'function'
+    ? gamePlayerName(playerIdx)
+    : (typeof getPlayerName === 'function' ? getPlayerName(playerIdx) : '');
+  return registry.find(b => b.id === botId) || registry.find(b => b.name === name) || null;
+}
+
+function versionedBotIconSrc(src) {
+  if (!src || !String(src).startsWith('/static/icons/')) return src;
+  const separator = String(src).includes('?') ? '&' : '?';
+  return `${src}${separator}v=${encodeURIComponent(STATIC_ASSET_VERSION)}`;
+}
 
 function getPlayerIcon(playerIdx) {
   const profile = typeof getSlotProfile === 'function' ? getSlotProfile(playerIdx) : null;
@@ -38,8 +69,27 @@ function setPlayerIcon(playerIdx, icon) {
   persistSettings();
 }
 
-// Returns the FA class string for a player:
-// humans → their chosen face icon, bots → fa-robot
+function botAvatarHtml(bot, options = {}) {
+  const className = options.className || 'bot-avatar';
+  const title = bot?.name ? ` title="${iconEscapeAttr(bot.name)}"` : '';
+  const style = options.color ? ` style="color:${iconEscapeAttr(options.color)}"` : '';
+  if (!bot?.icon) return `<span class="${className}"${style}${title}><i class="fa-solid fa-robot"></i></span>`;
+  const src = versionedBotIconSrc(bot.icon);
+  if (options.color) {
+    return `<span class="${className} bot-avatar--mask" style="background:${iconEscapeAttr(options.color)};-webkit-mask:url('${iconEscapeCssUrl(src)}') center / contain no-repeat;mask:url('${iconEscapeCssUrl(src)}') center / contain no-repeat;"${title}></span>`;
+  }
+  return `<span class="${className}"${title}><img src="${iconEscapeAttr(src)}" class="bot-avatar-img" alt=""></span>`;
+}
+
+function playerAvatarHtml(playerIdx, options = {}) {
+  const type = typeof gamePlayerType === 'function' ? gamePlayerType(playerIdx) : getPlayerType(playerIdx);
+  const className = options.className || 'player-avatar';
+  const style = options.color ? ` style="color:${iconEscapeAttr(options.color)}"` : '';
+  if (type !== 'human') return botAvatarHtml(botForPlayer(playerIdx), { className, color: options.color });
+  return `<span class="${className}"${style}><i class="fa-solid ${getPlayerIcon(playerIdx)}"></i></span>`;
+}
+
+// Returns the FA class string for a player.
 function playerIconClass(playerIdx) {
   return gamePlayerType(playerIdx) !== 'human' ? 'fa-robot' : getPlayerIcon(playerIdx);
 }

@@ -75,8 +75,6 @@ function moveMatchesEvent(move, event) {
   return false;
 }
 
-const DEFAULT_HUMAN_NAMES = ['Óðinn','Freyja','Loki','Þór','Sif','Týr'];
-const DEFAULT_BOT_NAMES = ['Artemis'];
 function getPlayerType(i){ return settings.player_types?.[i] || (i===0 ? 'human':'random'); }
 
 function playerDisplayOrder(n) {
@@ -84,12 +82,6 @@ function playerDisplayOrder(n) {
   const filtered = order.filter(i => i >= 0 && i < n);
   const missing = Array.from({length: n}, (_, i) => i).filter(i => !filtered.includes(i));
   return filtered.concat(missing);
-}
-
-function botDisplayName(i) {
-  const base = 'Artemis';
-  const robotsBefore = Array.from({length: i + 1}, (_, idx) => getPlayerType(idx)).filter(t => t !== 'human').length;
-  return robotsBefore <= 1 ? base : `${base}-${robotsBefore}`;
 }
 
 function getPlayerName(i){
@@ -105,7 +97,7 @@ function getPlayerName(i){
   }
   const profile = typeof getSlotProfile === 'function' ? getSlotProfile(i) : null;
   if (profile) return profile.username;
-  return settings.player_names?.[i] || DEFAULT_HUMAN_NAMES[i] || `Player ${i+1}`;
+  return settings.player_names?.[i] || `Player ${i+1}`;
 }
 function gamePlayerName(i) {
   const player = (gameState?.players || []).find(p => Number(p.index) === Number(i));
@@ -377,7 +369,7 @@ function requestNewGame(){
 
 function cancelNewGame(){
   const ctrl = document.getElementById('new-game-control');
-  if(ctrl) ctrl.innerHTML = `<button class="btn btn-primary btn-sm" onclick="requestNewGame()"><i class="ti ti-plus"></i> New game</button>`;
+  if(ctrl) ctrl.innerHTML = `<button class="btn btn-primary btn-sm" onclick="requestNewGame()"><i class="ti ti-users"></i> Player Setup</button>`;
 }
 
 let _gameStartTime=null;
@@ -746,6 +738,13 @@ function spacesRemaining(pos,finished=false){ if(finished)return 0; const entry=
 // Move history rendering lives in history.js.
 function renderPlayers(){
   const list=document.getElementById('players-list'); if(!list)return;
+  const inPregame=typeof _pg!=='undefined'&&_pg!==null;
+  if(!gameState&&!inPregame){
+    list.innerHTML='<div class="move-history-empty">No game set up yet.</div>';
+    const sub=document.getElementById('players-subtitle');
+    if(sub) sub.textContent='';
+    return;
+  }
   const lobbyN=typeof lobbyActiveSlots==='function'?lobbyActiveSlots().length:null;
   const n=gameState?.num_players||lobbyN||parseInt(document.getElementById('set-num-players')?.value||4);
   const players=gameState?.players||Array.from({length:n},(_,i)=>({index:i,color:playerColorName(i,n),pieces:Array.from({length:(gameState?.config?.board?.pawns_per_player||4)},()=>({in_yard:true,finished:false}))}));
@@ -754,7 +753,6 @@ function renderPlayers(){
   const ordinals=['1st','2nd','3rd','4th','5th','6th'];
   list.innerHTML=sorted.map((p)=>{
     const col=COLORS[p.color]||COLORS.blue;
-    const inPregame=typeof _pg!=='undefined'&&_pg!==null;
     const turnPos=!inPregame&&gameStartingPlayer!=null?((p.index-gameStartingPlayer+n)%n):null;
     const ordinal=inPregame?`<span class="player-order-place"> · ?</span>`:(turnPos!=null?`<span class="player-order-place"> · ${ordinals[turnPos]||turnPos+1+'th'}</span>`:'');
     const isCurrent=p.index===gameState?.current_player;
@@ -816,8 +814,8 @@ function renderPlayerTypes(){
     const slot = playerSlot(i, n);
     const colorName = PLAYER_COLORS[slot] || 'blue';
     const color = COLORS[colorName] || COLORS.blue;
-    const humanName = settings.player_names?.[i] || DEFAULT_HUMAN_NAMES[i] || `Player ${i+1}`;
-    const botName = settings.bot_names?.[i] || botDisplayName(i);
+    const humanName = settings.player_names?.[i] || `Player ${i+1}`;
+    const botName = settings.bot_names?.[i] || getPlayerName(i);
     const avatar = typeof playerAvatarHtml === 'function'
       ? playerAvatarHtml(i, { className: 'settings-player-avatar', color })
       : `<span class="settings-player-avatar" style="color:${color}"><i class="fa-solid ${isHuman ? 'fa-user' : 'fa-robot'}"></i></span>`;

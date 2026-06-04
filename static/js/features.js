@@ -6,7 +6,7 @@ function renderPawnOptions(){
   const card=document.getElementById('pawn-options-card');
   if(!card)return;
   if(!gameState){
-	card.innerHTML='<div class="move-history-empty">Start a game to inspect pawn features.</div>';
+	card.innerHTML='<div class="move-history-empty">No game set up yet.</div>';
 	return;
   }
 
@@ -25,5 +25,8 @@ function renderPawnOptions(){
   const browsing = typeof isLiveHistoryBrowsing === 'function' && isLiveHistoryBrowsing();
   const locked = typeof isMoveJustificationActive === 'function' && isMoveJustificationActive();
 
-  card.innerHTML=`<div class="pawn-options-turn-head" style="--player-color:${col}"><i class="fa-solid ${gamePlayerType(p.index)!=='human'?'fa-robot':'fa-user'}"></i><strong>${gamePlayerName(p.index)}</strong><span class="pawn-options-dice">dice ${gameState.dice||'–'}</span></div><div class="pawn-options-header pawn-options-grid compact"><span>pawn</span><span>move</span><span>remaining</span></div><div class="pawn-options-list">${p.pieces.map((pc,i)=>{const g=p.index*pawns+i;const pid=pc.pawn_id||pawnId(p.color,i);const m=valid.get(pid)||valid.get(`idx:${g}`);const clickable=m&&!replay&&!browsing&&!locked;const selected=typeof isMoveAwaitingJustification==='function'&&isMoveAwaitingJustification(g,pid);return `<div class="pawn-option-row pawn-options-grid compact${clickable?' clickable':''}${selected?' selected':''}" ${clickable?`onclick="clickPiece(${g})"`:''}><span><strong>${pid}</strong></span><span>${displayCellLabel(p.index,pc.position)} → ${m?displayCellLabel(p.index,m.target):'—'}</span><span><strong>${spacesRemaining(m?m.target:pc.position,pc.finished)}</strong></span></div>`}).join('')}</div>`;
+  const avatar = typeof playerAvatarHtml === 'function'
+    ? playerAvatarHtml(p.index, { className: 'pawn-options-avatar', color: col })
+    : `<span class="pawn-options-avatar" style="color:${col}"><i class="fa-solid ${gamePlayerType(p.index)!=='human'?'fa-robot':'fa-user'}"></i></span>`;
+  card.innerHTML=`<div class="pawn-options-turn-head" style="--player-color:${col}">${avatar}<strong>${gamePlayerName(p.index)}</strong><span class="pawn-options-dice">dice ${gameState.dice||'–'}</span></div><div class="pawn-options-header pawn-options-grid compact"><span>pawn</span><span>move</span><span>remaining</span></div><div class="pawn-options-list">${p.pieces.map((pc,i)=>{const g=p.index*pawns+i;const pid=pc.pawn_id||pawnId(p.color,i);const m=valid.get(pid)||valid.get(`idx:${g}`);const clickable=m&&!replay&&!browsing&&!locked;const selected=typeof isMoveAwaitingJustification==='function'&&isMoveAwaitingJustification(g,pid);return `<div class="pawn-option-row pawn-options-grid compact${clickable?' clickable':''}${selected?' selected':''}" ${clickable?`onclick="clickPiece(${g})"`:''}><span><strong>${pid}</strong></span><span>${displayCellLabel(p.index,pc.position)} → ${m?displayCellLabel(p.index,m.target):'—'}</span><span><strong>${spacesRemaining(m?m.target:pc.position,pc.finished)}</strong></span></div>`}).join('')}</div>`;
 }

@@ -112,10 +112,12 @@
         <div class="action-card" id="action-card">
           <div class="action-card-top idle" id="action-card-top">
             <div class="action-card-avatar">
-              <i class="action-avatar-icon fa-solid fa-circle-info" id="action-avatar-icon"></i>
+              <span class="action-avatar-content" id="action-avatar-content">
+                <i class="action-avatar-icon fa-solid fa-circle-info"></i>
+              </span>
               <img id="action-avatar-laurel" class="action-avatar-laurel" src="/static/icons/laurel.svg" alt="" hidden>
             </div>
-            <div class="action-card-name" id="turn-player-name">Start game</div>
+            <div class="action-card-name" id="turn-player-name">No game</div>
           </div>
 
           <div class="action-card-body">
@@ -125,7 +127,7 @@
 
             <div id="game-action-wrap">
               <div class="action-instruction" id="action-instruction">
-                Pregame will appear here.
+                Set up players before playing.
               </div>
               <div id="move-justification-wrap" class="move-justification-wrap" hidden></div>
             </div>
@@ -141,7 +143,7 @@
         </button>
         <div class="collapsible-body">
           <div class="pawn-options-card" id="pawn-options-card">
-            <div class="move-history-empty">Start a game to inspect pawn options.</div>
+            <div class="move-history-empty">No game set up yet.</div>
           </div>
         </div>
       </div>
@@ -155,7 +157,7 @@
         <div class="collapsible-body">
           <div class="move-history-card">
             <div id="move-history-list" class="move-history-list">
-              <div class="move-history-empty">No committed moves yet.</div>
+              <div class="move-history-empty">No game set up yet.</div>
             </div>
           </div>
         </div>
@@ -167,7 +169,7 @@
           <div class="replay-controls-row">
             <div id="new-game-control">
               <button class="btn btn-primary btn-sm" onclick="requestNewGame()">
-                <i class="ti ti-plus"></i> New game
+                <i class="ti ti-users"></i> Player Setup
               </button>
             </div>
             <button class="btn btn-sm"

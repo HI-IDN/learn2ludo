@@ -51,6 +51,14 @@
   justify-content: center;
 }
 
+.action-avatar-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &[hidden] { display: none; }
+}
+
 .action-avatar-icon {
   font-size: 22px;
   color: rgba(255, 255, 255, 0.9);

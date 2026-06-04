@@ -144,39 +144,6 @@
   opacity: 0.9;
 }
 
-// Ares: soldier + spear side by side
-.lobby-avatar-duo {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-
-  .lobby-avatar-svg { width: 26px; height: 26px; }
-  .lobby-avatar-svg--spear { width: 18px; height: 18px; opacity: 0.75; }
-}
-
-// Hephaestus / Apollo: SVG with FA badge overlay at lower-right
-.lobby-avatar-badged {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-
-  .lobby-avatar-svg { width: 34px; height: 34px; }
-}
-
-.lobby-avatar-badge {
-  position: absolute;
-  bottom: -2px;
-  right: -4px;
-  font-size: 11px;
-  color: #fff;
-  -webkit-text-stroke: 1.5px rgba(0,0,0,0.55);
-  paint-order: stroke fill;
-  filter: drop-shadow(0 0 2px rgba(0,0,0,0.6));
-}
-
 .bot-avatar,
 .player-order-avatar,
 .settings-player-avatar,
@@ -196,42 +163,12 @@
   object-fit: contain;
 }
 
-.bot-avatar--duo {
-  gap: 2px;
+.bot-avatar--lobby {
+  width: 52px;
+  height: 52px;
+  color: rgba(255,255,255,0.9);
 }
 
-.bot-avatar--duo .bot-avatar-img {
-  width: 70%;
-  height: 70%;
-}
-
-.bot-avatar--duo .bot-avatar-img--secondary {
-  width: 48%;
-  height: 48%;
-  opacity: 0.75;
-}
-
-.bot-avatar--badged {
-  position: relative;
-}
-
-.bot-avatar--badged .bot-avatar-img {
-  width: 90%;
-  height: 90%;
-}
-
-.bot-avatar-badge {
-  position: absolute;
-  right: -5px;
-  bottom: -3px;
-  font-size: 0.36em;
-  color: currentColor;
-  -webkit-text-stroke: 1.5px rgba(255,255,255,0.85);
-  paint-order: stroke fill;
-  filter: drop-shadow(0 0 1px rgba(0,0,0,0.35));
-}
-
-.bot-avatar--lobby,
 .action-avatar-symbol {
   width: 38px;
   height: 38px;
@@ -244,20 +181,10 @@
   opacity: 0.9;
 }
 
-.bot-avatar--lobby .bot-avatar-badge,
-.action-avatar-symbol .bot-avatar-badge {
-  color: #fff;
-  -webkit-text-stroke-color: rgba(0,0,0,0.55);
-}
-
 .bot-avatar--card {
-  width: 24px;
-  height: 24px;
+  width: 31px;
+  height: 31px;
   color: $color-primary;
-}
-
-.bot-avatar--card .bot-avatar-badge {
-  font-size: 0.42em;
 }
 
 .action-avatar-symbol {

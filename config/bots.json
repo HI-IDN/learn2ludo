@@ -6,7 +6,7 @@
       "type": "baseline",
       "tldr": "Goddess of Discord",
       "description": "Chooses from valid moves without using strategy.",
-      "icon": "/static/icons/goddess.svg",
+      "icon": "/static/icons/eris.svg",
       "status": "Available"
     },
     {
@@ -15,8 +15,7 @@
       "type": "SDR",
       "tldr": "God of War",
       "description": "Looks for chances to send opponent pawns back to their yard.",
-      "icon": "/static/icons/soldier.svg",
-      "icon2": "/static/icons/spear.svg",
+      "icon": "/static/icons/ares.svg",
       "status": "Available"
     },
     {
@@ -25,7 +24,7 @@
       "type": "SDR",
       "tldr": "Goddess of Wisdom",
       "description": "Keeps pawns safe before looking for other moves.",
-      "icon": "/static/icons/goddess.svg",
+      "icon": "/static/icons/athena.svg",
       "status": "Available"
     },
     {
@@ -34,7 +33,7 @@
       "type": "SDR",
       "tldr": "Goddess of the Hearth",
       "description": "Brings pawns home as directly as possible.",
-      "icon": "/static/icons/goddess.svg",
+      "icon": "/static/icons/hestia.svg",
       "status": "Available"
     },
     {
@@ -52,8 +51,7 @@
       "type": "SDR",
       "tldr": "God of the Forge",
       "description": "Builds defensive stacks with friendly pawns.",
-      "icon": "/static/icons/god.svg",
-      "icon_overlay": "fa-dumbbell",
+      "icon": "/static/icons/hephaestus.svg",
       "status": "Available"
     },
     {
@@ -62,7 +60,7 @@
       "type": "SDR",
       "tldr": "Goddess of the Hunt",
       "description": "Gets pawns out of the yard whenever possible.",
-      "icon": "/static/icons/goddess.svg",
+      "icon": "/static/icons/artemis.svg",
       "status": "Available"
     },
     {
@@ -71,8 +69,7 @@
       "type": "CDR",
       "tldr": "God of Order",
       "description": "Balanced weighted bot combining capture, safety, progress, and activation.",
-      "icon": "/static/icons/god.svg",
-      "icon_overlay": "fa-scale-balanced",
+      "icon": "/static/icons/apollo.svg",
       "status": "Template"
     }
   ]

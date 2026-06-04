@@ -4,15 +4,15 @@
 // JS policies are offline fallbacks only — do not add game logic here.
 
 const FALLBACK_BOTS = [
-  { id: 'eris',          name: 'Eris',        type: 'baseline', tldr: 'Goddess of Discord',      description: 'Chooses from valid moves without using strategy.',                             status: 'Available', implemented: true },
-  { id: 'ares',          name: 'Ares',        type: 'SDR',      tldr: 'God of War',               description: 'Looks for chances to send opponent pawns back to their yard.',              status: 'Available', implemented: true },
-  { id: 'athena',        name: 'Athena',      type: 'SDR',      tldr: 'Goddess of Wisdom',        description: 'Keeps pawns safe before looking for other moves.',                           status: 'Available', implemented: true },
-  { id: 'hestia',        name: 'Hestia',      type: 'SDR',      tldr: 'Goddess of the Hearth',    description: 'Brings pawns home as directly as possible.',                                 status: 'Available', implemented: true },
-  { id: 'apollo',        name: 'Apollo',      type: 'CDR',      tldr: 'God of Order',             description: 'Balanced weighted bot combining capture, safety, progress, and activation.', status: 'Template',  implemented: true },
+  { id: 'eris',          name: 'Eris',        type: 'baseline', tldr: 'Goddess of Discord',      description: 'Chooses from valid moves without using strategy.',                             icon: '/static/icons/eris.svg',       status: 'Available', implemented: true },
+  { id: 'ares',          name: 'Ares',        type: 'SDR',      tldr: 'God of War',               description: 'Looks for chances to send opponent pawns back to their yard.',                 icon: '/static/icons/ares.svg',       status: 'Available', implemented: true },
+  { id: 'athena',        name: 'Athena',      type: 'SDR',      tldr: 'Goddess of Wisdom',        description: 'Keeps pawns safe before looking for other moves.',                              icon: '/static/icons/athena.svg',     status: 'Available', implemented: true },
+  { id: 'hestia',        name: 'Hestia',      type: 'SDR',      tldr: 'Goddess of the Hearth',    description: 'Brings pawns home as directly as possible.',                                    icon: '/static/icons/hestia.svg',     status: 'Available', implemented: true },
+  { id: 'apollo',        name: 'Apollo',      type: 'CDR',      tldr: 'God of Order',             description: 'Balanced weighted bot combining capture, safety, progress, and activation.',    icon: '/static/icons/apollo.svg',     status: 'Template',  implemented: true },
   { id: 'user-weighted', name: 'Build-a-bot', type: 'CDR',      tldr: 'User CDR',                 description: 'Custom weighted bot configured with sliders.',                               status: 'Custom',    implemented: true },
-  { id: 'hermes',        name: 'Hermes',      type: 'SDR',      tldr: 'God of Travel',            description: 'Keeps pawns distributed across the board.',                                  status: 'Available', implemented: true },
-  { id: 'hephaestus',    name: 'Hephaestus',  type: 'SDR',      tldr: 'God of the Forge',        description: 'Builds defensive stacks with friendly pawns.',                               status: 'Available', implemented: true },
-  { id: 'artemis',       name: 'Artemis',     type: 'SDR',      tldr: 'Goddess of the Hunt',      description: 'Gets pawns out of the yard whenever possible.',                              status: 'Available', implemented: true },
+  { id: 'hermes',        name: 'Hermes',      type: 'SDR',      tldr: 'God of Travel',            description: 'Keeps pawns distributed across the board.',                                     icon: '/static/icons/hermes.svg',     status: 'Available', implemented: true },
+  { id: 'hephaestus',    name: 'Hephaestus',  type: 'SDR',      tldr: 'God of the Forge',         description: 'Builds defensive stacks with friendly pawns.',                                  icon: '/static/icons/hephaestus.svg', status: 'Available', implemented: true },
+  { id: 'artemis',       name: 'Artemis',     type: 'SDR',      tldr: 'Goddess of the Hunt',      description: 'Gets pawns out of the yard whenever possible.',                                 icon: '/static/icons/artemis.svg',    status: 'Available', implemented: true },
 ];
 
 let BOT_REGISTRY = FALLBACK_BOTS;
@@ -301,7 +301,7 @@ function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '
     ? bots.map(b => `
         <div class="bot-card${botIsPlanned(b) ? ' bot-card--planned' : ''}${b.status === 'Custom' ? ' bot-card--custom' : ''}">
           ${b.type === 'CDR' && b.designer ? `<button class="bot-card-delete" title="Delete bot" onclick="botDeleteCustom('${b.id}', '${b.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>` : ''}
-          <div class="bot-card-icon"><i class="fa-solid fa-robot"></i></div>
+          <div class="bot-card-icon">${typeof botAvatarHtml === 'function' ? botAvatarHtml(b, { className: 'bot-avatar bot-avatar--card' }) : '<i class="fa-solid fa-robot"></i>'}</div>
           <div class="bot-card-body">
             <div class="bot-card-title">
               <div class="bot-card-name">${b.name}</div>

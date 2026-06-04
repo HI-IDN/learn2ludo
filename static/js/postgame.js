@@ -80,7 +80,9 @@ function _promptReflection(players, idx) {
   const color  = gameState.players[playerIdx]?.color || 'blue';
   const name   = gamePlayerName(playerIdx);
   const hex    = COLORS[color] || '#888';
-  const icon   = isBot ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(playerIdx) : 'fa-face-smile');
+  const avatar = typeof playerAvatarHtml === 'function'
+    ? playerAvatarHtml(playerIdx, { className: 'pg-reflect-avatar', color: hex })
+    : `<span class="pg-reflect-avatar" style="color:${hex}"><i class="fa-solid ${isBot ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(playerIdx) : 'fa-face-smile')}"></i></span>`;
   const title  = isBot ? `How did ${escapeAttr(name)} play?` : 'How did you play?';
   const sub    = isBot ? `Rate this bot's play before seeing the stats.` : 'Rate yourself before seeing the stats.';
   const btnLbl = idx < players.length - 1 ? 'Next' : 'See stats';
@@ -102,7 +104,7 @@ function _promptReflection(players, idx) {
   modal.innerHTML = `
     <div class="pg-reflect-card">
       <div class="pg-reflect-badge" style="--pc:${hex}">
-        <i class="fa-solid ${icon}"></i> ${escapeAttr(name)}
+        ${avatar} ${escapeAttr(name)}
       </div>
       <h2 class="pg-reflect-title">${title}</h2>
       <p class="pg-reflect-sub">${sub}</p>

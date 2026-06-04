@@ -12,7 +12,8 @@ function renderCurrentAction() {
   const cp = gameState.current_player ?? gameState.player ?? 0;
   const color = winnerPlayerColor(cp);
   const cardTop = document.getElementById('action-card-top');
-  const avatarIcon = document.getElementById('action-avatar-icon');
+  const avatarContent = document.getElementById('action-avatar-content');
+  const laurel = document.getElementById('action-avatar-laurel');
   const name = document.getElementById('turn-player-name');
   const instr = document.getElementById('action-instruction');
   const dice = document.getElementById('dice-face');
@@ -30,7 +31,13 @@ function renderCurrentAction() {
   cardTop.classList.remove('idle');
   cardTop.style.backgroundImage = '';
   cardTop.style.background = color;
-  if (avatarIcon) avatarIcon.className = `action-avatar-icon fa-solid ${actionPlayerType(cp) !== 'human' ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(cp) : 'fa-face-smile')}`;
+  if (avatarContent) {
+    avatarContent.hidden = false;
+    avatarContent.innerHTML = typeof playerAvatarHtml === 'function'
+      ? playerAvatarHtml(cp, { className: 'action-avatar-symbol', color })
+      : `<span class="action-avatar-symbol" style="color:${color}"><i class="fa-solid ${actionPlayerType(cp) !== 'human' ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(cp) : 'fa-face-smile')}"></i></span>`;
+  }
+  if (laurel) laurel.hidden = true;
 
   const _winners = winnerPlayersForBanner();
   if (tentativeReplayWinner) {
@@ -41,8 +48,7 @@ function renderCurrentAction() {
     return;
   }
   if (_winners.length) {
-    if (avatarIcon) avatarIcon.hidden = true;
-    const laurel = document.getElementById('action-avatar-laurel');
+    if (avatarContent) avatarContent.hidden = true;
     if (laurel) laurel.hidden = false;
     cardTop.style.background = winnerBannerBackground(_winners);
     const names = winnerNamesForBanner(_winners);
@@ -58,8 +64,7 @@ function renderCurrentAction() {
     return;
   }
   delete cardTop.dataset.winSoundPlayed;
-  if (avatarIcon) avatarIcon.hidden = false;
-  const laurel = document.getElementById('action-avatar-laurel');
+  if (avatarContent) avatarContent.hidden = false;
   if (laurel) laurel.hidden = true;
 
   name.textContent = `${winnerPlayerName(cp)}'s turn`;

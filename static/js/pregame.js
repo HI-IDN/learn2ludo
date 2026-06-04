@@ -43,7 +43,7 @@ function _hidePregame() {
   document.getElementById('game-action-wrap')?.style.removeProperty('display');
   _setPregameSubtitle('');
   if (typeof setCurrentActionMode === 'function') setCurrentActionMode(false);
-  _setActionCardTop(null, 'fa-circle-info', 'Start game', true);
+  _setActionCardTop(null, 'fa-circle-info', 'No game', true);
   _pg = null;
 }
 
@@ -54,7 +54,8 @@ function clearPregameMode() {
 
 function _setActionCardTop(color, iconClass, label, idle = false) {
   const top = document.getElementById('action-card-top');
-  const icon = document.getElementById('action-avatar-icon');
+  const content = document.getElementById('action-avatar-content');
+  const laurel = document.getElementById('action-avatar-laurel');
   const name = document.getElementById('turn-player-name');
   if (!top) return;
   if (idle) {
@@ -64,8 +65,20 @@ function _setActionCardTop(color, iconClass, label, idle = false) {
     top.classList.remove('idle');
     top.style.background = color || '';
   }
-  if (icon) icon.className = `action-avatar-icon fa-solid ${iconClass}`;
+  if (content) {
+    content.hidden = false;
+    content.innerHTML = `<span class="action-avatar-symbol"><i class="action-avatar-icon fa-solid ${iconClass}"></i></span>`;
+  }
+  if (laurel) laurel.hidden = true;
   if (name) name.textContent = label;
+}
+
+function _setPregamePlayerActionCard(color, playerIdx, label) {
+  _setActionCardTop(color, 'fa-dice-d6', label);
+  const content = document.getElementById('action-avatar-content');
+  if (content && typeof playerAvatarHtml === 'function') {
+    content.innerHTML = playerAvatarHtml(playerIdx, { className: 'action-avatar-symbol', color });
+  }
 }
 
 function _setPregameSubtitle(text) {
@@ -87,7 +100,7 @@ function _renderPregame() {
     const slot  = _pg.active[currentPlayerIdx];
     const color = COLORS[PLAYER_COLORS[slot]] || COLORS.blue;
     const name  = typeof getPlayerName === 'function' ? getPlayerName(currentPlayerIdx) : `Player ${currentPlayerIdx+1}`;
-    _setActionCardTop(color, 'fa-dice-d6', `${name}'s roll`);
+    _setPregamePlayerActionCard(color, currentPlayerIdx, `${name}'s roll`);
   } else {
     _setActionCardTop(null, 'fa-spinner fa-spin', 'Evaluating…', true);
   }
