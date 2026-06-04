@@ -62,7 +62,10 @@ function _isCustomBot(i) {
 
 function _reflectionPlayersInOrder() {
   const n = gameState.num_players || 1;
-  return Array.from({length: n}, (_, i) => i)
+  const order = typeof playerDisplayOrder === 'function'
+    ? playerDisplayOrder(n)
+    : Array.from({length: n}, (_, i) => i);
+  return order
     .filter(i => gamePlayerType(i) === 'human' || _isCustomBot(i));
 }
 
@@ -80,11 +83,15 @@ function _promptReflection(players, idx) {
   const color  = gameState.players[playerIdx]?.color || 'blue';
   const name   = gamePlayerName(playerIdx);
   const hex    = COLORS[color] || '#888';
+  const promptNumber = idx + 1;
+  const promptTotal = players.length;
   const avatar = typeof playerAvatarHtml === 'function'
     ? playerAvatarHtml(playerIdx, { className: 'pg-reflect-avatar', color: hex })
     : `<span class="pg-reflect-avatar" style="color:${hex}"><i class="fa-solid ${isBot ? 'fa-robot' : (typeof getPlayerIcon==='function' ? getPlayerIcon(playerIdx) : 'fa-face-smile')}"></i></span>`;
-  const title  = isBot ? `How did ${escapeAttr(name)} play?` : 'How did you play?';
-  const sub    = isBot ? `Rate this bot's play before seeing the stats.` : 'Rate yourself before seeing the stats.';
+  const title  = isBot ? `Rate ${escapeAttr(name)}` : `${escapeAttr(name)}, rate your game`;
+  const sub    = isBot
+    ? `The human designer of this custom bot must rate its game before stats are shown.`
+    : `This response is required before the group can see the stats.`;
   const btnLbl = idx < players.length - 1 ? 'Next' : 'See stats';
 
   document.getElementById('pg-reflection-modal')?.remove();
@@ -102,24 +109,34 @@ function _promptReflection(players, idx) {
   const modal = document.createElement('div');
   modal.id = 'pg-reflection-modal';
   modal.innerHTML = `
-    <div class="pg-reflect-card">
+    <div class="pg-reflect-card" style="--pc:${hex}">
+      <div class="pg-reflect-stripe"></div>
       <div class="pg-reflect-badge" style="--pc:${hex}">
         ${avatar} ${escapeAttr(name)}
       </div>
+      <div class="pg-reflect-progress">${promptNumber}/${promptTotal} · ${escapeAttr(color)}</div>
       <h2 class="pg-reflect-title">${title}</h2>
       <p class="pg-reflect-sub">${sub}</p>
       ${axis('r-aggressive', 'Aggressive', 'Passive')}
       ${axis('r-risky',      'Risky',      'Cautious')}
       ${axis('r-lucky',      'Lucky',      'Unlucky')}
+      <label class="pg-reflect-note">
+        <span>Short description</span>
+        <textarea id="r-description" maxlength="240" rows="3" placeholder="${isBot ? 'Describe how this custom bot played.' : 'Describe how your game felt.'}"></textarea>
+      </label>
       <div class="pg-reflect-actions">
         <button class="btn btn-primary" id="r-next" disabled>${btnLbl}</button>
-        <button class="btn btn-ghost" id="r-skip">Skip</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
 
   let agg = null, risk = null, lucky = null;
   const nextBtn = modal.querySelector('#r-next');
+  const descEl = modal.querySelector('#r-description');
+  const updateNext = () => {
+    const description = descEl?.value.trim() || '';
+    nextBtn.disabled = !(agg && risk && lucky && description);
+  };
 
   ['r-aggressive','r-risky','r-lucky'].forEach(axisId => {
     modal.querySelectorAll(`#${axisId} .pg-pip`).forEach(b => b.addEventListener('click', () => {
@@ -128,21 +145,17 @@ function _promptReflection(players, idx) {
       if (axisId === 'r-aggressive') agg   = +b.dataset.v;
       if (axisId === 'r-risky')      risk  = +b.dataset.v;
       if (axisId === 'r-lucky')      lucky = +b.dataset.v;
-      nextBtn.disabled = !(agg && risk && lucky);
+      updateNext();
     }));
   });
+  descEl?.addEventListener('input', updateNext);
 
   nextBtn.addEventListener('click', () => {
+    const description = descEl?.value.trim() || '';
+    if (!(agg && risk && lucky && description)) { updateNext(); return; }
     _reflections.push({ player: playerIdx, color, name, is_bot: isBot,
       self_aggressive: agg, self_risky: risk, self_lucky: lucky,
-      skipped: false, timestamp: new Date().toISOString() });
-    modal.remove();
-    _promptReflection(players, idx + 1);
-  });
-  modal.querySelector('#r-skip').addEventListener('click', () => {
-    _reflections.push({ player: playerIdx, color, name, is_bot: isBot,
-      self_aggressive: null, self_risky: null, self_lucky: null,
-      skipped: true, timestamp: new Date().toISOString() });
+      description, skipped: false, timestamp: new Date().toISOString() });
     modal.remove();
     _promptReflection(players, idx + 1);
   });
@@ -164,7 +177,7 @@ function _mountStatsSidePanel() {
   const wHex    = COLORS[wColor] || '#888';
   const n       = stats.length;
   const { captureMatrix, blockMatrix } = _computeMatrices(stats);
-  const hasReflections = _reflections.some(r => !r.skipped);
+  const hasReflections = _reflections.length > 0;
 
   sp.innerHTML = `
     <div id="pg-side-header">
@@ -409,7 +422,7 @@ function _buildReflectionDescriptions(stats) {
     luck: ['','Lucky','Somewhat lucky','Neutral','Somewhat unlucky','Unlucky'],
   };
   return (_playerStats || []).map(s => {
-    const ref = _reflections.find(r => r.player === s.player && !r.skipped);
+    const ref = _reflections.find(r => r.player === s.player);
     const hex = COLORS[s.color] || '#888';
     const name = escapeAttr(gamePlayerName(s.player));
     if (!ref) return `<div class="pg-desc-row"><span class="pg-desc-name" style="color:${hex}">${name}</span><span class="pg-desc-text">—</span></div>`;
@@ -420,6 +433,7 @@ function _buildReflectionDescriptions(stats) {
         ${labels.risk[ref.self_risky]||ref.self_risky},
         ${labels.luck[ref.self_lucky]||ref.self_lucky}
       </span>
+      <span class="pg-desc-note">${escapeAttr(ref.description || '')}</span>
     </div>`;
   }).join('');
 }
@@ -452,7 +466,7 @@ function _drawScatter() {
     ctx.moveTo(mx, my-r); ctx.lineTo(mx+r, my); ctx.lineTo(mx, my+r); ctx.lineTo(mx-r, my);
     ctx.closePath(); ctx.fill();
 
-    const ref = _reflections.find(x => x.player === s.player && !x.skipped);
+    const ref = _reflections.find(x => x.player === s.player);
     if (ref) {
       const selfAgg  = (ref.self_aggressive - 1) / 4;
       const selfRisk = 1 - (ref.self_risky - 1) / 4;

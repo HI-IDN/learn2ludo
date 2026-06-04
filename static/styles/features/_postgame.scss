@@ -23,6 +23,15 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid color-mix(in srgb, var(--pc) 36%, #{$border-light});
+}
+
+.pg-reflect-stripe {
+  height: 8px;
+  background: var(--pc);
+  margin: -24px -20px 0;
 }
 
 .pg-reflect-badge {
@@ -49,6 +58,15 @@
   font-size: 12px;
   color: $color-text-2;
   margin: -8px 0 0;
+}
+
+.pg-reflect-progress {
+  align-self: flex-start;
+  color: var(--pc);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .pg-axis {
@@ -83,8 +101,40 @@
   cursor: pointer;
   transition: background 0.1s, border-color 0.1s, color 0.1s;
 
-  &:hover { border-color: $color-primary; color: $color-primary; }
-  &.sel   { background: $color-primary; border-color: $color-primary; color: #fff; }
+  &:hover { border-color: var(--pc); color: var(--pc); }
+  &.sel   { background: var(--pc); border-color: var(--pc); color: #fff; }
+}
+
+.pg-reflect-note {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  span {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $color-text-2;
+  }
+
+  textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 76px;
+    border: 1.5px solid $border-medium;
+    border-radius: $radius;
+    padding: 9px 10px;
+    font-family: $font-sans;
+    font-size: 13px;
+    color: $color-text;
+    background: #fff;
+
+    &:focus {
+      outline: 2px solid color-mix(in srgb, var(--pc) 22%, transparent);
+      border-color: var(--pc);
+    }
+  }
 }
 
 .pg-reflect-actions {
@@ -370,6 +420,12 @@
 .pg-desc-text {
   font-size: 11px;
   color: $color-text-2;
+}
+
+.pg-desc-note {
+  font-size: 11px;
+  color: $color-text-3;
+  line-height: 1.35;
 }
 
 // ── Footer ────────────────────────────────────────────────────────────────────
