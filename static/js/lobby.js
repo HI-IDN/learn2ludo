@@ -263,6 +263,7 @@ function lobbyToggleSlot(slotIdx) {
     : [...active, slotIdx].sort((a, b) => a - b);
 
   lobbyRemapPlayerSettings(active, next);
+  if (!isActive) lobbyInitNewHumanSlot(next.indexOf(slotIdx));
   settings.active_slots = next;
   settings.num_players  = next.length;
   persistSettings();
@@ -280,6 +281,15 @@ function lobbyRemapPlayerSettings(active, next) {
     });
     settings[key] = remapped;
   });
+}
+
+function lobbyInitNewHumanSlot(playerIdx) {
+  if (playerIdx === -1) return;
+  settings.player_types = settings.player_types || {};
+  settings.player_types[playerIdx] = 'human';
+  if (settings.bot_ids) delete settings.bot_ids[playerIdx];
+  if (settings.profile_ids) delete settings.profile_ids[playerIdx];
+  if (settings.player_names) delete settings.player_names[playerIdx];
 }
 
 function lobbyBotSelect(slotIdx, playerIdx) {
