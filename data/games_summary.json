@@ -1,0 +1,240 @@
+{
+  "20260604T141442_4p4y4pw.json": {
+    "filename": "20260604T141442_4p4y4pw.json",
+    "name": null,
+    "incomplete": false,
+    "started_at_ms": null,
+    "finished_at_ms": null,
+    "player_count": 4,
+    "yard_count": 4,
+    "winner": 2,
+    "winner_color": "yellow",
+    "players": [
+      {
+        "index": 0,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 1,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 2,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 3,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      }
+    ],
+    "justification_count": 0
+  },
+  "20260604T141728_2p4y4pw.json": {
+    "filename": "20260604T141728_2p4y4pw.json",
+    "name": null,
+    "incomplete": false,
+    "started_at_ms": null,
+    "finished_at_ms": null,
+    "player_count": 2,
+    "yard_count": 4,
+    "winner": 0,
+    "winner_color": "red",
+    "players": [
+      {
+        "index": 0,
+        "color": null,
+        "type": "random",
+        "bot_id": "bot-38f81ec2",
+        "human_icon": null
+      },
+      {
+        "index": 1,
+        "color": null,
+        "type": "random",
+        "bot_id": "ares",
+        "human_icon": null
+      }
+    ],
+    "justification_count": 0
+  },
+  "20260604T142205_4p4y4pw.json": {
+    "filename": "20260604T142205_4p4y4pw.json",
+    "name": null,
+    "incomplete": false,
+    "started_at_ms": null,
+    "finished_at_ms": null,
+    "player_count": 4,
+    "yard_count": 4,
+    "winner": 2,
+    "winner_color": "yellow",
+    "players": [
+      {
+        "index": 0,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 1,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 2,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 3,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      }
+    ],
+    "justification_count": 0
+  },
+  "20260604T142329_4p4y4pw.json": {
+    "filename": "20260604T142329_4p4y4pw.json",
+    "name": null,
+    "incomplete": false,
+    "started_at_ms": null,
+    "finished_at_ms": null,
+    "player_count": 4,
+    "yard_count": 4,
+    "winner": 2,
+    "winner_color": "yellow",
+    "players": [
+      {
+        "index": 0,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 1,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 2,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 3,
+        "color": null,
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      }
+    ],
+    "justification_count": 0
+  },
+  "20260604T142810_4p4y4pw.json": {
+    "filename": "20260604T142810_4p4y4pw.json",
+    "name": null,
+    "incomplete": false,
+    "started_at_ms": 1780583290498,
+    "finished_at_ms": 1780583290513,
+    "player_count": 4,
+    "yard_count": 4,
+    "winner": 2,
+    "winner_color": "yellow",
+    "players": [
+      {
+        "index": 0,
+        "color": "red",
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 1,
+        "color": "green",
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 2,
+        "color": "yellow",
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      },
+      {
+        "index": 3,
+        "color": "blue",
+        "type": null,
+        "bot_id": null,
+        "human_icon": null
+      }
+    ],
+    "justification_count": 0
+  },
+  "20260604T160826_4p4y4pw.json": {
+    "filename": "20260604T160826_4p4y4pw.json",
+    "name": null,
+    "incomplete": false,
+    "started_at_ms": 1780588460174,
+    "finished_at_ms": 1780589306644,
+    "player_count": 4,
+    "yard_count": 4,
+    "winner": 0,
+    "winner_color": "red",
+    "players": [
+      {
+        "index": 0,
+        "color": "red",
+        "type": "human",
+        "bot_id": null,
+        "human_icon": "fa-face-angry"
+      },
+      {
+        "index": 1,
+        "color": "green",
+        "type": "bot",
+        "bot_id": "hermes",
+        "human_icon": null
+      },
+      {
+        "index": 2,
+        "color": "yellow",
+        "type": "human",
+        "bot_id": null,
+        "human_icon": "fa-face-grin-tongue"
+      },
+      {
+        "index": 3,
+        "color": "blue",
+        "type": "bot",
+        "bot_id": "bot-a61e342c",
+        "human_icon": null
+      }
+    ],
+    "justification_count": 7
+  }
+}

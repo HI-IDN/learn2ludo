@@ -103,6 +103,10 @@ def _extract_game_meta(filename: str, data: dict, player_registry: dict) -> dict
             "bot_id": p.get("bot_id"),
             "human_icon": pr.get("icon"),
         })
+    justification_count = sum(
+        1 for h in data.get("history", [])
+        if h.get("type") == "move" and h.get("justification")
+    )
     return {
         "filename": filename,
         "name": data.get("_name") or None,
@@ -114,6 +118,7 @@ def _extract_game_meta(filename: str, data: dict, player_registry: dict) -> dict
         "winner": data.get("winner"),
         "winner_color": data.get("winner_color"),
         "players": players,
+        "justification_count": justification_count,
     }
 
 

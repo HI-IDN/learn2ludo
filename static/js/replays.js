@@ -117,7 +117,8 @@ function _renderGameCard(g, isAdmin) {
   const winnerLabel = winnerPlayer
     ? `<span class="replays-winner" style="--pc:${winnerHex}"><i class="ti ti-trophy" style="font-size:11px;"></i> ${winnerPlayer.color}${winnerPlayer.type === 'bot' ? ` (${winnerPlayer.bot_id || 'bot'})` : ''}</span>`
     : '';
-  const meta = [g.player_count ? `${g.player_count}p` : null, g.yard_count ? `${g.yard_count} yards` : null].filter(Boolean).join(' · ');
+  const justLabel = g.justification_count > 0 ? `${g.justification_count} justification${g.justification_count !== 1 ? 's' : ''}` : null;
+  const meta = [g.player_count ? `${g.player_count}p` : null, g.yard_count ? `${g.yard_count} yards` : null, justLabel].filter(Boolean).join(' · ');
 
   const adminBtns = isAdmin ? `
     <button class="replays-card-action" title="Rename" onclick="event.stopPropagation(); startRenameReplay('${g.filename}', this)"><i class="ti ti-pencil"></i></button>
