@@ -300,16 +300,16 @@ function botSection(title, subtitle, bots, allowEmpty = false, extraCardHtml = '
   const botCards = bots.length
     ? bots.map(b => `
         <div class="bot-card${botIsPlanned(b) ? ' bot-card--planned' : ''}${b.status === 'Custom' ? ' bot-card--custom' : ''}">
-          ${b.type === 'CDR' && b.designer ? `<button class="bot-card-delete" title="Delete bot" onclick="botDeleteCustom('${b.id}', '${b.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+          ${b.type === 'CDR' && b.designer ? `<button class="bot-card-delete" title="Delete bot" onclick="botDeleteCustom('${escapeBotCardJs(b.id)}', '${escapeBotCardJs(b.name)}')"><i class="fa-solid fa-trash"></i></button>` : ''}
           <div class="bot-card-icon">${typeof botAvatarHtml === 'function' ? botAvatarHtml(b, { className: 'bot-avatar bot-avatar--card' }) : '<i class="fa-solid fa-robot"></i>'}</div>
           <div class="bot-card-body">
             <div class="bot-card-title">
-              <div class="bot-card-name">${b.name}</div>
+              <div class="bot-card-name">${escapeBotCardText(b.name)}</div>
               ${botStatusBadge(b)}
             </div>
             <div class="bot-card-desc">${botCardDescription(b)}</div>
             ${botCardFocus(b) ? `<div class="bot-card-focus">${botCardFocus(b)}</div>` : ''}
-            ${b.designer ? `<div class="bot-card-designer">by ${b.designer}</div>` : ''}
+            ${b.designer ? `<div class="bot-card-designer">by ${escapeBotCardText(botDesignerLabel(b.designer))}</div>` : ''}
           </div>
         </div>`).join('')
     : '';
@@ -343,13 +343,36 @@ function botIsPlanned(bot) {
 }
 
 function botCardDescription(bot) {
-  return [bot?.tldr, bot?.description].filter(Boolean).join(' — ');
+  return escapeBotCardText([bot?.tldr, bot?.description].filter(Boolean).join(' — '));
 }
 
 function botCardFocus(bot) {
   if (bot?.focus) return bot.focus;
   if (bot?.weights && typeof botProfileText === 'function') return botProfileText(bot.weights);
   return '';
+}
+
+function botDesignerLabel(designerId) {
+  if (typeof getSessionProfileName === 'function') {
+    const sessionName = getSessionProfileName(designerId);
+    if (sessionName) return sessionName;
+  }
+  return designerId;
+}
+
+function escapeBotCardText(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}
+
+function escapeBotCardJs(value) {
+  return String(value ?? '')
+    .replaceAll('\\', '\\\\')
+    .replaceAll("'", "\\'")
+    .replaceAll('\n', ' ');
 }
 
 // ---- Auto-play loop --------------------------------------------------------

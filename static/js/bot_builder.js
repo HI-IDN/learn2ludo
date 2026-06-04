@@ -60,6 +60,7 @@ function getUserBotWeights() {
 function renderBotBuilderCard() {
   const weights = getUserBotWeights();
   const draft = getUserBotDraft();
+  const designerOptions = botBuilderDesignerOptions(draft.designer);
   const rows = USER_BOT_WEIGHT_DEFS.map(def => {
     const value = weights[def.key] ?? 0;
     return `
@@ -155,13 +156,11 @@ function renderBotBuilderCard() {
             </label>
             <label class="bot-builder-field bot-builder-field--designer">
               <span>Designer</span>
-              <input
-              type="text"
-              maxlength="100"
-              placeholder="Who designed this bot?"
-              value="${escapeBotText(draft.designer)}"
-              oninput="botBuilderSetDraftDesigner(this.value)"
-            >
+              <select onchange="botBuilderSetDraftDesigner(this.value)" ${designerOptions.length ? '' : 'disabled'}>
+                ${designerOptions.length
+                  ? `<option value="">Choose ready player</option>${designerOptions.join('')}`
+                  : '<option value="">No ready players</option>'}
+              </select>
             </label>
             <div class="bot-builder-draft-actions">
               ${saveValid ? '' : `<em class="bot-builder-hint" id="bot-builder-hint">${botBuilderSaveTooltip()}</em>`}
@@ -200,10 +199,21 @@ function getUserBotDraft() {
   };
 }
 
+function botBuilderDesignerOptions(selectedId = '') {
+  if (typeof loadProfiles !== 'function' || typeof isSessionConsented !== 'function') return [];
+  return loadProfiles()
+    .filter(p => p.id && isSessionConsented(p.id))
+    .map(p => {
+      const label = typeof profileDisplayName === 'function' ? profileDisplayName(p) : (p.username || p.id);
+      return `<option value="${escapeBotText(p.id)}"${p.id === selectedId ? ' selected' : ''}>${escapeBotText(label)}</option>`;
+    });
+}
+
 function botBuilderSetDraftDesigner(value) {
   settings.user_bot_draft = settings.user_bot_draft || {};
-  settings.user_bot_draft.designer = String(value || '').slice(0, 100);
+  settings.user_bot_draft.designer = String(value || '');
   persistSettings();
+  botBuilderRefreshSaveBtn();
 }
 
 function _botBuilderWeightIssue() {
@@ -218,7 +228,7 @@ function _botBuilderWeightIssue() {
 function botBuilderDraftValid(draft) {
   draft = draft || getUserBotDraft();
   if (_botBuilderWeightIssue()) return false;
-  return !!(draft.name.trim() && draft.tldr.trim() && draft.description.trim());
+  return !!(draft.name.trim() && draft.tldr.trim() && draft.description.trim() && draft.designer.trim());
 }
 
 function botBuilderSaveTooltip() {
@@ -227,6 +237,7 @@ function botBuilderSaveTooltip() {
   const draft = getUserBotDraft();
   if (!draft.name.trim() || !draft.tldr.trim() || !draft.description.trim())
     return 'Fill in Name, TLDR, and Description to save';
+  if (!draft.designer.trim()) return 'Choose a ready player as designer';
   return 'Save this bot configuration';
 }
 

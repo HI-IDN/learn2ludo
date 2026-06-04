@@ -229,4 +229,4 @@ assets/fontawesome-free-7.2.0-web/
 .codex/
 
 # Local simulation data (full game records — gitignored, keep locally only)
-data/
+data/games/

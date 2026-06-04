@@ -155,38 +155,44 @@ class PlayerRegisterRequest(BaseModel):
     leaderboard_opt_in: bool = False
 
 
-def load_players() -> list:
+def load_players() -> dict:
     if PLAYERS_PATH.exists():
         try:
-            return json.loads(PLAYERS_PATH.read_text()).get("players", [])
+            data = json.loads(PLAYERS_PATH.read_text())
         except Exception:
-            return []
-    return []
+            return {}
+        if isinstance(data.get("users"), dict):
+            return data["users"]
+        if isinstance(data.get("players"), list):
+            return {p.get("id"): p for p in data["players"] if p.get("id")}
+    return {}
 
 
-def save_players(players: list):
+def save_players(players: dict):
     PLAYERS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    PLAYERS_PATH.write_text(json.dumps({"players": players}, indent=2))
+    PLAYERS_PATH.write_text(json.dumps({"users": players}, indent=2))
+
+
+@app.get("/api/players")
+def list_players():
+    return {"users": load_players()}
 
 
 @app.post("/api/players/register", status_code=201)
 def register_player(req: PlayerRegisterRequest):
-    """Persist a consented player's UUID, icon, age range and consent timestamp.
+    """Persist a consented player's anonymous UUID record.
     No username is stored server-side."""
     players = load_players()
-    # Upsert: update existing record if UUID already registered
-    existing = next((p for p in players if p["id"] == req.id), None)
+    existing = players.get(req.id, {})
     record = {
         "id": req.id,
         "icon": req.icon,
         "age_range": req.age_range,
-        "consent_ts": req.consent_ts,
+        "joined_ts": existing.get("joined_ts") or req.consent_ts,
+        "last_consent_ts": req.consent_ts,
         "leaderboard_opt_in": req.leaderboard_opt_in,
     }
-    if existing:
-        players = [record if p["id"] == req.id else p for p in players]
-    else:
-        players.append(record)
+    players[req.id] = record
     save_players(players)
     return {"ok": True}
 

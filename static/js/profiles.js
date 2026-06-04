@@ -4,6 +4,7 @@
 
 const PROFILE_STORAGE_KEY = 'learn2ludo_profiles';
 const SESSION_CONSENT_KEY  = 'learn2ludo_session_consented';
+const SESSION_PROFILE_NAMES_KEY = 'learn2ludo_session_profile_names';
 const PROFILE_NAME_MAX     = 10;
 
 const AGE_RANGES = ['Under 13', '13–17', '18–29', '30–44', '45–59', '60+', 'Prefer not to say'];
@@ -43,6 +44,51 @@ function getProfileById(id) {
   return loadProfiles().find(p => p.id === id) || null;
 }
 
+function profileDisplayName(profile) {
+  return profile?.username || profile?.id || '';
+}
+
+function getSessionProfileNames() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_PROFILE_NAMES_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+function markSessionProfileName(profile) {
+  if (!profile?.id || !profile.username) return;
+  const names = getSessionProfileNames();
+  names[profile.id] = profile.username;
+  sessionStorage.setItem(SESSION_PROFILE_NAMES_KEY, JSON.stringify(names));
+}
+
+function getSessionProfileName(profileId) {
+  return getSessionProfileNames()[profileId] || '';
+}
+
+async function hydrateServerProfiles() {
+  let data = null;
+  try {
+    const r = await fetch('/api/players');
+    if (r.ok) data = await r.json();
+  } catch {
+    return;
+  }
+  const users = data?.users || {};
+  const profiles = loadProfiles();
+  const byId = new Map(profiles.map(p => [p.id, p]));
+  Object.entries(users).forEach(([id, user]) => {
+    if (!id || byId.has(id)) return;
+    profiles.push({
+      id,
+      username: '',
+      icon: user.icon || DEFAULT_FACE_ICON,
+      age_range: user.age_range || 'Prefer not to say',
+      consent_ts: user.last_consent_ts || user.joined_ts || Date.now(),
+      leaderboard_opt_in: !!user.leaderboard_opt_in,
+    });
+  });
+  if (profiles.length !== byId.size) saveProfiles(profiles);
+}
+
 // ── Session consent ───────────────────────────────────────────────────────────
 
 function getSessionConsented() {
@@ -54,6 +100,7 @@ function markSessionConsented(profileId) {
   const s = getSessionConsented();
   s.add(profileId);
   sessionStorage.setItem(SESSION_CONSENT_KEY, JSON.stringify([...s]));
+  markSessionProfileName(getProfileById(profileId));
 }
 
 function isSessionConsented(profileId) {
@@ -119,7 +166,7 @@ function renderProfiles() {
         <div class="profile-card-icon">
           <i class="fa-solid ${escapeAttr(p.icon)}"></i>
         </div>
-        <div class="profile-card-name">${escapeAttr(p.username)}</div>
+        <div class="profile-card-name">${escapeAttr(profileDisplayName(p))}</div>
         <div class="profile-card-age">${escapeAttr(p.age_range)}</div>
         ${ready
           ? `<div class="profile-card-status"><i class="fa-solid fa-circle-check"></i> Ready</div>`
@@ -134,7 +181,7 @@ function renderProfiles() {
 
 function deleteProfile(id) {
   const profile = getProfileById(id);
-  if (!confirm(`Remove player "${profile?.username || id}"?`)) return;
+  if (!confirm(`Remove player "${profileDisplayName(profile) || id}"?`)) return;
   saveProfiles(loadProfiles().filter(p => p.id !== id));
   if (settings.profile_ids) {
     for (const k of Object.keys(settings.profile_ids)) {
@@ -194,7 +241,7 @@ function openProfileEdit(profileId) {
   const submitEl = document.getElementById('reg-submit-btn');
   if (submitEl) submitEl.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save changes';
   const usernameEl = document.getElementById('reg-username');
-  if (usernameEl) usernameEl.value = profile.username;
+  if (usernameEl) usernameEl.value = profileDisplayName(profile);
   const ageEl = document.getElementById('reg-age-select');
   if (ageEl) ageEl.value = profile.age_range;
   const leaderEl = document.getElementById('reg-leaderboard-check');
@@ -254,7 +301,8 @@ function _updateRegSubmit() {
   const consent  = document.getElementById('reg-consent-check')?.checked;
   const parentOk  = age !== 'Under 13'         || document.getElementById('reg-parent-check')?.checked;
   const confirmOk = age !== 'Prefer not to say' || document.getElementById('reg-age-confirm-check')?.checked;
-  btn.disabled = !(_regIcon && username && age && consent && parentOk && confirmOk);
+  const consentOk = _editingId ? true : consent;
+  btn.disabled = !(_regIcon && username && age && consentOk && parentOk && confirmOk);
 }
 
 function _regUsernameError(msg) {
@@ -270,7 +318,7 @@ function submitRegistration() {
   if (!_regIcon || !username || !age) return;
 
   const profiles = loadProfiles();
-  const duplicate = profiles.find(p => p.username.toLowerCase() === username.toLowerCase() && p.id !== _editingId);
+  const duplicate = profiles.find(p => (p.username || '').toLowerCase() === username.toLowerCase() && p.id !== _editingId);
   if (duplicate) {
     _regUsernameError('That name is already taken. Choose another.');
     document.getElementById('reg-username')?.focus();
@@ -284,6 +332,8 @@ function submitRegistration() {
     if (idx !== -1) {
       profiles[idx] = { ...profiles[idx], username, icon: _regIcon, age_range: age, leaderboard_opt_in: leaderboard };
       saveProfiles(profiles);
+      markSessionProfileName(profiles[idx]);
+      _serverRegisterProfile(profiles[idx]);
     }
   } else {
     const consent = document.getElementById('reg-consent-check')?.checked;
@@ -294,6 +344,7 @@ function submitRegistration() {
     const newProfile = { id, username, icon: _regIcon, age_range: age, consent_ts: Date.now(), leaderboard_opt_in: leaderboard };
     profiles.push(newProfile);
     saveProfiles(profiles);
+    markSessionProfileName(newProfile);
     markSessionConsented(id);
     _serverRegisterProfile(newProfile);
   }
@@ -301,6 +352,7 @@ function submitRegistration() {
   closeProfileRegistration();
   renderProfiles();
   if (typeof renderLobbySlots === 'function') renderLobbySlots();
+  if (typeof renderBotsPage === 'function') renderBotsPage();
 }
 
 // ── Re-consent modal ──────────────────────────────────────────────────────────
@@ -319,7 +371,7 @@ function openReconsent(profileId, callback) {
 
   const nameEl = modal.querySelector('.reconsent-name');
   if (nameEl) nameEl.innerHTML =
-    `<i class="fa-solid ${escapeAttr(profile.icon)}"></i> ${escapeAttr(profile.username)}`;
+    `<i class="fa-solid ${escapeAttr(profile.icon)}"></i> ${escapeAttr(profileDisplayName(profile))}`;
 
   const checkEl = document.getElementById('reconsent-check');
   if (checkEl) checkEl.checked = false;
@@ -340,12 +392,18 @@ function submitReconsent() {
   if (!_reconsentId) { closeReconsent(); return; }
   markSessionConsented(_reconsentId);
   const _rp = getProfileById(_reconsentId);
-  if (_rp) _serverRegisterProfile(_rp);
+  if (_rp) {
+    _rp.consent_ts = Date.now();
+    saveProfiles(loadProfiles().map(p => p.id === _rp.id ? _rp : p));
+    markSessionProfileName(_rp);
+    _serverRegisterProfile(_rp);
+  }
   const cb = _reconsentCallback;
   const id = _reconsentId;
   closeReconsent();
   renderProfiles();
   if (typeof renderLobbySlots === 'function') renderLobbySlots();
+  if (typeof renderBotsPage === 'function') renderBotsPage();
   if (cb) cb(id);
 }
 
@@ -366,7 +424,7 @@ function lobbyProfileSelect(slotIdx, playerIdx) {
     `<option value="">— pick player —</option>`,
     ...profiles.map(p => {
       const inUse = usedIds.has(p.id) && p.id !== currentId;
-      return `<option value="${p.id}"${p.id === currentId ? ' selected' : ''}${inUse ? ' disabled' : ''}>${escapeAttr(p.username)}${inUse ? ' (in use)' : ''}</option>`;
+      return `<option value="${p.id}"${p.id === currentId ? ' selected' : ''}${inUse ? ' disabled' : ''}>${escapeAttr(profileDisplayName(p))}${inUse ? ' (in use)' : ''}</option>`;
     })
   ].join('');
 
@@ -407,11 +465,13 @@ function _serverRegisterProfile(profile) {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-function initProfilesPanel() {
+async function initProfilesPanel() {
+  await hydrateServerProfiles();
   cleanStaleProfileIds();
   const regText      = document.getElementById('reg-consent-text');
   if (regText) regText.innerHTML = CONSENT_TEXT;
   const reconsentText = document.getElementById('reconsent-consent-text');
   if (reconsentText) reconsentText.innerHTML = CONSENT_TEXT;
   renderProfiles();
+  if (typeof renderBotsPage === 'function') renderBotsPage();
 }
