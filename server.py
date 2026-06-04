@@ -136,26 +136,13 @@ class AdminLogin(BaseModel):
     password: str
 
 
+_ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "password1")
+
+
 @app.post("/api/admin/login")
 def admin_login(body: AdminLogin):
-    cfg = load_config()
-    stored = cfg["admin"].get("password_hash", "")
-    # Simple comparison - in production use proper bcrypt
-    attempt_hash = hashlib.sha256(body.password.encode()).hexdigest()
-    stored_hash = cfg["admin"].get("password_sha256", "")
-
-    if not stored_hash:
-        # First run: accept any password and set it
-        new_hash = hashlib.sha256(body.password.encode()).hexdigest()
-        cfg["admin"]["password_sha256"] = new_hash
-        save_config(cfg)
-        token = secrets.token_hex(32)
-        admin_tokens.add(token)
-        return {"token": token, "first_run": True}
-
-    if attempt_hash != stored_hash:
+    if body.password != _ADMIN_PASSWORD:
         raise HTTPException(status_code=401, detail="Invalid password")
-
     token = secrets.token_hex(32)
     admin_tokens.add(token)
     return {"token": token}

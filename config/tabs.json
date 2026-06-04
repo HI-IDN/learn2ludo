@@ -33,6 +33,7 @@
       "icon": "ti-settings",
       "enabled": true,
       "default_visible": true,
+      "admin_only": true,
       "order": 2,
       "description": "Board rules and players"
     },

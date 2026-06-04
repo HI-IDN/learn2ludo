@@ -39,7 +39,7 @@ function boardLayout(trackSize=null, yardCount=null) {
   ]);
   return {track_size: trackSize, yard_count: yardCount, starts, finishes, safe_havens};
 }
-function currentLayout(){ return gameState?.board || boardLayout(); }
+function currentLayout(){ return (gameHasStarted() ? gameState?.board : null) || boardLayout(); }
 function homeEntryPosition(){ return (currentLayout().track_size || 52) - 1; }
 
 function playerSlot(playerIdx, n=gameState?.num_players || settings.num_players || 4) {
@@ -246,7 +246,14 @@ function saveSettings(){
 
     sound_volume: typeof getSoundVolume==='function' ? getSoundVolume() : (settings.sound_volume ?? 0.8)
   };
-  updateMoveJustificationSettingsVisibility(); validateBoardConfig(); persistSettings(); renderPlayers(); renderLobbySlots(); drawBoard();
+  updateMoveJustificationSettingsVisibility(); validateBoardConfig(); persistSettings(); renderPlayers(); renderLobbySlots();
+  // Rebuild demo state so the board preview reflects new settings immediately.
+  if(!gameHasStarted()){
+    const n=gameState?.num_players||(typeof lobbyActiveSlots==='function'?lobbyActiveSlots().length:null)||settings.num_players||4;
+    gameState=makeDemoState(n, gameState?.slots||null);
+    if(typeof invalidateBoardGeometry==='function') invalidateBoardGeometry();
+  }
+  drawBoard();
 }
 function getGameRules(){ return {six_to_enter:true, six_extra_turn:true, capture_enabled:true, safe_squares: settings.safe_squares ?? true, max_consecutive_sixes: settings.max_consecutive_sixes ?? 3, no_pawn_three_rolls:true, empty_board_rolls: settings.empty_board_rolls ?? 3, equal_rounds: settings.equal_rounds ?? false}; }
 
@@ -356,14 +363,37 @@ async function loadTabs(){
   ]; }
   renderTabs();
 }
-function getVisibleTabs(){ return tabConfig.filter(t=>t.enabled).sort((a,b)=>a.order-b.order); }
+function getVisibleTabs(){ return tabConfig.filter(t=>t.enabled && (!t.admin_only || adminToken)).sort((a,b)=>a.order-b.order); }
 function renderTabs(){ const nav=document.getElementById('tab-nav'); nav.innerHTML=''; getVisibleTabs().forEach(t=>{ const b=document.createElement('button'); b.className='tab-btn'; b.id='tab-btn-'+t.id; b.innerHTML=`<i class="ti ${t.icon}"></i>${t.label}`; b.onclick=()=>switchTab(t.id); nav.appendChild(b); }); switchTab(getVisibleTabs()[0]?.id || 'play'); }
 function switchTab(id){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tab-btn-'+id)?.classList.add('active'); document.getElementById('panel-'+id)?.classList.add('active'); if(id==='stats')loadStats(); if(id==='lobby')renderLobbySlots(); if(id==='profiles'&&typeof renderProfiles==='function')renderProfiles(); if(id==='bots')renderBotsPage(); }
-async function doAdminLogin(){adminToken='dev';}
-async function doOverlayLogin(){adminToken='dev'; closeOverlay(); switchTab('admin');}
+async function doAdminLogin(){
+  const pw = document.getElementById('admin-pw')?.value || '';
+  const alert = document.getElementById('admin-alert');
+  try {
+    const r = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: pw}) });
+    if (!r.ok) { if(alert){ alert.textContent='Incorrect password.'; alert.style.display='block'; } return; }
+    const data = await r.json();
+    adminToken = data.token;
+    if(alert) alert.style.display='none';
+    document.getElementById('admin-locked-msg').style.display='none';
+    document.getElementById('admin-panel').style.display='block';
+    document.getElementById('admin-auth-badge').textContent='unlocked';
+    document.getElementById('admin-auth-badge').className='badge badge-green';
+    renderTabs();
+    switchTab('admin');
+  } catch(e) { if(alert){ alert.textContent='Login failed.'; alert.style.display='block'; } }
+}
+async function doOverlayLogin(){
+  await doAdminLogin();
+  if(adminToken){ closeOverlay(); switchTab('admin'); }
+}
 function closeOverlay(){ const o=document.getElementById('admin-overlay'); if(o)o.style.display='none'; }
 function updateTabConfig(){}
-async function saveTabConfig(){}
+async function saveTabConfig(){
+  if(!adminToken) return;
+  const r = await fetch('/api/tabs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token: adminToken, tabs: tabConfig}) });
+  if(r.ok){ const ok=document.getElementById('admin-save-ok'); if(ok){ ok.style.display='block'; setTimeout(()=>ok.style.display='none',2000); } }
+}
 
 function gameInProgress(){
   return gameState && gameState.winner === null;
