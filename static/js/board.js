@@ -287,20 +287,20 @@ function drawBoard(){
     const lxi=-Math.sin(ti), lyi=Math.cos(ti);
     const axj=Math.cos(tj), ayj=Math.sin(tj);
     const lxj=-Math.sin(tj), lyj=Math.cos(tj);
-    // co_outer: flush with outer cell edges (used for both Px and T1/T2).
-    // Using co_outer for Px ensures the Px→T1 line stays exactly along the arm's
-    // lateral boundary — critical for N=2 where cot(π/N)=0 and Px lands at board
-    // centre, making the diagonal span the full board width.
+    // co_inner (1.5c+4): 4 px margin from arm cell outer edges — used for both Px
+    // and T1/T2 so the Px→T1 boundary line is exactly along the arm's lateral edge
+    // (no diagonal). For N=2 this makes the flat boundary perfectly horizontal.
+    // co_outer (1.5c): only used for the N=4 straight-line extensions to FAR.
     const co_inner=c*1.5+4, co_outer=c*1.5;
-    const Px=_cx+co_outer*lxi+_cot*co_outer*axi, Py=_cy+co_outer*lyi+_cot*co_outer*ayi;
+    const Px=_cx+co_inner*lxi+_cot*co_inner*axi, Py=_cy+co_inner*lyi+_cot*co_inner*ayi;
     if(_yN===4){
       const B1x=_cx+co_outer*lxi+_FAR*axi, B1y=_cy+co_outer*lyi+_FAR*ayi;
       const B2x=_cx-co_outer*lxj+_FAR*axj, B2y=_cy-co_outer*lyj+_FAR*ayj;
       html+=`<path d="M ${Px},${Py} L ${B1x},${B1y} L ${B2x},${B2y} Z" fill="${col}" opacity=".92" clip-path="url(#board-clip)"/>`;
     } else {
-      const R=S/2, t=Math.sqrt(Math.max(0,R*R-co_outer*co_outer));
-      const T1x=_cx+co_outer*lxi+t*axi, T1y=_cy+co_outer*lyi+t*ayi;
-      const T2x=_cx-co_outer*lxj+t*axj, T2y=_cy-co_outer*lyj+t*ayj;
+      const R=S/2, t=Math.sqrt(Math.max(0,R*R-co_inner*co_inner));
+      const T1x=_cx+co_inner*lxi+t*axi, T1y=_cy+co_inner*lyi+t*ayi;
+      const T2x=_cx-co_inner*lxj+t*axj, T2y=_cy-co_inner*lyj+t*ayj;
       html+=`<path d="M ${Px},${Py} L ${T1x},${T1y} A ${R},${R},0,0,1,${T2x},${T2y} Z" fill="${col}" opacity=".92"/>`;
     }
     // size is already the max square fitting the inscribed circle; use it directly.
