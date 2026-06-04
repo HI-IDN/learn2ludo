@@ -79,15 +79,20 @@ function buildBoardGeometry(yardCount, homeLength, pawnsPerPlayer, S) {
   // R_arc: distance from board centre to each arm's outermost corner cell (includes delta offset).
   const R_arc = Math.sqrt(Math.pow((n + 1) * c + delta, 2) + c * c);
 
-  // Logo: place at the inscribed circle of the yard sector (largest circle fitting
-  // within the wedge, touching both straight edges and the outer arc).
-  // For a sector with half-angle α=π/N and outer radius R=S/2:
-  //   centre distance d = R/(1+sin α),  inscribed radius ρ = R·sin α/(1+sin α)
-  //   max square side (fitting inside the inscribed circle) = ρ√2
+  // Logo placement: on the yard bisector at the geometric centre of the yard's free area.
+  // N=4 (square yard): quadrant centre = S√2/4 from board centre; size = free axis width.
+  // N≠4 (wedge yard): inscribed circle of the circular sector (d=R/(1+sinα), ρ=R·sinα/(1+sinα)).
   const _sinN = Math.sin(Math.PI / yardCount);
   const _R_board = S / 2;
-  const _logoD = _R_board / (1 + _sinN);
-  const _logoSize = _R_board * _sinN / (1 + _sinN) * Math.SQRT2;
+  const _co_inner = c * 1.5 + 4;
+  let _logoD, _logoSize;
+  if (yardCount === 4) {
+    _logoD = S * Math.SQRT2 / 4;               // centre of each quadrant along the diagonal
+    _logoSize = _R_board - 2 * _co_inner;       // free space per axis inside arm boundaries
+  } else {
+    _logoD = _R_board / (1 + _sinN);
+    _logoSize = _R_board * _sinN / (1 + _sinN) * Math.SQRT2;
+  }
   const yardCenters = Array.from({length: yardCount}, (_, arm) => {
     const theta = Math.PI + arm * 2 * Math.PI / yardCount;
     const bisector = theta + Math.PI / yardCount;
