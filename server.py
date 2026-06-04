@@ -84,16 +84,25 @@ def save_game_record(session: GameSession):
 
 
 def build_game_player_registry(session: GameSession) -> list[dict]:
-    refs = {int(p.get("player_index", p.get("index", -1))): p for p in session.player_refs if isinstance(p, dict)}
+    return normalize_game_player_refs(session.player_refs, session.seeds)
+
+
+def normalize_game_player_refs(player_refs: list, seeds: list[int]) -> list[dict]:
+    refs = {int(p.get("player_index", p.get("index", -1))): p for p in player_refs if isinstance(p, dict)}
     registry = []
-    for idx, seed in enumerate(session.seeds):
+    for idx, seed in enumerate(seeds):
         ref = refs.get(idx, {})
+        bot_id = ref.get("bot_id") or None
+        human_id = ref.get("human_id") or None
+        player_type = ref.get("type") or ("human" if human_id else "bot" if bot_id else None)
+        if player_type not in ("human", "bot"):
+            player_type = "human" if human_id else "bot" if bot_id else None
         registry.append({
             "player_index": idx,
-            "player_uuid": ref.get("player_uuid") or None,
             "seed": seed,
-            "type": ref.get("type") or None,
-            "bot_id": ref.get("bot_id") or None,
+            "type": player_type,
+            "human_id": human_id if player_type == "human" else None,
+            "bot_id": bot_id if player_type == "bot" else None,
             "designer_uuid": ref.get("designer_uuid") or None,
         })
     return registry
@@ -326,7 +335,7 @@ def new_game(req: NewGameRequest):
     equal_rounds   = bool(req.rules.get("equal_rounds", False))
     active_game = GameSession(cfg, max_yard_rolls=max_yard_rolls, starting_player=starting_player,
                               equal_rounds=equal_rounds, seeds=req.seeds)
-    active_game.player_refs = req.config.get("player_refs") or []
+    active_game.player_refs = normalize_game_player_refs(req.config.get("player_refs") or [], active_game.seeds)
     stats = load_stats()
     stats["games_played"] += 1
     save_stats(stats)

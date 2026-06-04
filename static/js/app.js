@@ -321,16 +321,17 @@ function buildNewGamePayload(){
 
 function buildGamePlayerRefs(playerCount) {
   return Array.from({length: playerCount}, (_, i) => {
-    const type = getPlayerType(i);
+    const playerType = getPlayerType(i);
+    const type = playerType === 'human' ? 'human' : 'bot';
     const botId = settings.bot_ids?.[i] || null;
-    const bot = type !== 'human' && typeof getBotRegistry === 'function'
+    const bot = type === 'bot' && typeof getBotRegistry === 'function'
       ? getBotRegistry().find(b => b.id === botId)
       : null;
     return {
       player_index: i,
-      player_uuid: type === 'human' ? (settings.profile_ids?.[i] || null) : null,
       type,
-      bot_id: botId,
+      human_id: type === 'human' ? (settings.profile_ids?.[i] || null) : null,
+      bot_id: type === 'bot' ? botId : null,
       designer_uuid: bot?.designer || null,
     };
   });

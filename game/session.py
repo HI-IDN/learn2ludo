@@ -272,7 +272,6 @@ class GameSession:
             "round_count":      self.round_count,
             "yard_roll_count":  self._yard_roll_count,
             "max_yard_rolls":   self.max_yard_rolls,
-            "seeds":            self.seeds,
             "player_refs":      self.player_refs,
         }
 

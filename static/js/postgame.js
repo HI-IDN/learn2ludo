@@ -68,7 +68,7 @@ function _isCustomBot(i) {
   return !!bot?.designer;
 }
 
-function _reflectionPlayerUuid(playerIdx) {
+function _reflectionHumanId(playerIdx) {
   if (gamePlayerType(playerIdx) === 'human') {
     return settings.profile_ids?.[playerIdx] || null;
   }
@@ -170,7 +170,7 @@ function _promptReflection(players, idx) {
   nextBtn.addEventListener('click', () => {
     const description = descEl?.value.trim() || '';
     if (!(agg && risk && lucky && description)) { updateNext(); return; }
-    _reflections.push({ player: playerIdx, player_uuid: _reflectionPlayerUuid(playerIdx), color, is_bot: isBot,
+    _reflections.push({ player: playerIdx, human_id: _reflectionHumanId(playerIdx), color, is_bot: isBot,
       self_aggressive: agg, self_risky: risk, self_lucky: lucky,
       description, skipped: false, timestamp: new Date().toISOString() });
     modal.remove();
