@@ -21,7 +21,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from game.engine import GameConfig, BoardConfig
+from game.engine import GameConfig, BoardConfig, board_track_size
 from game.session import GameSession
 from game.bots import ApolloBot, get_bot_info, save_custom_bot, delete_custom_bot, delete_custom_bots_by_designer, load_custom_bots, REGISTRY as BOT_REGISTRY
 from rl.environment import LudoEnv, TrainingSession, OPPONENT_POLICIES
@@ -341,11 +341,12 @@ def new_game(req: NewGameRequest):
     explicit_slots = req.config.get("explicit_slots") or list(range(player_count))
     starting_player = int(req.config.get("starting_player", 0))
     yard_count = board_cfg.get("yard_count", 4)
+    home_length = board_cfg.get("home_length", 6)
     cfg = GameConfig(
         board=BoardConfig(
-            track_size=board_cfg.get("track_size", 52),
+            track_size=board_cfg.get("track_size", board_track_size(yard_count, home_length)),
             yard_count=yard_count,
-            home_length=board_cfg.get("home_length", 6),
+            home_length=home_length,
             safe_offset=board_cfg.get("safe_offset", 7),
             pawns_per_player=board_cfg.get("pawns_per_player", 4),
         ),

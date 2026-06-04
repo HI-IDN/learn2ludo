@@ -49,35 +49,37 @@ function _yardSlotLayout(count, yardSize) {
 
 function buildBoardGeometry(yardCount, homeLength, pawnsPerPlayer, S) {
   const n = homeLength;
+  const armN = yardCount === 2 ? n + 1 : n;
   // For N≠4 the centre polygon apothem = 1.5c·cot(π/N) > 1.5c, so arms must shift outward
   // by delta = 1.5c·(cot(π/N)−1) to keep H5 just outside and H6 just inside the polygon.
-  // We solve for c by requiring the board diameter 2·((n+1.5)c + delta) = S, giving:
-  //   c = S / (2·(n + 1.5·cot(π/N)))    [N=4 → same as S/(2n+3)]
+  // We solve for c by requiring the board diameter 2·((armN+1.5)c + delta) = S, giving:
+  //   c = S / (2·(armN + 1.5·cot(π/N)))    [N=4 → same as S/(2n+3)]
   const cotN = 1 / Math.tan(Math.PI / yardCount);
-  const c = S / (2 * (n + 1.5 * cotN));
+  const c = S / (2 * (armN + 1.5 * cotN));
   const delta = 1.5 * c * (cotN - 1);   // radial arm offset (0 for N=4)
   const cx = S / 2, cy = S / 2;
-  const trackSize = yardCount * (2 * n + 1);
+  const cellsPerArm = 2 * armN + 1;
+  const trackSize = yardCount * cellsPerArm;
   const trackCenters = new Array(trackSize);
   const homeCenters = Array.from({length: yardCount}, () => new Array(n));
   for (let arm = 0; arm < yardCount; arm++) {
     const theta = Math.PI + arm * 2 * Math.PI / yardCount;
     const ax = Math.cos(theta), ay = Math.sin(theta);   // outward unit vector
     const lx = -Math.sin(theta), ly = Math.cos(theta);  // left (CCW perp) unit vector
-    const base = arm * (2 * n + 1);
+    const base = arm * cellsPerArm;
     // Right column first (p=0..n-1): d=p+2, outermost at d=n+1, directly below cap
-    for (let p = 0; p < n; p++)
+    for (let p = 0; p < armN; p++)
       trackCenters[base + p] = {x: cx + ((p+2)*c + delta)*ax - c*lx, y: cy + ((p+2)*c + delta)*ay - c*ly};
     // Cap (p=n): at d=n+1, centre-line — arrow cell
-    trackCenters[base + n] = {x: cx + ((n+1)*c + delta)*ax, y: cy + ((n+1)*c + delta)*ay};
+    trackCenters[base + armN] = {x: cx + ((armN+1)*c + delta)*ax, y: cy + ((armN+1)*c + delta)*ay};
     // Left column (p=n+1..2n): outermost→innermost, d=n+1 down to d=2, directly above cap first
-    for (let p = n+1; p <= 2*n; p++)
-      trackCenters[base + p] = {x: cx + ((2*n+2-p)*c + delta)*ax + c*lx, y: cy + ((2*n+2-p)*c + delta)*ay + c*ly};
+    for (let p = armN+1; p <= 2*armN; p++)
+      trackCenters[base + p] = {x: cx + ((2*armN+2-p)*c + delta)*ax + c*lx, y: cy + ((2*armN+2-p)*c + delta)*ay + c*ly};
     for (let j = 0; j < n; j++)
-      homeCenters[arm][j] = {x: cx + ((n-j)*c + delta)*ax, y: cy + ((n-j)*c + delta)*ay};
+      homeCenters[arm][j] = {x: cx + ((armN-j)*c + delta)*ax, y: cy + ((armN-j)*c + delta)*ay};
   }
   // R_arc: distance from board centre to each arm's outermost corner cell (includes delta offset).
-  const R_arc = Math.sqrt(Math.pow((n + 1) * c + delta, 2) + c * c);
+  const R_arc = Math.sqrt(Math.pow((armN + 1) * c + delta, 2) + c * c);
 
   // Logo placement: on the yard bisector at the geometric centre of the yard's free area.
   // N=4 (square yard): quadrant centre = S√2/4 from board centre; size = free axis width.
@@ -112,9 +114,9 @@ function buildBoardGeometry(yardCount, homeLength, pawnsPerPlayer, S) {
     const theta = Math.PI + arm * 2 * Math.PI / yardCount;
     const ax = Math.cos(theta), ay = Math.sin(theta);   // arm direction
     const lx = -Math.sin(theta), ly = Math.cos(theta);  // left-perp = into yard
-    // (n·c + delta) along arm + 2c into yard  →  one cell beyond the track, adjacent to H1
-    const yx = cx + (n * c + delta) * ax + 2 * c * lx;
-    const yy = cy + (n * c + delta) * ay + 2 * c * ly;
+    // (armN·c + delta) along arm + 2c into yard  →  one cell beyond the track, adjacent to H1
+    const yx = cx + (armN * c + delta) * ax + 2 * c * lx;
+    const yy = cy + (armN * c + delta) * ay + 2 * c * ly;
     // fanSign ensures i=0 is always the topmost pawn on screen.
     // For downward arms (ay>0) keep direction; for upward arms (ay<0) flip.
     const fanSign = ay < 0 ? -1 : 1;
@@ -137,7 +139,7 @@ function currentGeometry(){
   const layout=currentLayout();
   const n=gameState?.config?.board?.home_length??settings.board_home_length??6;
   const p=gameState?.config?.board?.pawns_per_player??settings.pawns_per_player??4;
-  const key=`${layout.yard_count}:${n}:${p}`;
+  const key=`${layout.yard_count}:${layout.track_size}:${n}:${p}`;
   if(_geoKey!==key){_geo=buildBoardGeometry(layout.yard_count,n,p,480);_geoKey=key;}
   return _geo;
 }
@@ -315,7 +317,7 @@ function drawBoard(){
   });
 
   // Track cells — each rotated to align with its arm direction
-  const _cpa=2*(gameState?.config?.board?.home_length??settings.board_home_length??6)+1; // cells per arm
+  const _cpa=Math.floor(layout.track_size/layout.yard_count); // cells per arm
   const _N=layout.yard_count;
   // Content rotation matches arm theta = PI + i*2PI/N → rot = (theta*180/PI+180)%360 = i*360/N
   const _armRot=i=>(i*360/_N)%360;

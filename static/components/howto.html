@@ -10,6 +10,7 @@
     <a class="howto-nav-link active" href="#howto-state">Game state</a>
     <a class="howto-nav-link" href="#howto-features">Features</a>
     <a class="howto-nav-link" href="#howto-decision">Decision-making</a>
+    <a class="howto-nav-link" href="#howto-lookahead">Lookahead</a>
     <a class="howto-nav-link" href="#howto-bots">Bot types</a>
     <a class="howto-nav-link" href="#howto-training">Training vs fixed</a>
   </nav>
@@ -148,7 +149,50 @@
       </div>
     </section>
 
-    <!-- 4. Bot types -->
+    <!-- 4. Lookahead -->
+    <section class="howto-section" id="howto-lookahead">
+      <h2 class="howto-heading">
+        <i class="ti ti-eye"></i>
+        Lookahead
+      </h2>
+      <p class="howto-text">
+        The decision-making described above only looks at the <em>current</em> board state — it scores each move and picks the best one right now. But a smarter bot could also ask: <strong>what is likely to happen next?</strong>
+      </p>
+
+      <div class="howto-two-col">
+        <div class="howto-col-card">
+          <div class="howto-col-label">No lookahead (SDR / CDR)</div>
+          <ul class="howto-list">
+            <li>Scores moves based on the current state only</li>
+            <li>Fast — one pass per decision</li>
+            <li>Cannot anticipate what an opponent will do next</li>
+          </ul>
+        </div>
+        <div class="howto-col-card">
+          <div class="howto-col-label">1-step lookahead</div>
+          <ul class="howto-list">
+            <li>For each candidate move, simulate the resulting board state</li>
+            <li>Score <em>that</em> state, not just the immediate move</li>
+            <li>Picks the move that leads to the best position one step ahead</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="howto-callout">
+        <i class="ti ti-bulb"></i>
+        <span>The pawn preview you see on the board is essentially a 1-step lookahead visualised — it shows you the state that would result from each candidate move.</span>
+      </div>
+
+      <p class="howto-text" style="margin-top:16px;">
+        Lookahead is more accurate but more expensive: a bot must evaluate <em>every legal move</em> from the resulting state, not just the current one. The cost multiplies with each additional step.
+      </p>
+
+      <p class="howto-text">
+        Beyond 1-step lookahead, a bot could run a <strong>Monte Carlo simulation</strong> — play out many random games from the resulting state and use the win rate to estimate how good that position is. This gives a much richer signal than feature scores alone, at the cost of significant computation. Monte Carlo methods are not currently implemented in Learn2Ludo, but they are a natural next step on the path from simple rules to full RL.
+      </p>
+    </section>
+
+    <!-- 5. Bot types -->
     <section class="howto-section" id="howto-bots">
       <h2 class="howto-heading">
         <i class="ti ti-robot"></i>

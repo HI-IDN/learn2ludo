@@ -257,7 +257,7 @@ function normalizeReplayData(data) {
   const pawnsPerPlayer = boardCfg.pawns_per_player || players[0]?.pawns?.length || 4;
   const homeLength = boardCfg.home_length || 6;
   const yardCount = boardCfg.yard_count || data.board?.yard_count || playerCount;
-  const trackSize = boardCfg.track_size || data.board?.track_size || yardCount * (2 * homeLength + 1);
+  const trackSize = boardCfg.track_size || data.board?.track_size || (typeof boardTrackSize === 'function' ? boardTrackSize(yardCount, homeLength) : yardCount * (2 * homeLength + 1));
   const slots = data.slots?.length ? data.slots : players.map(p => p.slot ?? p.index);
   const history = replayableHistory(data.history || []).map(normalizeReplayHistoryEvent);
   return {
