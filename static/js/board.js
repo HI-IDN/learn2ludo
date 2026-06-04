@@ -287,11 +287,12 @@ function drawBoard(){
     const lxi=-Math.sin(ti), lyi=Math.cos(ti);
     const axj=Math.cos(tj), ayj=Math.sin(tj);
     const lxj=-Math.sin(tj), lyj=Math.cos(tj);
-    // co_inner: gap at the centre side (keeps yard clear of track cells near polygon).
-    // co_outer: flush at the board edge (no gap at arm outermost corners).
-    // The lateral boundary lines taper from co_inner (Px) to co_outer (T1/T2).
+    // co_outer: flush with outer cell edges (used for both Px and T1/T2).
+    // Using co_outer for Px ensures the Px→T1 line stays exactly along the arm's
+    // lateral boundary — critical for N=2 where cot(π/N)=0 and Px lands at board
+    // centre, making the diagonal span the full board width.
     const co_inner=c*1.5+4, co_outer=c*1.5;
-    const Px=_cx+co_inner*lxi+_cot*co_inner*axi, Py=_cy+co_inner*lyi+_cot*co_inner*ayi;
+    const Px=_cx+co_outer*lxi+_cot*co_outer*axi, Py=_cy+co_outer*lyi+_cot*co_outer*ayi;
     if(_yN===4){
       const B1x=_cx+co_outer*lxi+_FAR*axi, B1y=_cy+co_outer*lyi+_FAR*ayi;
       const B2x=_cx-co_outer*lxj+_FAR*axj, B2y=_cy-co_outer*lyj+_FAR*ayj;
