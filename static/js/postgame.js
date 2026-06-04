@@ -8,13 +8,19 @@ let _postgameShown = false;
 let _reflections   = [];
 let _playerStats   = null;
 let _sidePanelOrigHTML = null;
+let _postgameSource = null;
 
 function resetPostGame() {
   _postgameShown = false;
   _reflections   = [];
   _playerStats   = null;
+  _postgameSource = null;
   _restoreSidePanel();
   document.getElementById('pg-reflection-modal')?.remove();
+}
+
+function currentPostGameReflections() {
+  return _reflections.map(r => ({...r}));
 }
 
 function _restoreSidePanel() {
@@ -31,6 +37,7 @@ function showReplayStats(replayData) {
   if (_postgameShown) return;
   if (!replayData?.player_stats) return;
   _postgameShown = true;
+  _postgameSource = 'replay';
   _reflections   = Array.isArray(replayData.reflections) ? replayData.reflections : [];
   _playerStats   = replayData.player_stats;
   if (replayData.winner       !== undefined) gameState.winner       = replayData.winner;
@@ -46,6 +53,7 @@ function maybeShowPostGame() {
   if (!gameState || gameState.winner === null) return;
   if (!gameState.player_stats) return;
   _postgameShown = true;
+  _postgameSource = 'live';
   _playerStats   = gameState.player_stats;
   _reflections   = [];
   _startReflectionPhase();
@@ -164,7 +172,7 @@ function _promptReflection(players, idx) {
 // ── Stats side panel ──────────────────────────────────────────────────────────
 
 function _mountStatsSidePanel() {
-  if (_reflections.length) _saveReflections();
+  if (_postgameSource === 'live' && _reflections.length) _saveReflections();
 
   const sp = document.getElementById('side-panel');
   if (!sp) return;

@@ -14,7 +14,7 @@ function compactPawn(pawn, index, color) {
 function compactGameState() {
   if (!gameState) return null;
   const history = (gameState.history || []).map(compactHistoryEvent);
-  return {
+  const data = {
     v: 2,
     saved_at: new Date().toISOString(),
     config: gameState.config || null,
@@ -40,6 +40,10 @@ function compactGameState() {
     })),
     history
   };
+  if (gameState.player_stats) data.player_stats = gameState.player_stats;
+  const reflections = typeof currentPostGameReflections === 'function' ? currentPostGameReflections() : [];
+  if (reflections.length) data.reflections = reflections;
+  return data;
 }
 
 function compactHistoryEvent(event) {
