@@ -17,7 +17,7 @@ from pathlib import Path
 
 
 BOTS_CONFIG_PATH = Path(__file__).resolve().parents[1] / "config" / "bots.json"
-BOTS_CUSTOM_PATH = Path(__file__).resolve().parents[1] / "config" / "bots_custom.json"
+BOTS_CUSTOM_PATH = Path(__file__).resolve().parents[1] / "data" / "bots_custom.json"
 
 
 @dataclass(frozen=True)
@@ -259,6 +259,7 @@ def save_custom_bot(bot: dict) -> None:
     else:
         data = {"bots": []}
     data["bots"].append(bot)
+    BOTS_CUSTOM_PATH.parent.mkdir(parents=True, exist_ok=True)
     BOTS_CUSTOM_PATH.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
