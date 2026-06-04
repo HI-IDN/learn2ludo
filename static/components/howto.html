@@ -16,8 +16,7 @@
       <div class="howto-body">
         <p class="howto-text">
           Before a bot can decide anything, it needs to know what is happening on the board.
-          The <strong>game state</strong> is a complete snapshot of the game at one moment in time.
-          It contains:
+          The <strong>game state</strong> is a complete snapshot of the game at one moment in time. It contains:
         </p>
         <ul class="howto-list">
           <li>Every pawn's current position (yard, track, home stretch, or finished)</li>
@@ -33,7 +32,7 @@
       </div>
     </div>
 
-    <!-- 2. Features -->
+    <!-- 2. Features (includes lookahead + normalisation) -->
     <div class="howto-item" id="howto-features">
       <button class="howto-trigger" onclick="howtoToggle('howto-features')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-vector-triangle"></i> What are features?</span>
@@ -41,10 +40,19 @@
       </button>
       <div class="howto-body">
         <p class="howto-text">
-          Raw board positions are hard to reason about directly. <strong>Features</strong> translate the game state into a set of numbers, one per move, that capture what matters strategically.
-          Each feature answers one question about a candidate move.
+          Raw board positions are hard to reason about directly. <strong>Features</strong> translate the game state into a set of numbers — one per candidate move — that capture what matters strategically. Each feature answers one question about what happens if you make that move.
         </p>
+        <p class="howto-text">
+          These 8 features are just a starting point. There can be many more. You can also construct new features by <strong>combining existing ones mathematically</strong>:
+        </p>
+        <div class="howto-feature-mixtures">
+          <div class="howto-mixture-row"><span class="howto-mixture-expr">capture − risk</span><span class="howto-mixture-desc">net gain — rewards capturing only when the landing square is not immediately dangerous</span></div>
+          <div class="howto-mixture-row"><span class="howto-mixture-expr">progress × safety</span><span class="howto-mixture-desc">safe advancement — only values progress that lands on a protected square</span></div>
+          <div class="howto-mixture-row"><span class="howto-mixture-expr">spread + activation</span><span class="howto-mixture-desc">board presence — encourages distributing pawns while also entering new ones</span></div>
+          <div class="howto-mixture-row"><span class="howto-mixture-expr">(1 − risk) × progress</span><span class="howto-mixture-desc">risk-adjusted advancement — discounts progress on exposed squares</span></div>
+        </div>
 
+        <!-- Type legend -->
         <div class="howto-type-legend">
           <span class="howto-type-legend-label">Type notation:</span>
           <span><span class="howto-range mono">{0, 1}</span> binary — 1 = True, 0 = False</span>
@@ -54,6 +62,8 @@
           <span><span class="howto-range math">ℤ⁺</span> positive integer</span>
         </div>
 
+        <!-- Feature grid: raw values -->
+        <p class="howto-subsection-label">Raw features (before normalisation)</p>
         <div class="howto-feature-grid">
           <div class="howto-feature-card">
             <div class="howto-feature-header">
@@ -61,39 +71,39 @@
               <span class="howto-range mono">{0, 1}</span>
             </div>
             <span class="howto-feature-desc">Does this move land on an opponent's pawn and send it back to their yard?</span>
-            <span class="howto-feature-example">e.g. <strong>1</strong> if captures, <strong>0</strong> otherwise</span>
+            <span class="howto-feature-example">1 if captures, 0 otherwise</span>
           </div>
           <div class="howto-feature-card">
             <div class="howto-feature-header">
               <span class="howto-feature-name">Risk</span>
-              <span class="howto-range mono">[0, 1]</span>
+              <span class="howto-range math">ℤ ∈ [0, 6]</span>
             </div>
-            <span class="howto-feature-desc">Fraction of the opponent's dice outcomes that would reach this square next turn.</span>
-            <span class="howto-feature-example">e.g. <strong>0.33</strong> — 2 of 6 outcomes threaten the destination</span>
+            <span class="howto-feature-desc">Number of unique dice rolls that would allow any opponent to land on this square next turn.</span>
+            <span class="howto-feature-example">2 — two different rolls threaten the destination</span>
           </div>
           <div class="howto-feature-card">
             <div class="howto-feature-header">
               <span class="howto-feature-name">Risk reduction</span>
-              <span class="howto-range math">ℝ</span>
+              <span class="howto-range math">ℝ ∈ [−1, 1]</span>
             </div>
-            <span class="howto-feature-desc">Change in exposure to capture versus staying put. Negative means the move increases risk.</span>
-            <span class="howto-feature-example">e.g. <strong>−0.17</strong> — move adds one threatening die face</span>
+            <span class="howto-feature-desc">Decrease in risk exposure compared to staying put. Negative means the move increases danger.</span>
+            <span class="howto-feature-example">−0.17 — landing here is riskier than the current square</span>
           </div>
           <div class="howto-feature-card">
             <div class="howto-feature-header">
               <span class="howto-feature-name">Progress</span>
-              <span class="howto-range mono">[0, 1]</span>
+              <span class="howto-range math">ℤ⁺</span>
             </div>
-            <span class="howto-feature-desc">Steps advanced toward home, divided by total track length.</span>
-            <span class="howto-feature-example">e.g. <strong>0.12</strong> — moving 6 steps on a 52-cell track</span>
+            <span class="howto-feature-desc">Target position index along the track (higher = closer to home).</span>
+            <span class="howto-feature-example">6 — moves to position 6 of 52</span>
           </div>
           <div class="howto-feature-card">
             <div class="howto-feature-header">
               <span class="howto-feature-name">Safety</span>
               <span class="howto-range mono">{0, 1}</span>
             </div>
-            <span class="howto-feature-desc">Does the destination land on a safe square where captures are not allowed?</span>
-            <span class="howto-feature-example">e.g. <strong>1</strong> on a safe haven, <strong>0</strong> on a normal square</span>
+            <span class="howto-feature-desc">Does the destination land on a safe square or home stretch?</span>
+            <span class="howto-feature-example">1 on a safe haven, 0 on a normal square</span>
           </div>
           <div class="howto-feature-card">
             <div class="howto-feature-header">
@@ -101,15 +111,15 @@
               <span class="howto-range mono">{0, 1}</span>
             </div>
             <span class="howto-feature-desc">Does this move stack with a friendly pawn, blocking opponents from passing?</span>
-            <span class="howto-feature-example">e.g. <strong>1</strong> if two friendly pawns share a square, <strong>0</strong> otherwise</span>
+            <span class="howto-feature-example">1 if two friendly pawns share a square</span>
           </div>
           <div class="howto-feature-card">
             <div class="howto-feature-header">
               <span class="howto-feature-name">Spread</span>
-              <span class="howto-range mono">[0, 1]</span>
+              <span class="howto-range math">ℤ⁺ ∈ [0, T/2]</span>
             </div>
-            <span class="howto-feature-desc">Mean pairwise track distance between your pawns after the move, normalised by the maximum possible distance.</span>
-            <span class="howto-feature-example">e.g. <strong>0.84</strong> — pawns well spread; <strong>0.20</strong> — pawns clustered</span>
+            <span class="howto-feature-desc">Mean pairwise circular distance (in cells) between your active pawns after the move. T = track length.</span>
+            <span class="howto-feature-example">18 cells average — pawns spread across the board</span>
           </div>
           <div class="howto-feature-card">
             <div class="howto-feature-header">
@@ -117,13 +127,50 @@
               <span class="howto-range mono">{0, 1}</span>
             </div>
             <span class="howto-feature-desc">Does this move bring a pawn out of the yard for the first time?</span>
-            <span class="howto-feature-example">e.g. <strong>1</strong> when a yard pawn first enters the track, <strong>0</strong> otherwise</span>
+            <span class="howto-feature-example">1 when a yard pawn first enters the track</span>
           </div>
         </div>
 
+        <!-- Normalisation -->
         <div class="howto-callout">
           <i class="ti ti-calculator"></i>
-          <span><strong>Normalisation.</strong> Before the weighted sum is computed all features are mapped to [0, 1]. Features that are already bounded (binary, Risk, Progress, Spread) need no adjustment. Unbounded features like Risk reduction are divided by the largest absolute value seen across all candidate moves in the current turn — so the most extreme option always scores ±1 and the scale is consistent with every other feature. This is why a weight of 0.8 on Capture means the same as 0.8 on any other feature.</span>
+          <span><strong>Normalisation is essential for weighted models.</strong> If features had different scales, the same weight value would mean different things for each one. All features must be mapped to [0, 1] before computing a weighted sum — this is what Learn2Ludo's engine does. The table below shows how each raw feature is normalised.</span>
+        </div>
+
+        <p class="howto-subsection-label">Normalised features (as used by the engine)</p>
+        <div class="howto-norm-table-wrap">
+          <table class="howto-table">
+            <thead>
+              <tr><th>Feature</th><th>Raw</th><th>Normalisation</th><th>Engine value</th><th>Example</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Capture</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>Already binary</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>1 or 0</td></tr>
+              <tr><td>Risk</td><td><span class="howto-range math sm">ℤ ∈ [0,6]</span></td><td>÷ 6</td><td><span class="howto-range mono sm">[0, 1]</span></td><td>2 → 0.33</td></tr>
+              <tr><td>Risk reduction</td><td><span class="howto-range math sm">ℝ ∈ [−1,1]</span></td><td>clip negatives to 0</td><td><span class="howto-range mono sm">[0, 1]</span></td><td>−0.17 → 0</td></tr>
+              <tr><td>Progress</td><td><span class="howto-range math sm">ℤ⁺</span></td><td>÷ finish position</td><td><span class="howto-range mono sm">[0, 1]</span></td><td>6 → 0.12</td></tr>
+              <tr><td>Safety</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>Already binary</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>1 or 0</td></tr>
+              <tr><td>Blockade</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>Already binary</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>1 or 0</td></tr>
+              <tr><td>Spread</td><td><span class="howto-range math sm">ℤ⁺ ∈ [0, T/2]</span></td><td>÷ (T/2)</td><td><span class="howto-range mono sm">[0, 1]</span></td><td>18 → 0.69</td></tr>
+              <tr><td>Activation</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>Already binary</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>1 or 0</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Lookahead -->
+        <div class="howto-callout">
+          <i class="ti ti-eye"></i>
+          <span><strong>All features above evaluate the board state <em>after</em> the move</strong> — they are all 1-step lookahead. For example, Capture asks "if I move here, is there an opponent to send home?" rather than "is there currently an opponent nearby?". Going further is possible: a 2-step lookahead would evaluate every opponent's best reply, and a <strong>Monte Carlo simulation</strong> would play out thousands of random games from the resulting state and use the win rate as the feature value — far richer, but more expensive to compute.</span>
+        </div>
+
+        <!-- Feature request -->
+        <div class="howto-feature-request-bar">
+          <div>
+            <strong>Have an idea for a new feature?</strong>
+            <span class="howto-text" style="display:inline;"> Describe what board situation it captures and how you'd compute it.</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="openFeatureRequestDialog()">
+            <i class="ti ti-bulb"></i> Submit a feature idea
+          </button>
         </div>
       </div>
     </div>
@@ -147,12 +194,8 @@
           </span>
         </div>
         <p class="howto-text">
-          Each <strong>weight</strong> is a number between −1 and +1. Zero means the feature is ignored. A positive value makes the bot prefer moves that score well on it; a negative value makes it actively avoid them.
+          Each <strong>weight</strong> controls how much a feature matters. Zero means the feature is ignored; positive makes the bot prefer moves that score well on it; negative makes it actively avoid them.
         </p>
-        <div class="howto-callout">
-          <i class="ti ti-info-circle"></i>
-          <span>Every feature is normalised to a 0–1 range before scoring. This means a weight of 0.8 on Capture carries the same magnitude as 0.8 on Progress.</span>
-        </div>
         <div class="howto-example">
           <div class="howto-example-label">Example — a capture-heavy bot evaluates two moves:</div>
           <table class="howto-table">
@@ -178,45 +221,7 @@
       </div>
     </div>
 
-    <!-- 4. Lookahead -->
-    <div class="howto-item" id="howto-lookahead">
-      <button class="howto-trigger" onclick="howtoToggle('howto-lookahead')" aria-expanded="false">
-        <span class="howto-trigger-left"><i class="ti ti-eye"></i> Lookahead</span>
-        <i class="ti ti-chevron-down howto-chevron"></i>
-      </button>
-      <div class="howto-body">
-        <p class="howto-text">
-          The decision-making described above only looks at the <em>current</em> board state. But a smarter bot could also ask: <strong>what is likely to happen next?</strong>
-        </p>
-        <div class="howto-two-col">
-          <div class="howto-col-card">
-            <div class="howto-col-label">No lookahead (SDR / CDR)</div>
-            <ul class="howto-list">
-              <li>Scores moves based on the current state only</li>
-              <li>Fast — one pass per decision</li>
-              <li>Cannot anticipate what an opponent will do next</li>
-            </ul>
-          </div>
-          <div class="howto-col-card">
-            <div class="howto-col-label">1-step lookahead</div>
-            <ul class="howto-list">
-              <li>For each candidate move, simulate the resulting board state</li>
-              <li>Score <em>that</em> state, not just the immediate move</li>
-              <li>Picks the move that leads to the best position one step ahead</li>
-            </ul>
-          </div>
-        </div>
-        <div class="howto-callout">
-          <i class="ti ti-bulb"></i>
-          <span>The pawn preview you see on the board is essentially a 1-step lookahead visualised — it shows you the state that would result from each candidate move.</span>
-        </div>
-        <p class="howto-text" style="margin-top:16px;">
-          Beyond 1-step lookahead, a bot could run a <strong>Monte Carlo simulation</strong> — play out many random games and use the win rate to estimate position quality. Monte Carlo methods are not currently implemented but are a natural next step toward full RL.
-        </p>
-      </div>
-    </div>
-
-    <!-- 5. Bot types -->
+    <!-- 4. Bot types -->
     <div class="howto-item" id="howto-bots">
       <button class="howto-trigger" onclick="howtoToggle('howto-bots')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-robot"></i> Bot types in Learn2Ludo</span>
@@ -247,13 +252,13 @@
               <span class="howto-bot-name">Reinforcement learning</span>
             </div>
             <p class="howto-bot-desc">Learns by playing thousands of games and adjusting its internal model based on wins and losses. Its decision logic is not hand-coded — it emerges from experience.</p>
-            <p class="howto-bot-desc">Train RL bots on the Train page. Saved models appear in the bot list.</p>
+            <p class="howto-bot-desc">Train RL bots on the RL page. Saved models appear in the bot list.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 6. Training vs fixed (hidden when RL tab is disabled) -->
+    <!-- 5. Training vs fixed (hidden when RL tab is disabled) -->
     <div class="howto-item" id="howto-training" data-rl>
       <button class="howto-trigger" onclick="howtoToggle('howto-training')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-school"></i> Training vs fixed behaviour</span>
@@ -295,3 +300,33 @@
 
   </div><!-- /.howto-accordion -->
 </div><!-- /#panel-howto -->
+
+<!-- Feature request dialog -->
+<div id="feature-request-dialog" class="howto-dialog-backdrop" style="display:none;" onclick="if(event.target===this)closeFeatureRequestDialog()">
+  <div class="howto-dialog">
+    <div class="howto-dialog-header">
+      <span><i class="ti ti-bulb"></i> Submit a feature idea</span>
+      <button class="howto-dialog-close" onclick="closeFeatureRequestDialog()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="howto-dialog-body">
+      <p class="howto-text">Describe a new feature — what board situation it captures and how you'd compute it. Good features are concrete, measurable, and tell the bot something the existing features don't.</p>
+      <div class="howto-dialog-field">
+        <label>Feature name <span class="howto-dialog-required">*</span></label>
+        <input type="text" id="fr-name" placeholder="e.g. Blockade breaking" maxlength="80">
+      </div>
+      <div class="howto-dialog-field">
+        <label>Description <span class="howto-dialog-required">*</span></label>
+        <textarea id="fr-desc" placeholder="How is this feature computed? What does a high value mean?" rows="4" maxlength="600"></textarea>
+      </div>
+      <div class="howto-dialog-field">
+        <label>Your name <span class="howto-dialog-optional">(optional)</span></label>
+        <input type="text" id="fr-user" placeholder="Leave blank to submit anonymously" maxlength="60">
+      </div>
+      <div id="fr-error" class="howto-dialog-error" style="display:none;"></div>
+    </div>
+    <div class="howto-dialog-footer">
+      <button class="btn btn-ghost" onclick="closeFeatureRequestDialog()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitFeatureRequest()"><i class="ti ti-send"></i> Submit</button>
+    </div>
+  </div>
+</div>

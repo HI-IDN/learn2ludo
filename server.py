@@ -277,6 +277,40 @@ class BugReportBody(BaseModel):
     screenshot_b64: str = ""
 
 
+FEATURE_REQUESTS_FILE = Path(__file__).parent / "data" / "feature_requests.json"
+
+class FeatureRequestBody(BaseModel):
+    name: str
+    description: str
+    username: str | None = None
+
+@app.post("/api/feature-requests", status_code=201)
+def submit_feature_request(body: FeatureRequestBody):
+    import uuid as _uuid2, datetime as _dt2
+    requests = []
+    if FEATURE_REQUESTS_FILE.exists():
+        try: requests = json.loads(FEATURE_REQUESTS_FILE.read_text())
+        except Exception: pass
+    entry = {
+        "id": str(_uuid2.uuid4()),
+        "name": body.name.strip(),
+        "description": body.description.strip(),
+        "username": body.username.strip() if body.username else None,
+        "timestamp": _dt2.datetime.utcnow().isoformat(),
+        "deleted": False,
+    }
+    requests.append(entry)
+    FEATURE_REQUESTS_FILE.write_text(json.dumps(requests, indent=2))
+    return {"id": entry["id"]}
+
+@app.get("/api/feature-requests")
+def get_feature_requests():
+    if not FEATURE_REQUESTS_FILE.exists():
+        return []
+    try: return json.loads(FEATURE_REQUESTS_FILE.read_text())
+    except Exception: return []
+
+
 @app.post("/api/bugs/report")
 def submit_bug(body: BugReportBody):
     reports_dir     = BUGS_DIR / "reports"

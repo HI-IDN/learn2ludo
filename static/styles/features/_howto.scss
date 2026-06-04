@@ -305,3 +305,164 @@
   font-size: 13px; font-weight: 700; color: $color-text;
   padding-bottom: 6px; border-bottom: 1px solid $border-light;
 }
+
+// ---- Feature mixtures -------------------------------------------------------
+
+.howto-feature-mixtures {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  background: $color-bg;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+}
+
+.howto-mixture-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.howto-mixture-expr {
+  font-family: $font-mono;
+  font-size: 13px;
+  font-weight: 700;
+  color: $color-primary;
+  white-space: nowrap;
+  min-width: 180px;
+}
+
+.howto-mixture-desc { font-size: 12px; color: $color-text-2; line-height: 1.5; }
+
+// ---- Subsection label -------------------------------------------------------
+
+.howto-subsection-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-text-2;
+  margin: 0;
+}
+
+// ---- Small range badge variant ----------------------------------------------
+
+.howto-range.sm { font-size: 10px; padding: 1px 5px; }
+
+// ---- Normalisation table wrap -----------------------------------------------
+
+.howto-norm-table-wrap {
+  overflow-x: auto;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+}
+
+// ---- Feature request bar ----------------------------------------------------
+
+.howto-feature-request-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  background: $color-bg;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+}
+
+// ---- Feature request dialog -------------------------------------------------
+
+.howto-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.howto-dialog {
+  background: $color-bg;
+  border-radius: $radius-lg;
+  border: 1px solid $border-medium;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.howto-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid $border-light;
+  font-size: 15px;
+  font-weight: 700;
+  color: $color-text;
+
+  i { color: $color-primary; margin-right: 6px; }
+}
+
+.howto-dialog-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: $color-text-2;
+  font-size: 18px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  &:hover { color: $color-text; }
+}
+
+.howto-dialog-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.howto-dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  label { font-size: 13px; font-weight: 600; color: $color-text; }
+  input, textarea {
+    padding: 8px 10px;
+    border: 1px solid $border-medium;
+    border-radius: $radius;
+    font-size: 13px;
+    font-family: inherit;
+    color: $color-text;
+    background: $color-bg-alt;
+    resize: vertical;
+    &:focus { outline: none; border-color: $color-primary; }
+  }
+}
+
+.howto-dialog-required { color: $color-danger; margin-left: 2px; }
+.howto-dialog-optional { color: $color-text-2; font-weight: 400; }
+
+.howto-dialog-error {
+  font-size: 13px;
+  color: $color-danger;
+  padding: 8px 10px;
+  background: $danger-tint;
+  border-radius: $radius;
+}
+
+.howto-dialog-footer {
+  padding: 14px 20px;
+  border-top: 1px solid $border-light;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
