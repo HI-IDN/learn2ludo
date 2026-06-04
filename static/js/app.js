@@ -382,7 +382,7 @@ async function doAdminLogin(){
     document.getElementById('admin-locked-msg').style.display='none';
     document.getElementById('admin-panel').style.display='block';
     document.getElementById('admin-auth-badge').textContent='unlocked';
-    document.getElementById('admin-auth-badge').className='badge badge-green';
+    document.getElementById('admin-auth-badge').className='badge badge-purple';
     document.getElementById('admin-logout-btn').style.display='';
     updateTabConfig();
     loadBugReports();
