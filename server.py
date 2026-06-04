@@ -210,11 +210,18 @@ def submit_bug(body: BugReportBody):
     # Save incomplete game snapshot when the report comes from the play tab
     active_tab = body.page_state.get("active_tab")
     game_state = body.page_state.get("game_state")
+    page_settings = body.page_state.get("settings") or {}
     game_file = None
     if active_tab == "play" and game_state:
         games_dir.mkdir(parents=True, exist_ok=True)
         (games_dir / f"{report_id}.json").write_text(json.dumps(game_state, indent=2))
         game_file = f"{report_id}.json"
+
+    # Extract player names for the report summary
+    player_names_map = page_settings.get("player_names") or {}
+    num_players = (game_state or {}).get("num_players") or page_settings.get("num_players") or 0
+    players_summary = [player_names_map.get(str(i)) or player_names_map.get(i) or f"Player {i+1}"
+                       for i in range(int(num_players))] if num_players else []
 
     has_screenshot = bool(body.screenshot_b64)
     report = {
@@ -223,9 +230,10 @@ def submit_bug(body: BugReportBody):
         "what_doing": body.what_doing,
         "what_wrong": body.what_wrong,
         "active_tab": active_tab,
+        "players": players_summary,
         "game_file": game_file,
         "screenshot": f"{report_id}.png" if has_screenshot else None,
-        "page_state": {k: v for k, v in body.page_state.items() if k != "game_state"},
+        "page_state": {k: v for k, v in body.page_state.items() if k not in ("game_state", "settings")},
     }
     (reports_dir / f"{report_id}.json").write_text(json.dumps(report, indent=2))
 
@@ -251,6 +259,15 @@ def list_bugs(request: Request):
         except Exception:
             pass
     return {"reports": reports}
+
+
+@app.get("/api/bugs/games/{filename}")
+def get_bug_game(filename: str, request: Request):
+    require_admin(request)
+    path = BUGS_DIR / "games" / filename
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Game file not found")
+    return json.loads(path.read_text())
 
 
 # ---------------------------------------------------------------------------

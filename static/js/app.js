@@ -385,10 +385,46 @@ async function doAdminLogin(){
     document.getElementById('admin-auth-badge').className='badge badge-green';
     document.getElementById('admin-logout-btn').style.display='';
     updateTabConfig();
+    loadBugReports();
     renderTabs();
     switchTab('admin');
   } catch(e) { if(alert){ alert.textContent='Login failed.'; alert.style.display='block'; } }
 }
+async function loadBugReports(){
+  const el = document.getElementById('bug-reports-list');
+  if (!el) return;
+  try {
+    const r = await fetch('/api/bugs', { headers: { 'X-Admin-Token': adminToken } });
+    const { reports } = await r.json();
+    if (!reports.length) { el.innerHTML = '<p style="font-size:13px;color:var(--text3);">No bug reports yet.</p>'; return; }
+    el.innerHTML = reports.map(rep => {
+      const dt = rep.timestamp ? new Date(rep.timestamp).toLocaleString() : '—';
+      const players = rep.players?.length ? rep.players.join(', ') : null;
+      const tab = rep.active_tab ? `<span class="badge badge-purple" style="font-size:10px;">${rep.active_tab}</span>` : '';
+      const hasGame = rep.game_file ? `<span class="badge badge-green" style="font-size:10px;">game saved</span>` : '';
+      return `<div class="rule-row" style="cursor:${rep.game_file?'pointer':'default'}; flex-direction:column; align-items:flex-start; gap:4px; padding:10px 0;"
+                   ${rep.game_file ? `onclick="loadBugGame('${rep.game_file}')"` : ''}>
+        <div style="display:flex; align-items:center; gap:8px; width:100%;">
+          <span style="font-size:12px; font-family:monospace; color:var(--text2);">${rep.id}</span>
+          ${tab} ${hasGame}
+          <span style="font-size:11px; color:var(--text3); margin-left:auto;">${dt}</span>
+        </div>
+        ${players ? `<div style="font-size:12px; color:var(--text2);">Players: ${players}</div>` : ''}
+        ${rep.what_doing ? `<div style="font-size:13px;"><strong>Doing:</strong> ${rep.what_doing}</div>` : ''}
+        ${rep.what_wrong ? `<div style="font-size:13px;"><strong>Wrong:</strong> ${rep.what_wrong}</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(_) { el.innerHTML = '<p style="font-size:13px;color:var(--text3);">Could not load reports.</p>'; }
+}
+
+async function loadBugGame(filename) {
+  if (typeof loadReplayByFilename !== 'function') return;
+  const r = await fetch(`/api/bugs/games/${encodeURIComponent(filename)}`, { headers: { 'X-Admin-Token': adminToken } });
+  if (!r.ok) return;
+  switchTab('play');
+  loadReplayJson(await r.json());
+}
+
 function doAdminLogout(){
   adminToken = null;
   document.getElementById('admin-panel').style.display='none';
