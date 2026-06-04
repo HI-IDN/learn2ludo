@@ -170,8 +170,8 @@ function renderReplayPlayers(g) {
 }
 
 function renderReplayPlayerLabel(player) {
-  const isBot = player.type === 'bot' || !!player.bot_id;
-  const label = isBot ? replayBotName(player.bot_id) : replayHumanName(player.human_id);
+  const isBot = replayPlayerIsBot(player);
+  const label = replayPlayerLabelText(player);
   const fallback = `Player ${(player.index ?? 0) + 1}`;
   const text = label || fallback;
   const titleParts = [
@@ -182,6 +182,15 @@ function renderReplayPlayerLabel(player) {
   return `<span class="replays-player-chip ${isBot ? 'bot' : 'human'}" title="${escapeReplayName(titleParts.join(' · '))}">
     ${escapeReplayName(text)}
   </span>`;
+}
+
+function replayPlayerIsBot(player) {
+  return player?.type === 'bot' || !!player?.bot_id;
+}
+
+function replayPlayerLabelText(player) {
+  if (!player) return '';
+  return replayPlayerIsBot(player) ? replayBotName(player.bot_id) : replayHumanName(player.human_id);
 }
 
 function replayHumanName(humanId) {
@@ -197,6 +206,23 @@ function replayBotName(botId) {
   if (!botId) return '';
   const registry = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
   return registry.find(bot => bot.id === botId)?.name || botId;
+}
+
+function applyReplayTablePlayerLabels(data, game) {
+  const summaryPlayers = Array.isArray(game?.players) ? game.players : [];
+  if (!summaryPlayers.length || !data) return data;
+  const labelsByIndex = new Map(summaryPlayers.map(player => [
+    Number(player.index),
+    {
+      name: replayPlayerLabelText(player) || `Player ${(player.index ?? 0) + 1}`,
+      type: replayPlayerIsBot(player) ? 'bot' : 'human',
+    },
+  ]));
+  data.players = (data.players || []).map((player, index) => {
+    const summary = labelsByIndex.get(Number(player.index ?? index));
+    return summary ? {...player, name: summary.name, type: summary.type} : player;
+  });
+  return data;
 }
 
 function sortReplaysBy(key) {
@@ -255,7 +281,7 @@ async function loadReplayFromPage(filename) {
       setReplayViewerLoaded();
       if (title) title.textContent = game?.name || filename.replace('.json', '');
       if (typeof prepareReplayBoard === 'function') prepareReplayBoard();
-      loadReplayJson(await r.json());
+      loadReplayJson(applyReplayTablePlayerLabels(await r.json(), game));
     }
   } catch (_) {
     alert('Could not load game.');
