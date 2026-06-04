@@ -159,6 +159,11 @@
         <button class="btn btn-primary" onclick="saveTabConfig()"><i class="ti ti-device-floppy"></i> Save tab changes</button>
       </div>
 
+      <!-- ── Game library ───────────────────────────────────────── -->
+      <p class="section-title" style="margin-top:32px;">Game library</p>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:12px;">The Replays page uses a cached summary file for fast loading. Rebuild it if games appear missing.</p>
+      <button class="btn btn-ghost" onclick="rebuildGamesSummary(this)"><i class="ti ti-refresh"></i> Rebuild games summary</button>
+
       <!-- ── Bug reports ─────────────────────────────────────────── -->
       <p class="section-title" style="margin-top:32px;">Bug reports</p>
       <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">Reports submitted by users. Click a row to load the saved game state for replay.</p>

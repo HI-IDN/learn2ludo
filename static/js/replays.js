@@ -9,6 +9,11 @@ async function loadReplaysPage() {
   try {
     const r = await fetch('/api/games');
     _allGames = (await r.json()).games || [];
+    // If summary is empty but we're admin, offer a rebuild
+    if (_allGames.length === 0 && typeof adminToken !== 'undefined' && adminToken) {
+      const list = document.getElementById('replays-list');
+      if (list) list.innerHTML = '<p class="replays-empty">No games in summary. Use Admin → Rebuild games summary if you have existing files.</p>';
+    }
   } catch (_) {
     _allGames = [];
   }

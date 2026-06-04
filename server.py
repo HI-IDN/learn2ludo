@@ -41,7 +41,8 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 CONFIG_PATH   = Path(__file__).parent / "config" / "tabs.json"
 STATS_PATH    = Path(__file__).parent / "config" / "stats.json"
-GAMES_DIR     = Path(__file__).parent / "data" / "games"
+GAMES_DIR         = Path(__file__).parent / "data" / "games"
+GAMES_SUMMARY_PATH = Path(__file__).parent / "data" / "games_summary.json"
 PLAYERS_PATH  = Path(__file__).parent / "data" / "players.json"
 BUGS_DIR      = Path(__file__).parent / "data" / "bugs"
 
@@ -70,6 +71,83 @@ def save_stats(stats: dict):
     STATS_PATH.write_text(json.dumps(stats, indent=2))
 
 
+_summary_lock = threading.Lock()
+
+
+def _load_games_summary() -> dict:
+    if GAMES_SUMMARY_PATH.exists():
+        try:
+            return json.loads(GAMES_SUMMARY_PATH.read_text())
+        except Exception:
+            pass
+    return {}
+
+
+def _save_games_summary(summary: dict):
+    GAMES_SUMMARY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    GAMES_SUMMARY_PATH.write_text(json.dumps(summary, indent=2))
+
+
+def _extract_game_meta(filename: str, data: dict, player_registry: dict) -> dict:
+    cfg = data.get("config", {})
+    board = cfg.get("board", {})
+    refs = data.get("players_registry") or data.get("player_refs") or []
+    players = []
+    for p in refs:
+        human_id = p.get("human_id")
+        pr = player_registry.get(human_id, {}) if human_id else {}
+        players.append({
+            "index": p.get("player_index"),
+            "color": p.get("color"),
+            "type": p.get("type"),
+            "bot_id": p.get("bot_id"),
+            "human_icon": pr.get("icon"),
+        })
+    return {
+        "filename": filename,
+        "name": data.get("_name") or None,
+        "incomplete": bool(data.get("_incomplete")),
+        "started_at_ms": data.get("started_at_ms"),
+        "finished_at_ms": data.get("finished_at_ms"),
+        "player_count": data.get("num_players") or cfg.get("player_count"),
+        "yard_count": board.get("yard_count"),
+        "winner": data.get("winner"),
+        "winner_color": data.get("winner_color"),
+        "players": players,
+    }
+
+
+def _upsert_game_summary(filename: str, data: dict):
+    player_registry = _load_player_registry()
+    with _summary_lock:
+        summary = _load_games_summary()
+        summary[filename] = _extract_game_meta(filename, data)
+        # strip players from summary to keep it lean; re-add with registry
+        summary[filename] = _extract_game_meta(filename, data, player_registry)
+        _save_games_summary(summary)
+
+
+def _remove_game_summary(filename: str):
+    with _summary_lock:
+        summary = _load_games_summary()
+        summary.pop(filename, None)
+        _save_games_summary(summary)
+
+
+def _load_player_registry() -> dict:
+    if not PLAYERS_PATH.exists():
+        return {}
+    try:
+        raw = json.loads(PLAYERS_PATH.read_text())
+        if isinstance(raw, dict) and "users" in raw:
+            return raw["users"]
+        if isinstance(raw, dict):
+            return raw
+        return {p["id"]: p for p in raw if p.get("id")}
+    except Exception:
+        return {}
+
+
 def save_game_record(session: GameSession):
     """Write full enriched game JSON to data/games/ (gitignored)."""
     GAMES_DIR.mkdir(parents=True, exist_ok=True)
@@ -86,6 +164,7 @@ def save_game_record(session: GameSession):
     ts = time.strftime("%Y%m%dT%H%M%S", time.gmtime())
     path = GAMES_DIR / f"{ts}_{label}.json"
     path.write_text(json.dumps(state, indent=2))
+    _upsert_game_summary(path.name, state)
     return str(path)
 
 
@@ -636,10 +715,11 @@ def save_game_manually(body: SaveGameBody):
     GAMES_DIR.mkdir(parents=True, exist_ok=True)
     filename = body.filename if body.filename else f"{_uuid.uuid4()}.json"
     path = GAMES_DIR / filename
-    if not path.parent == GAMES_DIR:
+    if path.parent != GAMES_DIR:
         raise HTTPException(status_code=400, detail="Invalid filename")
     state = {**body.state, "_name": body.name or None, "_incomplete": body.incomplete or False}
     path.write_text(json.dumps(state, indent=2))
+    _upsert_game_summary(filename, state)
     return {"filename": filename}
 
 
@@ -651,6 +731,7 @@ def rename_game(filename: str, body: RenameGameBody):
     data = json.loads(path.read_text())
     data["_name"] = body.name or None
     path.write_text(json.dumps(data, indent=2))
+    _upsert_game_summary(filename, data)
     return {"ok": True}
 
 
@@ -661,56 +742,36 @@ def delete_game(filename: str, request: Request):
     if not path.exists():
         raise HTTPException(status_code=404, detail="Game not found")
     path.unlink()
+    _remove_game_summary(filename)
     return {"ok": True}
 
 
 @app.get("/api/games")
 def list_games():
+    with _summary_lock:
+        summary = _load_games_summary()
+    games = sorted(summary.values(), key=lambda g: g.get("finished_at_ms") or g.get("started_at_ms") or 0, reverse=True)
+    return {"games": games}
+
+
+@app.post("/api/games/rebuild-summary")
+def rebuild_games_summary(request: Request):
+    """Rebuild the summary from scratch by scanning all game files. Admin only."""
+    require_admin(request)
     if not GAMES_DIR.exists():
-        return {"games": []}
-    # Load player registry for name lookups
-    player_registry: dict = {}
-    if PLAYERS_PATH.exists():
-        try:
-            raw = json.loads(PLAYERS_PATH.read_text())
-            player_registry = raw if isinstance(raw, dict) else {p["id"]: p for p in raw if p.get("id")}
-            if "users" in player_registry:
-                player_registry = player_registry["users"]
-        except Exception:
-            pass
-    games = []
-    for f in sorted(GAMES_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+        _save_games_summary({})
+        return {"rebuilt": 0}
+    player_registry = _load_player_registry()
+    summary = {}
+    for f in GAMES_DIR.glob("*.json"):
         try:
             data = json.loads(f.read_text())
-            cfg = data.get("config", {})
-            board = cfg.get("board", {})
-            refs = data.get("players_registry") or data.get("player_refs") or []
-            players = []
-            for p in refs:
-                human_id = p.get("human_id")
-                pr = player_registry.get(human_id, {}) if human_id else {}
-                players.append({
-                    "index": p.get("player_index"),
-                    "color": p.get("color"),
-                    "type": p.get("type"),
-                    "bot_id": p.get("bot_id"),
-                    "human_icon": pr.get("icon"),
-                })
-            games.append({
-                "filename": f.name,
-                "name": data.get("_name") or None,
-                "incomplete": bool(data.get("_incomplete")),
-                "started_at_ms": data.get("started_at_ms"),
-                "finished_at_ms": data.get("finished_at_ms"),
-                "player_count": data.get("num_players") or cfg.get("player_count"),
-                "yard_count": board.get("yard_count"),
-                "winner": data.get("winner"),
-                "winner_color": data.get("winner_color"),
-                "players": players,
-            })
+            summary[f.name] = _extract_game_meta(f.name, data, player_registry)
         except Exception:
             pass
-    return {"games": games}
+    with _summary_lock:
+        _save_games_summary(summary)
+    return {"rebuilt": len(summary)}
 
 
 @app.get("/api/games/{filename}")

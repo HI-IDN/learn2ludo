@@ -390,6 +390,18 @@ async function doAdminLogin(){
     switchTab('admin');
   } catch(e) { if(alert){ alert.textContent='Login failed.'; alert.style.display='block'; } }
 }
+async function rebuildGamesSummary(btn) {
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> Rebuilding…'; }
+  try {
+    const r = await fetch('/api/games/rebuild-summary', { method: 'POST', headers: { 'X-Admin-Token': adminToken } });
+    const { rebuilt } = await r.json();
+    if (btn) { btn.disabled = false; btn.innerHTML = `<i class="ti ti-circle-check"></i> Rebuilt ${rebuilt} games`; }
+    setTimeout(() => { if (btn) btn.innerHTML = '<i class="ti ti-refresh"></i> Rebuild games summary'; btn.disabled = false; }, 3000);
+  } catch (_) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-refresh"></i> Rebuild games summary'; }
+  }
+}
+
 async function loadBugReports(){
   const el = document.getElementById('bug-reports-list');
   if (!el) return;
