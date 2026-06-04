@@ -736,6 +736,7 @@ async function liveTimelineStep(delta) {
   await animateLiveTimelineTransition(liveTimelineIndex, next);
   liveTimelineIndex = next;
   gameState = normalizeEngineState(JSON.parse(JSON.stringify(liveTimelineSnapshots[liveTimelineIndex])));
+  if (!isLiveHistoryBrowsing()) settings.auto_play_speed = 'off';
   renderGame();
 }
 
@@ -805,6 +806,8 @@ function _updateLiveSpeedControls() {
     btn.setAttribute('aria-pressed', speed === mode ? 'true' : 'false');
     btn.disabled = browsing;
   });
+  const speedCtrl = document.getElementById('live-speed-ctrl');
+  if (speedCtrl) speedCtrl.style.opacity = browsing ? '0.4' : '';
   const back = document.getElementById('live-back-btn');
   const forward = document.getElementById('live-forward-btn');
   const status = document.getElementById('live-timeline-status');

@@ -31,13 +31,22 @@
         </div>
 
         <div class="replay-controls-row replay-controls-row--top" id="live-speed-controls">
-          <button class="btn btn-sm replay-step-btn"
-                  id="live-back-btn"
-                  onclick="liveTimelineStep(-1)"
-                  title="Previous move">
-            <i class="fa-solid fa-step-backward"></i>
-          </button>
-          <div class="seg-ctrl">
+          <span class="replay-status">Replay:</span>
+          <div class="seg-ctrl" id="live-step-ctrl">
+            <button class="seg-btn"
+                    id="live-back-btn"
+                    onclick="liveTimelineStep(-1)"
+                    title="Previous move">
+              <i class="fa-solid fa-step-backward"></i>
+            </button>
+            <button class="seg-btn"
+                    id="live-forward-btn"
+                    onclick="liveTimelineStep(1)"
+                    title="Next move">
+              <i class="fa-solid fa-step-forward"></i>
+            </button>
+          </div>
+          <div class="seg-ctrl" id="live-speed-ctrl">
             <button class="seg-btn"
                     id="speed-pause-btn"
                     onclick="setAutoPlaySpeed('off')"
@@ -60,12 +69,6 @@
               <i class="fa-solid fa-forward"></i>
             </button>
           </div>
-          <button class="btn btn-sm replay-step-btn"
-                  id="live-forward-btn"
-                  onclick="liveTimelineStep(1)"
-                  title="Next move">
-            <i class="fa-solid fa-step-forward"></i>
-          </button>
           <span class="replay-status" id="live-timeline-status"></span>
         </div>
 
