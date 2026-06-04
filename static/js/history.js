@@ -98,24 +98,73 @@ function escapeHistoryText(value) {
     .replace(/'/g, '&#39;');
 }
 
-function saveGameJson() {
+let _currentSaveGameName = null;
+
+function requestSaveGame() {
+  if (!gameState) return;
+  if (_currentSaveGameName) {
+    _doSaveGame(_currentSaveGameName);
+    return;
+  }
+  const ctrl = document.getElementById('save-game-control');
+  if (!ctrl) return;
+  ctrl.innerHTML = `
+    <div class="new-game-confirm" style="align-items:center;">
+      <input id="save-game-name-input" class="btn btn-sm" type="text"
+             placeholder="Game name…" maxlength="60"
+             style="width:130px; cursor:text;"
+             onkeydown="if(event.key==='Enter')confirmSaveGame(); if(event.key==='Escape')cancelSaveGame()">
+      <div class="new-game-confirm-btns">
+        <button class="btn btn-primary btn-sm" onclick="confirmSaveGame()">Save</button>
+        <button class="btn btn-sm" onclick="cancelSaveGame()">Cancel</button>
+      </div>
+    </div>`;
+  document.getElementById('save-game-name-input')?.focus();
+}
+
+function confirmSaveGame() {
+  const name = document.getElementById('save-game-name-input')?.value.trim();
+  if (!name) return;
+  _currentSaveGameName = name;
+  cancelSaveGame();
+  _doSaveGame(name);
+}
+
+function cancelSaveGame() {
+  const ctrl = document.getElementById('save-game-control');
+  if (ctrl) ctrl.innerHTML = `
+    <button class="btn btn-sm" id="save-game-btn" onclick="requestSaveGame()" title="Save game to server">
+      <i class="ti ti-device-floppy"></i> Save game
+    </button>`;
+  updateSaveGameButton();
+}
+
+async function _doSaveGame(name) {
   const data = compactGameState();
   if (!data) return;
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  a.href = url;
-  a.download = `learn2ludo-game-${stamp}.json`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  const btn = document.getElementById('save-game-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> Saving…'; }
+  try {
+    const r = await fetch('/api/games/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, state: data }),
+    });
+    const { filename } = await r.json();
+    if (btn) { btn.disabled = false; btn.innerHTML = `<i class="ti ti-circle-check"></i> Saved`; }
+    setTimeout(() => cancelSaveGame(), 2000);
+  } catch (_) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save game'; }
+  }
 }
 
 function updateSaveGameButton() {
-  const btn = document.getElementById('save-game-json-btn');
+  const btn = document.getElementById('save-game-btn');
   if (btn) btn.disabled = !gameState;
+}
+
+function resetSaveGameName() {
+  _currentSaveGameName = null;
 }
 
 const sessionHistory = [];

@@ -535,6 +535,7 @@ function _formatElapsed(){ const s=Math.floor((Date.now()-(_gameStartTime||Date.
 function _formatPlayerTime(ms){ if(!ms)return '0:00'; const s=Math.floor(ms/1000); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
 
 async function newGame(startingPlayer=0){
+  if (typeof resetSaveGameName === 'function') resetSaveGameName();
   if (typeof clearReplayMode === 'function') clearReplayMode();
   resetLiveTimeline();
   gameStartingPlayer=startingPlayer;

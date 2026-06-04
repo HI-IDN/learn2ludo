@@ -617,6 +617,22 @@ def get_stats():
     return load_stats()
 
 
+class SaveGameBody(BaseModel):
+    name: str
+    state: dict
+
+
+@app.post("/api/games/save")
+def save_game_manually(body: SaveGameBody):
+    GAMES_DIR.mkdir(parents=True, exist_ok=True)
+    slug = "".join(c if c.isalnum() or c in "-_ " else "" for c in body.name).strip().replace(" ", "_")
+    if not slug:
+        slug = "game"
+    filename = f"{slug}.json"
+    (GAMES_DIR / filename).write_text(json.dumps(body.state, indent=2))
+    return {"filename": filename}
+
+
 @app.get("/api/games")
 def list_games():
     if not GAMES_DIR.exists():
