@@ -48,42 +48,42 @@
           <div class="howto-feature-card">
             <span class="howto-feature-name">Capture</span>
             <span class="howto-feature-desc">Does this move land on an opponent's pawn and send it back to their yard?</span>
-            <span class="howto-feature-value good">+1 if yes, 0 if no</span>
+            <span class="howto-feature-range">{0, 1}</span>
           </div>
           <div class="howto-feature-card">
             <span class="howto-feature-name">Risk</span>
-            <span class="howto-feature-desc">How many opponent pawns can reach the destination square on their next roll?</span>
-            <span class="howto-feature-value bad">0 – 1 (fraction of dice outcomes that threaten you)</span>
+            <span class="howto-feature-desc">Fraction of the opponent's dice outcomes that would reach this square next turn.</span>
+            <span class="howto-feature-range">[0, 1]</span>
           </div>
           <div class="howto-feature-card">
             <span class="howto-feature-name">Risk reduction</span>
-            <span class="howto-feature-desc">Does moving this pawn lower its current exposure to capture?</span>
-            <span class="howto-feature-value good">Positive when the move is safer than staying</span>
+            <span class="howto-feature-desc">Change in exposure to capture: negative means the move increases risk.</span>
+            <span class="howto-feature-range">ℝ</span>
           </div>
           <div class="howto-feature-card">
             <span class="howto-feature-name">Progress</span>
-            <span class="howto-feature-desc">How much closer to home does this move bring the pawn?</span>
-            <span class="howto-feature-value good">Higher = further ahead</span>
+            <span class="howto-feature-desc">Steps advanced toward home, normalised by track length.</span>
+            <span class="howto-feature-range">[0, 1]</span>
           </div>
           <div class="howto-feature-card">
             <span class="howto-feature-name">Safety</span>
             <span class="howto-feature-desc">Does the destination land on a safe square?</span>
-            <span class="howto-feature-value good">+1 if safe haven, 0 otherwise</span>
+            <span class="howto-feature-range">{0, 1}</span>
           </div>
           <div class="howto-feature-card">
             <span class="howto-feature-name">Blockade</span>
             <span class="howto-feature-desc">Does this move stack with a friendly pawn to form a blockade?</span>
-            <span class="howto-feature-value good">+1 if a blockade is created</span>
+            <span class="howto-feature-range">{0, 1}</span>
           </div>
           <div class="howto-feature-card">
             <span class="howto-feature-name">Spread</span>
-            <span class="howto-feature-desc">Does this move keep pawns spread out rather than clustered together?</span>
-            <span class="howto-feature-value neutral">Positive when pawns are well distributed</span>
+            <span class="howto-feature-desc">Pairwise distance between friendly pawns after the move, normalised.</span>
+            <span class="howto-feature-range">[0, 1]</span>
           </div>
           <div class="howto-feature-card">
             <span class="howto-feature-name">Activation</span>
             <span class="howto-feature-desc">Does this move bring a pawn out of the yard for the first time?</span>
-            <span class="howto-feature-value good">+1 when a yard pawn enters the track</span>
+            <span class="howto-feature-range">{0, 1}</span>
           </div>
         </div>
       </div>
@@ -202,7 +202,7 @@
             <p class="howto-bot-desc">Combines multiple features with weights. Apollo is the built-in CDR. Custom bots you build on the Bots page are also CDRs — you control the weights with sliders.</p>
             <p class="howto-bot-desc">Setting one weight to 100 and the rest to 0 turns a CDR into the matching SDR.</p>
           </div>
-          <div class="howto-bot-card">
+          <div class="howto-bot-card" data-rl>
             <div class="howto-bot-header">
               <span class="howto-bot-badge rl">RL</span>
               <span class="howto-bot-name">Reinforcement learning</span>
@@ -214,8 +214,8 @@
       </div>
     </div>
 
-    <!-- 6. Training vs fixed -->
-    <div class="howto-item" id="howto-training">
+    <!-- 6. Training vs fixed (hidden when RL tab is disabled) -->
+    <div class="howto-item" id="howto-training" data-rl>
       <button class="howto-trigger" onclick="howtoToggle('howto-training')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-school"></i> Training vs fixed behaviour</span>
         <i class="ti ti-chevron-down howto-chevron"></i>

@@ -141,17 +141,18 @@
 .howto-feature-name  { font-size: 13px; font-weight: 700; color: $color-text; }
 .howto-feature-desc  { font-size: 12px; color: $color-text-2; line-height: 1.5; }
 
-.howto-feature-value {
+.howto-feature-range {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
+  font-family: $font-mono;
   padding: 2px 8px;
-  border-radius: 20px;
+  border-radius: 4px;
   align-self: flex-start;
-
-  &.good    { background: $success-tint; color: $color-green; }
-  &.bad     { background: $danger-tint;  color: $color-danger; }
-  &.neutral { background: $color-bg-raised; color: $color-text-2; }
+  background: $color-bg-raised;
+  color: $color-primary;
+  border: 1px solid $border-light;
+  letter-spacing: 0.02em;
 }
 
 // ---- Formula ----------------------------------------------------------------

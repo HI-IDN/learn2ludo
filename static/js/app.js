@@ -359,7 +359,7 @@ async function loadTabs(){
   catch{ tabConfig=[
     {id:'lobby',label:'Players',icon:'ti-users',enabled:true,default_visible:true,order:0},
     {id:'play',label:'Play',icon:'ti-dice',enabled:true,default_visible:true,order:1},
-    {id:'train',label:'Train',icon:'ti-brain',enabled:true,default_visible:false,order:3},
+    {id:'train',label:'RL',icon:'ti-brain',enabled:true,default_visible:false,order:3},
     {id:'stats',label:'Stats',icon:'ti-chart-bar',enabled:true,default_visible:true,order:4},
     {id:'bots',label:'Bots',icon:'ti-robot',enabled:true,default_visible:false,order:5},
     {id:'glossary',label:'Glossary',icon:'ti-book',enabled:true,default_visible:true,order:6},
@@ -369,7 +369,7 @@ async function loadTabs(){
 }
 function getVisibleTabs(){ return tabConfig.filter(t=>t.enabled && (!t.admin_only || adminToken)).sort((a,b)=>a.order-b.order); }
 function renderTabs(){ const nav=document.getElementById('tab-nav'); nav.innerHTML=''; getVisibleTabs().forEach(t=>{ const b=document.createElement('button'); b.className='tab-btn'; b.id='tab-btn-'+t.id; b.innerHTML=`<i class="ti ${t.icon}"></i>${t.label}`; b.onclick=()=>switchTab(t.id); nav.appendChild(b); }); switchTab(getVisibleTabs()[0]?.id || 'play'); }
-function switchTab(id){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tab-btn-'+id)?.classList.add('active'); document.getElementById('panel-'+id)?.classList.add('active'); if(id==='stats')loadStats(); if(id==='lobby')renderLobbySlots(); if(id==='profiles'&&typeof renderProfiles==='function')renderProfiles(); if(id==='bots')renderBotsPage(); if(id==='replays'&&typeof loadReplaysPage==='function')loadReplaysPage(); }
+function switchTab(id){ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('tab-btn-'+id)?.classList.add('active'); document.getElementById('panel-'+id)?.classList.add('active'); if(id==='stats')loadStats(); if(id==='lobby')renderLobbySlots(); if(id==='profiles'&&typeof renderProfiles==='function')renderProfiles(); if(id==='bots')renderBotsPage(); if(id==='replays'&&typeof loadReplaysPage==='function')loadReplaysPage(); if(id==='howto'&&typeof howtoUpdateRlVisibility==='function')howtoUpdateRlVisibility(); }
 async function doAdminLogin(){
   const pw = document.getElementById('admin-pw')?.value || '';
   const alert = document.getElementById('admin-alert');

@@ -9,3 +9,11 @@ function howtoToggle(id) {
     if (btn) btn.setAttribute('aria-expanded', nowOpen);
   });
 }
+
+function howtoUpdateRlVisibility() {
+  const rlEnabled = typeof tabConfig !== 'undefined'
+    && tabConfig.find(t => t.id === 'train')?.enabled !== false;
+  document.querySelectorAll('[data-rl]').forEach(el => {
+    el.style.display = rlEnabled ? '' : 'none';
+  });
+}
