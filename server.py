@@ -27,6 +27,7 @@ from game.bots import ApolloBot, get_bot_info, save_custom_bot, delete_custom_bo
 from rl.environment import LudoEnv, TrainingSession, OPPONENT_POLICIES
 
 app = FastAPI(title="Ludo RL")
+PLAYER_COLORS = ["red", "green", "yellow", "blue", "orange", "purple"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -74,6 +75,10 @@ def save_game_record(session: GameSession):
     state = session.to_dict()
     state["v"] = 2
     state["players_registry"] = build_game_player_registry(session)
+    finished_at_ms = int(time.time() * 1000)
+    state["started_at_ms"] = session.started_at_ms
+    state["finished_at_ms"] = finished_at_ms
+    state["total_play_time_ms"] = max(0, finished_at_ms - session.started_at_ms)
     state["player_stats"] = session.compute_player_stats()
     cfg = state["config"]
     label = f"{cfg['player_count']}p{cfg['board']['yard_count']}y{cfg['board']['pawns_per_player']}pw"
@@ -84,14 +89,27 @@ def save_game_record(session: GameSession):
 
 
 def build_game_player_registry(session: GameSession) -> list[dict]:
-    return normalize_game_player_refs(session.player_refs, session.seeds)
+    return normalize_game_player_refs(
+        session.player_refs,
+        session.seeds,
+        slots=session.game.slots,
+        starting_player=session.starting_player,
+    )
 
 
-def normalize_game_player_refs(player_refs: list, seeds: list[int]) -> list[dict]:
+def normalize_game_player_refs(
+    player_refs: list,
+    seeds: list[int],
+    slots: list[int] | None = None,
+    starting_player: int = 0,
+) -> list[dict]:
     refs = {int(p.get("player_index", p.get("index", -1))): p for p in player_refs if isinstance(p, dict)}
     registry = []
+    player_count = len(seeds)
+    slots = slots or list(range(player_count))
     for idx, seed in enumerate(seeds):
         ref = refs.get(idx, {})
+        slot = slots[idx] if idx < len(slots) else idx
         bot_id = ref.get("bot_id") or None
         human_id = ref.get("human_id") or None
         player_type = ref.get("type") or ("human" if human_id else "bot" if bot_id else None)
@@ -100,6 +118,9 @@ def normalize_game_player_refs(player_refs: list, seeds: list[int]) -> list[dict
         registry.append({
             "player_index": idx,
             "seed": seed,
+            "slot": slot,
+            "color": PLAYER_COLORS[slot] if 0 <= slot < len(PLAYER_COLORS) else None,
+            "play_order": (idx - starting_player + player_count) % player_count,
             "type": player_type,
             "human_id": human_id if player_type == "human" else None,
             "bot_id": bot_id if player_type == "bot" else None,
@@ -335,7 +356,15 @@ def new_game(req: NewGameRequest):
     equal_rounds   = bool(req.rules.get("equal_rounds", False))
     active_game = GameSession(cfg, max_yard_rolls=max_yard_rolls, starting_player=starting_player,
                               equal_rounds=equal_rounds, seeds=req.seeds)
-    active_game.player_refs = normalize_game_player_refs(req.config.get("player_refs") or [], active_game.seeds)
+    active_game.player_refs = build_game_player_registry(active_game)
+    incoming_refs = req.config.get("player_refs") or []
+    if incoming_refs:
+        active_game.player_refs = normalize_game_player_refs(
+            incoming_refs,
+            active_game.seeds,
+            slots=active_game.game.slots,
+            starting_player=active_game.starting_player,
+        )
     stats = load_stats()
     stats["games_played"] += 1
     save_stats(stats)

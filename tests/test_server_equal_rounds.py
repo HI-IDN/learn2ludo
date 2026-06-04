@@ -1,6 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 from datetime import datetime
+import json
+from pathlib import Path
 
 import server
 from game.engine import Phase
@@ -127,6 +129,8 @@ def test_api_move_persists_justification_and_timestamp(client: TestClient):
 def test_game_player_registry_uses_uuid_and_seed(client: TestClient):
     payload = _new_game_payload(equal_rounds=False)
     payload["seeds"] = [11, 22, 33, 44]
+    payload["config"]["explicit_slots"] = [2, 0, 1, 3]
+    payload["config"]["starting_player"] = 2
     payload["config"]["player_refs"] = [
         {"player_index": 0, "human_id": "uuid-a", "type": "human"},
         {"player_index": 1, "type": "bot", "bot_id": "ares"},
@@ -143,6 +147,9 @@ def test_game_player_registry_uses_uuid_and_seed(client: TestClient):
     assert registry[0] == {
         "player_index": 0,
         "seed": 11,
+        "slot": 2,
+        "color": "yellow",
+        "play_order": 2,
         "type": "human",
         "human_id": "uuid-a",
         "bot_id": None,
@@ -151,12 +158,40 @@ def test_game_player_registry_uses_uuid_and_seed(client: TestClient):
     assert registry[3] == {
         "player_index": 3,
         "seed": 44,
+        "slot": 3,
+        "color": "blue",
+        "play_order": 1,
         "type": "bot",
         "human_id": None,
         "bot_id": "bot-custom",
         "designer_uuid": "uuid-designer",
     }
     assert state_refs == registry
+
+
+def test_saved_game_record_includes_duration_and_player_registry(client: TestClient, tmp_path, monkeypatch):
+    monkeypatch.setattr(server, "GAMES_DIR", tmp_path)
+    payload = _new_game_payload(equal_rounds=False)
+    payload["seeds"] = [11, 22, 33, 44]
+    payload["config"]["player_refs"] = [
+        {"player_index": 0, "human_id": "uuid-a", "type": "human"},
+        {"player_index": 1, "type": "bot", "bot_id": "ares"},
+        {"player_index": 2, "human_id": "uuid-c", "type": "human"},
+        {"player_index": 3, "type": "bot", "bot_id": "bot-custom", "designer_uuid": "uuid-designer"},
+    ]
+    r = client.post("/api/game/new", json=payload)
+    assert r.status_code == 200
+
+    session = server.active_game
+    session.started_at_ms -= 2500
+    path = server.save_game_record(session)
+    saved = json.loads(Path(path).read_text())
+
+    assert saved["total_play_time_ms"] >= 2500
+    assert saved["finished_at_ms"] >= saved["started_at_ms"]
+    assert saved["players_registry"][0]["seed"] == 11
+    assert saved["players_registry"][0]["human_id"] == "uuid-a"
+    assert saved["players_registry"][1]["bot_id"] == "ares"
 
 
 def test_reflection_sanitize_removes_display_name():

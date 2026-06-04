@@ -1,6 +1,7 @@
 import random as _random
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import time
 from game.engine import LudoGame, GameConfig, BoardConfig, Phase
 from game.gameplay import Gameplay, Piece
 
@@ -27,6 +28,7 @@ class GameSession:
         self.game.player = max(0, min(starting_player, cfg.player_count - 1))
         self.gp   = Gameplay(self.game)
         self.history: list = []
+        self.started_at_ms = int(time.time() * 1000)
         self.winner  = None
         self.winners: list = []
         self.equal_rounds         = equal_rounds
