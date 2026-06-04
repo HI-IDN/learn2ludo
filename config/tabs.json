@@ -40,7 +40,7 @@
       "id": "train",
       "label": "Train",
       "icon": "ti-brain",
-      "enabled": true,
+      "enabled": false,
       "default_visible": false,
       "order": 3,
       "description": "RL training controls"
