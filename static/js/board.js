@@ -40,7 +40,7 @@ function _yardSlotLayout(count, yardSize) {
   const m = 0.80; // margin: use 80% of yard size
   const unitAx = (yardSize * m) / (t.cols + 0.5);
   const unitLx = (yardSize * m) / (t.rows + 0.5);
-  const radius = Math.min(unitAx, unitLx) * 0.44;
+  const radius = Math.min(unitAx, unitLx) * 0.38;
   return {
     slots: t.tpl.map(([a, l]) => ({dax: a * unitAx, dlx: l * unitLx})),
     radius,
@@ -49,7 +49,13 @@ function _yardSlotLayout(count, yardSize) {
 
 function buildBoardGeometry(yardCount, homeLength, pawnsPerPlayer, S) {
   const n = homeLength;
-  const c = S / (2 * n + 3);
+  // For N≠4 the centre polygon apothem = 1.5c·cot(π/N) > 1.5c, so arms must shift outward
+  // by delta = 1.5c·(cot(π/N)−1) to keep H5 just outside and H6 just inside the polygon.
+  // We solve for c by requiring the board diameter 2·((n+1.5)c + delta) = S, giving:
+  //   c = S / (2·(n + 1.5·cot(π/N)))    [N=4 → same as S/(2n+3)]
+  const cotN = 1 / Math.tan(Math.PI / yardCount);
+  const c = S / (2 * (n + 1.5 * cotN));
+  const delta = 1.5 * c * (cotN - 1);   // radial arm offset (0 for N=4)
   const cx = S / 2, cy = S / 2;
   const trackSize = yardCount * (2 * n + 1);
   const trackCenters = new Array(trackSize);
@@ -61,39 +67,53 @@ function buildBoardGeometry(yardCount, homeLength, pawnsPerPlayer, S) {
     const base = arm * (2 * n + 1);
     // Right column first (p=0..n-1): d=p+2, outermost at d=n+1, directly below cap
     for (let p = 0; p < n; p++)
-      trackCenters[base + p] = {x: cx + (p+2)*c*ax - c*lx, y: cy + (p+2)*c*ay - c*ly};
+      trackCenters[base + p] = {x: cx + ((p+2)*c + delta)*ax - c*lx, y: cy + ((p+2)*c + delta)*ay - c*ly};
     // Cap (p=n): at d=n+1, centre-line — arrow cell
-    trackCenters[base + n] = {x: cx + (n+1)*c*ax, y: cy + (n+1)*c*ay};
+    trackCenters[base + n] = {x: cx + ((n+1)*c + delta)*ax, y: cy + ((n+1)*c + delta)*ay};
     // Left column (p=n+1..2n): outermost→innermost, d=n+1 down to d=2, directly above cap first
     for (let p = n+1; p <= 2*n; p++)
-      trackCenters[base + p] = {x: cx + (2*n+2-p)*c*ax + c*lx, y: cy + (2*n+2-p)*c*ay + c*ly};
+      trackCenters[base + p] = {x: cx + ((2*n+2-p)*c + delta)*ax + c*lx, y: cy + ((2*n+2-p)*c + delta)*ay + c*ly};
     for (let j = 0; j < n; j++)
-      homeCenters[arm][j] = {x: cx + (n-j)*c*ax, y: cy + (n-j)*c*ay};
+      homeCenters[arm][j] = {x: cx + ((n-j)*c + delta)*ax, y: cy + ((n-j)*c + delta)*ay};
   }
-  // Yard block per arm: centered at angle (theta + π/4), distance 4.5c√2 from center
-  const yardDist = 4.5 * c * Math.SQRT2;
-  const yardSize = Math.min(5.7 * c,
-    yardDist * Math.SQRT2 * Math.sin(Math.PI / Math.max(yardCount, 3)) * 0.92);
+  // R_arc: distance from board centre to each arm's outermost corner cell (includes delta offset).
+  const R_arc = Math.sqrt(Math.pow((n + 1) * c + delta, 2) + c * c);
+
+  // Logo anchor: 70 % of the way to the arc, along the bisector.
+  // Logo size fits the wedge width available at that distance.
+  const _sinN = Math.sin(Math.PI / yardCount);
+  const _distLogo = 0.70 * R_arc;
   const yardCenters = Array.from({length: yardCount}, (_, arm) => {
     const theta = Math.PI + arm * 2 * Math.PI / yardCount;
-    const a = theta + Math.PI / 4;
-    return {x: cx + yardDist * Math.cos(a), y: cy + yardDist * Math.sin(a), size: yardSize};
+    const bisector = theta + Math.PI / yardCount;
+    const size = Math.max(2 * (_distLogo * _sinN - c), 2 * c);
+    return {x: cx + _distLogo * Math.cos(bisector), y: cy + _distLogo * Math.sin(bisector), size};
   });
 
-  // Pawn slot positions per yard — layout adapts to pawnsPerPlayer (1–8)
-  const {slots: slotOffsets, radius: slotRadius} = _yardSlotLayout(pawnsPerPlayer, yardSize);
+  // Pawn slots: at the hypothetical cell adjacent to the outermost home-stretch cell (H1),
+  // one step into the yard (= 2c in the left-perp direction from the arm axis).
+  // This mirrors the cell "above T(step-n+2)" that the user sees next to H1 on screen.
+  // All pawns for a player stack at this one point, fanned out horizontally at 1.8× the
+  // normal on-track step (8 px) — exactly as they would stack on a regular track cell.
+  const _yardFanStep = 8 * 1.8;             // 14.4 px horizontal fan
+  const slotRadius = c * 0.20;              // small indicator circle
   const yardPawnSlots = Array.from({length: yardCount}, (_, arm) => {
     const theta = Math.PI + arm * 2 * Math.PI / yardCount;
-    const ax = Math.cos(theta), ay = Math.sin(theta);
-    const lx = -Math.sin(theta), ly = Math.cos(theta);
-    const {x: yx, y: yy} = yardCenters[arm];
-    return slotOffsets.map(({dax, dlx}) => ({
-      x: yx + dax * ax + dlx * lx,
-      y: yy + dax * ay + dlx * ly,
+    const ax = Math.cos(theta), ay = Math.sin(theta);   // arm direction
+    const lx = -Math.sin(theta), ly = Math.cos(theta);  // left-perp = into yard
+    // (n·c + delta) along arm + 2c into yard  →  one cell beyond the track, adjacent to H1
+    const yx = cx + (n * c + delta) * ax + 2 * c * lx;
+    const yy = cy + (n * c + delta) * ay + 2 * c * ly;
+    // fanSign ensures i=0 is always the topmost pawn on screen.
+    // For downward arms (ay>0) keep direction; for upward arms (ay<0) flip.
+    const fanSign = ay < 0 ? -1 : 1;
+    return Array.from({length: pawnsPerPlayer}, (_, i) => ({
+      x: yx + fanSign * (i - (pawnsPerPlayer - 1) / 2) * _yardFanStep * ax,
+      y: yy + fanSign * (i - (pawnsPerPlayer - 1) / 2) * _yardFanStep * ay,
     }));
   });
 
-  return {trackCenters, homeCenters, yardCenters, yardPawnSlots, slotRadius, cellSize: c, center: {x: cx, y: cy}};
+  return {trackCenters, homeCenters, yardCenters, yardPawnSlots, slotRadius, cellSize: c, armDelta: delta, center: {x: cx, y: cy}};
 }
 
 const TRACK_GRID=[[1,6],[2,6],[3,6],[4,6],[5,6],[6,5],[6,4],[6,3],[6,2],[6,1],[6,0],[7,0],[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[9,6],[10,6],[11,6],[12,6],[13,6],[14,6],[14,7],[14,8],[13,8],[12,8],[11,8],[10,8],[9,8],[8,9],[8,10],[8,11],[8,12],[8,13],[8,14],[7,14],[6,14],[6,13],[6,12],[6,11],[6,10],[6,9],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8],[0,7],[0,6]];
@@ -147,8 +167,8 @@ function _pastChosenMove(){
 function _chosenMoveForPiece(g,pid){
   return _isChosenMoveForPiece(window._botChosenMove,g,pid)||_isChosenMoveForPiece(_pastChosenMove(),g,pid);
 }
-function pawnSvg(x,y,color,movable,g,label,chosen){
-  const s=26;
+function pawnSvg(x,y,color,movable,g,label,chosen,sz=26){
+  const s=sz;
   const botPending=!!window._botChosenMove;
   const isChosen=botPending&&chosen;
   const replay=typeof isReplayActive==='function'&&isReplayActive();
@@ -231,18 +251,47 @@ function drawBoard(){
   const svg=document.getElementById('ludo-board'); if(!svg)return;
   const S=480, layout=currentLayout(), geo=currentGeometry(), c=geo.cellSize;
 
-  // Background: white
-  let html=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
+  // Background: white; clipPath keeps yard wedges inside the rounded board rect
+  let html=`<defs><clipPath id="board-clip"><rect width="${S}" height="${S}" rx="12"/></clipPath></defs>`;
+  html+=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
   if((typeof isReplayActive==='function'&&isReplayActive())||(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing())){
     html+=`<g opacity="0.96"><rect x="${S-104}" y="14" width="86" height="30" rx="8" fill="${COLORS.blue}"/><text x="${S-61}" y="34" text-anchor="middle" font-size="13" font-family="Jost, sans-serif" font-weight="800" fill="#fff">REPLAY</text></g>`;
   }
 
-  // Yard blocks (one per arm) + logo overlay
+  // Yard blocks.
+  // N=4: classic straight-sided square corners (clipped to board rect).
+  // N≠4: two arm-edge lines + one circular arc connecting the outermost corner cells.
+  const _yN=layout.yard_count, _cx=S/2, _cy=S/2;
+  const _cot=1/Math.tan(Math.PI/_yN), _FAR=S*1.5;
+  const _nHL=gameState?.config?.board?.home_length??settings.board_home_length??6;
+  const _delta=geo.armDelta||0;
+  const _Rc=Math.sqrt(Math.pow((_nHL+1)*c+_delta,2)+c*c);
   geo.yardCenters.forEach(({x, y, size}, arm) => {
-    const col=COLORS[PLAYER_COLORS[arm]], hs=size/2, pad=c*.1;
-    html+=`<rect x="${x-hs+pad}" y="${y-hs+pad}" width="${size-pad*2}" height="${size-pad*2}" fill="${col}" opacity=".92" rx="8"/>`;
-    const ls=size*.56;
-    html+=`<image href="/static/logo.svg" x="${x-ls/2}" y="${y-ls/2}" width="${ls}" height="${ls}" opacity="0.18" style="pointer-events:none;"/>`;
+    const col=COLORS[PLAYER_COLORS[arm]];
+    const ti=Math.PI+arm*2*Math.PI/_yN, tj=ti+2*Math.PI/_yN;
+    const axi=Math.cos(ti), ayi=Math.sin(ti);
+    const lxi=-Math.sin(ti), lyi=Math.cos(ti);
+    const axj=Math.cos(tj), ayj=Math.sin(tj);
+    const lxj=-Math.sin(tj), lyj=Math.cos(tj);
+    // m: visual gap between yard colour and the track-cell edges
+    const m=c*0.12;
+    const co=c+m; // offset from arm axis to yard boundary (was exactly c, now slightly more)
+    const Px=_cx+co*lxi+_cot*co*axi, Py=_cy+co*lyi+_cot*co*ayi;
+    if(_yN===4){
+      // Classic square: straight lines to board edge, clipped
+      const B1x=_cx+co*lxi+_FAR*axi, B1y=_cy+co*lyi+_FAR*ayi;
+      const B2x=_cx-co*lxj+_FAR*axj, B2y=_cy-co*lyj+_FAR*ayj;
+      html+=`<path d="M ${Px},${Py} L ${B1x},${B1y} L ${B2x},${B2y} Z" fill="${col}" opacity=".92" clip-path="url(#board-clip)"/>`;
+    } else {
+      // Arc yard: inner corner → left-column tip → arc → right-column tip of next arm
+      const T1x=_cx+((_nHL+1)*c+_delta)*axi+co*lxi, T1y=_cy+((_nHL+1)*c+_delta)*ayi+co*lyi;
+      const T2x=_cx+((_nHL+1)*c+_delta)*axj-co*lxj, T2y=_cy+((_nHL+1)*c+_delta)*ayj-co*lyj;
+      html+=`<path d="M ${Px},${Py} L ${T1x},${T1y} A ${_Rc},${_Rc},0,0,1,${T2x},${T2y} Z" fill="${col}" opacity=".92"/>`;
+    }
+    // Logo: sized to 75 % of available wedge width, rotated along bisector
+    const ls=size*0.75;
+    const _bisDeg=((ti+Math.PI/_yN)*180/Math.PI-270+720)%360;
+    html+=`<image href="/static/logo.svg" x="${x-ls/2}" y="${y-ls/2}" width="${ls}" height="${ls}" opacity="0.18" style="pointer-events:none;" transform="rotate(${_bisDeg.toFixed(1)},${x},${y})"/>`;
   });
 
   // Yard pawn slots — one circle per pawn, layout adapts to pawn count
@@ -289,28 +338,26 @@ function drawBoard(){
     html+=`<foreignObject x="${x-c*.32}" y="${y-c*.32}" width="${c*.64}" height="${c*.64}" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:${col};font-size:17px;transform:rotate(${deg}deg);"><i class="fa-solid fa-circle-right"></i></div></foreignObject>`;
   });
 
-  // Home stretch lanes — innermost cell (j=n-1) left uncoloured; coloured centre handles it
+  // Home stretch lanes — all cells coloured; innermost (H6) will be covered by centre polygon
   geo.homeCenters.forEach((lane,armIdx)=>{
     const col=COLORS[PLAYER_COLORS[armIdx]];
     const rot=_armRot(armIdx);
-    lane.slice(0,-1).forEach(({x,y})=>html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".92" rx="2" transform="rotate(${rot},${x},${y})"/>`);
-    // Innermost cell: uncoloured rectangle (no fill)
-    const {x:ix,y:iy}=lane[lane.length-1];
-    html+=`<rect x="${ix-c/2+1}" y="${iy-c/2+1}" width="${c-2}" height="${c-2}" fill="#fff" stroke="rgba(0,0,0,.08)" stroke-width=".5" rx="2" transform="rotate(${rot},${ix},${iy})"/>`;
+    lane.forEach(({x,y})=>html+=`<rect x="${x-c/2+1}" y="${y-c/2+1}" width="${c-2}" height="${c-2}" fill="${col}" opacity=".92" rx="2" transform="rotate(${rot},${x},${y})"/>`);
   });
 
-  // Home center — N coloured pie slices meeting at board center
+  // Home centre — N-sided polygon drawn LAST so it covers H6 and arm-junction cells cleanly.
+  // Circumradius = 3c/(2·sin(π/N)) → side = 3c = full arm cross-section width.
   {
-    const hcx=geo.center.x, hcy=geo.center.y, r=c*1.5, N=layout.yard_count;
+    const hcx=geo.center.x, hcy=geo.center.y, N=layout.yard_count;
+    const r=3*c/(2*Math.sin(Math.PI/N));
     const half=Math.PI/N;
     Array.from({length:N},(_,arm)=>{
       const theta=Math.PI+arm*2*Math.PI/N;
       const a1=theta-half, a2=theta+half;
       const col=COLORS[PLAYER_COLORS[arm]];
-      const large=half>Math.PI/2?1:0;
       const x1=hcx+r*Math.cos(a1), y1=hcy+r*Math.sin(a1);
       const x2=hcx+r*Math.cos(a2), y2=hcy+r*Math.sin(a2);
-      html+=`<path d="M ${hcx},${hcy} L ${x1},${y1} A ${r},${r},0,${large},1,${x2},${y2} Z" fill="${col}"/>`;
+      html+=`<path d="M ${hcx},${hcy} L ${x1},${y1} L ${x2},${y2} Z" fill="${col}"/>`;
     });
   }
 
@@ -355,7 +402,7 @@ function drawBoard(){
         const movable=valid.has(g);
         if(pc.in_yard){
           const pt=yard[i]||yard[0];
-          html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,_chosenMoveForPiece(g,pid));
+          html+=pawnSvg(pt.x,pt.y,col,movable,g,i+1,_chosenMoveForPiece(g,pid),18);
           if(_showPawnNotation(player.index,movable,true,pc.finished)) _addPawnNotationGroup(notationGroups,pt.x,pt.y,pid);
         } else if(pc.finished){
           const entry=typeof homeEntryPosition==='function'?homeEntryPosition():(layout.track_size||52)-1;
