@@ -51,7 +51,8 @@ function doReplaysAdminLogout() {
 let _allGames = [];
 let _replayFilterPlayers = 'all';
 let _replayFilterYards = 'all';
-let _replayFilterWinner = 'all';
+let _replayFilterPerson = null;   // human_id or null
+let _replayFilterResult = 'all';  // 'all' | 'won' | 'lost'
 
 async function loadReplaysPage() {
   renderReplaysAdminWidget();
@@ -68,6 +69,11 @@ async function loadReplaysPage() {
     _allGames = [];
   }
   _buildFilterPills();
+  // Reset person filter state on fresh load
+  _replayFilterPerson = null;
+  _replayFilterResult = 'all';
+  const rg = document.getElementById('replays-filter-result-group');
+  if (rg) rg.style.display = 'none';
   filterReplays();
 }
 
@@ -77,13 +83,24 @@ function _buildFilterPills() {
 
   const pEl = document.getElementById('replays-filter-players');
   const yEl = document.getElementById('replays-filter-yards');
-  if (!pEl || !yEl) return;
-
-  pEl.innerHTML = `<button class="replays-pill active" data-val="all" onclick="setPlayersFilter('all',this)">All</button>`
+  if (pEl) pEl.innerHTML = `<button class="replays-pill active" data-val="all" onclick="setPlayersFilter('all',this)">All</button>`
     + playerCounts.map(n => `<button class="replays-pill" data-val="${n}" onclick="setPlayersFilter(${n},this)">${n}p</button>`).join('');
-
-  yEl.innerHTML = `<button class="replays-pill active" data-val="all" onclick="setYardsFilter('all',this)">All</button>`
+  if (yEl) yEl.innerHTML = `<button class="replays-pill active" data-val="all" onclick="setYardsFilter('all',this)">All</button>`
     + yardCounts.map(n => `<button class="replays-pill" data-val="${n}" onclick="setYardsFilter(${n},this)">${n} yards</button>`).join('');
+
+  _buildPersonPills();
+}
+
+function _buildPersonPills() {
+  const el = document.getElementById('replays-filter-person');
+  if (!el) return;
+  const readyIds = _getReadyIds();
+  if (!readyIds.size) { el.innerHTML = '<span style="font-size:12px;color:var(--text3)">No players ready</span>'; return; }
+  el.innerHTML = `<button class="replays-pill active" data-val="" onclick="setPersonFilter(null,this)">All</button>`
+    + [...readyIds].map(id => {
+        const name = (typeof getProfileById === 'function' && getProfileById(id)?.name) || id.slice(0,8);
+        return `<button class="replays-pill" data-val="${id}" onclick="setPersonFilter('${id}',this)">${name}</button>`;
+      }).join('');
 }
 
 function setPlayersFilter(val, btn) {
@@ -100,8 +117,21 @@ function setYardsFilter(val, btn) {
   filterReplays();
 }
 
-function setWinnerFilter(val, btn) {
-  _replayFilterWinner = val;
+function setPersonFilter(id, btn) {
+  _replayFilterPerson = id || null;
+  _replayFilterResult = 'all';
+  btn.closest('.replays-pills').querySelectorAll('.replays-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Reset result pills to 'all'
+  document.querySelectorAll('#replays-filter-result .replays-pill').forEach(b => b.classList.toggle('active', b.dataset.val === 'all'));
+  // Show/hide result filter
+  const rg = document.getElementById('replays-filter-result-group');
+  if (rg) rg.style.display = _replayFilterPerson ? '' : 'none';
+  filterReplays();
+}
+
+function setResultFilter(val, btn) {
+  _replayFilterResult = val;
   btn.closest('.replays-pills').querySelectorAll('.replays-pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   filterReplays();
@@ -143,9 +173,11 @@ function filterReplays() {
     }
     if (_replayFilterPlayers !== 'all' && g.player_count !== _replayFilterPlayers) return false;
     if (_replayFilterYards !== 'all' && g.yard_count !== _replayFilterYards) return false;
-    if (_replayFilterWinner !== 'all') {
-      const winnerType = _winnerType(g);
-      if (_replayFilterWinner !== winnerType) return false;
+    if (_replayFilterPerson) {
+      const personEntry = (g.players || []).find(p => p.human_id === _replayFilterPerson);
+      if (!personEntry) return false;
+      if (_replayFilterResult === 'won'  && personEntry.index !== g.winner) return false;
+      if (_replayFilterResult === 'lost' && personEntry.index === g.winner) return false;
     }
     if (search) {
       const nameMatch = (g.name || '').toLowerCase().includes(search);
@@ -169,11 +201,6 @@ function filterReplays() {
   list.innerHTML = filtered.map(g => _renderGameCard(g, isAdmin)).join('');
 }
 
-function _winnerType(g) {
-  if (g.winner === null || g.winner === undefined) return null;
-  const winner = (g.players || []).find(p => p.index === g.winner);
-  return winner?.type || null;
-}
 
 function _playerDots(players) {
   return (players || []).map(p => {

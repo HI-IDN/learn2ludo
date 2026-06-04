@@ -13,7 +13,7 @@
     <input class="replays-search" id="replays-search" type="search" placeholder="Search by name…" oninput="filterReplays()">
 
     <div class="replays-filter-group">
-      <span class="replays-filter-label">Players</span>
+      <span class="replays-filter-label">Player count</span>
       <div class="replays-pills" id="replays-filter-players"></div>
     </div>
 
@@ -22,12 +22,17 @@
       <div class="replays-pills" id="replays-filter-yards"></div>
     </div>
 
-    <div class="replays-filter-group">
-      <span class="replays-filter-label">Winner</span>
-      <div class="replays-pills" id="replays-filter-winner">
-        <button class="replays-pill active" data-winner="all" onclick="setWinnerFilter('all', this)">All</button>
-        <button class="replays-pill" data-winner="human" onclick="setWinnerFilter('human', this)">Human won</button>
-        <button class="replays-pill" data-winner="bot" onclick="setWinnerFilter('bot', this)">Bot won</button>
+    <div class="replays-filter-group" id="replays-filter-person-group">
+      <span class="replays-filter-label">Person</span>
+      <div class="replays-pills" id="replays-filter-person"></div>
+    </div>
+
+    <div class="replays-filter-group" id="replays-filter-result-group" style="display:none;">
+      <span class="replays-filter-label">Result</span>
+      <div class="replays-pills" id="replays-filter-result">
+        <button class="replays-pill active" data-val="all"  onclick="setResultFilter('all', this)">All</button>
+        <button class="replays-pill"         data-val="won"  onclick="setResultFilter('won', this)">Won</button>
+        <button class="replays-pill"         data-val="lost" onclick="setResultFilter('lost', this)">Lost</button>
       </div>
     </div>
   </div>
