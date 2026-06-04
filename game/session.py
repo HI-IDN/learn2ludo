@@ -47,6 +47,7 @@ class GameSession:
             seeds = [_random.randint(0, 2**31 - 1) for _ in range(n)]
         self.seeds: list[int] = list(seeds)
         self._rngs: list[_random.Random] = [_random.Random(s) for s in self.seeds]
+        self.player_refs: list[dict] = []
 
         self.history.append({
             "type": "game_start",
@@ -272,6 +273,7 @@ class GameSession:
             "yard_roll_count":  self._yard_roll_count,
             "max_yard_rolls":   self.max_yard_rolls,
             "seeds":            self.seeds,
+            "player_refs":      self.player_refs,
         }
 
     # ---- helpers ----------------------------------------------------------

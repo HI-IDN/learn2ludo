@@ -73,6 +73,7 @@ def save_game_record(session: GameSession):
     GAMES_DIR.mkdir(parents=True, exist_ok=True)
     state = session.to_dict()
     state["v"] = 2
+    state["players_registry"] = build_game_player_registry(session)
     state["player_stats"] = session.compute_player_stats()
     cfg = state["config"]
     label = f"{cfg['player_count']}p{cfg['board']['yard_count']}y{cfg['board']['pawns_per_player']}pw"
@@ -80,6 +81,22 @@ def save_game_record(session: GameSession):
     path = GAMES_DIR / f"{ts}_{label}.json"
     path.write_text(json.dumps(state, indent=2))
     return str(path)
+
+
+def build_game_player_registry(session: GameSession) -> list[dict]:
+    refs = {int(p.get("player_index", p.get("index", -1))): p for p in session.player_refs if isinstance(p, dict)}
+    registry = []
+    for idx, seed in enumerate(session.seeds):
+        ref = refs.get(idx, {})
+        registry.append({
+            "player_index": idx,
+            "player_uuid": ref.get("player_uuid") or None,
+            "seed": seed,
+            "type": ref.get("type") or None,
+            "bot_id": ref.get("bot_id") or None,
+            "designer_uuid": ref.get("designer_uuid") or None,
+        })
+    return registry
 
 
 # ---------------------------------------------------------------------------
@@ -309,6 +326,7 @@ def new_game(req: NewGameRequest):
     equal_rounds   = bool(req.rules.get("equal_rounds", False))
     active_game = GameSession(cfg, max_yard_rolls=max_yard_rolls, starting_player=starting_player,
                               equal_rounds=equal_rounds, seeds=req.seeds)
+    active_game.player_refs = req.config.get("player_refs") or []
     stats = load_stats()
     stats["games_played"] += 1
     save_stats(stats)
@@ -384,9 +402,19 @@ def save_reflections(req: ReflectionsRequest):
     if not files:
         return {"ok": False, "detail": "No game file to attach reflections to"}
     data = json.loads(files[0].read_text())
-    data["reflections"] = req.reflections
+    data["reflections"] = sanitize_reflections(req.reflections)
     files[0].write_text(json.dumps(data, indent=2))
     return {"ok": True}
+
+
+def sanitize_reflections(reflections: list) -> list:
+    sanitized = []
+    for ref in reflections:
+        if not isinstance(ref, dict):
+            continue
+        item = {k: v for k, v in ref.items() if k != "name"}
+        sanitized.append(item)
+    return sanitized
 
 
 # ---------------------------------------------------------------------------

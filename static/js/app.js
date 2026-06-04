@@ -313,9 +313,27 @@ function buildNewGamePayload(){
         stack_home_pawns:boardCfg.stack_home_pawns
       },
       player_count:playerCount,
-      explicit_slots:activeSlots||Array.from({length:playerCount},(_,i)=>i)
+      explicit_slots:activeSlots||Array.from({length:playerCount},(_,i)=>i),
+      player_refs: buildGamePlayerRefs(playerCount)
     }
   };
+}
+
+function buildGamePlayerRefs(playerCount) {
+  return Array.from({length: playerCount}, (_, i) => {
+    const type = getPlayerType(i);
+    const botId = settings.bot_ids?.[i] || null;
+    const bot = type !== 'human' && typeof getBotRegistry === 'function'
+      ? getBotRegistry().find(b => b.id === botId)
+      : null;
+    return {
+      player_index: i,
+      player_uuid: type === 'human' ? (settings.profile_ids?.[i] || null) : null,
+      type,
+      bot_id: botId,
+      designer_uuid: bot?.designer || null,
+    };
+  });
 }
 
 async function loadTabs(){

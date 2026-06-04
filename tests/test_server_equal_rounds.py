@@ -122,3 +122,51 @@ def test_api_move_persists_justification_and_timestamp(client: TestClient):
     assert move["justification"] == "  Open with R1.  "
     assert move["timestamp"].endswith("Z")
     datetime.fromisoformat(move["timestamp"].replace("Z", "+00:00"))
+
+
+def test_game_player_registry_uses_uuid_and_seed(client: TestClient):
+    payload = _new_game_payload(equal_rounds=False)
+    payload["seeds"] = [11, 22, 33, 44]
+    payload["config"]["player_refs"] = [
+        {"player_index": 0, "player_uuid": "uuid-a", "type": "human"},
+        {"player_index": 1, "type": "random", "bot_id": "ares"},
+        {"player_index": 2, "player_uuid": "uuid-c", "type": "human"},
+        {"player_index": 3, "type": "random", "bot_id": "bot-custom", "designer_uuid": "uuid-designer"},
+    ]
+
+    r = client.post("/api/game/new", json=payload)
+    assert r.status_code == 200
+
+    registry = server.build_game_player_registry(server.active_game)
+
+    assert registry[0] == {
+        "player_index": 0,
+        "player_uuid": "uuid-a",
+        "seed": 11,
+        "type": "human",
+        "bot_id": None,
+        "designer_uuid": None,
+    }
+    assert registry[3] == {
+        "player_index": 3,
+        "player_uuid": None,
+        "seed": 44,
+        "type": "random",
+        "bot_id": "bot-custom",
+        "designer_uuid": "uuid-designer",
+    }
+
+
+def test_reflection_sanitize_removes_display_name():
+    reflections = server.sanitize_reflections([{
+        "player": 0,
+        "player_uuid": "uuid-a",
+        "name": "Pallas",
+        "description": "Careful opening.",
+    }])
+
+    assert reflections == [{
+        "player": 0,
+        "player_uuid": "uuid-a",
+        "description": "Careful opening.",
+    }]
