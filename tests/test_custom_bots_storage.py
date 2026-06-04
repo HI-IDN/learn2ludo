@@ -4,12 +4,12 @@ from game import bots
 
 
 def test_custom_bots_live_under_data():
-    assert bots.BOTS_CUSTOM_PATH.name == "bots_custom.json"
+    assert bots.BOTS_CUSTOM_PATH.name == "bots.json"
     assert bots.BOTS_CUSTOM_PATH.parent.name == "data"
 
 
 def test_save_custom_bot_creates_data_file(tmp_path, monkeypatch):
-    custom_path = tmp_path / "data" / "bots_custom.json"
+    custom_path = tmp_path / "data" / "bots.json"
     monkeypatch.setattr(bots, "BOTS_CUSTOM_PATH", custom_path)
 
     bots.save_custom_bot({

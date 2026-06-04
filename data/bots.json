@@ -49,7 +49,31 @@
         "capture": -1
       },
       "designer": "helgaingim",
-      "created_at": "2026-06-03T13:31:12.652Z"
+      "created_at": "2026-06-03T13:31:12.652Z",
+      "_is_deleted": true
+    },
+    {
+      "id": "bot-38f81ec2",
+      "name": "Anti-Ares",
+      "tldr": "Passifist",
+      "description": "Actively avoids capturing opponents.",
+      "weights": {
+        "capture": -1
+      },
+      "designer": "c64fe787-5658-43a2-8f3c-03bab308ee9d",
+      "created_at": "2026-06-04T13:48:11.881Z"
+    },
+    {
+      "id": "bot-2091f07b",
+      "name": "adf",
+      "tldr": "daf",
+      "description": "dsf",
+      "weights": {
+        "safety": 0.35,
+        "blockade": -0.55
+      },
+      "designer": "4c5c88d4-e49d-4d63-b4d6-3fb65937dc02",
+      "created_at": "2026-06-04T13:49:13.665Z"
     }
   ]
 }

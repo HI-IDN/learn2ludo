@@ -17,7 +17,7 @@ from pathlib import Path
 
 
 BOTS_CONFIG_PATH = Path(__file__).resolve().parents[1] / "config" / "bots.json"
-BOTS_CUSTOM_PATH = Path(__file__).resolve().parents[1] / "data" / "bots_custom.json"
+BOTS_CUSTOM_PATH = Path(__file__).resolve().parents[1] / "data" / "bots.json"
 
 
 @dataclass(frozen=True)
