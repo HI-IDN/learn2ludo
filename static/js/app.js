@@ -828,6 +828,17 @@ function _updateAutoPlayBtn() {
   _updateLiveSpeedControls();
 }
 
+function _movesAreEquivalent(moves) {
+  if (!moves?.length) return false;
+  const p = gameState.current_player;
+  const pawnsPerPlayer = gameState?.config?.board?.pawns_per_player || 4;
+  const positions = new Set(moves.map(m => {
+    const localIdx = m.piece_idx - p * pawnsPerPlayer;
+    return gameState.players[p]?.pieces[localIdx]?.position ?? m.piece_idx;
+  }));
+  return positions.size < 2;
+}
+
 function _tryAutoResolveForcedHumanMove(immediate = false) {
   clearTimeout(_autoForcedMoveTimer);
   if (typeof isReplayActive === 'function' && isReplayActive()) return;
@@ -836,8 +847,10 @@ function _tryAutoResolveForcedHumanMove(immediate = false) {
   if (speed === 'off') return;
   if (!gameState || gameState.phase !== 'moving' || gameState.winner !== null) return;
   if (getPlayerType(gameState.current_player) !== 'human') return;
-  if (gameState.valid_moves?.length !== 1) return;
-  const m = gameState.valid_moves[0];
+  const moves = gameState.valid_moves || [];
+  if (moves.length === 0) return;
+  if (moves.length > 1 && !_movesAreEquivalent(moves)) return;
+  const m = moves[0];
   const delay = immediate ? 0 : _AUTO_DELAY[speed].move;
   _autoForcedMoveTimer = setTimeout(() => makeMove(m.piece_idx, m.target, m.pawn_id), delay);
 }
