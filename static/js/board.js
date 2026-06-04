@@ -202,6 +202,13 @@ function _pawnNotationSvg(x,y,labels){
   const w=Math.max(30, Math.min(120, text.length*8+12));
   return `<foreignObject x="${x-w/2}" y="${y-32}" width="${w}" height="24" style="overflow:visible;pointer-events:none;"><div xmlns="http://www.w3.org/1999/xhtml" class="pawn-notation-badge">${text}</div></foreignObject>`;
 }
+function _replayBannersSvg(S){
+  const fill=COLORS.blue;
+  return [
+    {x:S-104,y:14,tx:S-61,ty:34},
+    {x:18,y:S-44,tx:61,ty:S-24},
+  ].map(({x,y,tx,ty})=>`<g opacity="0.96"><rect x="${x}" y="${y}" width="86" height="30" rx="8" fill="${fill}"/><text x="${tx}" y="${ty}" text-anchor="middle" font-size="13" font-family="Jost, sans-serif" font-weight="800" fill="#fff">REPLAY</text></g>`).join('');
+}
 function _showPawnNotation(playerIdx,movable,inYard,finished){
   if(!(typeof isMoveJustificationActive==='function'&&isMoveJustificationActive()))return false;
   if(finished)return false;
@@ -269,9 +276,6 @@ function drawBoard(){
   let html=`<defs><clipPath id="board-clip"><rect width="${S}" height="${S}" rx="12"/></clipPath></defs>`;
   if(_isCircular) html+=`<circle cx="${S/2}" cy="${S/2}" r="${S/2}" fill="#fff"/>`;
   else html+=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
-  if((typeof isReplayActive==='function'&&isReplayActive())||(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing())){
-    html+=`<g opacity="0.96"><rect x="${S-104}" y="14" width="86" height="30" rx="8" fill="${COLORS.blue}"/><text x="${S-61}" y="34" text-anchor="middle" font-size="13" font-family="Jost, sans-serif" font-weight="800" fill="#fff">REPLAY</text></g>`;
-  }
 
   // Yard blocks.
   // N=4: classic straight-sided square corners (clipped to board rect).
@@ -308,6 +312,9 @@ function drawBoard(){
     const _bisDeg=((ti+Math.PI/_yN)*180/Math.PI-270+720)%360;
     html+=`<image href="/static/logo.svg" x="${x-ls/2}" y="${y-ls/2}" width="${ls}" height="${ls}" opacity="0.18" style="pointer-events:none;" transform="rotate(${_bisDeg.toFixed(1)},${x},${y})"/>`;
   });
+  if((typeof isReplayActive==='function'&&isReplayActive())||(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing())){
+    html+=_replayBannersSvg(S);
+  }
 
   // Yard pawn slots — one circle per pawn, layout adapts to pawn count
   const _pawnsPerPlayer=gameState?.config?.board?.pawns_per_player||4;

@@ -103,6 +103,7 @@ let _currentSaveFilename = null;
 
 function requestSaveGame() {
   if (!gameState) return;
+  if (typeof isReplayActive === 'function' && isReplayActive()) return;
   if (_currentSaveGameName) {
     _doSaveGame(_currentSaveGameName);
     return;
@@ -141,6 +142,7 @@ function cancelSaveGame() {
 }
 
 async function _doSaveGame(name, { incomplete = false, silent = false } = {}) {
+  if (typeof isReplayActive === 'function' && isReplayActive()) return;
   const data = compactGameState();
   if (!data) return;
   const btn = document.getElementById('save-game-btn');
@@ -167,7 +169,13 @@ async function autoSaveAbandoned() {
 
 function updateSaveGameButton() {
   const btn = document.getElementById('save-game-btn');
-  if (btn) btn.disabled = !gameState;
+  const ctrl = document.getElementById('save-game-control');
+  if (!btn) return;
+  const replay = typeof isReplayActive === 'function' && isReplayActive();
+  const title = replay ? 'This game is already saved.' : 'Save game to server';
+  btn.disabled = !gameState || replay;
+  btn.title = title;
+  if (ctrl) ctrl.title = title;
 }
 
 function resetSaveGameName() {
