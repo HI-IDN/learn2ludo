@@ -5,6 +5,51 @@
 
 @use "../base/variables" as *;
 
+// ── Segmented control (mutually exclusive option group) ───────────────────────
+// Use .seg-ctrl as the wrapper and .seg-btn on each button.
+// Active segment uses $color-primary fill. JS must toggle .active.
+
+.seg-ctrl {
+  display: inline-flex;
+  border: 1px solid $border-light;
+  border-radius: 999px;
+  overflow: hidden;
+  background: $color-bg-raised;
+}
+
+.seg-btn {
+  flex: 1;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: $color-text-2;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+
+  &.active, &[aria-pressed="true"] {
+    background: $color-primary;
+    color: #fff;
+    border-radius: 999px;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:not(.active):not([aria-pressed="true"]):not(:disabled):hover {
+    background: $color-bg-alt;
+    color: $color-text;
+  }
+}
+
 // ---- Sound volume control ---------------------------------------------------
 
 .sound-volume-control {

@@ -20,42 +20,46 @@
 
       <!-- TOP CONTROLS -->
       <div class="side-section controls">
-        <div class="view-toggle-row">
-          <button id="btn-view-board" class="view-toggle-btn active" onclick="selectBoardView()" title="Show game board">
+        <div class="seg-ctrl" style="width:100%">
+          <button id="btn-view-board" class="seg-btn active" onclick="selectBoardView()" title="Show game board">
             Board
           </button>
-          <button id="btn-view-stats" class="view-toggle-btn" onclick="selectStatsView()" disabled
+          <button id="btn-view-stats" class="seg-btn" onclick="selectStatsView()" disabled
                   title="Stats can be viewed once a game is completed">
             Stats
           </button>
         </div>
 
         <div class="replay-controls-row replay-controls-row--top" id="live-speed-controls">
-          <span class="replay-status">Controls</span>
           <button class="btn btn-sm replay-step-btn"
                   id="live-back-btn"
                   onclick="liveTimelineStep(-1)"
                   title="Previous move">
             <i class="fa-solid fa-step-backward"></i>
           </button>
-          <button class="btn btn-sm replay-step-btn"
-                  id="speed-pause-btn"
-                  onclick="setAutoPlaySpeed('off')"
-                  title="Pause (manual dice and moves)">
-            <i class="fa-solid fa-pause"></i>
-          </button>
-          <button class="btn btn-sm replay-step-btn"
-                  id="speed-normal-btn"
-                  onclick="setAutoPlaySpeed('normal')"
-                  title="Fast (with animation and sound)">
-            <i class="fa-solid fa-play"></i>
-          </button>
-          <button class="btn btn-sm replay-step-btn"
-                  id="speed-fast-btn"
-                  onclick="setAutoPlaySpeed('fast')"
-                  title="Fast forward (no animation, no sound)">
-            <i class="fa-solid fa-forward"></i>
-          </button>
+          <div class="seg-ctrl">
+            <button class="seg-btn"
+                    id="speed-pause-btn"
+                    onclick="setAutoPlaySpeed('off')"
+                    aria-pressed="true"
+                    title="Pause (manual dice and moves)">
+              <i class="fa-solid fa-pause"></i>
+            </button>
+            <button class="seg-btn"
+                    id="speed-normal-btn"
+                    onclick="setAutoPlaySpeed('normal')"
+                    aria-pressed="false"
+                    title="Play (with animation and sound)">
+              <i class="fa-solid fa-play"></i>
+            </button>
+            <button class="seg-btn"
+                    id="speed-fast-btn"
+                    onclick="setAutoPlaySpeed('fast')"
+                    aria-pressed="false"
+                    title="Fast forward (no animation, no sound)">
+              <i class="fa-solid fa-forward"></i>
+            </button>
+          </div>
           <button class="btn btn-sm replay-step-btn"
                   id="live-forward-btn"
                   onclick="liveTimelineStep(1)"
