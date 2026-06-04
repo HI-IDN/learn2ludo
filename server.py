@@ -204,14 +204,26 @@ def submit_bug(body: BugReportBody):
     suffix = "".join(_random.choices(_string.ascii_lowercase + _string.digits, k=4))
     report_id = f"bug_{ts}_{suffix}"
 
+    # Save incomplete game snapshot when the report comes from the play tab
+    active_tab = body.page_state.get("active_tab")
+    game_state = body.page_state.get("game_state")
+    game_file = None
+    if active_tab == "play" and game_state:
+        games_dir = BUGS_DIR / "games"
+        games_dir.mkdir(exist_ok=True)
+        game_file = f"games/{report_id}.json"
+        (BUGS_DIR / game_file).write_text(json.dumps(game_state, indent=2))
+
     has_screenshot = bool(body.screenshot_b64)
     report = {
         "id": report_id,
         "timestamp": _dt.datetime.utcnow().isoformat() + "Z",
         "what_doing": body.what_doing,
         "what_wrong": body.what_wrong,
-        "page_state": body.page_state,
+        "active_tab": active_tab,
+        "game_file": game_file,
         "screenshot": f"screenshots/{report_id}.png" if has_screenshot else None,
+        "page_state": {k: v for k, v in body.page_state.items() if k != "game_state"},
     }
     (BUGS_DIR / f"{report_id}.json").write_text(json.dumps(report, indent=2))
 

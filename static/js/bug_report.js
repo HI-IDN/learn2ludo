@@ -19,12 +19,16 @@ async function submitBugReport() {
   btn.disabled = true;
   btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> Capturing…';
 
+  const activeTab = document.querySelector('.tab-btn.active')?.id?.replace('tab-btn-', '') || null;
   const pageState = {
-    active_tab: document.querySelector('.tab-btn.active')?.id?.replace('tab-btn-', '') || null,
+    active_tab: activeTab,
     game_state: typeof gameState !== 'undefined' ? gameState : null,
     settings: typeof settings !== 'undefined' ? settings : null,
   };
 
+  // Hide modal, take screenshot of the page behind it, then restore
+  const overlay = document.getElementById('bug-modal-overlay');
+  overlay.style.display = 'none';
   let screenshotB64 = '';
   try {
     if (typeof html2canvas !== 'undefined') {
@@ -34,6 +38,7 @@ async function submitBugReport() {
   } catch (_) {
     // screenshot is best-effort — continue without it
   }
+  overlay.style.display = 'flex';
 
   try {
     const r = await fetch('/api/bugs/report', {
