@@ -60,7 +60,7 @@ def test_register_player_update_preserves_joined_timestamp(tmp_path, monkeypatch
     assert user["age_range"] == "30-44"
 
 
-def test_delete_player_removes_player_and_marks_custom_bots_deleted(tmp_path, monkeypatch):
+def test_delete_player_marks_player_and_custom_bots_deleted(tmp_path, monkeypatch):
     players_path = tmp_path / "players.json"
     custom_bots_path = tmp_path / "bots_custom.json"
     monkeypatch.setattr(server, "PLAYERS_PATH", players_path)
@@ -90,7 +90,9 @@ def test_delete_player_removes_player_and_marks_custom_bots_deleted(tmp_path, mo
         r = client.delete("/api/players/player-uuid-1")
         assert r.status_code == 200
         assert r.json()["deleted_bots"] == 1
-        assert client.get("/api/players").json()["users"] == {}
+        user = client.get("/api/players").json()["users"]["player-uuid-1"]
+        assert user["_is_deleted"] is True
+        assert isinstance(user["deleted_ts"], int)
 
     saved_bots = json.loads(custom_bots_path.read_text())
     assert saved_bots["bots"][0]["_is_deleted"] is True

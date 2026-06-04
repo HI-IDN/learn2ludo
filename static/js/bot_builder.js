@@ -202,7 +202,7 @@ function getUserBotDraft() {
 function botBuilderDesignerOptions(selectedId = '') {
   if (typeof loadProfiles !== 'function' || typeof isSessionConsented !== 'function') return [];
   return loadProfiles()
-    .filter(p => p.id && isSessionConsented(p.id))
+    .filter(p => p.id && !p._is_deleted && isSessionConsented(p.id))
     .map(p => {
       const label = typeof profileDisplayName === 'function' ? profileDisplayName(p) : (p.username || p.id);
       return `<option value="${escapeBotText(p.id)}"${p.id === selectedId ? ' selected' : ''}>${escapeBotText(label)}</option>`;

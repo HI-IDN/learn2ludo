@@ -202,7 +202,11 @@ def delete_player(player_id: str):
     players = load_players()
     if player_id not in players:
         raise HTTPException(status_code=404, detail=f"Player not found: {player_id}")
-    del players[player_id]
+    players[player_id] = {
+        **players[player_id],
+        "_is_deleted": True,
+        "deleted_ts": int(time.time() * 1000),
+    }
     save_players(players)
     deleted_bots = delete_custom_bots_by_designer(player_id)
     return {"ok": True, "deleted_bots": deleted_bots}

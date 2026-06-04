@@ -41,7 +41,7 @@ function saveProfiles(profiles) {
 }
 
 function getProfileById(id) {
-  return loadProfiles().find(p => p.id === id) || null;
+  return loadProfiles().find(p => p.id === id && !p._is_deleted) || null;
 }
 
 function profileDisplayName(profile) {
@@ -76,7 +76,13 @@ async function hydrateServerProfiles() {
   const profiles = loadProfiles();
   const byId = new Map(profiles.map(p => [p.id, p]));
   Object.entries(users).forEach(([id, user]) => {
-    if (!id || byId.has(id)) return;
+    if (!id) return;
+    if (user?._is_deleted && byId.has(id)) {
+      const idx = profiles.findIndex(p => p.id === id);
+      if (idx !== -1) profiles[idx] = { ...profiles[idx], _is_deleted: true, deleted_ts: user.deleted_ts || Date.now() };
+      return;
+    }
+    if (user?._is_deleted || byId.has(id)) return;
     profiles.push({
       id,
       username: '',
@@ -86,7 +92,7 @@ async function hydrateServerProfiles() {
       leaderboard_opt_in: !!user.leaderboard_opt_in,
     });
   });
-  if (profiles.length !== byId.size) saveProfiles(profiles);
+  if (JSON.stringify(profiles) !== JSON.stringify(loadProfiles())) saveProfiles(profiles);
 }
 
 // ── Session consent ───────────────────────────────────────────────────────────
@@ -131,7 +137,7 @@ function setSlotProfile(playerIdx, profileId) {
 
 function cleanStaleProfileIds() {
   if (!settings.profile_ids) return;
-  const existing = new Set(loadProfiles().map(p => p.id));
+  const existing = new Set(loadProfiles().filter(p => !p._is_deleted).map(p => p.id));
   let changed = false;
   for (const k of Object.keys(settings.profile_ids)) {
     if (!existing.has(settings.profile_ids[k])) { delete settings.profile_ids[k]; changed = true; }
@@ -144,7 +150,7 @@ function cleanStaleProfileIds() {
 function renderProfiles() {
   const wrap = document.getElementById('profiles-grid');
   if (!wrap) return;
-  const profiles = loadProfiles();
+  const profiles = loadProfiles().filter(p => !p._is_deleted);
   if (!profiles.length) {
     wrap.innerHTML = `
       <div class="profiles-empty">
@@ -196,7 +202,7 @@ async function deleteProfile(id) {
     alert('Could not delete this player. Please try again.');
     return;
   }
-  saveProfiles(loadProfiles().filter(p => p.id !== id));
+  saveProfiles(loadProfiles().map(p => p.id === id ? { ...p, _is_deleted: true, deleted_ts: Date.now() } : p));
   if (settings.profile_ids) {
     for (const k of Object.keys(settings.profile_ids)) {
       if (settings.profile_ids[k] === id) delete settings.profile_ids[k];
@@ -342,7 +348,7 @@ function submitRegistration() {
 
   if (!_regIcon || !username || !age) return;
 
-  const profiles = loadProfiles();
+  const profiles = loadProfiles().filter(p => !p._is_deleted);
   const duplicate = profiles.find(p => (p.username || '').toLowerCase() === username.toLowerCase() && p.id !== _editingId);
   if (duplicate) {
     _regUsernameError('That name is already taken. Choose another.');
@@ -436,7 +442,7 @@ function submitReconsent() {
 
 function lobbyProfileSelect(slotIdx, playerIdx) {
   cleanStaleProfileIds();
-  const allProfiles = loadProfiles();
+  const allProfiles = loadProfiles().filter(p => !p._is_deleted);
   const currentId   = settings.profile_ids?.[playerIdx];
   const usedIds     = new Set(
     Object.entries(settings.profile_ids || {})
