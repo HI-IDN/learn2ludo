@@ -251,9 +251,11 @@ function drawBoard(){
   const svg=document.getElementById('ludo-board'); if(!svg)return;
   const S=480, layout=currentLayout(), geo=currentGeometry(), c=geo.cellSize;
 
-  // Background: white; clipPath keeps yard wedges inside the rounded board rect
+  // Background: rounded rect for N=4 (classic square board), circle for N≠4.
+  const _isCircular=currentLayout().yard_count!==4;
   let html=`<defs><clipPath id="board-clip"><rect width="${S}" height="${S}" rx="12"/></clipPath></defs>`;
-  html+=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
+  if(_isCircular) html+=`<circle cx="${S/2}" cy="${S/2}" r="${S/2}" fill="#fff"/>`;
+  else html+=`<rect width="${S}" height="${S}" fill="#fff" rx="12"/>`;
   if((typeof isReplayActive==='function'&&isReplayActive())||(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing())){
     html+=`<g opacity="0.96"><rect x="${S-104}" y="14" width="86" height="30" rx="8" fill="${COLORS.blue}"/><text x="${S-61}" y="34" text-anchor="middle" font-size="13" font-family="Jost, sans-serif" font-weight="800" fill="#fff">REPLAY</text></g>`;
   }
@@ -265,7 +267,6 @@ function drawBoard(){
   const _cot=1/Math.tan(Math.PI/_yN), _FAR=S*1.5;
   const _nHL=gameState?.config?.board?.home_length??settings.board_home_length??6;
   const _delta=geo.armDelta||0;
-  const _Rc=Math.sqrt(Math.pow((_nHL+1)*c+_delta,2)+c*c);
   geo.yardCenters.forEach(({x, y, size}, arm) => {
     const col=COLORS[PLAYER_COLORS[arm]];
     const ti=Math.PI+arm*2*Math.PI/_yN, tj=ti+2*Math.PI/_yN;
@@ -279,15 +280,17 @@ function drawBoard(){
     const co=c*1.5+4;
     const Px=_cx+co*lxi+_cot*co*axi, Py=_cy+co*lyi+_cot*co*ayi;
     if(_yN===4){
-      // Classic square: straight lines to board edge, clipped
+      // Classic square: straight lines to board edge, clipped to rounded rect.
       const B1x=_cx+co*lxi+_FAR*axi, B1y=_cy+co*lyi+_FAR*ayi;
       const B2x=_cx-co*lxj+_FAR*axj, B2y=_cy-co*lyj+_FAR*ayj;
       html+=`<path d="M ${Px},${Py} L ${B1x},${B1y} L ${B2x},${B2y} Z" fill="${col}" opacity=".92" clip-path="url(#board-clip)"/>`;
     } else {
-      // Arc yard: inner corner → left-column tip → arc → right-column tip of next arm
-      const T1x=_cx+((_nHL+1)*c+_delta)*axi+co*lxi, T1y=_cy+((_nHL+1)*c+_delta)*ayi+co*lyi;
-      const T2x=_cx+((_nHL+1)*c+_delta)*axj-co*lxj, T2y=_cy+((_nHL+1)*c+_delta)*ayj-co*lyj;
-      html+=`<path d="M ${Px},${Py} L ${T1x},${T1y} A ${_Rc},${_Rc},0,0,1,${T2x},${T2y} Z" fill="${col}" opacity=".92"/>`;
+      // Arc yard: T1/T2 are where each arm's lateral boundary meets the board circle,
+      // so the arc at radius S/2 traces the board edge exactly.
+      const R=S/2, t=Math.sqrt(Math.max(0,R*R-co*co));
+      const T1x=_cx+co*lxi+t*axi, T1y=_cy+co*lyi+t*ayi;
+      const T2x=_cx-co*lxj+t*axj, T2y=_cy-co*lyj+t*ayj;
+      html+=`<path d="M ${Px},${Py} L ${T1x},${T1y} A ${R},${R},0,0,1,${T2x},${T2y} Z" fill="${col}" opacity=".92"/>`;
     }
     // Logo: sized to 75 % of available wedge width, rotated along bisector
     const ls=size*0.75;
