@@ -617,20 +617,50 @@ def get_stats():
     return load_stats()
 
 
+import uuid as _uuid
+
+
 class SaveGameBody(BaseModel):
-    name: str
+    name: str = ""
+    filename: str = ""   # if set, overwrite existing file
     state: dict
+
+
+class RenameGameBody(BaseModel):
+    name: str
 
 
 @app.post("/api/games/save")
 def save_game_manually(body: SaveGameBody):
     GAMES_DIR.mkdir(parents=True, exist_ok=True)
-    slug = "".join(c if c.isalnum() or c in "-_ " else "" for c in body.name).strip().replace(" ", "_")
-    if not slug:
-        slug = "game"
-    filename = f"{slug}.json"
-    (GAMES_DIR / filename).write_text(json.dumps(body.state, indent=2))
+    filename = body.filename if body.filename else f"{_uuid.uuid4()}.json"
+    path = GAMES_DIR / filename
+    if not path.parent == GAMES_DIR:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    state = {**body.state, "_name": body.name or None}
+    path.write_text(json.dumps(state, indent=2))
     return {"filename": filename}
+
+
+@app.patch("/api/games/{filename}")
+def rename_game(filename: str, body: RenameGameBody):
+    path = GAMES_DIR / filename
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Game not found")
+    data = json.loads(path.read_text())
+    data["_name"] = body.name or None
+    path.write_text(json.dumps(data, indent=2))
+    return {"ok": True}
+
+
+@app.delete("/api/games/{filename}")
+def delete_game(filename: str, request: Request):
+    require_admin(request)
+    path = GAMES_DIR / filename
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Game not found")
+    path.unlink()
+    return {"ok": True}
 
 
 @app.get("/api/games")
@@ -645,6 +675,7 @@ def list_games():
             board = cfg.get("board", {})
             games.append({
                 "filename": f.name,
+                "name": data.get("_name") or None,
                 "started_at_ms": data.get("started_at_ms"),
                 "finished_at_ms": data.get("finished_at_ms"),
                 "player_count": cfg.get("player_count"),
@@ -659,7 +690,7 @@ def list_games():
 @app.get("/api/games/{filename}")
 def get_game(filename: str):
     path = GAMES_DIR / filename
-    if not path.exists() or not path.is_relative_to(GAMES_DIR):
+    if not path.exists():
         raise HTTPException(status_code=404, detail="Game not found")
     return json.loads(path.read_text())
 

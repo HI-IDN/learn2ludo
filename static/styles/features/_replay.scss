@@ -115,3 +115,55 @@
   font-size: 11px;
   color: $color-text-3;
 }
+
+.replay-picker-row-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.replay-picker-row-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.replay-picker-row:hover .replay-picker-row-actions {
+  opacity: 1;
+}
+
+.replay-picker-action {
+  background: none;
+  border: 1px solid $border-light;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  color: $color-text-2;
+  line-height: 1.4;
+
+  &:hover { background: $color-bg-raised; color: $color-text; }
+  &.danger:hover { background: rgba(172,26,47,0.08); color: $color-danger; border-color: $color-danger; }
+}
+
+.replay-picker-name.unnamed {
+  color: $color-text-3;
+  font-style: italic;
+  font-family: monospace;
+  font-weight: 400;
+}
+
+.replay-picker-rename-input {
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid $color-primary;
+  border-radius: 6px;
+  padding: 2px 6px;
+  background: $color-bg-alt;
+  color: $color-text;
+  flex: 1;
+  min-width: 0;
+}

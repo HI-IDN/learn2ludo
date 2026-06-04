@@ -99,6 +99,7 @@ function escapeHistoryText(value) {
 }
 
 let _currentSaveGameName = null;
+let _currentSaveFilename = null;
 
 function requestSaveGame() {
   if (!gameState) return;
@@ -148,9 +149,10 @@ async function _doSaveGame(name) {
     const r = await fetch('/api/games/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, state: data }),
+      body: JSON.stringify({ name, filename: _currentSaveFilename || '', state: data }),
     });
     const { filename } = await r.json();
+    _currentSaveFilename = filename;
     if (btn) { btn.disabled = false; btn.innerHTML = `<i class="ti ti-circle-check"></i> Saved`; }
     setTimeout(() => cancelSaveGame(), 2000);
   } catch (_) {
@@ -165,6 +167,7 @@ function updateSaveGameButton() {
 
 function resetSaveGameName() {
   _currentSaveGameName = null;
+  _currentSaveFilename = null;
 }
 
 const sessionHistory = [];

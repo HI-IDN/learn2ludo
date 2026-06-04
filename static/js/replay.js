@@ -72,28 +72,84 @@ async function openGamePicker() {
     games = (await r.json()).games || [];
   } catch (_) {}
 
+  const isAdmin = typeof adminToken !== 'undefined' && adminToken;
   const overlay = document.createElement('div');
   overlay.className = 'replay-picker-overlay';
+  overlay.id = 'replay-picker-overlay';
   overlay.innerHTML = `
     <div class="replay-picker">
       <div class="replay-picker-header">
         <span><i class="fa-solid fa-folder-open"></i> Saved games</span>
         <button class="bug-modal-close" onclick="this.closest('.replay-picker-overlay').remove()">&times;</button>
       </div>
-      <div class="replay-picker-list">
-        ${games.length === 0
-          ? '<p class="replay-picker-empty">No saved games found.</p>'
-          : games.map(g => {
-              const dt = g.finished_at_ms ? new Date(g.finished_at_ms).toLocaleString() : '—';
-              const label = `${g.player_count}p · ${g.yard_count} yards`;
-              return `<button class="replay-picker-row" onclick="loadReplayByFilename('${g.filename}', this.closest('.replay-picker-overlay'))">
-                <span class="replay-picker-name">${g.filename.replace('.json','')}</span>
-                <span class="replay-picker-meta">${label} · ${dt}</span>
-              </button>`;
-            }).join('')}
+      <div class="replay-picker-list" id="replay-picker-list">
+        ${renderGamePickerRows(games, isAdmin)}
       </div>
     </div>`;
   document.body.appendChild(overlay);
+}
+
+function renderGamePickerRows(games, isAdmin) {
+  if (!games.length) return '<p class="replay-picker-empty">No saved games found.</p>';
+  return games.map(g => {
+    const displayName = g.name || g.filename.replace('.json', '');
+    const isNamed = !!g.name;
+    const dt = g.finished_at_ms ? new Date(g.finished_at_ms).toLocaleString() : (g.started_at_ms ? new Date(g.started_at_ms).toLocaleString() : '—');
+    const meta = [g.player_count ? `${g.player_count}p` : null, g.yard_count ? `${g.yard_count} yards` : null, dt].filter(Boolean).join(' · ');
+    const adminBtns = isAdmin ? `
+      <button class="replay-picker-action" title="Rename" onclick="event.stopPropagation(); startRenameGame('${g.filename}', this)"><i class="ti ti-pencil"></i></button>
+      <button class="replay-picker-action danger" title="Delete" onclick="event.stopPropagation(); deleteGame('${g.filename}', this)"><i class="ti ti-trash"></i></button>` : '';
+    return `<div class="replay-picker-row" onclick="loadReplayByFilename('${g.filename}', document.getElementById('replay-picker-overlay'))">
+      <div class="replay-picker-row-main">
+        <span class="replay-picker-name${isNamed ? '' : ' unnamed'}">${displayName}</span>
+        <div class="replay-picker-row-actions">${adminBtns}</div>
+      </div>
+      <span class="replay-picker-meta">${meta}</span>
+    </div>`;
+  }).join('');
+}
+
+async function startRenameGame(filename, btn) {
+  const row = btn.closest('.replay-picker-row');
+  const nameEl = row.querySelector('.replay-picker-name');
+  const current = nameEl.textContent;
+  nameEl.outerHTML = `<input class="replay-picker-rename-input" id="rename-input-${filename.replace('.','_')}" value="${current}" maxlength="80" onclick="event.stopPropagation()">`;
+  const input = row.querySelector('input');
+  input.focus(); input.select();
+  input.onkeydown = async e => {
+    if (e.key === 'Enter') await confirmRenameGame(filename, input.value.trim());
+    if (e.key === 'Escape') refreshGamePicker();
+  };
+  btn.innerHTML = '<i class="ti ti-check"></i>';
+  btn.onclick = e => { e.stopPropagation(); confirmRenameGame(filename, input.value.trim()); };
+}
+
+async function confirmRenameGame(filename, name) {
+  if (!name) return;
+  await fetch(`/api/games/${encodeURIComponent(filename)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  refreshGamePicker();
+}
+
+async function deleteGame(filename, btn) {
+  if (!confirm(`Delete this game? This cannot be undone.`)) return;
+  await fetch(`/api/games/${encodeURIComponent(filename)}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Token': adminToken },
+  });
+  refreshGamePicker();
+}
+
+async function refreshGamePicker() {
+  const list = document.getElementById('replay-picker-list');
+  if (!list) return;
+  let games = [];
+  try { games = (await (await fetch('/api/games')).json()).games || []; } catch (_) {}
+  const isAdmin = typeof adminToken !== 'undefined' && adminToken;
+  list.innerHTML = renderGamePickerRows(games, isAdmin);
 }
 
 async function loadReplayByFilename(filename, overlayEl) {
