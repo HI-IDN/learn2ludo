@@ -87,8 +87,10 @@ function buildBoardGeometry(yardCount, homeLength, pawnsPerPlayer, S) {
   const _co_inner = c * 1.5 + 4;
   let _logoD, _logoSize;
   if (yardCount === 4) {
-    _logoD = S * Math.SQRT2 / 4;               // centre of each quadrant along the diagonal
-    _logoSize = _R_board - 2 * _co_inner;       // free space per axis inside arm boundaries
+    // Yard square for N=4 spans [0, S/2−1.5c] in each axis.
+    // Centre offset from board centre = (S/4 + 0.75c)·√2 along the bisector.
+    _logoD = (S / 4 + 0.75 * c) * Math.SQRT2;
+    _logoSize = (_R_board - 1.5 * c) * 0.75;   // 75 % of the yard square side
   } else {
     _logoD = _R_board / (1 + _sinN);
     _logoSize = _R_board * _sinN / (1 + _sinN) * Math.SQRT2;
