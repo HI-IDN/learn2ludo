@@ -1,11 +1,60 @@
 // Replays page — browse, filter, and load saved games.
 
+function renderReplaysAdminWidget() {
+  const el = document.getElementById('replays-admin-widget');
+  if (!el) return;
+  const isAdmin = typeof adminToken !== 'undefined' && adminToken;
+  if (isAdmin) {
+    el.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="badge badge-green">Admin</span>
+        <button class="btn btn-ghost btn-sm" onclick="doReplaysAdminLogout()"><i class="ti ti-logout"></i> Log out</button>
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div id="replays-login-form" style="display:flex; align-items:center; gap:8px;">
+        <input type="password" id="replays-admin-pw" placeholder="Admin password…"
+               style="padding:6px 10px; font-size:13px; border:1.5px solid var(--border-medium,#D4D8E5); border-radius:8px; width:160px;"
+               onkeydown="if(event.key==='Enter')doReplaysAdminLogin()">
+        <button class="btn btn-sm" onclick="doReplaysAdminLogin()"><i class="ti ti-shield"></i> Admin</button>
+      </div>`;
+  }
+}
+
+async function doReplaysAdminLogin() {
+  const pw = document.getElementById('replays-admin-pw')?.value || '';
+  const r = await fetch('/api/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw }),
+  });
+  if (!r.ok) {
+    const input = document.getElementById('replays-admin-pw');
+    if (input) { input.style.borderColor = 'var(--color-danger,#AC1A2F)'; input.focus(); }
+    return;
+  }
+  const { token } = await r.json();
+  if (typeof adminToken !== 'undefined') window.adminToken = token;
+  // also sync app.js global
+  if (typeof doAdminLoginSuccess === 'function') doAdminLoginSuccess(token);
+  renderReplaysAdminWidget();
+  filterReplays();
+}
+
+function doReplaysAdminLogout() {
+  if (typeof doAdminLogout === 'function') doAdminLogout();
+  else { window.adminToken = null; }
+  renderReplaysAdminWidget();
+  filterReplays();
+}
+
 let _allGames = [];
 let _replayFilterPlayers = 'all';
 let _replayFilterYards = 'all';
 let _replayFilterWinner = 'all';
 
 async function loadReplaysPage() {
+  renderReplaysAdminWidget();
   try {
     const r = await fetch('/api/games');
     _allGames = (await r.json()).games || [];

@@ -387,6 +387,8 @@ async function doAdminLogin(){
     updateTabConfig();
     loadBugReports();
     renderTabs();
+    if(typeof renderReplaysAdminWidget==='function') renderReplaysAdminWidget();
+    if(typeof filterReplays==='function') filterReplays();
     switchTab('admin');
   } catch(e) { if(alert){ alert.textContent='Login failed.'; alert.style.display='block'; } }
 }
@@ -437,6 +439,9 @@ async function loadBugGame(filename) {
   loadReplayJson(await r.json());
 }
 
+function doAdminLoginSuccess(token) {
+  adminToken = token;
+}
 function doAdminLogout(){
   adminToken = null;
   document.getElementById('admin-panel').style.display='none';
@@ -445,6 +450,8 @@ function doAdminLogout(){
   document.getElementById('admin-auth-badge').className='badge badge-purple';
   document.getElementById('admin-logout-btn').style.display='none';
   document.getElementById('admin-pw').value='';
+  if(typeof renderReplaysAdminWidget==='function') renderReplaysAdminWidget();
+  if(typeof filterReplays==='function') filterReplays();
   renderTabs();
 }
 async function doOverlayLogin(){
