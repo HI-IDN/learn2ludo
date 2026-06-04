@@ -129,6 +129,7 @@ function renderReplaysTable(games, isAdmin) {
         <th><button type="button" onclick="sortReplaysBy('name')">Name ${sortMark('name')}</button></th>
         <th><button type="button" onclick="sortReplaysBy('players')">Players ${sortMark('players')}</button></th>
         <th><button type="button" onclick="sortReplaysBy('yards')">Yards ${sortMark('yards')}</button></th>
+        <th><button type="button" onclick="sortReplaysBy('rounds')">Rounds ${sortMark('rounds')}</button></th>
         <th><button type="button" onclick="sortReplaysBy('timestamp')">Timestamp ${sortMark('timestamp')}</button></th>
         ${isAdmin ? '<th class="replays-table-actions">Delete</th>' : ''}
       </tr>
@@ -151,6 +152,7 @@ function renderReplayTableRow(g, isAdmin) {
       <td>${nameCell}</td>
       <td>${renderReplayPlayers(g)}</td>
       <td>${g.yard_count ?? '-'}</td>
+      <td>${g.round_count ?? '-'}</td>
       <td>${dt}</td>
       ${isAdmin ? `<td class="replays-table-actions"><button class="replay-picker-action danger" title="Delete" onclick="event.stopPropagation(); deleteReplay('${g.filename}')"><i class="ti ti-trash"></i></button></td>` : ''}
     </tr>`;
@@ -225,6 +227,7 @@ function compareReplayRows(a, b) {
 function replaySortValue(g, key) {
   if (key === 'players') return g.player_count ?? 0;
   if (key === 'yards') return g.yard_count ?? 0;
+  if (key === 'rounds') return g.round_count ?? 0;
   if (key === 'timestamp') return g.finished_at_ms || g.started_at_ms || 0;
   return g.name || g.filename.replace('.json', '');
 }
