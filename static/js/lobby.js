@@ -316,8 +316,12 @@ function lobbyValidationError() {
     const playerIdx = active.indexOf(slotIdx);
     if (getPlayerType(playerIdx) === 'human' && typeof getSlotProfile === 'function' && !getSlotProfile(playerIdx))
       return 'Each human player must select a profile. <a href="#" onclick="event.preventDefault();switchTab(\'profiles\')">Go to Players tab</a>';
-    if (getPlayerType(playerIdx) !== 'human' && !settings.bot_ids?.[playerIdx])
+    if (getPlayerType(playerIdx) !== 'human') {
+      const selectable = typeof getSelectableBots === 'function' ? getSelectableBots() : [];
+      const selectedBot = settings.bot_ids?.[playerIdx];
+      if (!selectedBot || !selectable.some(bot => bot.id === selectedBot))
       return `Select a bot for the ${PLAYER_COLORS[slotIdx] || 'player'} slot.`;
+    }
   }
   return null;
 }

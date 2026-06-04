@@ -40,7 +40,14 @@ function getOrderedBotRegistry() {
 
 function getBotRegistry() { return BOT_REGISTRY; }
 function getSelectableBots() {
-  return BOT_REGISTRY.filter(b => b.implemented !== false && !b._is_deleted && b.id !== 'user-weighted');
+  return BOT_REGISTRY.filter(b => b.implemented !== false && botVisibleInSession(b) && b.id !== 'user-weighted');
+}
+
+function botVisibleInSession(bot) {
+  if (!bot || bot._is_deleted) return false;
+  if (!bot.designer) return true;
+  if (typeof getProfileById !== 'function' || typeof isSessionConsented !== 'function') return false;
+  return !!getProfileById(bot.designer) && isSessionConsented(bot.designer);
 }
 
 function botLobbyLabel(bot) {
@@ -266,7 +273,7 @@ function renderBotsPage() {
   const wrap = document.getElementById('bots-sections');
   if (!wrap) return;
 
-  const ordered    = getOrderedBotRegistry();
+  const ordered    = getOrderedBotRegistry().filter(botVisibleInSession);
   const baseline   = ordered.filter(b => b.type === 'baseline');
   const heuristics = ordered.filter(b => b.type === 'SDR');
   const weighted   = ordered.filter(b => b.type === 'CDR');
