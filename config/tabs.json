@@ -37,6 +37,15 @@
       "description": "Saved bot models"
     },
     {
+      "id": "replays",
+      "label": "Replays",
+      "icon": "ti-player-play",
+      "enabled": true,
+      "default_visible": true,
+      "order": 4,
+      "description": "Browse and replay saved games"
+    },
+    {
       "id": "stats",
       "label": "Stats",
       "icon": "ti-chart-bar",
@@ -79,7 +88,7 @@
       "enabled": false,
       "default_visible": false,
       "order": 8,
-      "description": "Board rules and players — merged into Admin panel"
+      "description": "Board rules and players \u00e2\u20ac\u201d merged into Admin panel"
     },
     {
       "id": "admin",

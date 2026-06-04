@@ -1,0 +1,223 @@
+@use "../base/variables" as *;
+
+// ── Filter bar ────────────────────────────────────────────────────────────────
+
+.replays-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $border-light;
+}
+
+.replays-search {
+  border: 1.5px solid $border-medium;
+  border-radius: $radius;
+  padding: 6px 10px;
+  font-size: 13px;
+  background: $color-bg-alt;
+  color: $color-text;
+  width: 200px;
+  font-family: inherit;
+
+  &:focus { outline: none; border-color: $color-primary; }
+}
+
+.replays-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.replays-filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-text-2;
+  white-space: nowrap;
+}
+
+.replays-pills {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.replays-pill {
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid $border-medium;
+  background: $color-bg-alt;
+  color: $color-text-2;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+
+  &:hover { background: $color-bg-raised; color: $color-text; }
+
+  &.active {
+    background: $color-primary;
+    border-color: $color-primary;
+    color: #fff;
+  }
+}
+
+// ── Count line ────────────────────────────────────────────────────────────────
+
+.replays-count {
+  font-size: 12px;
+  color: $color-text-3;
+  margin-bottom: 12px;
+}
+
+// ── Game cards ────────────────────────────────────────────────────────────────
+
+.replays-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.replays-empty {
+  font-size: 13px;
+  color: $color-text-3;
+  grid-column: 1 / -1;
+}
+
+.replays-card {
+  background: $color-bg-alt;
+  border: 1.5px solid $border-light;
+  border-radius: $radius-lg;
+  padding: 14px 16px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &:hover {
+    border-color: $color-primary;
+    box-shadow: 0 2px 12px rgba(16,9,159,0.08);
+  }
+}
+
+.replays-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.replays-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.replays-card-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: $color-text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &.unnamed {
+    font-family: monospace;
+    font-weight: 400;
+    font-size: 12px;
+    color: $color-text-3;
+  }
+}
+
+.replays-card-uuid {
+  font-size: 11px;
+  color: $color-text-3;
+  font-family: monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.replays-card-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.replays-card:hover .replays-card-actions { opacity: 1; }
+
+.replays-card-action {
+  background: none;
+  border: 1px solid $border-light;
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 12px;
+  cursor: pointer;
+  color: $color-text-2;
+
+  &:hover { background: $color-bg-raised; color: $color-text; }
+  &.danger:hover { color: $color-danger; border-color: $color-danger; background: rgba(172,26,47,0.06); }
+}
+
+.replays-card-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.replays-player-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.replays-player-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--pc) 20%, #{$color-bg-raised});
+  border: 1.5px solid color-mix(in srgb, var(--pc) 50%, transparent);
+  color: color-mix(in srgb, var(--pc) 80%, #000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.replays-meta {
+  font-size: 12px;
+  color: $color-text-2;
+}
+
+.replays-winner {
+  font-size: 12px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--pc) 70%, #333);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.replays-card-footer {
+  font-size: 11px;
+  color: $color-text-3;
+}
+
+.replays-rename-input {
+  font-size: 14px;
+  font-weight: 700;
+  border: 1.5px solid $color-primary;
+  border-radius: 6px;
+  padding: 2px 6px;
+  background: $color-bg-alt;
+  color: $color-text;
+  width: 100%;
+  font-family: inherit;
+}

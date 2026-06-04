@@ -46,3 +46,4 @@
 @use "features/move-justification"; // prompt shown before optional human moves
 @use "features/postgame";           // reflection + stats overlay shown after game ends
 @use "features/bug-report";         // floating bug-report button + modal
+@use "features/replays";            // replays page — game browser with filters

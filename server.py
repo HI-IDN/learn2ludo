@@ -667,20 +667,44 @@ def delete_game(filename: str, request: Request):
 def list_games():
     if not GAMES_DIR.exists():
         return {"games": []}
+    # Load player registry for name lookups
+    player_registry: dict = {}
+    if PLAYERS_PATH.exists():
+        try:
+            raw = json.loads(PLAYERS_PATH.read_text())
+            player_registry = raw if isinstance(raw, dict) else {p["id"]: p for p in raw if p.get("id")}
+            if "users" in player_registry:
+                player_registry = player_registry["users"]
+        except Exception:
+            pass
     games = []
     for f in sorted(GAMES_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
         try:
             data = json.loads(f.read_text())
             cfg = data.get("config", {})
             board = cfg.get("board", {})
+            refs = data.get("players_registry") or data.get("player_refs") or []
+            players = []
+            for p in refs:
+                human_id = p.get("human_id")
+                pr = player_registry.get(human_id, {}) if human_id else {}
+                players.append({
+                    "index": p.get("player_index"),
+                    "color": p.get("color"),
+                    "type": p.get("type"),
+                    "bot_id": p.get("bot_id"),
+                    "human_icon": pr.get("icon"),
+                })
             games.append({
                 "filename": f.name,
                 "name": data.get("_name") or None,
                 "started_at_ms": data.get("started_at_ms"),
                 "finished_at_ms": data.get("finished_at_ms"),
-                "player_count": cfg.get("player_count"),
+                "player_count": data.get("num_players") or cfg.get("player_count"),
                 "yard_count": board.get("yard_count"),
                 "winner": data.get("winner"),
+                "winner_color": data.get("winner_color"),
+                "players": players,
             })
         except Exception:
             pass

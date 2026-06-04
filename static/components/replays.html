@@ -1,0 +1,37 @@
+<!-- REPLAYS -->
+<div class="panel" id="panel-replays">
+  <div style="margin-bottom:20px;">
+    <h1 style="font-size:22px; font-weight:700;">Replays</h1>
+    <p style="font-size:13px; color:var(--text2); margin-top:4px;">Browse and load saved games.</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="replays-filters">
+    <input class="replays-search" id="replays-search" type="search" placeholder="Search by name…" oninput="filterReplays()">
+
+    <div class="replays-filter-group">
+      <span class="replays-filter-label">Players</span>
+      <div class="replays-pills" id="replays-filter-players"></div>
+    </div>
+
+    <div class="replays-filter-group">
+      <span class="replays-filter-label">Yards</span>
+      <div class="replays-pills" id="replays-filter-yards"></div>
+    </div>
+
+    <div class="replays-filter-group">
+      <span class="replays-filter-label">Winner</span>
+      <div class="replays-pills" id="replays-filter-winner">
+        <button class="replays-pill active" data-winner="all" onclick="setWinnerFilter('all', this)">All</button>
+        <button class="replays-pill" data-winner="human" onclick="setWinnerFilter('human', this)">Human won</button>
+        <button class="replays-pill" data-winner="bot" onclick="setWinnerFilter('bot', this)">Bot won</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game list -->
+  <div class="replays-count" id="replays-count"></div>
+  <div class="replays-list" id="replays-list">
+    <p class="replays-empty">Loading…</p>
+  </div>
+</div>
