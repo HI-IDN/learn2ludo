@@ -20,14 +20,10 @@
 
       <!-- TOP CONTROLS -->
       <div class="side-section controls">
-        <div class="seg-ctrl" style="width:100%">
-          <button id="btn-view-board" class="seg-btn active" onclick="selectBoardView()" title="Show game board">
-            Board
-          </button>
+        <div class="seg-ctrl">
+          <button id="btn-view-board" class="seg-btn active" onclick="selectBoardView()" title="Show game board">Board</button>
           <button id="btn-view-stats" class="seg-btn" onclick="selectStatsView()" disabled
-                  title="Stats can be viewed once a game is completed">
-            Stats
-          </button>
+                  title="Stats can be viewed once a game is completed">Stats</button>
         </div>
 
         <div class="replay-controls-row replay-controls-row--top" id="live-speed-controls">
@@ -46,6 +42,7 @@
               <i class="fa-solid fa-step-forward"></i>
             </button>
           </div>
+          <span class="replay-status">Speed:</span>
           <div class="seg-ctrl" id="live-speed-ctrl">
             <button class="seg-btn"
                     id="speed-pause-btn"
