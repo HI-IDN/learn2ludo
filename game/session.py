@@ -1,3 +1,4 @@
+import random as _random
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from game.engine import LudoGame, GameConfig, BoardConfig, Phase
@@ -20,7 +21,8 @@ def pawn_id(color: str, pawn_index: int) -> str:
 
 
 class GameSession:
-    def __init__(self, cfg: GameConfig, max_yard_rolls: int = 3, starting_player: int = 0, equal_rounds: bool = False):
+    def __init__(self, cfg: GameConfig, max_yard_rolls: int = 3, starting_player: int = 0,
+                 equal_rounds: bool = False, seeds: list[int] | None = None):
         self.game = LudoGame(cfg)
         self.game.player = max(0, min(starting_player, cfg.player_count - 1))
         self.gp   = Gameplay(self.game)
@@ -39,10 +41,18 @@ class GameSession:
         # Count turns started per player; starting player's first turn = 1
         self._turn_counts: dict[int, int] = {i: 0 for i in range(cfg.player_count)}
         self._turn_counts[self.starting_player] = 1
+
+        n = cfg.player_count
+        if seeds is None:
+            seeds = [_random.randint(0, 2**31 - 1) for _ in range(n)]
+        self.seeds: list[int] = list(seeds)
+        self._rngs: list[_random.Random] = [_random.Random(s) for s in self.seeds]
+
         self.history.append({
             "type": "game_start",
             "player": self.starting_player,
             "color": self._color_for_player(self.starting_player),
+            "seeds": self.seeds,
         })
 
     def _next_turn(self):
@@ -70,7 +80,7 @@ class GameSession:
         return all(p.pos == -1 for p in self.gp.pieces if p.player == player_idx)
 
     def roll_dice(self) -> int:
-        value = self.game.roll()          # phase → MOVING, last_roll = value
+        value = self.game.roll(self._rngs[self.game.player])  # phase → MOVING, last_roll = value
         valid = self.gp.valid_moves(self.game.player)
         blocked = self._blocked_pawns_with_ids(self.game.player)
 
@@ -261,6 +271,7 @@ class GameSession:
             "round_count":      self.round_count,
             "yard_roll_count":  self._yard_roll_count,
             "max_yard_rolls":   self.max_yard_rolls,
+            "seeds":            self.seeds,
         }
 
     # ---- helpers ----------------------------------------------------------

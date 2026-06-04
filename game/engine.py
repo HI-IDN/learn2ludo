@@ -51,9 +51,9 @@ class LudoGame:
         self.player=0
         self.last_roll=None
 
-    def roll(self):
+    def roll(self, rng=None):
         assert self.phase==Phase.ROLLING
-        self.last_roll=random.randint(1,6)
+        self.last_roll=(rng or random).randint(1,6)
         self.phase=Phase.MOVING
         return self.last_roll
 

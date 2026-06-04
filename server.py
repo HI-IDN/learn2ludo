@@ -262,6 +262,7 @@ class NewGameRequest(BaseModel):
     num_players: int = 4
     rules: dict = {}
     config: dict = {}
+    seeds: list[int] | None = None
 
 
 @app.post("/api/game/new")
@@ -285,7 +286,8 @@ def new_game(req: NewGameRequest):
     )
     max_yard_rolls = int(req.rules.get("empty_board_rolls", 3))
     equal_rounds   = bool(req.rules.get("equal_rounds", False))
-    active_game = GameSession(cfg, max_yard_rolls=max_yard_rolls, starting_player=starting_player, equal_rounds=equal_rounds)
+    active_game = GameSession(cfg, max_yard_rolls=max_yard_rolls, starting_player=starting_player,
+                              equal_rounds=equal_rounds, seeds=req.seeds)
     stats = load_stats()
     stats["games_played"] += 1
     save_stats(stats)

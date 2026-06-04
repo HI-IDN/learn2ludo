@@ -154,11 +154,12 @@ class TestGameHistoryMetadata:
 
         assert state["starting_player"] == 1
         assert state["starting_player_color"] == "green"
-        assert state["history"][0] == {
-            "type": "game_start",
-            "player": 1,
-            "color": "green",
-        }
+        ev = state["history"][0]
+        assert ev["type"] == "game_start"
+        assert ev["player"] == 1
+        assert ev["color"] == "green"
+        assert len(ev["seeds"]) == 4
+        assert all(isinstance(seed, int) for seed in ev["seeds"])
 
     def test_winner_is_recorded_in_history_and_state(self):
         s = make_session(num_players=2, home_length=6)
