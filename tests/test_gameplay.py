@@ -257,3 +257,40 @@ class TestPawnIdentifiers:
         assert latest["type"] == "move"
         assert latest["justification"] is None
         assert latest["timestamp"].endswith("Z")
+
+
+class TestPerPlayerSeeding:
+    def test_seeds_auto_generated_and_stored(self):
+        s = make_session(num_players=3, home_length=6)
+        assert len(s.seeds) == 3
+        assert all(isinstance(seed, int) for seed in s.seeds)
+        assert len(set(s.seeds)) == 3  # very likely distinct
+
+    def test_seeds_in_to_dict_and_game_start_event(self):
+        s = make_session(num_players=2, home_length=6)
+        state = s.to_dict()
+        assert state["seeds"] == s.seeds
+        assert s.history[0]["seeds"] == s.seeds
+
+    def test_explicit_seeds_produce_identical_roll_sequences(self):
+        seeds = [42, 99]
+        cfg = GameConfig(
+            board=BoardConfig(track_size=2 * (2 * 6 + 1), yard_count=2, home_length=6),
+            player_count=2,
+        )
+        rolls_a, rolls_b = [], []
+        for rolls in (rolls_a, rolls_b):
+            s = GameSession(cfg, seeds=seeds)
+            for _ in range(10):
+                if s.game.phase.value == "rolling":
+                    rolls.append(s.roll_dice())
+        assert rolls_a == rolls_b
+
+    def test_different_seeds_produce_independent_rng_per_player(self):
+        import random
+        s = make_session(num_players=2, home_length=6)
+        assert s._rngs[0] is not s._rngs[1]
+        # RNG state of player 0 is unaffected by rolling player 1's RNG
+        state_before = s._rngs[0].getstate()
+        s._rngs[1].randint(1, 6)
+        assert s._rngs[0].getstate() == state_before
