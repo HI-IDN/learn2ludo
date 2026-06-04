@@ -1,5 +1,54 @@
 @use "../base/variables" as *;
 
+// ── Board / Stats view toggle ─────────────────────────────────────────────────
+
+.view-toggle-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.view-toggle-btn {
+  flex: 1;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: $radius;
+  border: 1px solid $border-light;
+  background: transparent;
+  color: $color-text-2;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &.active {
+    background: #1a3a6b;
+    color: #fff;
+    border-color: #1a3a6b;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:not(.active):not(:disabled):hover {
+    background: $color-bg-alt;
+    color: $color-text;
+  }
+}
+
+// ── Stats area (replaces board-area when stats view active) ───────────────────
+
+#stats-area {
+  flex: 0 0 auto;
+  width: calc(100vh - 100px);
+  max-width: calc(100% - 300px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 // ── Reflection modal (small, centered, private) ───────────────────────────────
 
 #pg-reflection-modal {
@@ -169,7 +218,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-right: 2px;
+  padding-right: 4px;
+  padding-bottom: 16px;
 }
 
 // ── Sections ──────────────────────────────────────────────────────────────────

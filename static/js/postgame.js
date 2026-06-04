@@ -17,6 +17,37 @@ function resetPostGame() {
   _postgameSource = null;
   _restoreSidePanel();
   document.getElementById('pg-reflection-modal')?.remove();
+  _setStatsButtonReady(false);
+  selectBoardView();
+}
+
+function _setStatsButtonReady(ready) {
+  const btn = document.getElementById('btn-view-stats');
+  if (!btn) return;
+  btn.disabled = !ready;
+  btn.title = ready
+    ? 'Show post-game stats'
+    : 'Stats can be viewed once a game is completed';
+}
+
+function selectBoardView() {
+  const boardArea = document.getElementById('board-area');
+  const statsArea = document.getElementById('stats-area');
+  if (boardArea) boardArea.style.display = '';
+  if (statsArea) statsArea.style.display = 'none';
+  document.getElementById('btn-view-board')?.classList.add('active');
+  document.getElementById('btn-view-stats')?.classList.remove('active');
+}
+
+function selectStatsView() {
+  const btn = document.getElementById('btn-view-stats');
+  if (btn?.disabled) return;
+  const boardArea = document.getElementById('board-area');
+  const statsArea = document.getElementById('stats-area');
+  if (boardArea) boardArea.style.display = 'none';
+  if (statsArea) statsArea.style.display = '';
+  document.getElementById('btn-view-board')?.classList.remove('active');
+  document.getElementById('btn-view-stats')?.classList.add('active');
 }
 
 function currentPostGameReflections() {
@@ -24,11 +55,9 @@ function currentPostGameReflections() {
 }
 
 function _restoreSidePanel() {
-  const sp = document.getElementById('side-panel');
-  if (sp && _sidePanelOrigHTML !== null) {
-    sp.innerHTML = _sidePanelOrigHTML;
-    _sidePanelOrigHTML = null;
-  }
+  const sa = document.getElementById('stats-area');
+  if (sa) sa.innerHTML = '';
+  _sidePanelOrigHTML = null;
 }
 
 // ── Replay entry (no reflection) ─────────────────────────────────────────────
@@ -183,9 +212,8 @@ function _promptReflection(players, idx) {
 function _mountStatsSidePanel() {
   if (_postgameSource === 'live' && _reflections.length) _saveReflections();
 
-  const sp = document.getElementById('side-panel');
-  if (!sp) return;
-  _sidePanelOrigHTML = sp.innerHTML;
+  const sa = document.getElementById('stats-area');
+  if (!sa) return;
 
   const stats   = _playerStats || [];
   const winner  = gameState.winner;
@@ -196,7 +224,7 @@ function _mountStatsSidePanel() {
   const { captureMatrix, blockMatrix } = _computeMatrices(stats);
   const hasReflections = _reflections.length > 0;
 
-  sp.innerHTML = `
+  sa.innerHTML = `
     <div id="pg-side-header">
       <div class="pg-winner-banner" style="--wc:${wHex}">
         <i class="fa-solid fa-trophy"></i> ${escapeAttr(wName)} wins!
@@ -263,8 +291,11 @@ function _mountStatsSidePanel() {
     </div>
   `;
 
+  _setStatsButtonReady(true);
+  selectStatsView();
+
   _drawHistogram('all');
-  sp.querySelectorAll('input[name="dice-player"]').forEach(r =>
+  sa.querySelectorAll('input[name="dice-player"]').forEach(r =>
     r.addEventListener('change', () => _drawHistogram(r.value))
   );
 

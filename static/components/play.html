@@ -4,7 +4,7 @@
   <!-- MAIN LAYOUT -->
   <div id="play-layout">
 
-    <!-- LEFT: BOARD -->
+    <!-- LEFT: BOARD / STATS -->
     <div id="board-area">
       <div id="board-wrap">
         <svg id="ludo-board" class="board-svg" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
@@ -13,11 +13,23 @@
       </div>
     </div>
 
+    <div id="stats-area" style="display:none"></div>
+
     <!-- RIGHT: SIDE PANEL -->
     <div id="side-panel">
 
       <!-- TOP CONTROLS -->
       <div class="side-section controls">
+        <div class="view-toggle-row">
+          <button id="btn-view-board" class="view-toggle-btn active" onclick="selectBoardView()" title="Show game board">
+            Board
+          </button>
+          <button id="btn-view-stats" class="view-toggle-btn" onclick="selectStatsView()" disabled
+                  title="Stats can be viewed once a game is completed">
+            Stats
+          </button>
+        </div>
+
         <div class="replay-controls-row replay-controls-row--top" id="live-speed-controls">
           <span class="replay-status">Controls</span>
           <button class="btn btn-sm replay-step-btn"
