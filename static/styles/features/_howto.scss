@@ -1,0 +1,281 @@
+// =============================================================================
+// How It Works page
+// =============================================================================
+
+@use "../base/variables" as *;
+
+// ---- Section nav ------------------------------------------------------------
+
+.howto-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 32px;
+}
+
+.howto-nav-link {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: $color-text-2;
+  background: $color-bg-raised;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: $accent-tint; color: $color-primary; }
+  &.active { background: $color-primary; color: #fff; }
+}
+
+// ---- Sections ---------------------------------------------------------------
+
+.howto-body {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.howto-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-margin-top: 16px;
+}
+
+.howto-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: $color-text;
+  padding-bottom: 10px;
+  border-bottom: 2px solid $border-light;
+
+  i { color: $color-primary; font-size: 20px; }
+}
+
+.howto-text {
+  font-size: 14px;
+  color: $color-text-2;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.howto-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  color: $color-text-2;
+  line-height: 1.8;
+}
+
+// ---- Callout ----------------------------------------------------------------
+
+.howto-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: $accent-tint;
+  border: 1px solid $accent-tint-border;
+  border-radius: $radius;
+  font-size: 13px;
+  color: $color-text-2;
+  line-height: 1.6;
+
+  i { color: $color-primary; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+}
+
+// ---- Feature grid -----------------------------------------------------------
+
+.howto-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.howto-feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: $color-bg-alt;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+}
+
+.howto-feature-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: $color-text;
+}
+
+.howto-feature-desc {
+  font-size: 12px;
+  color: $color-text-2;
+  line-height: 1.5;
+}
+
+.howto-feature-value {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  align-self: flex-start;
+
+  &.good    { background: $success-tint; color: $color-green; }
+  &.bad     { background: $danger-tint;  color: $color-danger; }
+  &.neutral { background: $color-bg-raised; color: $color-text-2; }
+}
+
+// ---- Formula ----------------------------------------------------------------
+
+.howto-formula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  padding: 14px 16px;
+  background: $color-bg-alt;
+  border: 1px solid $border-medium;
+  border-radius: $radius;
+  font-family: $font-mono;
+  font-size: 13px;
+}
+
+.howto-formula-label {
+  font-weight: 700;
+  color: $color-text;
+  white-space: nowrap;
+}
+
+.howto-formula-expr {
+  color: $color-primary;
+  line-height: 1.8;
+}
+
+// ---- Example table ----------------------------------------------------------
+
+.howto-example {
+  background: $color-bg-alt;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+  overflow: hidden;
+}
+
+.howto-example-label {
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: $color-text-2;
+  background: $color-bg-raised;
+  border-bottom: 1px solid $border-light;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.howto-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th, td {
+    padding: 9px 14px;
+    text-align: left;
+    border-bottom: 1px solid $border-light;
+    color: $color-text-2;
+  }
+
+  th {
+    font-weight: 700;
+    color: $color-text;
+    font-size: 12px;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  .howto-table-total td {
+    background: $accent-tint;
+    color: $color-text;
+    font-size: 13px;
+  }
+}
+
+// ---- Bot type cards ---------------------------------------------------------
+
+.howto-bot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.howto-bot-card {
+  padding: 14px 16px;
+  background: $color-bg-alt;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.howto-bot-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.howto-bot-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+
+  &.sdr { background: $success-tint; color: $color-green; }
+  &.cdr { background: $accent-tint;  color: $color-primary; }
+  &.rl  { background: $danger-tint;  color: $color-danger; }
+}
+
+.howto-bot-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: $color-text;
+}
+
+.howto-bot-desc {
+  font-size: 13px;
+  color: $color-text-2;
+  line-height: 1.6;
+  margin: 0;
+}
+
+// ---- Two-column comparison --------------------------------------------------
+
+.howto-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 560px) { grid-template-columns: 1fr; }
+}
+
+.howto-col-card {
+  padding: 14px 16px;
+  background: $color-bg-alt;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.howto-col-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: $color-text;
+  padding-bottom: 6px;
+  border-bottom: 1px solid $border-light;
+}

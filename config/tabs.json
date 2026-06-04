@@ -64,12 +64,21 @@
       "description": "Saved bot models"
     },
     {
+      "id": "howto",
+      "label": "How It Works",
+      "icon": "ti-school",
+      "enabled": true,
+      "default_visible": true,
+      "order": 6,
+      "description": "Plain-language guide to how bots make decisions"
+    },
+    {
       "id": "glossary",
       "label": "Glossary",
       "icon": "ti-book",
       "enabled": true,
       "default_visible": true,
-      "order": 6,
+      "order": 7,
       "description": "AI and gameplay terms explained"
     },
     {

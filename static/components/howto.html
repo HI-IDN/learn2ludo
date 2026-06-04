@@ -1,0 +1,228 @@
+<!-- HOW IT WORKS -->
+<div class="panel" id="panel-howto">
+  <div style="margin-bottom:24px;">
+    <h1 style="font-size:22px; font-weight:700;">How It Works</h1>
+    <p style="font-size:13px; color:var(--text2); margin-top:4px;">A plain-language guide to how bots make decisions in Learn2Ludo.</p>
+  </div>
+
+  <!-- Section nav -->
+  <nav class="howto-nav" aria-label="Sections">
+    <a class="howto-nav-link active" href="#howto-state">Game state</a>
+    <a class="howto-nav-link" href="#howto-features">Features</a>
+    <a class="howto-nav-link" href="#howto-decision">Decision-making</a>
+    <a class="howto-nav-link" href="#howto-bots">Bot types</a>
+    <a class="howto-nav-link" href="#howto-training">Training vs fixed</a>
+  </nav>
+
+  <div class="howto-body">
+
+    <!-- 1. Game state -->
+    <section class="howto-section" id="howto-state">
+      <h2 class="howto-heading">
+        <i class="ti ti-layout-board"></i>
+        What is a game state?
+      </h2>
+      <p class="howto-text">
+        Before a bot can decide anything, it needs to know what is happening on the board.
+        The <strong>game state</strong> is a complete snapshot of the game at one moment in time.
+        It contains:
+      </p>
+      <ul class="howto-list">
+        <li>Every pawn's current position (yard, track, home stretch, or finished)</li>
+        <li>Whose turn it is</li>
+        <li>The dice value just rolled</li>
+        <li>Which moves are currently legal</li>
+        <li>Board layout — track length, safe squares, starting squares</li>
+      </ul>
+      <div class="howto-callout">
+        <i class="ti ti-bulb"></i>
+        <span>Think of the game state as a photograph of the board. Two identical photographs mean two identical situations — and a deterministic bot will always make the same choice given the same photograph.</span>
+      </div>
+    </section>
+
+    <!-- 2. Features -->
+    <section class="howto-section" id="howto-features">
+      <h2 class="howto-heading">
+        <i class="ti ti-vector-triangle"></i>
+        What are features?
+      </h2>
+      <p class="howto-text">
+        Raw board positions are hard to reason about directly. <strong>Features</strong> translate the game state into a set of numbers, one per move, that capture what matters strategically.
+        Each feature answers one question about a candidate move.
+      </p>
+
+      <div class="howto-feature-grid">
+        <div class="howto-feature-card">
+          <span class="howto-feature-name">Capture</span>
+          <span class="howto-feature-desc">Does this move land on an opponent's pawn and send it back to their yard?</span>
+          <span class="howto-feature-value good">+1 if yes, 0 if no</span>
+        </div>
+        <div class="howto-feature-card">
+          <span class="howto-feature-name">Risk</span>
+          <span class="howto-feature-desc">How many opponent pawns can reach the destination square on their next roll?</span>
+          <span class="howto-feature-value bad">0 – 1 (fraction of dice outcomes that threaten you)</span>
+        </div>
+        <div class="howto-feature-card">
+          <span class="howto-feature-name">Risk reduction</span>
+          <span class="howto-feature-desc">Does moving this pawn lower its current exposure to capture?</span>
+          <span class="howto-feature-value good">Positive when the move is safer than staying</span>
+        </div>
+        <div class="howto-feature-card">
+          <span class="howto-feature-name">Progress</span>
+          <span class="howto-feature-desc">How much closer to home does this move bring the pawn?</span>
+          <span class="howto-feature-value good">Higher = further ahead</span>
+        </div>
+        <div class="howto-feature-card">
+          <span class="howto-feature-name">Safety</span>
+          <span class="howto-feature-desc">Does the destination land on a safe square?</span>
+          <span class="howto-feature-value good">+1 if safe haven, 0 otherwise</span>
+        </div>
+        <div class="howto-feature-card">
+          <span class="howto-feature-name">Blockade</span>
+          <span class="howto-feature-desc">Does this move stack with a friendly pawn to form a blockade?</span>
+          <span class="howto-feature-value good">+1 if a blockade is created</span>
+        </div>
+        <div class="howto-feature-card">
+          <span class="howto-feature-name">Spread</span>
+          <span class="howto-feature-desc">Does this move keep pawns spread out rather than clustered together?</span>
+          <span class="howto-feature-value neutral">Positive when pawns are well distributed</span>
+        </div>
+        <div class="howto-feature-card">
+          <span class="howto-feature-name">Activation</span>
+          <span class="howto-feature-desc">Does this move bring a pawn out of the yard for the first time?</span>
+          <span class="howto-feature-value good">+1 when a yard pawn enters the track</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Decision-making -->
+    <section class="howto-section" id="howto-decision">
+      <h2 class="howto-heading">
+        <i class="ti ti-math-function"></i>
+        How bots make decisions
+      </h2>
+      <p class="howto-text">
+        The <strong>weighted bot</strong> (Apollo and custom bots) scores every legal move using a weighted sum of features, then picks the highest-scoring move.
+      </p>
+
+      <div class="howto-formula">
+        <span class="howto-formula-label">Score for a move =</span>
+        <span class="howto-formula-expr">
+          w<sub>capture</sub> · capture &nbsp;+&nbsp;
+          w<sub>progress</sub> · progress &nbsp;+&nbsp;
+          w<sub>safety</sub> · safety &nbsp;+&nbsp; …
+        </span>
+      </div>
+
+      <p class="howto-text">
+        Each <strong>weight</strong> controls how much that feature matters. A weight of 0 means the bot ignores that feature entirely. A large positive weight makes the bot strongly prefer moves that score well on it.
+      </p>
+
+      <div class="howto-example">
+        <div class="howto-example-label">Example — Apollo evaluates two moves:</div>
+        <table class="howto-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Weight</th>
+              <th>Move A (capture)</th>
+              <th>Move B (advance)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Capture</td><td>5</td><td>1</td><td>0</td></tr>
+            <tr><td>Progress</td><td>2</td><td>0.3</td><td>0.8</td></tr>
+            <tr><td>Safety</td><td>1</td><td>0</td><td>1</td></tr>
+            <tr class="howto-table-total">
+              <td colspan="2"><strong>Total score</strong></td>
+              <td><strong>5.6</strong> ✓ chosen</td>
+              <td>2.6</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="howto-callout">
+        <i class="ti ti-bulb"></i>
+        <span>If two moves tie, the bot picks between them at random. This is the only randomness in a weighted bot's decision — everything else is deterministic.</span>
+      </div>
+    </section>
+
+    <!-- 4. Bot types -->
+    <section class="howto-section" id="howto-bots">
+      <h2 class="howto-heading">
+        <i class="ti ti-robot"></i>
+        Bot types in Learn2Ludo
+      </h2>
+      <p class="howto-text">Bots fall into three broad categories:</p>
+
+      <div class="howto-bot-list">
+        <div class="howto-bot-card">
+          <div class="howto-bot-header">
+            <span class="howto-bot-badge sdr">SDR</span>
+            <span class="howto-bot-name">Simple dispatching rule</span>
+          </div>
+          <p class="howto-bot-desc">Follows one rule. Examples: Ares (always capture if possible), Athena (stay on safe squares), Hestia (advance the furthest pawn), Artemis (activate yard pawns), Eris (random).</p>
+          <p class="howto-bot-desc">Predictable and easy to study. If its one rule does not apply, it falls back to random choice.</p>
+        </div>
+        <div class="howto-bot-card">
+          <div class="howto-bot-header">
+            <span class="howto-bot-badge cdr">CDR</span>
+            <span class="howto-bot-name">Composite dispatching rule</span>
+          </div>
+          <p class="howto-bot-desc">Combines multiple features with weights. Apollo is the built-in CDR. Custom bots you build on the Bots page are also CDRs — you control the weights with sliders.</p>
+          <p class="howto-bot-desc">Setting one weight to 100 and the rest to 0 turns a CDR into the matching SDR.</p>
+        </div>
+        <div class="howto-bot-card">
+          <div class="howto-bot-header">
+            <span class="howto-bot-badge rl">RL</span>
+            <span class="howto-bot-name">Reinforcement learning</span>
+          </div>
+          <p class="howto-bot-desc">Learns by playing thousands of games and adjusting its internal model based on wins and losses. Its decision logic is not hand-coded — it emerges from experience.</p>
+          <p class="howto-bot-desc">Train RL bots on the Train page. Saved models appear in the bot list.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Training vs fixed -->
+    <section class="howto-section" id="howto-training">
+      <h2 class="howto-heading">
+        <i class="ti ti-school"></i>
+        Training vs fixed behaviour
+      </h2>
+      <p class="howto-text">
+        SDR and CDR bots have <strong>fixed behaviour</strong>: their rules and weights are set before the game starts and do not change during play. They are fast, transparent, and easy to understand.
+      </p>
+      <p class="howto-text">
+        An <strong>RL bot</strong> improves through experience. During training it plays many games, receives a reward signal (positive for good outcomes, negative for bad ones), and gradually updates its model to maximise future rewards. Once training is complete the model is frozen and the bot plays using what it learned — this is called <em>inference</em>.
+      </p>
+
+      <div class="howto-two-col">
+        <div class="howto-col-card">
+          <div class="howto-col-label">Fixed bot (SDR / CDR)</div>
+          <ul class="howto-list">
+            <li>Rules written by hand</li>
+            <li>Behaviour is fully explainable</li>
+            <li>No training needed</li>
+            <li>Cannot adapt to new situations</li>
+          </ul>
+        </div>
+        <div class="howto-col-card">
+          <div class="howto-col-label">RL bot</div>
+          <ul class="howto-list">
+            <li>Learns from game outcomes</li>
+            <li>May discover non-obvious strategies</li>
+            <li>Requires training time</li>
+            <li>Harder to interpret directly</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="howto-callout">
+        <i class="ti ti-info-circle"></i>
+        <span>Both bot types use the same game engine and the same legal move rules. The difference is only in <em>how</em> they choose which legal move to make.</span>
+      </div>
+    </section>
+
+  </div><!-- /.howto-body -->
+</div><!-- /#panel-howto -->

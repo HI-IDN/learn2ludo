@@ -41,6 +41,7 @@
 @use "features/bot-builder";  // .bot-builder-card, slider controls for custom CDR bot
 @use "features/pregame";      // #pregame-overlay, .pg-card, .pg-player-row
 @use "features/replay";       // .replay-controls, replay step buttons
+@use "features/howto";        // .howto-nav, .howto-section, .howto-feature-grid
 @use "features/glossary";     // .glossary-search, .glossary-entry, .glossary-letter
 @use "features/move-justification"; // prompt shown before optional human moves
 @use "features/postgame";           // reflection + stats overlay shown after game ends
