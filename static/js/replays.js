@@ -48,33 +48,28 @@ function doReplaysAdminLogout() {
 }
 
 function moveReplaySurfaceToReplays() {
-  const board = document.getElementById('board-area');
-  const boardHost = document.getElementById('replays-board-host');
-  const controls = document.getElementById('replay-step-controls');
-  const controlsHost = document.getElementById('replays-controls-host');
-  if (board && boardHost && board.parentElement !== boardHost) {
-    boardHost.appendChild(board);
-    board.classList.add('board-area--replays');
-  }
-  if (controls && controlsHost && controls.parentElement !== controlsHost) {
-    controlsHost.appendChild(controls);
+  const playLayout = document.getElementById('play-layout');
+  const replayHost = document.getElementById('replays-play-host');
+  if (playLayout && replayHost && playLayout.parentElement !== replayHost) {
+    replayHost.appendChild(playLayout);
   }
 }
 
 function moveReplaySurfaceToPlay() {
-  const board = document.getElementById('board-area');
+  const panelPlay = document.getElementById('panel-play');
   const playLayout = document.getElementById('play-layout');
-  const sidePanel = document.getElementById('side-panel');
-  const controls = document.getElementById('replay-step-controls');
-  const playControls = document.querySelector('#side-panel .side-section.controls');
-  const liveControls = document.getElementById('live-speed-controls');
-  if (board && playLayout && board.parentElement !== playLayout) {
-    playLayout.insertBefore(board, sidePanel || playLayout.firstChild);
-    board.classList.remove('board-area--replays');
+  if (panelPlay && playLayout && playLayout.parentElement !== panelPlay) {
+    panelPlay.appendChild(playLayout);
   }
-  if (controls && playControls && controls.parentElement !== playControls) {
-    playControls.insertBefore(controls, liveControls?.nextSibling || playControls.firstChild);
-  }
+}
+
+function quitReplayFromPage() {
+  if (typeof clearReplayMode === 'function') clearReplayMode();
+  moveReplaySurfaceToPlay();
+  const viewer = document.getElementById('replays-viewer');
+  const title = document.getElementById('replays-viewer-title');
+  if (viewer) viewer.hidden = true;
+  if (title) title.textContent = 'Replay';
 }
 
 let _replaysPageGames = [];

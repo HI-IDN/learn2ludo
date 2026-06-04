@@ -9,15 +9,17 @@
   </div>
 
   <!-- Replay viewer -->
-  <div class="replays-viewer" id="replays-viewer" hidden>
-    <div class="replays-viewer-head">
+  <div class="replays-viewer" id="replays-viewer" hidden style="grid-template-columns:1fr; background:#fff; border:1px solid var(--border-light,#E2E5EE); border-radius:16px; padding:14px; margin-bottom:20px;">
+    <div class="replays-viewer-head" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
       <div>
         <div class="replays-viewer-kicker">Selected replay</div>
         <div class="replays-viewer-title" id="replays-viewer-title">Replay</div>
       </div>
-      <div class="replays-viewer-controls" id="replays-controls-host"></div>
+      <button class="btn btn-sm" onclick="quitReplayFromPage()" title="Close replay">
+        <i class="ti ti-x"></i> Quit replay
+      </button>
     </div>
-    <div class="replays-board-host" id="replays-board-host"></div>
+    <div class="replays-play-host" id="replays-play-host" style="width:100%;"></div>
   </div>
 
   <!-- Game list -->
