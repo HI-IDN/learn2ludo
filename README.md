@@ -55,6 +55,23 @@ python -m uvicorn server:app --port 8000
 python -m uvicorn server:app --reload --port 8000
 ```
 
+**Setting the admin password:**
+
+The admin password defaults to `password1`. Override it with the `ADMIN_PASSWORD` environment variable:
+
+```bash
+# macOS / Linux
+ADMIN_PASSWORD=mypassword python -m uvicorn server:app --port 8000
+
+# Windows (PowerShell)
+$env:ADMIN_PASSWORD="mypassword"; python -m uvicorn server:app --port 8000
+
+# Windows (Command Prompt)
+set ADMIN_PASSWORD=mypassword && python -m uvicorn server:app --port 8000
+```
+
+The password is never written to disk — it lives only in the server process for the duration of the session.
+
 ### 5. Open the app
 
 ```
