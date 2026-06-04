@@ -55,6 +55,7 @@ let _replayFilterWinner = 'all';
 
 async function loadReplaysPage() {
   renderReplaysAdminWidget();
+  renderReplaysReadyStrip();
   try {
     const r = await fetch('/api/games');
     _allGames = (await r.json()).games || [];
@@ -106,11 +107,40 @@ function setWinnerFilter(val, btn) {
   filterReplays();
 }
 
+function _getReadyIds() {
+  return typeof getSessionConsented === 'function' ? getSessionConsented() : new Set();
+}
+
+function renderReplaysReadyStrip() {
+  const strip = document.getElementById('replays-ready-strip');
+  if (!strip) return;
+  const readyIds = _getReadyIds();
+  if (!readyIds.size) {
+    strip.textContent = '';
+    return;
+  }
+  const names = [...readyIds].map(id => {
+    if (typeof getProfileById === 'function') {
+      const p = getProfileById(id);
+      if (p) return p.name || id.slice(0,8);
+    }
+    return id.slice(0, 8);
+  });
+  strip.innerHTML = `<i class="ti ti-filter" style="font-size:11px;"></i> Showing games for: <strong>${names.join(', ')}</strong>`;
+}
+
 function filterReplays() {
   const isAdmin = typeof adminToken !== 'undefined' && adminToken;
+  const readyIds = _getReadyIds();
   const search = (document.getElementById('replays-search')?.value || '').toLowerCase();
+  renderReplaysReadyStrip();
   const filtered = _allGames.filter(g => {
-    if (g.incomplete && !isAdmin) return false;           // hide incomplete from non-admin
+    if (g.incomplete && !isAdmin) return false;
+    // Only show games that include at least one ready player (skip if no one is ready)
+    if (readyIds.size > 0) {
+      const hasReady = (g.players || []).some(p => p.human_id && readyIds.has(p.human_id));
+      if (!hasReady) return false;
+    }
     if (_replayFilterPlayers !== 'all' && g.player_count !== _replayFilterPlayers) return false;
     if (_replayFilterYards !== 'all' && g.yard_count !== _replayFilterYards) return false;
     if (_replayFilterWinner !== 'all') {
