@@ -444,11 +444,12 @@ function lobbyProfileSelect(slotIdx, playerIdx) {
   cleanStaleProfileIds();
   const allProfiles = loadProfiles().filter(p => !p._is_deleted);
   const currentId   = settings.profile_ids?.[playerIdx];
-  const usedIds     = new Set(
-    Object.entries(settings.profile_ids || {})
-      .filter(([k]) => Number(k) !== playerIdx)
-      .map(([, v]) => v)
-  );
+  const active = typeof lobbyActiveSlots === 'function' ? lobbyActiveSlots() : [];
+  const usedIds = new Set();
+  active.forEach((_activeSlot, idx) => {
+    if (idx !== playerIdx && getPlayerType(idx) === 'human' && settings.profile_ids?.[idx])
+      usedIds.add(settings.profile_ids[idx]);
+  });
   // Only show players who have consented this session
   const profiles = allProfiles.filter(p => isSessionConsented(p.id) || p.id === currentId);
   const options = [
