@@ -54,6 +54,36 @@ let _replayFilterYards = 'all';
 let _replayFilterPerson = null;   // human_id or null
 let _replayFilterResult = 'all';  // 'all' | 'won' | 'lost'
 
+function moveReplaySurfaceToReplays() {
+  const board = document.getElementById('board-area');
+  const boardHost = document.getElementById('replays-board-host');
+  const controls = document.getElementById('replay-step-controls');
+  const controlsHost = document.getElementById('replays-controls-host');
+  if (board && boardHost && board.parentElement !== boardHost) {
+    boardHost.appendChild(board);
+    board.classList.add('board-area--replays');
+  }
+  if (controls && controlsHost && controls.parentElement !== controlsHost) {
+    controlsHost.appendChild(controls);
+  }
+}
+
+function moveReplaySurfaceToPlay() {
+  const board = document.getElementById('board-area');
+  const playLayout = document.getElementById('play-layout');
+  const sidePanel = document.getElementById('side-panel');
+  const controls = document.getElementById('replay-step-controls');
+  const playControls = document.querySelector('#side-panel .side-section.controls');
+  const liveControls = document.getElementById('live-speed-controls');
+  if (board && playLayout && board.parentElement !== playLayout) {
+    playLayout.insertBefore(board, sidePanel || playLayout.firstChild);
+    board.classList.remove('board-area--replays');
+  }
+  if (controls && playControls && controls.parentElement !== playControls) {
+    playControls.insertBefore(controls, liveControls?.nextSibling || playControls.firstChild);
+  }
+}
+
 async function loadReplaysPage() {
   renderReplaysAdminWidget();
   renderReplaysReadyStrip();
@@ -197,7 +227,6 @@ function filterReplays() {
     list.innerHTML = '<p class="replays-empty">No games match the current filters.</p>';
     return;
   }
-  const isAdmin = typeof adminToken !== 'undefined' && adminToken;
   list.innerHTML = filtered.map(g => _renderGameCard(g, isAdmin)).join('');
 }
 
@@ -251,11 +280,15 @@ function _renderGameCard(g, isAdmin) {
 }
 
 async function loadReplayFromPage(filename) {
-  if (typeof switchTab === 'function') switchTab('play');
   try {
     const r = await fetch(`/api/games/${encodeURIComponent(filename)}`);
     if (!r.ok) throw new Error();
     if (typeof loadReplayJson === 'function') {
+      moveReplaySurfaceToReplays();
+      const viewer = document.getElementById('replays-viewer');
+      const title = document.getElementById('replays-viewer-title');
+      if (viewer) viewer.hidden = false;
+      if (title) title.textContent = _allGames.find(g => g.filename === filename)?.name || filename.replace('.json', '');
       if (typeof prepareReplayBoard === 'function') prepareReplayBoard();
       loadReplayJson(await r.json());
     }

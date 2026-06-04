@@ -233,3 +233,62 @@
   margin-bottom: 8px;
   min-height: 16px;
 }
+
+// ── Replay viewer ────────────────────────────────────────────────────────────
+
+.replays-viewer {
+  display: grid;
+  grid-template-columns: minmax(320px, 640px);
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+.replays-viewer[hidden] {
+  display: none;
+}
+
+.replays-viewer-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.replays-viewer-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-text-3;
+}
+
+.replays-viewer-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: $color-text;
+}
+
+.replays-viewer-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.replays-board-host {
+  grid-column: 1;
+}
+
+#board-area.board-area--replays {
+  width: 100%;
+  max-width: none;
+  overflow: visible;
+}
+
+@media (max-width: 900px) {
+  .replays-viewer {
+    grid-template-columns: 1fr;
+  }
+}

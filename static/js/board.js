@@ -312,7 +312,7 @@ function drawBoard(){
     const _bisDeg=((ti+Math.PI/_yN)*180/Math.PI-270+720)%360;
     html+=`<image href="/static/logo.svg" x="${x-ls/2}" y="${y-ls/2}" width="${ls}" height="${ls}" opacity="0.18" style="pointer-events:none;" transform="rotate(${_bisDeg.toFixed(1)},${x},${y})"/>`;
   });
-  if((typeof isReplayActive==='function'&&isReplayActive())||(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing())){
+  if(typeof isLiveHistoryBrowsing==='function'&&isLiveHistoryBrowsing()){
     html+=_replayBannersSvg(S);
   }
 
