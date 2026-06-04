@@ -53,6 +53,7 @@ function moveReplaySurfaceToReplays() {
   if (playLayout && replayHost && playLayout.parentElement !== replayHost) {
     replayHost.appendChild(playLayout);
   }
+  setReplayViewerLoaded();
 }
 
 function moveReplaySurfaceToPlay() {
@@ -67,10 +68,9 @@ function quitReplayFromPage() {
   if (typeof resetPostGame === 'function') resetPostGame();
   if (typeof clearReplayMode === 'function') clearReplayMode();
   moveReplaySurfaceToPlay();
-  const viewer = document.getElementById('replays-viewer');
-  const title = document.getElementById('replays-viewer-title');
-  if (viewer) viewer.hidden = true;
-  if (title) title.textContent = 'Replay';
+  _selectedReplayFilename = null;
+  renderSelectedReplayRow();
+  setReplayViewerEmpty();
 }
 
 function showReplayStatsFromPage() {
@@ -83,8 +83,29 @@ let _selectedReplayFilename = null;
 let _replaysSortKey = 'timestamp';
 let _replaysSortDir = 'desc';
 
+function setReplayViewerLoaded() {
+  const viewer = document.getElementById('replays-viewer');
+  const empty = document.getElementById('replays-empty-viewer');
+  const actions = document.getElementById('replays-viewer-actions');
+  if (viewer) viewer.hidden = false;
+  if (empty) empty.style.display = 'none';
+  if (actions) actions.style.display = 'flex';
+}
+
+function setReplayViewerEmpty() {
+  const viewer = document.getElementById('replays-viewer');
+  const empty = document.getElementById('replays-empty-viewer');
+  const actions = document.getElementById('replays-viewer-actions');
+  const title = document.getElementById('replays-viewer-title');
+  if (viewer) viewer.hidden = false;
+  if (empty) empty.style.display = 'flex';
+  if (actions) actions.style.display = 'none';
+  if (title) title.textContent = 'Replay';
+}
+
 async function loadReplaysPage() {
   renderReplaysAdminWidget();
+  if (!(typeof isReplayActive === 'function' && isReplayActive())) setReplayViewerEmpty();
   const list = document.getElementById('replays-list');
   const count = document.getElementById('replays-count');
   if (list) list.innerHTML = '<p class="replay-picker-empty">Loading...</p>';
@@ -187,7 +208,7 @@ async function loadReplayFromPage(filename) {
       const game = _replaysPageGames.find(g => g.filename === filename);
       _selectedReplayFilename = filename;
       renderSelectedReplayRow();
-      if (viewer) viewer.hidden = false;
+      setReplayViewerLoaded();
       if (title) title.textContent = game?.name || filename.replace('.json', '');
       if (typeof prepareReplayBoard === 'function') prepareReplayBoard();
       loadReplayJson(await r.json());
