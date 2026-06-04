@@ -100,6 +100,7 @@ function renderLobbySlots() {
   if (!wrap) return;
 
   const active = lobbyActiveSlots();
+  lobbyCleanBotProfileAssignments(active);
 
   wrap.innerHTML = Array.from({length: lobbyMaxSlots()}, (_, slotIdx) => {
     const isActive  = active.includes(slotIdx);
@@ -287,8 +288,21 @@ function lobbySetType(slotIdx, type) {
   settings.player_types = settings.player_types || {};
   settings.player_types[playerIdx] = type === 'human' ? 'human' : 'random';
   if (type === 'human') { settings.bot_ids = settings.bot_ids || {}; delete settings.bot_ids[playerIdx]; }
+  else if (settings.profile_ids) delete settings.profile_ids[playerIdx];
   persistSettings();
   renderLobbySlots();
+}
+
+function lobbyCleanBotProfileAssignments(active = lobbyActiveSlots()) {
+  if (!settings.profile_ids) return;
+  let changed = false;
+  active.forEach((_slotIdx, playerIdx) => {
+    if (getPlayerType(playerIdx) !== 'human' && settings.profile_ids[playerIdx]) {
+      delete settings.profile_ids[playerIdx];
+      changed = true;
+    }
+  });
+  if (changed) persistSettings();
 }
 
 function lobbySetBotId(slotIdx, botId) {
