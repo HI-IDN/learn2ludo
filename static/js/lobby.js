@@ -73,6 +73,7 @@ function renderLobbyBoardPreview() {
 
   const clone = src.cloneNode(true);
   clone.removeAttribute('id');
+  clone.querySelectorAll('foreignObject').forEach(el => el.remove());
   // Force 200×200 — overrides any inline size board.js may have set
   clone.setAttribute('width', '200');
   clone.setAttribute('height', '200');
