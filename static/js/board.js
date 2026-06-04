@@ -79,15 +79,19 @@ function buildBoardGeometry(yardCount, homeLength, pawnsPerPlayer, S) {
   // R_arc: distance from board centre to each arm's outermost corner cell (includes delta offset).
   const R_arc = Math.sqrt(Math.pow((n + 1) * c + delta, 2) + c * c);
 
-  // Logo anchor: 70 % of the way to the arc, along the bisector.
-  // Logo size fits the wedge width available at that distance.
+  // Logo: place at the inscribed circle of the yard sector (largest circle fitting
+  // within the wedge, touching both straight edges and the outer arc).
+  // For a sector with half-angle α=π/N and outer radius R=S/2:
+  //   centre distance d = R/(1+sin α),  inscribed radius ρ = R·sin α/(1+sin α)
+  //   max square side (fitting inside the inscribed circle) = ρ√2
   const _sinN = Math.sin(Math.PI / yardCount);
-  const _distLogo = 0.70 * R_arc;
+  const _R_board = S / 2;
+  const _logoD = _R_board / (1 + _sinN);
+  const _logoSize = _R_board * _sinN / (1 + _sinN) * Math.SQRT2;
   const yardCenters = Array.from({length: yardCount}, (_, arm) => {
     const theta = Math.PI + arm * 2 * Math.PI / yardCount;
     const bisector = theta + Math.PI / yardCount;
-    const size = Math.max(2 * (_distLogo * _sinN - c), 2 * c);
-    return {x: cx + _distLogo * Math.cos(bisector), y: cy + _distLogo * Math.sin(bisector), size};
+    return {x: cx + _logoD * Math.cos(bisector), y: cy + _logoD * Math.sin(bisector), size: _logoSize};
   });
 
   // Pawn slots: at the hypothetical cell adjacent to the outermost home-stretch cell (H1),
@@ -274,26 +278,23 @@ function drawBoard(){
     const lxi=-Math.sin(ti), lyi=Math.cos(ti);
     const axj=Math.cos(tj), ayj=Math.sin(tj);
     const lxj=-Math.sin(tj), lyj=Math.cos(tj);
-    // co = 1.5c + 4px: outer edge of lateral arm cells plus a small white margin.
-    // The extra 4px keeps yard colour clear of the track cells and gives the arc
-    // just enough reach to cover the arm's outermost cell corners for all N.
-    const co=c*1.5+4;
-    const Px=_cx+co*lxi+_cot*co*axi, Py=_cy+co*lyi+_cot*co*ayi;
+    // co_inner: gap at the centre side (keeps yard clear of track cells near polygon).
+    // co_outer: flush at the board edge (no gap at arm outermost corners).
+    // The lateral boundary lines taper from co_inner (Px) to co_outer (T1/T2).
+    const co_inner=c*1.5+4, co_outer=c*1.5;
+    const Px=_cx+co_inner*lxi+_cot*co_inner*axi, Py=_cy+co_inner*lyi+_cot*co_inner*ayi;
     if(_yN===4){
-      // Classic square: straight lines to board edge, clipped to rounded rect.
-      const B1x=_cx+co*lxi+_FAR*axi, B1y=_cy+co*lyi+_FAR*ayi;
-      const B2x=_cx-co*lxj+_FAR*axj, B2y=_cy-co*lyj+_FAR*ayj;
+      const B1x=_cx+co_outer*lxi+_FAR*axi, B1y=_cy+co_outer*lyi+_FAR*ayi;
+      const B2x=_cx-co_outer*lxj+_FAR*axj, B2y=_cy-co_outer*lyj+_FAR*ayj;
       html+=`<path d="M ${Px},${Py} L ${B1x},${B1y} L ${B2x},${B2y} Z" fill="${col}" opacity=".92" clip-path="url(#board-clip)"/>`;
     } else {
-      // Arc yard: T1/T2 are where each arm's lateral boundary meets the board circle,
-      // so the arc at radius S/2 traces the board edge exactly.
-      const R=S/2, t=Math.sqrt(Math.max(0,R*R-co*co));
-      const T1x=_cx+co*lxi+t*axi, T1y=_cy+co*lyi+t*ayi;
-      const T2x=_cx-co*lxj+t*axj, T2y=_cy-co*lyj+t*ayj;
+      const R=S/2, t=Math.sqrt(Math.max(0,R*R-co_outer*co_outer));
+      const T1x=_cx+co_outer*lxi+t*axi, T1y=_cy+co_outer*lyi+t*ayi;
+      const T2x=_cx-co_outer*lxj+t*axj, T2y=_cy-co_outer*lyj+t*ayj;
       html+=`<path d="M ${Px},${Py} L ${T1x},${T1y} A ${R},${R},0,0,1,${T2x},${T2y} Z" fill="${col}" opacity=".92"/>`;
     }
-    // Logo: sized to 75 % of available wedge width, rotated along bisector
-    const ls=size*0.75;
+    // size is already the max square fitting the inscribed circle; use it directly.
+    const ls=size;
     const _bisDeg=((ti+Math.PI/_yN)*180/Math.PI-270+720)%360;
     html+=`<image href="/static/logo.svg" x="${x-ls/2}" y="${y-ls/2}" width="${ls}" height="${ls}" opacity="0.18" style="pointer-events:none;" transform="rotate(${_bisDeg.toFixed(1)},${x},${y})"/>`;
   });
