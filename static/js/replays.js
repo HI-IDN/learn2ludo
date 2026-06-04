@@ -160,7 +160,9 @@ function renderReplayPlayers(g) {
   const players = Array.isArray(g.players) ? [...g.players] : [];
   if (!players.length) return escapeReplayName(g.player_count ?? '-');
   players.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+  const count = g.player_count ?? players.length;
   return `<div class="replays-player-list">
+    <span class="replays-player-count">${escapeReplayName(count)}p</span>
     ${players.map(p => renderReplayPlayerLabel(p)).join('')}
   </div>`;
 }

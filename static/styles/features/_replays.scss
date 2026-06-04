@@ -190,6 +190,16 @@
   }
 }
 
+.replays-player-count {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 0;
+  color: $color-text-3;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
 // ── Game cards ────────────────────────────────────────────────────────────────
 
 .replays-list {
