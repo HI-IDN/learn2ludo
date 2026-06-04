@@ -11,12 +11,12 @@
     </div>
 
     <!-- Locked state -->
-    <div id="admin-locked-msg" class="card" style="background:var(--bg2); max-width:400px;">
+    <div id="admin-locked-msg" class="settings-card" style="max-width:400px;">
       <p style="font-size:14px; font-weight:600; margin-bottom:4px;">Admin access required</p>
-      <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">Enter the admin password to manage settings and tabs.</p>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">Enter the admin password to continue. The password is set by your system administrator when the server is started.</p>
       <div class="alert" id="admin-alert"></div>
-      <div style="display:flex; gap:8px;">
-        <input type="password" id="admin-pw" placeholder="Password…" style="flex:1;" onkeydown="if(event.key==='Enter')doAdminLogin()">
+      <div class="rule-row" style="border:none; padding:0; margin-top:4px;">
+        <input type="password" id="admin-pw" placeholder="Password…" class="settings-number" style="flex:1; width:auto;" onkeydown="if(event.key==='Enter')doAdminLogin()">
         <button class="btn btn-primary" onclick="doAdminLogin()">Unlock</button>
       </div>
     </div>
