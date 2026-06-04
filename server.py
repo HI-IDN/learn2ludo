@@ -43,6 +43,7 @@ CONFIG_PATH   = Path(__file__).parent / "config" / "tabs.json"
 STATS_PATH    = Path(__file__).parent / "config" / "stats.json"
 GAMES_DIR     = Path(__file__).parent / "data" / "games"
 PLAYERS_PATH  = Path(__file__).parent / "data" / "players.json"
+BUGS_DIR      = Path(__file__).parent / "data" / "bugs"
 
 active_game: Optional[GameSession] = None
 active_env: Optional[LudoEnv] = None
@@ -176,6 +177,65 @@ def update_tabs(body: TabUpdate):
     cfg["tabs"] = body.tabs
     save_config(cfg)
     return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# Bug reports
+# ---------------------------------------------------------------------------
+import base64 as _base64
+import datetime as _dt
+import random as _random
+import string as _string
+
+
+class BugReportBody(BaseModel):
+    what_doing: str = ""
+    what_wrong: str = ""
+    page_state: dict = {}
+    screenshot_b64: str = ""
+
+
+@app.post("/api/bugs/report")
+def submit_bug(body: BugReportBody):
+    BUGS_DIR.mkdir(parents=True, exist_ok=True)
+    (BUGS_DIR / "screenshots").mkdir(exist_ok=True)
+
+    ts = _dt.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    suffix = "".join(_random.choices(_string.ascii_lowercase + _string.digits, k=4))
+    report_id = f"bug_{ts}_{suffix}"
+
+    has_screenshot = bool(body.screenshot_b64)
+    report = {
+        "id": report_id,
+        "timestamp": _dt.datetime.utcnow().isoformat() + "Z",
+        "what_doing": body.what_doing,
+        "what_wrong": body.what_wrong,
+        "page_state": body.page_state,
+        "screenshot": f"screenshots/{report_id}.png" if has_screenshot else None,
+    }
+    (BUGS_DIR / f"{report_id}.json").write_text(json.dumps(report, indent=2))
+
+    if has_screenshot:
+        raw = body.screenshot_b64.split(",")[-1]
+        (BUGS_DIR / "screenshots" / f"{report_id}.png").write_bytes(
+            _base64.b64decode(raw)
+        )
+
+    return {"id": report_id}
+
+
+@app.get("/api/bugs")
+def list_bugs(request: Request):
+    require_admin(request)
+    if not BUGS_DIR.exists():
+        return {"reports": []}
+    reports = []
+    for f in sorted(BUGS_DIR.glob("bug_*.json"), reverse=True):
+        try:
+            reports.append(json.loads(f.read_text()))
+        except Exception:
+            pass
+    return {"reports": reports}
 
 
 # ---------------------------------------------------------------------------

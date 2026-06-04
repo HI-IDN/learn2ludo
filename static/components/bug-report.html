@@ -1,0 +1,37 @@
+<!-- Bug report FAB + modal -->
+<button class="bug-fab" id="bug-fab" onclick="openBugReport()" title="Report a bug" aria-label="Report a bug">
+  <i class="ti ti-bug"></i>
+</button>
+
+<div class="bug-modal-overlay" id="bug-modal-overlay" style="display:none;" onclick="if(event.target===this)closeBugReport()">
+  <div class="bug-modal" role="dialog" aria-modal="true" aria-labelledby="bug-modal-title">
+    <div class="bug-modal-header">
+      <span class="bug-modal-title" id="bug-modal-title"><i class="ti ti-bug"></i> Report a bug</span>
+      <button class="bug-modal-close" onclick="closeBugReport()" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="bug-modal-body" id="bug-modal-body">
+      <label class="bug-label" for="bug-doing">What were you doing?</label>
+      <input class="bug-input" id="bug-doing" type="text" placeholder="e.g. Playing against Apollo, rolled a 6…" maxlength="200">
+
+      <label class="bug-label" for="bug-wrong">What went wrong?</label>
+      <textarea class="bug-textarea" id="bug-wrong" rows="4" placeholder="Describe what you expected to happen vs what actually happened…" maxlength="1000"></textarea>
+
+      <p class="bug-note"><i class="ti ti-camera"></i> A screenshot of the current page will be included automatically.</p>
+    </div>
+
+    <div class="bug-modal-footer">
+      <button class="btn btn-ghost" onclick="closeBugReport()">Cancel</button>
+      <button class="btn btn-primary" id="bug-submit-btn" onclick="submitBugReport()">
+        <i class="ti ti-send"></i> Send report
+      </button>
+    </div>
+
+    <div class="bug-success" id="bug-success" style="display:none;">
+      <i class="ti ti-circle-check" style="font-size:32px; color:var(--color-green, #719500);"></i>
+      <p class="bug-success-msg">Report saved — thank you!</p>
+      <p class="bug-success-id" id="bug-success-id"></p>
+      <button class="btn btn-ghost" onclick="closeBugReport()">Close</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,164 @@
+@use "../base/variables" as *;
+
+// ── Floating action button ────────────────────────────────────────────────────
+
+.bug-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 800;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: $color-bg-alt;
+  border: 1.5px solid $border-light;
+  color: $color-text-2;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    background: $color-danger;
+    color: #fff;
+    border-color: $color-danger;
+    box-shadow: 0 4px 14px rgba(172,26,47,0.3);
+  }
+}
+
+// ── Modal overlay ─────────────────────────────────────────────────────────────
+
+.bug-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.bug-modal {
+  background: $color-bg-alt;
+  border-radius: $radius-lg;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.bug-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid $border-light;
+}
+
+.bug-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: $color-text;
+}
+
+.bug-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: $color-text-2;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: $radius;
+
+  &:hover { color: $color-text; }
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+
+.bug-modal-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bug-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text;
+}
+
+.bug-input,
+.bug-textarea {
+  width: 100%;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1.5px solid $border-medium;
+  border-radius: $radius;
+  background: $color-bg;
+  color: $color-text;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+  }
+}
+
+.bug-note {
+  font-size: 12px;
+  color: $color-text-3;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.bug-modal-footer {
+  padding: 12px 20px 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  border-top: 1px solid $border-light;
+}
+
+// ── Success state ─────────────────────────────────────────────────────────────
+
+.bug-success {
+  padding: 32px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.bug-success-msg {
+  font-size: 15px;
+  font-weight: 600;
+  color: $color-text;
+  margin: 0;
+}
+
+.bug-success-id {
+  font-size: 12px;
+  color: $color-text-3;
+  font-family: monospace;
+  margin: 0 0 8px;
+}
