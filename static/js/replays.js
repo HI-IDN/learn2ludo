@@ -64,12 +64,18 @@ function moveReplaySurfaceToPlay() {
 }
 
 function quitReplayFromPage() {
+  if (typeof resetPostGame === 'function') resetPostGame();
   if (typeof clearReplayMode === 'function') clearReplayMode();
   moveReplaySurfaceToPlay();
   const viewer = document.getElementById('replays-viewer');
   const title = document.getElementById('replays-viewer-title');
   if (viewer) viewer.hidden = true;
   if (title) title.textContent = 'Replay';
+}
+
+function showReplayStatsFromPage() {
+  if (typeof showReplayStats !== 'function' || typeof replayData === 'undefined' || !replayData?.player_stats) return;
+  showReplayStats(replayData);
 }
 
 let _replaysPageGames = [];
