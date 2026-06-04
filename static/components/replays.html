@@ -8,35 +8,6 @@
     <div id="replays-admin-widget"></div>
   </div>
 
-  <!-- Filters -->
-  <div class="replays-filters">
-    <input class="replays-search" id="replays-search" type="search" placeholder="Search by name…" oninput="filterReplays()">
-
-    <div class="replays-filter-group">
-      <span class="replays-filter-label">Player count</span>
-      <div class="replays-pills" id="replays-filter-players"></div>
-    </div>
-
-    <div class="replays-filter-group">
-      <span class="replays-filter-label">Yards</span>
-      <div class="replays-pills" id="replays-filter-yards"></div>
-    </div>
-
-    <div class="replays-filter-group" id="replays-filter-person-group">
-      <span class="replays-filter-label">Person</span>
-      <div class="replays-pills" id="replays-filter-person"></div>
-    </div>
-
-    <div class="replays-filter-group" id="replays-filter-result-group" style="display:none;">
-      <span class="replays-filter-label">Result</span>
-      <div class="replays-pills" id="replays-filter-result">
-        <button class="replays-pill active" data-val="all"  onclick="setResultFilter('all', this)">All</button>
-        <button class="replays-pill"         data-val="won"  onclick="setResultFilter('won', this)">Won</button>
-        <button class="replays-pill"         data-val="lost" onclick="setResultFilter('lost', this)">Lost</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Replay viewer -->
   <div class="replays-viewer" id="replays-viewer" hidden>
     <div class="replays-viewer-head">
@@ -50,9 +21,8 @@
   </div>
 
   <!-- Game list -->
-  <div class="replays-ready-strip" id="replays-ready-strip"></div>
   <div class="replays-count" id="replays-count"></div>
-  <div class="replays-list" id="replays-list">
-    <p class="replays-empty">Loading…</p>
+  <div class="replay-picker-list replays-page-list" id="replays-list">
+    <p class="replay-picker-empty">Loading…</p>
   </div>
 </div>
