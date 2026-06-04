@@ -481,7 +481,7 @@ function requestNewGame(){
       <div class="new-game-confirm">
         <span class="new-game-confirm-msg"><i class="fa-solid fa-triangle-exclamation"></i> Abandon current game?</span>
         <div class="new-game-confirm-btns">
-          <button class="btn btn-danger btn-sm" onclick="cancelNewGame();switchTab('lobby')">Yes, go to Setup</button>
+          <button class="btn btn-danger btn-sm" onclick="cancelNewGame();if(typeof autoSaveAbandoned==='function')autoSaveAbandoned();switchTab('lobby')">Yes, go to Setup</button>
           <button class="btn btn-sm" onclick="cancelNewGame()">Cancel</button>
         </div>
       </div>`;

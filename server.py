@@ -623,6 +623,7 @@ import uuid as _uuid
 class SaveGameBody(BaseModel):
     name: str = ""
     filename: str = ""   # if set, overwrite existing file
+    incomplete: bool = False
     state: dict
 
 
@@ -637,7 +638,7 @@ def save_game_manually(body: SaveGameBody):
     path = GAMES_DIR / filename
     if not path.parent == GAMES_DIR:
         raise HTTPException(status_code=400, detail="Invalid filename")
-    state = {**body.state, "_name": body.name or None}
+    state = {**body.state, "_name": body.name or None, "_incomplete": body.incomplete or False}
     path.write_text(json.dumps(state, indent=2))
     return {"filename": filename}
 
@@ -698,6 +699,7 @@ def list_games():
             games.append({
                 "filename": f.name,
                 "name": data.get("_name") or None,
+                "incomplete": bool(data.get("_incomplete")),
                 "started_at_ms": data.get("started_at_ms"),
                 "finished_at_ms": data.get("finished_at_ms"),
                 "player_count": data.get("num_players") or cfg.get("player_count"),

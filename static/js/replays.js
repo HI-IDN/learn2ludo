@@ -53,8 +53,10 @@ function setWinnerFilter(val, btn) {
 }
 
 function filterReplays() {
+  const isAdmin = typeof adminToken !== 'undefined' && adminToken;
   const search = (document.getElementById('replays-search')?.value || '').toLowerCase();
   const filtered = _allGames.filter(g => {
+    if (g.incomplete && !isAdmin) return false;           // hide incomplete from non-admin
     if (_replayFilterPlayers !== 'all' && g.player_count !== _replayFilterPlayers) return false;
     if (_replayFilterYards !== 'all' && g.yard_count !== _replayFilterYards) return false;
     if (_replayFilterWinner !== 'all') {
@@ -116,12 +118,14 @@ function _renderGameCard(g, isAdmin) {
     <button class="replays-card-action" title="Rename" onclick="event.stopPropagation(); startRenameReplay('${g.filename}', this)"><i class="ti ti-pencil"></i></button>
     <button class="replays-card-action danger" title="Delete" onclick="event.stopPropagation(); deleteReplay('${g.filename}', this)"><i class="ti ti-trash"></i></button>` : '';
 
-  return `<div class="replays-card" onclick="loadReplayFromPage('${g.filename}')">
+  const incompleteBadge = g.incomplete ? `<span class="badge badge-purple" style="font-size:10px; margin-left:4px;">incomplete</span>` : '';
+  return `<div class="replays-card${g.incomplete ? ' incomplete' : ''}" onclick="loadReplayFromPage('${g.filename}')">
     <div class="replays-card-header">
       <div class="replays-card-title">
         ${displayName
           ? `<span class="replays-card-name">${displayName}</span><span class="replays-card-uuid">${uuid}</span>`
           : `<span class="replays-card-name unnamed">${uuid}</span>`}
+        ${incompleteBadge}
       </div>
       <div class="replays-card-actions">${adminBtns}</div>
     </div>

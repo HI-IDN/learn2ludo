@@ -140,24 +140,29 @@ function cancelSaveGame() {
   updateSaveGameButton();
 }
 
-async function _doSaveGame(name) {
+async function _doSaveGame(name, { incomplete = false, silent = false } = {}) {
   const data = compactGameState();
   if (!data) return;
   const btn = document.getElementById('save-game-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> Saving…'; }
+  if (btn && !silent) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader ti-spin"></i> Saving…'; }
   try {
     const r = await fetch('/api/games/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, filename: _currentSaveFilename || '', state: data }),
+      body: JSON.stringify({ name, filename: _currentSaveFilename || '', incomplete, state: data }),
     });
     const { filename } = await r.json();
     _currentSaveFilename = filename;
-    if (btn) { btn.disabled = false; btn.innerHTML = `<i class="ti ti-circle-check"></i> Saved`; }
-    setTimeout(() => cancelSaveGame(), 2000);
+    if (btn && !silent) { btn.disabled = false; btn.innerHTML = `<i class="ti ti-circle-check"></i> Saved`; }
+    if (!silent) setTimeout(() => cancelSaveGame(), 2000);
   } catch (_) {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save game'; }
+    if (btn && !silent) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-device-floppy"></i> Save game'; }
   }
+}
+
+async function autoSaveAbandoned() {
+  if (!gameState || !gameHasStarted()) return;
+  await _doSaveGame(_currentSaveGameName || '', { incomplete: true, silent: true });
 }
 
 function updateSaveGameButton() {

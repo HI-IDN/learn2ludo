@@ -221,3 +221,8 @@
   width: 100%;
   font-family: inherit;
 }
+
+.replays-card.incomplete {
+  opacity: 0.75;
+  border-style: dashed;
+}
