@@ -116,11 +116,16 @@
       </div>
 
       <p class="howto-text">
-        Each <strong>weight</strong> controls how much that feature matters. A weight of 0 means the bot ignores that feature entirely. A large positive weight makes the bot strongly prefer moves that score well on it.
+        Each <strong>weight</strong> is a number between −1 and +1. Zero means the feature is ignored. A positive value makes the bot prefer moves that score well on it; a negative value makes it actively avoid them.
       </p>
 
+      <div class="howto-callout">
+        <i class="ti ti-info-circle"></i>
+        <span>Every feature is normalised to a 0–1 range before scoring. This matters: it means a weight of 0.8 on Capture carries the same magnitude as 0.8 on Progress. If features had different scales, the same weight value would mean different things for each one.</span>
+      </div>
+
       <div class="howto-example">
-        <div class="howto-example-label">Example — Apollo evaluates two moves:</div>
+        <div class="howto-example-label">Example — a capture-heavy bot evaluates two moves:</div>
         <table class="howto-table">
           <thead>
             <tr>
@@ -131,13 +136,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>Capture</td><td>5</td><td>1</td><td>0</td></tr>
-            <tr><td>Progress</td><td>2</td><td>0.3</td><td>0.8</td></tr>
-            <tr><td>Safety</td><td>1</td><td>0</td><td>1</td></tr>
+            <tr><td>Capture</td><td>0.80</td><td>1.00</td><td>0.00</td></tr>
+            <tr><td>Progress</td><td>0.30</td><td>0.40</td><td>0.90</td></tr>
+            <tr><td>Safety</td><td>0.20</td><td>0.00</td><td>1.00</td></tr>
             <tr class="howto-table-total">
               <td colspan="2"><strong>Total score</strong></td>
-              <td><strong>5.6</strong> ✓ chosen</td>
-              <td>2.6</td>
+              <td><strong>0.92</strong> ✓ chosen</td>
+              <td>0.47</td>
             </tr>
           </tbody>
         </table>

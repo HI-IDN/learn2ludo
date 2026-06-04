@@ -18,12 +18,17 @@ let liveTimelineSnapshots = [];
 let liveTimelineIndex = -1;
 let liveTimelineLastKey = null;
 
+function boardTrackSize(yardCount, homeLength) {
+  const armHomeLength = yardCount === 2 ? homeLength + 1 : homeLength;
+  return yardCount * (2 * armHomeLength + 1);
+}
+
 function boardLayout(trackSize=null, yardCount=null) {
   yardCount = yardCount ?? settings.board_yard_count ?? 4;
   const hl = settings.board_home_length ?? 6;
-  trackSize = trackSize ?? yardCount * (2 * hl + 1);
-  const s = Math.floor(trackSize / yardCount);  // cells per arm = 2*hl+1
-  const n = (s - 1) / 2;                        // home_length
+  trackSize = trackSize ?? boardTrackSize(yardCount, hl);
+  const s = Math.floor(trackSize / yardCount);  // cells per arm
+  const n = (s - 1) / 2;
   const startOff = n + 2;                        // start at local 1-based pos n+3 = right col cell 2
   const safeOffset = settings.board_safe_offset ?? 7;
   const starts = Array.from({length: yardCount}, (_, i) => (i * s + startOff) % trackSize);
@@ -152,7 +157,7 @@ function normalizeEngineState(raw) {
   });
   return {
     ...state,
-    config:{board:{track_size:cfg.board?.track_size||52,yard_count:cfg.board?.yard_count||4,home_length:cfg.board?.home_length||6,pawns_per_player:pawnsPerPlayer}, player_count:playerCount},
+    config:{board:{track_size:cfg.board?.track_size||layout.track_size||52,yard_count:cfg.board?.yard_count||4,home_length:cfg.board?.home_length||6,pawns_per_player:pawnsPerPlayer}, player_count:playerCount},
     board:layout, slots, num_players:playerCount,
     current_player: state.current_player ?? state.player ?? 0,
     dice: state.dice ?? state.last_roll ?? 0,
@@ -248,7 +253,7 @@ function getGameRules(){ return {six_to_enter:true, six_extra_turn:true, capture
 function readBoardConfig() {
   const yardCount = Math.max(2, Math.min(6, parseInt(document.getElementById('board-yard-count')?.value || settings.board_yard_count || 4)));
   const homeLength = Math.max(2, parseInt(document.getElementById('board-home-length')?.value || settings.board_home_length || 6));
-  const trackSize = yardCount * (2 * homeLength + 1);
+  const trackSize = boardTrackSize(yardCount, homeLength);
   const pawns = Math.max(1, Math.min(8, parseInt(document.getElementById('board-pawns-per-player')?.value || settings.pawns_per_player || 4)));
   const safeOffset = Math.max(1, parseInt(document.getElementById('board-safe-offset')?.value || settings.board_safe_offset || 7));
   const stackHome = document.getElementById('board-stack-home')?.checked ?? !!settings.stack_home_pawns;
@@ -452,7 +457,7 @@ async function newGame(startingPlayer=0){
   if(_gameStartTime) _startTurnTracking(); else startElapsedTimer();
   renderGame();
 }
-function makeDemoState(n=4,explicit_slots=null){ const slots=explicit_slots||Array.from({length:n},(_,i)=>i); const hl=settings.board_home_length||6; const yc=settings.board_yard_count||Math.max(n,4); const ts=yc*(2*hl+1); return normalizeEngineState({config:{player_count:n,board:{track_size:ts,yard_count:yc,home_length:hl}}, slots, phase:'rolling', player:0}); }
+function makeDemoState(n=4,explicit_slots=null){ const slots=explicit_slots||Array.from({length:n},(_,i)=>i); const hl=settings.board_home_length||6; const yc=settings.board_yard_count||Math.max(n,4); const ts=boardTrackSize(yc,hl); return normalizeEngineState({config:{player_count:n,board:{track_size:ts,yard_count:yc,home_length:hl}}, slots, phase:'rolling', player:0}); }
 function animateDice(finalValue){
   const face=document.getElementById('dice-face');
   if((settings?.auto_play_speed||'off')==='fast'){ face.textContent=DICE_FACES[finalValue]||DICE_FACES[1]; return Promise.resolve(); }
