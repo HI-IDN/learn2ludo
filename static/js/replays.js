@@ -149,11 +149,50 @@ function renderReplayTableRow(g, isAdmin) {
       : `<span class="replays-table-name${isNamed ? '' : ' unnamed'}">${escapeReplayName(displayName)}</span>`;
     return `<tr class="${selected ? 'selected' : ''}" data-filename="${escapeReplayName(g.filename)}" onclick="loadReplayFromPage('${g.filename}')">
       <td>${nameCell}</td>
-      <td>${g.player_count ?? '-'}</td>
+      <td>${renderReplayPlayers(g)}</td>
       <td>${g.yard_count ?? '-'}</td>
       <td>${dt}</td>
       ${isAdmin ? `<td class="replays-table-actions"><button class="replay-picker-action danger" title="Delete" onclick="event.stopPropagation(); deleteReplay('${g.filename}')"><i class="ti ti-trash"></i></button></td>` : ''}
     </tr>`;
+}
+
+function renderReplayPlayers(g) {
+  const players = Array.isArray(g.players) ? [...g.players] : [];
+  if (!players.length) return escapeReplayName(g.player_count ?? '-');
+  players.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+  return `<div class="replays-player-list">
+    ${players.map(p => renderReplayPlayerLabel(p)).join('')}
+  </div>`;
+}
+
+function renderReplayPlayerLabel(player) {
+  const isBot = player.type === 'bot' || !!player.bot_id;
+  const label = isBot ? replayBotName(player.bot_id) : replayHumanName(player.human_id);
+  const fallback = `Player ${(player.index ?? 0) + 1}`;
+  const text = label || fallback;
+  const titleParts = [
+    fallback,
+    player.color,
+    isBot ? player.bot_id : player.human_id,
+  ].filter(Boolean);
+  return `<span class="replays-player-chip ${isBot ? 'bot' : 'human'}" title="${escapeReplayName(titleParts.join(' · '))}">
+    ${escapeReplayName(text)}
+  </span>`;
+}
+
+function replayHumanName(humanId) {
+  if (!humanId) return '';
+  const profile = typeof getProfileById === 'function' ? getProfileById(humanId) : null;
+  const profileName = typeof profileDisplayName === 'function' ? profileDisplayName(profile) : profile?.username;
+  if (profileName && profileName !== humanId) return profileName;
+  const sessionName = typeof getSessionProfileName === 'function' ? getSessionProfileName(humanId) : '';
+  return sessionName || humanId;
+}
+
+function replayBotName(botId) {
+  if (!botId) return '';
+  const registry = typeof getBotRegistry === 'function' ? getBotRegistry() : [];
+  return registry.find(bot => bot.id === botId)?.name || botId;
 }
 
 function sortReplaysBy(key) {

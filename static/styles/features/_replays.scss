@@ -164,6 +164,32 @@
   text-align: center !important;
 }
 
+.replays-player-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 380px;
+}
+
+.replays-player-chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  border: 1px solid $border-light;
+  border-radius: 999px;
+  padding: 2px 7px;
+  background: $color-bg-raised;
+  color: $color-text-2;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+
+  &.bot {
+    background: color-mix(in srgb, $color-primary 7%, #fff);
+    color: color-mix(in srgb, $color-primary 72%, #222);
+  }
+}
+
 // ── Game cards ────────────────────────────────────────────────────────────────
 
 .replays-list {
