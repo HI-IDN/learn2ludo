@@ -7,7 +7,8 @@
       "tldr": "Goddess of Discord",
       "description": "Chooses from valid moves without using strategy.",
       "icon": "/static/icons/eris.svg",
-      "status": "Available"
+      "status": "Available",
+      "weights": {}
     },
     {
       "id": "ares",
@@ -16,7 +17,10 @@
       "tldr": "God of War",
       "description": "Looks for chances to send opponent pawns back to their yard.",
       "icon": "/static/icons/ares.svg",
-      "status": "Available"
+      "status": "Available",
+      "weights": {
+        "capture": 1
+      }
     },
     {
       "id": "athena",
@@ -25,7 +29,10 @@
       "tldr": "Goddess of Wisdom",
       "description": "Keeps pawns safe before looking for other moves.",
       "icon": "/static/icons/athena.svg",
-      "status": "Available"
+      "status": "Available",
+      "weights": {
+        "safety": 1
+      }
     },
     {
       "id": "hestia",
@@ -34,7 +41,10 @@
       "tldr": "Goddess of the Hearth",
       "description": "Brings pawns home as directly as possible.",
       "icon": "/static/icons/hestia.svg",
-      "status": "Available"
+      "status": "Available",
+      "weights": {
+        "progress": 1
+      }
     },
     {
       "id": "hermes",
@@ -43,7 +53,10 @@
       "tldr": "God of Travel",
       "description": "Keeps pawns distributed across the board.",
       "icon": "/static/icons/hermes.svg",
-      "status": "Available"
+      "status": "Available",
+      "weights": {
+        "spread": 1
+      }
     },
     {
       "id": "hephaestus",
@@ -52,7 +65,10 @@
       "tldr": "God of the Forge",
       "description": "Builds defensive stacks with friendly pawns.",
       "icon": "/static/icons/hephaestus.svg",
-      "status": "Available"
+      "status": "Available",
+      "weights": {
+        "blockade": 1
+      }
     },
     {
       "id": "artemis",
@@ -61,7 +77,10 @@
       "tldr": "Goddess of the Hunt",
       "description": "Gets pawns out of the yard whenever possible.",
       "icon": "/static/icons/artemis.svg",
-      "status": "Available"
+      "status": "Available",
+      "weights": {
+        "activation": 1
+      }
     },
     {
       "id": "apollo",
@@ -70,7 +89,13 @@
       "tldr": "God of Order",
       "description": "Balanced weighted bot combining capture, safety, progress, and activation.",
       "icon": "/static/icons/apollo.svg",
-      "status": "Template"
+      "status": "Template",
+      "weights": {
+        "capture": 0.3,
+        "safety": 0.35,
+        "progress": 0.25,
+        "activation": 0.1
+      }
     }
   ]
 }
