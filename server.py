@@ -197,8 +197,11 @@ class BugReportBody(BaseModel):
 
 @app.post("/api/bugs/report")
 def submit_bug(body: BugReportBody):
-    BUGS_DIR.mkdir(parents=True, exist_ok=True)
-    (BUGS_DIR / "screenshots").mkdir(exist_ok=True)
+    reports_dir     = BUGS_DIR / "reports"
+    screenshots_dir = BUGS_DIR / "screenshots"
+    games_dir       = BUGS_DIR / "games"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    screenshots_dir.mkdir(parents=True, exist_ok=True)
 
     ts = _dt.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     suffix = "".join(_random.choices(_string.ascii_lowercase + _string.digits, k=4))
@@ -209,10 +212,9 @@ def submit_bug(body: BugReportBody):
     game_state = body.page_state.get("game_state")
     game_file = None
     if active_tab == "play" and game_state:
-        games_dir = BUGS_DIR / "games"
-        games_dir.mkdir(exist_ok=True)
-        game_file = f"games/{report_id}.json"
-        (BUGS_DIR / game_file).write_text(json.dumps(game_state, indent=2))
+        games_dir.mkdir(parents=True, exist_ok=True)
+        (games_dir / f"{report_id}.json").write_text(json.dumps(game_state, indent=2))
+        game_file = f"{report_id}.json"
 
     has_screenshot = bool(body.screenshot_b64)
     report = {
@@ -222,14 +224,14 @@ def submit_bug(body: BugReportBody):
         "what_wrong": body.what_wrong,
         "active_tab": active_tab,
         "game_file": game_file,
-        "screenshot": f"screenshots/{report_id}.png" if has_screenshot else None,
+        "screenshot": f"{report_id}.png" if has_screenshot else None,
         "page_state": {k: v for k, v in body.page_state.items() if k != "game_state"},
     }
-    (BUGS_DIR / f"{report_id}.json").write_text(json.dumps(report, indent=2))
+    (reports_dir / f"{report_id}.json").write_text(json.dumps(report, indent=2))
 
     if has_screenshot:
         raw = body.screenshot_b64.split(",")[-1]
-        (BUGS_DIR / "screenshots" / f"{report_id}.png").write_bytes(
+        (screenshots_dir / f"{report_id}.png").write_bytes(
             _base64.b64decode(raw)
         )
 
@@ -239,10 +241,11 @@ def submit_bug(body: BugReportBody):
 @app.get("/api/bugs")
 def list_bugs(request: Request):
     require_admin(request)
-    if not BUGS_DIR.exists():
+    reports_dir = BUGS_DIR / "reports"
+    if not reports_dir.exists():
         return {"reports": []}
     reports = []
-    for f in sorted(BUGS_DIR.glob("bug_*.json"), reverse=True):
+    for f in sorted(reports_dir.glob("bug_*.json"), reverse=True):
         try:
             reports.append(json.loads(f.read_text()))
         except Exception:
