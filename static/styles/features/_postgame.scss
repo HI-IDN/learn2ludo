@@ -428,6 +428,43 @@
   line-height: 1.35;
 }
 
+.pg-reflection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pg-reflection-note-card {
+  border: 1px solid color-mix(in srgb, var(--pc) 28%, #{$border-light});
+  border-left: 4px solid var(--pc);
+  border-radius: $radius;
+  background: color-mix(in srgb, var(--pc) 8%, #fff);
+  padding: 8px 10px;
+}
+
+.pg-reflection-note-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pc);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pg-reflection-note-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pc);
+}
+
+.pg-reflection-note-card p {
+  margin: 4px 0 0;
+  color: $color-text-2;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 // ── Footer ────────────────────────────────────────────────────────────────────
 
 .pg-footer {

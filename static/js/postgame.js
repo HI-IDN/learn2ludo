@@ -31,7 +31,7 @@ function showReplayStats(replayData) {
   if (_postgameShown) return;
   if (!replayData?.player_stats) return;
   _postgameShown = true;
-  _reflections   = [];
+  _reflections   = Array.isArray(replayData.reflections) ? replayData.reflections : [];
   _playerStats   = replayData.player_stats;
   if (replayData.winner       !== undefined) gameState.winner       = replayData.winner;
   if (replayData.winner_color !== undefined) gameState.winner_color = replayData.winner_color;
@@ -213,7 +213,7 @@ function _mountStatsSidePanel() {
 
       ${hasReflections ? `
       <div class="pg-section">
-        <span class="pg-section-title">Self-perception vs actual play</span>
+        <span class="pg-section-title">Aggression and risk perception</span>
         <p class="pg-section-hint">◆ Measured &nbsp;○ Self-rated</p>
         <div class="pg-scatter-row">
           <div>
@@ -226,6 +226,14 @@ function _mountStatsSidePanel() {
         </div>
         <div class="pg-scatter-y-labels-row">
           <span>Risky</span><span style="margin-left:auto">Cautious</span>
+        </div>
+      </div>` : ''}
+
+      ${hasReflections ? `
+      <div class="pg-section">
+        <span class="pg-section-title">Player reflections</span>
+        <div class="pg-reflection-list">
+          ${_buildReflectionNotes(stats)}
         </div>
       </div>` : ''}
 
@@ -297,6 +305,7 @@ function _buildStatTable(stats, captureMatrix, blockMatrix) {
   </div>`;
 
   const sep = label => `<div class="pg-stat-sep"><span>${label}</span></div>`;
+  const luckyRatings = _reflections.filter(r => r.self_lucky != null);
 
   const row = (label, key, opts = {}) => {
     const { exp, fmt, derived, cls } = opts;
@@ -321,6 +330,14 @@ function _buildStatTable(stats, captureMatrix, blockMatrix) {
     row('Avg roll',     'dice_avg',   { fmt: v => v.toFixed(2) }),
     row('Luck (avg−3.5)', 'luck_score', { fmt: v => (v>0?'+':'')+v.toFixed(2) }),
     row('Sixes',          'sixes_pct',  { fmt: v => v+'%' }),
+    luckyRatings.length ? row('Self-rated luck', null, {
+      exp: '—',
+      cls: 'pg-self-row',
+      derived: s => {
+        const ref = luckyRatings.find(r => r.player === s.player);
+        return ref ? _luckLabel(ref.self_lucky) : null;
+      },
+    }) : '',
 
     sep('Captures & Blockades'),
     row('Captures made',  'captures_made'),
@@ -342,20 +359,6 @@ function _buildStatTable(stats, captureMatrix, blockMatrix) {
     row('Avg spaces left',  'avg_spaces_remaining', { exp: '—' }),
   ].join('');
 
-  // Self-rated luck row if any reflections exist
-  const luckyRatings = _reflections.filter(r => !r.skipped && r.self_lucky != null);
-  const luckyRow = luckyRatings.length ? `
-    <div class="pg-stat-sep"><span>Perception</span></div>
-    <div class="pg-stat-row pg-self-row">
-      <span class="pg-stat-label">Self-rated luck</span><span class="pg-exp-col">—</span>
-      ${stats.map(s => {
-        const ref = luckyRatings.find(r => r.player === s.player);
-        if (!ref) return '<span>—</span>';
-        const labels = ['','Lucky','Somewhat lucky','Neutral','Somewhat unlucky','Unlucky'];
-        return `<span title="${labels[ref.self_lucky]||''}">${ref.self_lucky}</span>`;
-      }).join('')}
-    </div>` : '';
-
   const matrices = n >= 2 ? `
     <div class="pg-stat-sep"><span>Capture breakdown</span></div>
     <div class="pg-matrices">
@@ -363,7 +366,7 @@ function _buildStatTable(stats, captureMatrix, blockMatrix) {
       ${_matrixHTML(stats, blockMatrix,   'Blocked', 'By')}
     </div>` : '';
 
-  return header + sections + luckyRow + matrices;
+  return header + sections + matrices;
 }
 
 // ── Dice histogram ────────────────────────────────────────────────────────────
@@ -419,9 +422,8 @@ function _buildReflectionDescriptions(stats) {
   const labels = {
     agg:  ['','Aggressive','Somewhat aggressive','Neutral','Somewhat passive','Passive'],
     risk: ['','Risky','Somewhat risky','Balanced','Somewhat cautious','Cautious'],
-    luck: ['','Lucky','Somewhat lucky','Neutral','Somewhat unlucky','Unlucky'],
   };
-  return (_playerStats || []).map(s => {
+  return stats.map(s => {
     const ref = _reflections.find(r => r.player === s.player);
     const hex = COLORS[s.color] || '#888';
     const name = escapeAttr(gamePlayerName(s.player));
@@ -430,12 +432,30 @@ function _buildReflectionDescriptions(stats) {
       <span class="pg-desc-name" style="color:${hex}">${name}</span>
       <span class="pg-desc-text">
         ${labels.agg[ref.self_aggressive]||ref.self_aggressive},
-        ${labels.risk[ref.self_risky]||ref.self_risky},
-        ${labels.luck[ref.self_lucky]||ref.self_lucky}
+        ${labels.risk[ref.self_risky]||ref.self_risky}
       </span>
-      <span class="pg-desc-note">${escapeAttr(ref.description || '')}</span>
     </div>`;
   }).join('');
+}
+
+function _luckLabel(value) {
+  const labels = ['', 'Lucky', 'Somewhat lucky', 'Neutral', 'Somewhat unlucky', 'Unlucky'];
+  return labels[value] || value;
+}
+
+function _buildReflectionNotes(stats) {
+  return stats.map(s => {
+    const ref = _reflections.find(r => r.player === s.player);
+    if (!ref?.description) return '';
+    const hex = COLORS[s.color] || '#888';
+    return `<div class="pg-reflection-note-card" style="--pc:${hex}">
+      <div class="pg-reflection-note-head">
+        <span class="pg-reflection-note-dot"></span>
+        <span>${escapeAttr(gamePlayerName(s.player))}</span>
+      </div>
+      <p>${escapeAttr(ref.description)}</p>
+    </div>`;
+  }).filter(Boolean).join('');
 }
 
 function _drawScatter() {
