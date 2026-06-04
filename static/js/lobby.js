@@ -262,10 +262,24 @@ function lobbyToggleSlot(slotIdx) {
     ? active.filter(s => s !== slotIdx)
     : [...active, slotIdx].sort((a, b) => a - b);
 
+  lobbyRemapPlayerSettings(active, next);
   settings.active_slots = next;
   settings.num_players  = next.length;
   persistSettings();
   renderLobbySlots();
+}
+
+function lobbyRemapPlayerSettings(active, next) {
+  ['player_types', 'bot_ids', 'profile_ids', 'player_names'].forEach(key => {
+    if (!settings[key]) return;
+    const remapped = {};
+    next.forEach((slot, newIdx) => {
+      const oldIdx = active.indexOf(slot);
+      if (oldIdx !== -1 && settings[key][oldIdx] !== undefined)
+        remapped[newIdx] = settings[key][oldIdx];
+    });
+    settings[key] = remapped;
+  });
 }
 
 function lobbyBotSelect(slotIdx, playerIdx) {
