@@ -273,9 +273,10 @@ function drawBoard(){
     const lxi=-Math.sin(ti), lyi=Math.cos(ti);
     const axj=Math.cos(tj), ayj=Math.sin(tj);
     const lxj=-Math.sin(tj), lyj=Math.cos(tj);
-    // m: visual gap between yard colour and the track-cell edges
-    const m=c*0.12;
-    const co=c+m; // offset from arm axis to yard boundary (was exactly c, now slightly more)
+    // co = 1.5c: outer edge of the lateral arm cells (±c centre ± c/2 half-width).
+    // This makes the yard boundary flush with cell edges (no bleed through gaps)
+    // and aligns the yard inner corner exactly with the polygon vertices for all N.
+    const co=c*1.5;
     const Px=_cx+co*lxi+_cot*co*axi, Py=_cy+co*lyi+_cot*co*ayi;
     if(_yN===4){
       // Classic square: straight lines to board edge, clipped
