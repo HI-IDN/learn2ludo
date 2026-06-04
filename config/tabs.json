@@ -24,35 +24,8 @@
       "icon": "ti-dice",
       "enabled": true,
       "default_visible": true,
-      "order": 1,
-      "description": "Board and game controls"
-    },
-    {
-      "id": "settings",
-      "label": "Settings",
-      "icon": "ti-settings",
-      "enabled": false,
-      "default_visible": false,
       "order": 2,
-      "description": "Board rules and players — merged into Admin panel"
-    },
-    {
-      "id": "train",
-      "label": "Train",
-      "icon": "ti-brain",
-      "enabled": false,
-      "default_visible": false,
-      "order": 3,
-      "description": "RL training controls"
-    },
-    {
-      "id": "stats",
-      "label": "Stats & Replay",
-      "icon": "ti-chart-bar",
-      "enabled": true,
-      "default_visible": true,
-      "order": 4,
-      "description": "Win rates and history"
+      "description": "Board and game controls"
     },
     {
       "id": "bots",
@@ -60,8 +33,17 @@
       "icon": "ti-robot",
       "enabled": true,
       "default_visible": false,
-      "order": 5,
+      "order": 3,
       "description": "Saved bot models"
+    },
+    {
+      "id": "stats",
+      "label": "Stats",
+      "icon": "ti-chart-bar",
+      "enabled": true,
+      "default_visible": true,
+      "order": 4,
+      "description": "Win rates and game history"
     },
     {
       "id": "howto",
@@ -69,7 +51,7 @@
       "icon": "ti-school",
       "enabled": true,
       "default_visible": true,
-      "order": 6,
+      "order": 5,
       "description": "Plain-language guide to how bots make decisions"
     },
     {
@@ -78,8 +60,26 @@
       "icon": "ti-book",
       "enabled": true,
       "default_visible": true,
-      "order": 7,
+      "order": 6,
       "description": "AI and gameplay terms explained"
+    },
+    {
+      "id": "train",
+      "label": "Train",
+      "icon": "ti-brain",
+      "enabled": false,
+      "default_visible": false,
+      "order": 7,
+      "description": "RL training controls"
+    },
+    {
+      "id": "settings",
+      "label": "Settings",
+      "icon": "ti-settings",
+      "enabled": false,
+      "default_visible": false,
+      "order": 8,
+      "description": "Board rules and players — merged into Admin panel"
     },
     {
       "id": "admin",

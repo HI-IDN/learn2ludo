@@ -355,7 +355,7 @@ async function loadTabs(){
     {id:'lobby',label:'Players',icon:'ti-users',enabled:true,default_visible:true,order:0},
     {id:'play',label:'Play',icon:'ti-dice',enabled:true,default_visible:true,order:1},
     {id:'train',label:'Train',icon:'ti-brain',enabled:true,default_visible:false,order:3},
-    {id:'stats',label:'Stats & Replay',icon:'ti-chart-bar',enabled:true,default_visible:true,order:4},
+    {id:'stats',label:'Stats',icon:'ti-chart-bar',enabled:true,default_visible:true,order:4},
     {id:'bots',label:'Bots',icon:'ti-robot',enabled:true,default_visible:false,order:5},
     {id:'glossary',label:'Glossary',icon:'ti-book',enabled:true,default_visible:true,order:6},
     {id:'admin',label:'Admin',icon:'ti-shield',enabled:true,default_visible:true,order:99}
@@ -379,6 +379,7 @@ async function doAdminLogin(){
     document.getElementById('admin-auth-badge').textContent='unlocked';
     document.getElementById('admin-auth-badge').className='badge badge-green';
     document.getElementById('admin-logout-btn').style.display='';
+    updateTabConfig();
     renderTabs();
     switchTab('admin');
   } catch(e) { if(alert){ alert.textContent='Login failed.'; alert.style.display='block'; } }
@@ -398,7 +399,24 @@ async function doOverlayLogin(){
   if(adminToken){ closeOverlay(); switchTab('admin'); }
 }
 function closeOverlay(){ const o=document.getElementById('admin-overlay'); if(o)o.style.display='none'; }
-function updateTabConfig(){}
+function updateTabConfig(){
+  const list = document.getElementById('tab-config-list');
+  if (!list) return;
+  const manageable = tabConfig
+    .filter(t => t.id !== 'admin' && t.id !== 'settings')
+    .sort((a,b) => a.order - b.order);
+  list.innerHTML = manageable.map(t => `
+    <div class="rule-row" style="padding:10px 0; border-bottom:1px solid var(--border-light, #E2E5EE);">
+      <div>
+        <div class="rule-name"><i class="ti ${t.icon}" style="margin-right:6px;"></i>${t.label}</div>
+        <div class="rule-desc">${t.description || ''}</div>
+      </div>
+      <label class="toggle" title="Enable tab">
+        <input type="checkbox" ${t.enabled ? 'checked' : ''} onchange="tabConfig.find(x=>x.id==='${t.id}').enabled=this.checked">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>`).join('');
+}
 async function saveTabConfig(){
   if(!adminToken) return;
   const r = await fetch('/api/tabs', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({token: adminToken, tabs: tabConfig}) });
