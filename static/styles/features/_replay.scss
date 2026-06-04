@@ -39,3 +39,79 @@
   color: $color-text-2;
   font-variant-numeric: tabular-nums;
 }
+
+// ── Saved-game picker modal ───────────────────────────────────────────────────
+
+.replay-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.replay-picker {
+  background: $color-bg-alt;
+  border-radius: $radius-lg;
+  width: 100%;
+  max-width: 480px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.replay-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid $border-light;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.replay-picker-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.replay-picker-empty {
+  padding: 24px;
+  text-align: center;
+  color: $color-text-3;
+  font-size: 13px;
+}
+
+.replay-picker-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 1px solid $border-light;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover { background: $color-bg-raised; }
+  &:last-child { border-bottom: none; }
+}
+
+.replay-picker-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text;
+  font-family: monospace;
+}
+
+.replay-picker-meta {
+  font-size: 11px;
+  color: $color-text-3;
+}

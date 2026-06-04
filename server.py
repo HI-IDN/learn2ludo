@@ -585,6 +585,37 @@ def get_stats():
     return load_stats()
 
 
+@app.get("/api/games")
+def list_games():
+    if not GAMES_DIR.exists():
+        return {"games": []}
+    games = []
+    for f in sorted(GAMES_DIR.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+        try:
+            data = json.loads(f.read_text())
+            cfg = data.get("config", {})
+            board = cfg.get("board", {})
+            games.append({
+                "filename": f.name,
+                "started_at_ms": data.get("started_at_ms"),
+                "finished_at_ms": data.get("finished_at_ms"),
+                "player_count": cfg.get("player_count"),
+                "yard_count": board.get("yard_count"),
+                "winner": data.get("winner"),
+            })
+        except Exception:
+            pass
+    return {"games": games}
+
+
+@app.get("/api/games/{filename}")
+def get_game(filename: str):
+    path = GAMES_DIR / filename
+    if not path.exists() or not path.is_relative_to(GAMES_DIR):
+        raise HTTPException(status_code=404, detail="Game not found")
+    return json.loads(path.read_text())
+
+
 # ---------------------------------------------------------------------------
 # Serve frontend
 # ---------------------------------------------------------------------------

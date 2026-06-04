@@ -12,15 +12,10 @@ function renderLoadReplayButton() {
   const ctrl = document.getElementById('load-replay-control');
   if (!ctrl) return;
   ctrl.innerHTML = `
-    <input type="file"
-           id="replay-json-input"
-           accept="application/json,.json"
-           onchange="loadReplayJsonFile(this.files?.[0])"
-           hidden>
     <button class="btn btn-sm"
             id="load-replay-json-btn"
             onclick="requestLoadReplayJson()"
-            title="Load replay JSON">
+            title="Load a saved game">
       <i class="fa-solid fa-folder-open"></i> Replay
     </button>`;
 }
@@ -44,7 +39,7 @@ function prepareReplayBoard() {
   if (typeof setCurrentActionMode === 'function') setCurrentActionMode(false);
 }
 
-function requestLoadReplayJson() {
+async function requestLoadReplayJson() {
   if (typeof gameInProgress === 'function' && typeof gameHasStarted === 'function' && gameInProgress() && gameHasStarted()) {
     const ctrl = document.getElementById('load-replay-control');
     if (!ctrl) return;
@@ -65,24 +60,53 @@ function cancelLoadReplayJson() {
   renderLoadReplayButton();
 }
 
-function confirmLoadReplayJson() {
+async function confirmLoadReplayJson() {
   renderLoadReplayButton();
-  prepareReplayBoard();
-  document.getElementById('replay-json-input')?.click();
+  await openGamePicker();
 }
 
-async function loadReplayJsonFile(file) {
-  if (!file) return;
+async function openGamePicker() {
+  let games = [];
+  try {
+    const r = await fetch('/api/games');
+    games = (await r.json()).games || [];
+  } catch (_) {}
+
+  const overlay = document.createElement('div');
+  overlay.className = 'replay-picker-overlay';
+  overlay.innerHTML = `
+    <div class="replay-picker">
+      <div class="replay-picker-header">
+        <span><i class="fa-solid fa-folder-open"></i> Saved games</span>
+        <button class="bug-modal-close" onclick="this.closest('.replay-picker-overlay').remove()">&times;</button>
+      </div>
+      <div class="replay-picker-list">
+        ${games.length === 0
+          ? '<p class="replay-picker-empty">No saved games found.</p>'
+          : games.map(g => {
+              const dt = g.finished_at_ms ? new Date(g.finished_at_ms).toLocaleString() : '—';
+              const label = `${g.player_count}p · ${g.yard_count} yards`;
+              return `<button class="replay-picker-row" onclick="loadReplayByFilename('${g.filename}', this.closest('.replay-picker-overlay'))">
+                <span class="replay-picker-name">${g.filename.replace('.json','')}</span>
+                <span class="replay-picker-meta">${label} · ${dt}</span>
+              </button>`;
+            }).join('')}
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function loadReplayByFilename(filename, overlayEl) {
+  overlayEl?.remove();
   try {
     updateReplayStatus('Loading...');
-    const text = await readReplayFile(file);
-    loadReplayJson(JSON.parse(text));
+    prepareReplayBoard();
+    const r = await fetch(`/api/games/${encodeURIComponent(filename)}`);
+    if (!r.ok) throw new Error('Not found');
+    loadReplayJson(await r.json());
   } catch (err) {
     console.error('[Learn2Ludo] Replay load failed:', err);
     updateReplayStatus('Could not load replay');
-  } finally {
-    const input = document.getElementById('replay-json-input');
-    if (input) input.value = '';
     renderLoadReplayButton();
   }
 }
