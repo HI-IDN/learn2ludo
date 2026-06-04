@@ -79,6 +79,9 @@ function showReplayStatsFromPage() {
 }
 
 let _replaysPageGames = [];
+let _selectedReplayFilename = null;
+let _replaysSortKey = 'timestamp';
+let _replaysSortDir = 'desc';
 
 async function loadReplaysPage() {
   renderReplaysAdminWidget();
@@ -93,27 +96,75 @@ async function loadReplaysPage() {
   }
   const isAdmin = typeof adminToken !== 'undefined' && adminToken;
   if (count) count.textContent = `${_replaysPageGames.length} saved game${_replaysPageGames.length !== 1 ? 's' : ''}`;
-  if (list) list.innerHTML = renderReplaysPageRows(_replaysPageGames, isAdmin);
+  if (list) list.innerHTML = renderReplaysTable(_replaysPageGames, isAdmin);
 }
 
-function renderReplaysPageRows(games, isAdmin) {
+function renderReplaysTable(games, isAdmin) {
   if (!games.length) return '<p class="replay-picker-empty">No saved games found.</p>';
-  return games.map(g => {
+  const sorted = [...games].sort((a, b) => compareReplayRows(a, b));
+  return `<table class="replays-table">
+    <thead>
+      <tr>
+        <th><button type="button" onclick="sortReplaysBy('name')">Name ${sortMark('name')}</button></th>
+        <th><button type="button" onclick="sortReplaysBy('players')">Players ${sortMark('players')}</button></th>
+        <th><button type="button" onclick="sortReplaysBy('yards')">Yards ${sortMark('yards')}</button></th>
+        <th><button type="button" onclick="sortReplaysBy('timestamp')">Timestamp ${sortMark('timestamp')}</button></th>
+        ${isAdmin ? '<th class="replays-table-actions">Delete</th>' : ''}
+      </tr>
+    </thead>
+    <tbody>
+      ${sorted.map(g => renderReplayTableRow(g, isAdmin)).join('')}
+    </tbody>
+  </table>`;
+}
+
+function renderReplayTableRow(g, isAdmin) {
     const displayName = g.name || g.filename.replace('.json', '');
     const isNamed = !!g.name;
     const dt = g.finished_at_ms ? new Date(g.finished_at_ms).toLocaleString() : (g.started_at_ms ? new Date(g.started_at_ms).toLocaleString() : '-');
-    const meta = [g.player_count ? `${g.player_count}p` : null, g.yard_count ? `${g.yard_count} yards` : null, dt].filter(Boolean).join(' · ');
-    const adminBtns = isAdmin ? `
-      <button class="replay-picker-action" title="Rename" onclick="event.stopPropagation(); startRenameReplay('${g.filename}', this)"><i class="ti ti-pencil"></i></button>
-      <button class="replay-picker-action danger" title="Delete" onclick="event.stopPropagation(); deleteReplay('${g.filename}', this)"><i class="ti ti-trash"></i></button>` : '';
-    return `<div class="replay-picker-row" onclick="loadReplayFromPage('${g.filename}')">
-      <div class="replay-picker-row-main">
-        <span class="replay-picker-name${isNamed ? '' : ' unnamed'}">${escapeReplayName(displayName)}</span>
-        <div class="replay-picker-row-actions">${adminBtns}</div>
-      </div>
-      <span class="replay-picker-meta">${meta}</span>
-    </div>`;
-  }).join('');
+    const selected = g.filename === _selectedReplayFilename;
+    const nameCell = isAdmin
+      ? `<input class="replays-name-input${isNamed ? '' : ' unnamed'}" value="${escapeReplayName(displayName)}" onclick="event.stopPropagation()" onkeydown="handleReplayNameKey(event,'${g.filename}')" onblur="renameReplayFromInput('${g.filename}', this)">`
+      : `<span class="replays-table-name${isNamed ? '' : ' unnamed'}">${escapeReplayName(displayName)}</span>`;
+    return `<tr class="${selected ? 'selected' : ''}" data-filename="${escapeReplayName(g.filename)}" onclick="loadReplayFromPage('${g.filename}')">
+      <td>${nameCell}</td>
+      <td>${g.player_count ?? '-'}</td>
+      <td>${g.yard_count ?? '-'}</td>
+      <td>${dt}</td>
+      ${isAdmin ? `<td class="replays-table-actions"><button class="replay-picker-action danger" title="Delete" onclick="event.stopPropagation(); deleteReplay('${g.filename}')"><i class="ti ti-trash"></i></button></td>` : ''}
+    </tr>`;
+}
+
+function sortReplaysBy(key) {
+  if (_replaysSortKey === key) {
+    _replaysSortDir = _replaysSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    _replaysSortKey = key;
+    _replaysSortDir = key === 'timestamp' ? 'desc' : 'asc';
+  }
+  const list = document.getElementById('replays-list');
+  const isAdmin = typeof adminToken !== 'undefined' && adminToken;
+  if (list) list.innerHTML = renderReplaysTable(_replaysPageGames, isAdmin);
+}
+
+function sortMark(key) {
+  if (_replaysSortKey !== key) return '';
+  return _replaysSortDir === 'asc' ? '<i class="ti ti-chevron-up"></i>' : '<i class="ti ti-chevron-down"></i>';
+}
+
+function compareReplayRows(a, b) {
+  const av = replaySortValue(a, _replaysSortKey);
+  const bv = replaySortValue(b, _replaysSortKey);
+  const dir = _replaysSortDir === 'asc' ? 1 : -1;
+  if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
+  return String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: 'base' }) * dir;
+}
+
+function replaySortValue(g, key) {
+  if (key === 'players') return g.player_count ?? 0;
+  if (key === 'yards') return g.yard_count ?? 0;
+  if (key === 'timestamp') return g.finished_at_ms || g.started_at_ms || 0;
+  return g.name || g.filename.replace('.json', '');
 }
 
 function escapeReplayName(value) {
@@ -134,6 +185,8 @@ async function loadReplayFromPage(filename) {
       const viewer = document.getElementById('replays-viewer');
       const title = document.getElementById('replays-viewer-title');
       const game = _replaysPageGames.find(g => g.filename === filename);
+      _selectedReplayFilename = filename;
+      renderSelectedReplayRow();
       if (viewer) viewer.hidden = false;
       if (title) title.textContent = game?.name || filename.replace('.json', '');
       if (typeof prepareReplayBoard === 'function') prepareReplayBoard();
@@ -144,22 +197,24 @@ async function loadReplayFromPage(filename) {
   }
 }
 
-async function startRenameReplay(filename, btn) {
-  const row = btn.closest('.replay-picker-row');
-  const nameEl = row.querySelector('.replay-picker-name');
-  const current = nameEl.textContent;
-  nameEl.outerHTML = `<input class="replay-picker-rename-input" value="${escapeReplayName(current)}" maxlength="80" onclick="event.stopPropagation()">`;
-  const input = row.querySelector('input');
-  input.focus(); input.select();
-  input.onkeydown = async e => {
-    if (e.key === 'Enter') await _confirmRenameReplay(filename, input.value.trim());
-    if (e.key === 'Escape') loadReplaysPage();
-  };
-  btn.innerHTML = '<i class="ti ti-check"></i>';
-  btn.onclick = e => { e.stopPropagation(); _confirmRenameReplay(filename, input.value.trim()); };
+function renderSelectedReplayRow() {
+  document.querySelectorAll('.replays-table tbody tr').forEach(row => row.classList.remove('selected'));
+  document.querySelector(`.replays-table tbody tr[data-filename="${CSS.escape(_selectedReplayFilename || '')}"]`)?.classList.add('selected');
 }
 
-async function _confirmRenameReplay(filename, name) {
+function handleReplayNameKey(event, filename) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    event.currentTarget.blur();
+  }
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    loadReplaysPage();
+  }
+}
+
+async function renameReplayFromInput(filename, input) {
+  const name = input.value.trim();
   if (!name) return;
   await fetch(`/api/games/${encodeURIComponent(filename)}`, {
     method: 'PATCH',
@@ -175,5 +230,6 @@ async function deleteReplay(filename) {
     method: 'DELETE',
     headers: { 'X-Admin-Token': adminToken },
   });
+  if (_selectedReplayFilename === filename) quitReplayFromPage();
   await loadReplaysPage();
 }

@@ -73,6 +73,97 @@
   margin-bottom: 12px;
 }
 
+// ── Saved games table ────────────────────────────────────────────────────────
+
+.replays-page-list {
+  overflow-x: auto;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+  background: $color-bg-alt;
+}
+
+.replays-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.replays-table th,
+.replays-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid $border-light;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.replays-table th {
+  background: $color-bg-raised;
+  color: $color-text-2;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.replays-table th button {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.replays-table tbody tr {
+  cursor: pointer;
+}
+
+.replays-table tbody tr:hover {
+  background: $accent-tint;
+}
+
+.replays-table tbody tr.selected {
+  background: $accent-tint;
+  box-shadow: inset 3px 0 0 $color-primary;
+}
+
+.replays-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.replays-table-name,
+.replays-name-input {
+  font-weight: 700;
+}
+
+.replays-table-name.unnamed,
+.replays-name-input.unnamed {
+  font-family: monospace;
+  font-weight: 400;
+  color: $color-text-3;
+}
+
+.replays-name-input {
+  width: min(360px, 100%);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 6px;
+  background: transparent;
+  color: $color-text;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.replays-name-input:focus {
+  outline: none;
+  border-color: $color-primary;
+  background: $color-bg-alt;
+}
+
+.replays-table-actions {
+  width: 72px;
+  text-align: center !important;
+}
+
 // ── Game cards ────────────────────────────────────────────────────────────────
 
 .replays-list {
