@@ -145,6 +145,19 @@ function cleanStaleProfileIds() {
   if (changed) persistSettings();
 }
 
+function cleanUnreadyProfileIds(active = typeof lobbyActiveSlots === 'function' ? lobbyActiveSlots() : []) {
+  if (!settings.profile_ids) return;
+  let changed = false;
+  active.forEach((_slotIdx, playerIdx) => {
+    const profileId = settings.profile_ids?.[playerIdx];
+    if (profileId && getPlayerType(playerIdx) === 'human' && !isSessionConsented(profileId)) {
+      delete settings.profile_ids[playerIdx];
+      changed = true;
+    }
+  });
+  if (changed) persistSettings();
+}
+
 // ── Panel rendering ───────────────────────────────────────────────────────────
 
 function renderProfiles() {
@@ -442,6 +455,7 @@ function submitReconsent() {
 
 function lobbyProfileSelect(slotIdx, playerIdx) {
   cleanStaleProfileIds();
+  cleanUnreadyProfileIds();
   const allProfiles = loadProfiles().filter(p => !p._is_deleted);
   const currentId   = settings.profile_ids?.[playerIdx];
   const active = typeof lobbyActiveSlots === 'function' ? lobbyActiveSlots() : [];
@@ -450,8 +464,7 @@ function lobbyProfileSelect(slotIdx, playerIdx) {
     if (idx !== playerIdx && getPlayerType(idx) === 'human' && settings.profile_ids?.[idx])
       usedIds.add(settings.profile_ids[idx]);
   });
-  // Only show players who have consented this session
-  const profiles = allProfiles.filter(p => isSessionConsented(p.id) || p.id === currentId);
+  const profiles = allProfiles.filter(p => isSessionConsented(p.id));
   const options = [
     `<option value="">— pick player —</option>`,
     ...profiles.map(p => {

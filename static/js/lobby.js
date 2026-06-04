@@ -101,6 +101,7 @@ function renderLobbySlots() {
 
   const active = lobbyActiveSlots();
   lobbyCleanBotProfileAssignments(active);
+  if (typeof cleanUnreadyProfileIds === 'function') cleanUnreadyProfileIds(active);
 
   wrap.innerHTML = Array.from({length: lobbyMaxSlots()}, (_, slotIdx) => {
     const isActive  = active.includes(slotIdx);
@@ -328,8 +329,11 @@ function lobbyValidationError() {
   const active = lobbyActiveSlots();
   for (const slotIdx of active) {
     const playerIdx = active.indexOf(slotIdx);
-    if (getPlayerType(playerIdx) === 'human' && typeof getSlotProfile === 'function' && !getSlotProfile(playerIdx))
-      return 'Each human player must select a profile. <a href="#" onclick="event.preventDefault();switchTab(\'profiles\')">Go to Players tab</a>';
+    if (getPlayerType(playerIdx) === 'human' && typeof getSlotProfile === 'function') {
+      const profile = getSlotProfile(playerIdx);
+      if (!profile || (typeof isSessionConsented === 'function' && !isSessionConsented(profile.id)))
+        return 'Each human player must select a ready profile. <a href="#" onclick="event.preventDefault();switchTab(\'profiles\')">Go to Players tab</a>';
+    }
     if (getPlayerType(playerIdx) !== 'human') {
       const selectable = typeof getSelectableBots === 'function' ? getSelectableBots() : [];
       const selectedBot = settings.bot_ids?.[playerIdx];
