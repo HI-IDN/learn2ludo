@@ -89,7 +89,6 @@
       "enabled": true,
       "default_visible": true,
       "order": 99,
-      "admin_only": true,
       "description": "Tab visibility control"
     }
   ]
