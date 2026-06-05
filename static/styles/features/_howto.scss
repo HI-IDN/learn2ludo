@@ -4,6 +4,31 @@
 
 @use "../base/variables" as *;
 
+// ---- Quick-nav pills --------------------------------------------------------
+
+.howto-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.howto-nav-pill {
+  padding: 5px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  color: $color-text-2;
+  background: $color-bg-raised;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover  { background: $accent-tint; color: $color-primary; }
+  &.active { background: $color-primary; color: #fff; }
+}
+
 // ---- Accordion container ----------------------------------------------------
 
 .howto-accordion {
@@ -359,18 +384,57 @@
   border-radius: $radius;
 }
 
-// ---- Feature request bar ----------------------------------------------------
+// ---- Inline link button -----------------------------------------------------
 
-.howto-feature-request-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+.howto-inline-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: $color-primary;
+  font-size: inherit;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  &:hover { color: darken($color-primary, 10%); }
+}
+
+// ---- Submitted idea cards ---------------------------------------------------
+
+.howto-idea-card {
   padding: 12px 14px;
   background: $color-bg;
   border: 1px solid $border-light;
   border-radius: $radius;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  & + & { margin-top: 8px; }
+}
+
+.howto-idea-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.howto-idea-name { font-size: 13px; font-weight: 700; color: $color-text; }
+.howto-idea-meta { font-size: 11px; color: $color-text-2; }
+.howto-idea-desc { font-size: 13px; color: $color-text-2; line-height: 1.6; margin: 0; }
+
+// ---- Feature request dialog select ------------------------------------------
+
+.howto-dialog-field select {
+  padding: 8px 10px;
+  border: 1px solid $border-medium;
+  border-radius: $radius;
+  font-size: 13px;
+  font-family: inherit;
+  color: $color-text;
+  background: $color-bg-alt;
+  &:focus { outline: none; border-color: $color-primary; }
 }
 
 // ---- Feature request dialog -------------------------------------------------

@@ -1,9 +1,21 @@
 <!-- HOW IT WORKS -->
 <div class="panel" id="panel-howto">
-  <div style="margin-bottom:24px;">
+  <div style="margin-bottom:16px;">
     <h1 style="font-size:22px; font-weight:700;">How It Works</h1>
     <p style="font-size:13px; color:var(--text2); margin-top:4px;">A plain-language guide to how bots make decisions in Learn2Ludo.</p>
   </div>
+
+  <!-- Quick-nav pills -->
+  <nav class="howto-nav" id="howto-nav" aria-label="Sections">
+    <button class="howto-nav-pill active" onclick="howtoOpen('howto-state')">Game state</button>
+    <button class="howto-nav-pill" onclick="howtoOpen('howto-features')">Features</button>
+    <button class="howto-nav-pill" onclick="howtoOpen('howto-normalisation')">Normalisation</button>
+    <button class="howto-nav-pill" onclick="howtoOpen('howto-lookahead')">Lookahead</button>
+    <button class="howto-nav-pill" onclick="howtoOpen('howto-ideas')">Feature ideas</button>
+    <button class="howto-nav-pill" onclick="howtoOpen('howto-decision')">Decision-making</button>
+    <button class="howto-nav-pill" onclick="howtoOpen('howto-bots')">Bot types</button>
+    <button class="howto-nav-pill" id="howto-pill-training" onclick="howtoOpen('howto-training')" data-rl>Training vs fixed</button>
+  </nav>
 
   <div class="howto-accordion">
 
@@ -16,7 +28,7 @@
       <div class="howto-body">
         <p class="howto-text">
           Before a bot can decide anything, it needs to know what is happening on the board.
-          The <strong>game state</strong> is a complete snapshot of the game at one moment in time. It contains:
+          The <strong>game state</strong> — written <strong>x</strong> — is a complete snapshot of the game at one moment in time. It contains:
         </p>
         <ul class="howto-list">
           <li>Every pawn's current position (yard, track, home stretch, or finished)</li>
@@ -32,7 +44,7 @@
       </div>
     </div>
 
-    <!-- 2. Features (includes lookahead + normalisation) -->
+    <!-- 2. Features -->
     <div class="howto-item" id="howto-features">
       <button class="howto-trigger" onclick="howtoToggle('howto-features')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-vector-triangle"></i> What are features?</span>
@@ -40,29 +52,9 @@
       </button>
       <div class="howto-body">
         <p class="howto-text">
-          Raw board positions are hard to reason about directly. <strong>Features</strong> translate the game state into a set of numbers — one per candidate move — that capture what matters strategically. Each feature answers one question about what happens if you make that move.
+          Raw board positions are hard to reason about directly. <strong>Features</strong> translate a game state <strong>x</strong> into a set of numbers — one per candidate move — that capture what matters strategically. Each feature answers one question about what happens if you make that move. We collect them into a vector <strong>φ(x)</strong>, one entry per feature.
         </p>
-        <p class="howto-text">
-          These 8 features are just a starting point. There can be many more. You can also construct new features by <strong>combining existing ones mathematically</strong>:
-        </p>
-        <div class="howto-feature-mixtures">
-          <div class="howto-mixture-row"><span class="howto-mixture-expr">capture − risk</span><span class="howto-mixture-desc">net gain — rewards capturing only when the landing square is not immediately dangerous</span></div>
-          <div class="howto-mixture-row"><span class="howto-mixture-expr">progress × safety</span><span class="howto-mixture-desc">safe advancement — only values progress that lands on a protected square</span></div>
-          <div class="howto-mixture-row"><span class="howto-mixture-expr">spread + activation</span><span class="howto-mixture-desc">board presence — encourages distributing pawns while also entering new ones</span></div>
-          <div class="howto-mixture-row"><span class="howto-mixture-expr">(1 − risk) × progress</span><span class="howto-mixture-desc">risk-adjusted advancement — discounts progress on exposed squares</span></div>
-        </div>
 
-        <!-- Type legend -->
-        <div class="howto-type-legend">
-          <span class="howto-type-legend-label">Type notation:</span>
-          <span><span class="howto-range mono">{0, 1}</span> binary — 1 = True, 0 = False</span>
-          <span><span class="howto-range mono">[0, 1]</span> normalised real</span>
-          <span><span class="howto-range math">ℝ</span> real (pos. or neg.)</span>
-          <span><span class="howto-range math">ℤ</span> integer</span>
-          <span><span class="howto-range math">ℤ⁺</span> positive integer</span>
-        </div>
-
-        <!-- Feature grid: raw values -->
         <p class="howto-subsection-label">Raw features (before normalisation)</p>
         <div class="howto-feature-grid">
           <div class="howto-feature-card">
@@ -131,17 +123,44 @@
           </div>
         </div>
 
-        <!-- Normalisation -->
-        <div class="howto-callout">
-          <i class="ti ti-calculator"></i>
-          <span><strong>Normalisation is essential for weighted models.</strong> If features had different scales, the same weight value would mean different things for each one. All features must be mapped to [0, 1] before computing a weighted sum — this is what Learn2Ludo's engine does. The table below shows how each raw feature is normalised.</span>
+        <div class="howto-type-legend">
+          <span class="howto-type-legend-label">Type notation:</span>
+          <span><span class="howto-range mono">{0, 1}</span> binary — 1 = True, 0 = False</span>
+          <span><span class="howto-range mono">[0, 1]</span> normalised real</span>
+          <span><span class="howto-range math">ℝ</span> real (pos. or neg.)</span>
+          <span><span class="howto-range math">ℤ</span> integer</span>
+          <span><span class="howto-range math">ℤ⁺</span> positive integer</span>
         </div>
 
-        <p class="howto-subsection-label">Normalised features (as used by the engine)</p>
+        <p class="howto-text" style="margin-top:16px;">
+          These 8 features are just a starting point — there can be many more. You can also construct new features by <strong>combining existing ones mathematically</strong>:
+        </p>
+        <div class="howto-feature-mixtures">
+          <div class="howto-mixture-row"><span class="howto-mixture-expr">capture − risk</span><span class="howto-mixture-desc">net gain — rewards capturing only when the landing square is not immediately dangerous</span></div>
+          <div class="howto-mixture-row"><span class="howto-mixture-expr">progress × safety</span><span class="howto-mixture-desc">safe advancement — only values progress that lands on a protected square</span></div>
+          <div class="howto-mixture-row"><span class="howto-mixture-expr">spread + activation</span><span class="howto-mixture-desc">board presence — encourages distributing pawns while also entering new ones</span></div>
+          <div class="howto-mixture-row"><span class="howto-mixture-expr">(1 − risk) × progress</span><span class="howto-mixture-desc">risk-adjusted advancement — discounts progress on exposed squares</span></div>
+        </div>
+        <p class="howto-text" style="margin-top:12px; color:var(--text2); font-size:12px;">
+          Have an idea for a new feature? Head to the <button class="howto-inline-link" onclick="howtoOpen('howto-ideas')">Feature ideas</button> section.
+        </p>
+      </div>
+    </div>
+
+    <!-- 3. Normalisation -->
+    <div class="howto-item" id="howto-normalisation">
+      <button class="howto-trigger" onclick="howtoToggle('howto-normalisation')" aria-expanded="false">
+        <span class="howto-trigger-left"><i class="ti ti-calculator"></i> Normalisation</span>
+        <i class="ti ti-chevron-down howto-chevron"></i>
+      </button>
+      <div class="howto-body">
+        <p class="howto-text">
+          Features arrive on different scales — Capture is binary, Progress can be any positive integer, Risk sits between 0 and 6. Before a weighted model can use them, every feature must be mapped to the same range, [0, 1]. Without this step, a weight of 0.8 on Capture would not be comparable to 0.8 on Progress.
+        </p>
         <div class="howto-norm-table-wrap">
           <table class="howto-table">
             <thead>
-              <tr><th>Feature</th><th>Raw</th><th>Normalisation</th><th>Engine value</th><th>Example</th></tr>
+              <tr><th>Feature</th><th>Raw type</th><th>Normalisation</th><th>Engine value</th><th>Example</th></tr>
             </thead>
             <tbody>
               <tr><td>Capture</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>Already binary</td><td><span class="howto-range mono sm">{0, 1}</span></td><td>1 or 0</td></tr>
@@ -155,27 +174,88 @@
             </tbody>
           </table>
         </div>
+        <p class="howto-text">
+          Once all features land in [0, 1], a weight of 0.8 on Capture carries exactly the same magnitude as 0.8 on Progress. The scale is shared, so weights are directly comparable across every feature.
+        </p>
+      </div>
+    </div>
 
-        <!-- Lookahead -->
-        <div class="howto-callout">
-          <i class="ti ti-eye"></i>
-          <span><strong>All features above evaluate the board state <em>after</em> the move</strong> — they are all 1-step lookahead. For example, Capture asks "if I move here, is there an opponent to send home?" rather than "is there currently an opponent nearby?". Going further is possible: a 2-step lookahead would evaluate every opponent's best reply, and a <strong>Monte Carlo simulation</strong> would play out thousands of random games from the resulting state and use the win rate as the feature value — far richer, but more expensive to compute.</span>
-        </div>
-
-        <!-- Feature request -->
-        <div class="howto-feature-request-bar">
-          <div>
-            <strong>Have an idea for a new feature?</strong>
-            <span class="howto-text" style="display:inline;"> Describe what board situation it captures and how you'd compute it.</span>
+    <!-- 4. Lookahead -->
+    <div class="howto-item" id="howto-lookahead">
+      <button class="howto-trigger" onclick="howtoToggle('howto-lookahead')" aria-expanded="false">
+        <span class="howto-trigger-left"><i class="ti ti-eye"></i> Lookahead</span>
+        <i class="ti ti-chevron-down howto-chevron"></i>
+      </button>
+      <div class="howto-body">
+        <p class="howto-text">
+          All features above evaluate the board state <em>after</em> the move — they are all <strong>1-step lookahead</strong>. For example, Capture asks "if I move here, is there an opponent to send home?" rather than "is there currently an opponent nearby?". This is a subtle but important distinction:
+        </p>
+        <div class="howto-two-col">
+          <div class="howto-col-card">
+            <div class="howto-col-label">Current-state feature</div>
+            <ul class="howto-list">
+              <li>Evaluates the board <em>right now</em></li>
+              <li>Example: "does this pawn currently sit on a safe square?"</li>
+              <li>Does not account for what the move changes</li>
+            </ul>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="openFeatureRequestDialog()">
-            <i class="ti ti-bulb"></i> Submit a feature idea
-          </button>
+          <div class="howto-col-card">
+            <div class="howto-col-label">1-step lookahead feature</div>
+            <ul class="howto-list">
+              <li>Evaluates the board <em>after making this move</em></li>
+              <li>Example: "does making this move land on a safe square?"</li>
+              <li>All 8 Learn2Ludo features work this way</li>
+            </ul>
+          </div>
+        </div>
+        <div class="howto-callout">
+          <i class="ti ti-bulb"></i>
+          <span>The pawn preview you see on the board is 1-step lookahead visualised — it shows you the state that would result from each candidate move.</span>
+        </div>
+        <p class="howto-text">
+          Some features naturally require comparing <strong>two states</strong> — current and future. For example, "does this move break an existing blockade?" requires knowing whether a blockade exists now <em>and</em> whether it dissolves after the move. Going further is also possible:
+        </p>
+        <div class="howto-two-col">
+          <div class="howto-col-card">
+            <div class="howto-col-label">2-step lookahead</div>
+            <ul class="howto-list">
+              <li>For each candidate move, simulate all opponent replies</li>
+              <li>Score the board after the opponent's best response</li>
+              <li>More accurate — but cost multiplies with each step</li>
+            </ul>
+          </div>
+          <div class="howto-col-card">
+            <div class="howto-col-label">Monte Carlo simulation</div>
+            <ul class="howto-list">
+              <li>Play out thousands of random games from the resulting state</li>
+              <li>Use the win rate as the feature value</li>
+              <li>Rich signal — natural path toward full RL</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 3. Decision-making -->
+    <!-- 5. Feature ideas -->
+    <div class="howto-item" id="howto-ideas">
+      <button class="howto-trigger" onclick="howtoToggle('howto-ideas')" aria-expanded="false">
+        <span class="howto-trigger-left"><i class="ti ti-bulb"></i> Feature ideas</span>
+        <i class="ti ti-chevron-down howto-chevron"></i>
+      </button>
+      <div class="howto-body">
+        <p class="howto-text">
+          The 8 features in Learn2Ludo are just a starting point. Good features are <strong>concrete</strong> (computable from the game state), <strong>measurable</strong> (produce a number), and <strong>informative</strong> (tell the bot something the existing features don't). Have an idea? Click the submission form.
+        </p>
+        <div style="margin-bottom:16px;">
+          <button class="btn btn-primary btn-sm" onclick="openFeatureRequestDialog()">
+            <i class="ti ti-send"></i> Submit idea
+          </button>
+        </div>
+        <div id="howto-idea-cards"></div>
+      </div>
+    </div>
+
+    <!-- 6. Decision-making -->
     <div class="howto-item" id="howto-decision">
       <button class="howto-trigger" onclick="howtoToggle('howto-decision')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-math-function"></i> How bots make decisions</span>
@@ -183,45 +263,27 @@
       </button>
       <div class="howto-body">
         <p class="howto-text">
-          The <strong>weighted bot</strong> (Apollo and custom bots) scores every legal move using a weighted sum of features, then picks the highest-scoring move.
+          Every bot receives a game state <strong>x</strong> and must return a single move from the list of legal options. All bot types share this contract — what differs is the strategy used to rank or filter those moves.
         </p>
-        <div class="howto-formula">
-          <span class="howto-formula-label">Score for a move =</span>
-          <span class="howto-formula-expr">
-            w<sub>capture</sub> · capture &nbsp;+&nbsp;
-            w<sub>progress</sub> · progress &nbsp;+&nbsp;
-            w<sub>safety</sub> · safety &nbsp;+&nbsp; …
-          </span>
-        </div>
         <p class="howto-text">
-          Each <strong>weight</strong> controls how much a feature matters. Zero means the feature is ignored; positive makes the bot prefer moves that score well on it; negative makes it actively avoid them.
+          There are three broad approaches used in Learn2Ludo:
         </p>
-        <div class="howto-example">
-          <div class="howto-example-label">Example — a capture-heavy bot evaluates two moves:</div>
-          <table class="howto-table">
-            <thead>
-              <tr><th>Feature</th><th>Weight</th><th>Move A (capture)</th><th>Move B (advance)</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>Capture</td><td>0.80</td><td>1.00</td><td>0.00</td></tr>
-              <tr><td>Progress</td><td>0.30</td><td>0.40</td><td>0.90</td></tr>
-              <tr><td>Safety</td><td>0.20</td><td>0.00</td><td>1.00</td></tr>
-              <tr class="howto-table-total">
-                <td colspan="2"><strong>Total score</strong></td>
-                <td><strong>0.92</strong> ✓ chosen</td>
-                <td>0.47</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <ul class="howto-list">
+          <li><strong>Priority rules</strong> — check conditions one by one and take the first move that matches a rule. No scoring, no weighing; just structured if-then logic.</li>
+          <li><strong>Weighted scoring</strong> — compute a score for every legal move using a combination of features and weights, then pick the highest. Fully deterministic once the weights are fixed.</li>
+          <li><strong>Learned policy</strong> — use a model trained on game outcomes to estimate which move leads to the best long-run result. The decision logic is not hand-written; it emerges from experience.</li>
+        </ul>
         <div class="howto-callout">
           <i class="ti ti-bulb"></i>
           <span>If two moves tie, the bot picks between them at random. This is the only randomness in a weighted bot's decision — everything else is deterministic.</span>
         </div>
+        <p class="howto-text">
+          See <button class="howto-inline-link" onclick="howtoOpen('howto-bots')">Bot types</button> for how each approach is used in practice.
+        </p>
       </div>
     </div>
 
-    <!-- 4. Bot types -->
+    <!-- 7. Bot types -->
     <div class="howto-item" id="howto-bots">
       <button class="howto-trigger" onclick="howtoToggle('howto-bots')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-robot"></i> Bot types in Learn2Ludo</span>
@@ -235,7 +297,7 @@
               <span class="howto-bot-badge sdr">SDR</span>
               <span class="howto-bot-name">Simple dispatching rule</span>
             </div>
-            <p class="howto-bot-desc">Follows one rule. Examples: Ares (always capture if possible), Athena (stay on safe squares), Hestia (advance the furthest pawn), Artemis (activate yard pawns), Eris (random).</p>
+            <p class="howto-bot-desc">Follows one priority rule. Examples: Ares (always capture if possible), Athena (stay on safe squares), Hestia (advance the furthest pawn), Artemis (activate yard pawns), Eris (random).</p>
             <p class="howto-bot-desc">Predictable and easy to study. If its one rule does not apply, it falls back to random choice.</p>
           </div>
           <div class="howto-bot-card">
@@ -243,7 +305,7 @@
               <span class="howto-bot-badge cdr">CDR</span>
               <span class="howto-bot-name">Composite dispatching rule</span>
             </div>
-            <p class="howto-bot-desc">Combines multiple features with weights. Apollo is the built-in CDR. Custom bots you build on the Bots page are also CDRs — you control the weights with sliders.</p>
+            <p class="howto-bot-desc">Scores every legal move using a weighted sum of features — φ(x) · w — then picks the highest. Apollo is the built-in CDR. Custom bots you build on the Bots page are also CDRs — you control the weights with sliders.</p>
             <p class="howto-bot-desc">Setting one weight to 100 and the rest to 0 turns a CDR into the matching SDR.</p>
           </div>
           <div class="howto-bot-card" data-rl>
@@ -258,7 +320,7 @@
       </div>
     </div>
 
-    <!-- 5. Training vs fixed (hidden when RL tab is disabled) -->
+    <!-- 8. Training vs fixed (hidden when RL tab is disabled) -->
     <div class="howto-item" id="howto-training" data-rl>
       <button class="howto-trigger" onclick="howtoToggle('howto-training')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-school"></i> Training vs fixed behaviour</span>
@@ -266,7 +328,7 @@
       </button>
       <div class="howto-body">
         <p class="howto-text">
-          SDR and CDR bots have <strong>fixed behaviour</strong>: their rules and weights are set before the game starts and do not change during play. They are fast, transparent, and easy to understand.
+          SDR and CDR bots have <strong>fixed behaviour</strong>: their rules and weights are set before the game starts and do not change during play.
         </p>
         <p class="howto-text">
           An <strong>RL bot</strong> improves through experience. During training it plays many games, receives a reward signal, and gradually updates its model to maximise future rewards. Once training is complete the model is frozen — this is called <em>inference</em>.
@@ -309,7 +371,7 @@
       <button class="howto-dialog-close" onclick="closeFeatureRequestDialog()"><i class="ti ti-x"></i></button>
     </div>
     <div class="howto-dialog-body">
-      <p class="howto-text">Describe a new feature — what board situation it captures and how you'd compute it. Good features are concrete, measurable, and tell the bot something the existing features don't.</p>
+      <p class="howto-text">Describe a new feature — what board situation it captures and how you'd compute it.</p>
       <div class="howto-dialog-field">
         <label>Feature name <span class="howto-dialog-required">*</span></label>
         <input type="text" id="fr-name" placeholder="e.g. Blockade breaking" maxlength="80">
@@ -319,8 +381,10 @@
         <textarea id="fr-desc" placeholder="How is this feature computed? What does a high value mean?" rows="4" maxlength="600"></textarea>
       </div>
       <div class="howto-dialog-field">
-        <label>Your name <span class="howto-dialog-optional">(optional)</span></label>
-        <input type="text" id="fr-user" placeholder="Leave blank to submit anonymously" maxlength="60">
+        <label>Submitted by <span class="howto-dialog-optional">(optional)</span></label>
+        <select id="fr-user">
+          <option value="">— submit anonymously —</option>
+        </select>
       </div>
       <div id="fr-error" class="howto-dialog-error" style="display:none;"></div>
     </div>
