@@ -331,6 +331,80 @@
   padding-bottom: 6px; border-bottom: 1px solid $border-light;
 }
 
+// ---- Decision tree learning diagram ----------------------------------------
+
+.howto-tree-demo {
+  padding: 14px;
+  background: $color-bg;
+  border: 1px solid $border-light;
+  border-radius: $radius;
+}
+
+.howto-tree-node,
+.howto-tree-leaf {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid $border-medium;
+  border-radius: $radius;
+  background: $color-bg-alt;
+  color: $color-text;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.howto-tree-node.root {
+  display: flex;
+  width: fit-content;
+  margin: 0 auto 12px;
+  color: $color-primary;
+  border-color: $accent-tint-border;
+  background: $accent-tint;
+}
+
+.howto-tree-branches {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.howto-tree-branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid $border-light;
+}
+
+.howto-tree-answer {
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: $color-bg-raised;
+  color: $color-text-2;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.howto-tree-leaves {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.howto-tree-leaf {
+  min-height: 30px;
+  color: $color-text-2;
+  font-weight: 600;
+}
+
 // ---- Feature mixtures -------------------------------------------------------
 
 .howto-feature-mixtures {

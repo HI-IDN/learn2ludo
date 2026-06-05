@@ -13,6 +13,7 @@
     <button class="howto-nav-pill" onclick="howtoOpen('howto-lookahead')">Lookahead</button>
     <button class="howto-nav-pill" onclick="howtoOpen('howto-ideas')">Feature ideas</button>
     <button class="howto-nav-pill" onclick="howtoOpen('howto-decision')">Decision-making</button>
+    <button class="howto-nav-pill" onclick="howtoOpen('howto-trees')">Decision trees</button>
     <button class="howto-nav-pill" onclick="howtoOpen('howto-bots')">Bot types</button>
     <button class="howto-nav-pill" id="howto-pill-training" onclick="howtoOpen('howto-training')" data-rl>Training vs fixed</button>
   </nav>
@@ -283,7 +284,72 @@
       </div>
     </div>
 
-    <!-- 7. Bot types -->
+    <!-- 7. Decision trees -->
+    <div class="howto-item" id="howto-trees">
+      <button class="howto-trigger" onclick="howtoToggle('howto-trees')" aria-expanded="false">
+        <span class="howto-trigger-left"><i class="ti ti-binary-tree"></i> Decision trees and random forests</span>
+        <i class="ti ti-chevron-down howto-chevron"></i>
+      </button>
+      <div class="howto-body">
+        <p class="howto-text">
+          A <strong>decision tree</strong> is a bot strategy written as yes/no questions. Start at the top, ask one question about the current legal moves, follow the matching branch, and keep going until you reach a move rule.
+        </p>
+
+        <div class="howto-tree-demo" aria-label="Decision tree example">
+          <div class="howto-tree-node root">Can I capture?</div>
+          <div class="howto-tree-branches">
+            <div class="howto-tree-branch">
+              <span class="howto-tree-answer">Yes</span>
+              <div class="howto-tree-node">Is the landing square safe?</div>
+              <div class="howto-tree-leaves">
+                <span class="howto-tree-leaf">Yes: capture</span>
+                <span class="howto-tree-leaf">No: choose safer move</span>
+              </div>
+            </div>
+            <div class="howto-tree-branch">
+              <span class="howto-tree-answer">No</span>
+              <div class="howto-tree-node">Can I leave the yard?</div>
+              <div class="howto-tree-leaves">
+                <span class="howto-tree-leaf">Yes: activate pawn</span>
+                <span class="howto-tree-leaf">No: move farthest</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="howto-two-col">
+          <div class="howto-col-card">
+            <div class="howto-col-label">How a decision tree thinks</div>
+            <ul class="howto-list">
+              <li>Each branch asks one clear question.</li>
+              <li>Each leaf chooses a move rule.</li>
+              <li>You can trace the path by hand.</li>
+              <li>The bot is explainable because every choice has a visible reason.</li>
+            </ul>
+          </div>
+          <div class="howto-col-card">
+            <div class="howto-col-label">How this differs from weights</div>
+            <ul class="howto-list">
+              <li>A weighted bot scores all moves at once.</li>
+              <li>A tree filters choices step by step.</li>
+              <li>Weights ask "how much does this matter?"</li>
+              <li>Trees ask "which question should I answer next?"</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="howto-text">
+          A <strong>random forest</strong> is a group of decision trees. Each tree votes for a move, then the forest picks the move with the most votes. This is useful because one small tree can be too simple, but many slightly different trees can make steadier decisions together.
+        </p>
+
+        <div class="howto-callout">
+          <i class="ti ti-info-circle"></i>
+          <span>TL;DR: a decision tree is one explainable path of questions. A random forest is many trees voting together. In Learn2Ludo, the first practical step is making decision-tree bots work in the game engine and builder UI.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Bot types -->
     <div class="howto-item" id="howto-bots">
       <button class="howto-trigger" onclick="howtoToggle('howto-bots')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-robot"></i> Bot types in Learn2Ludo</span>
@@ -320,7 +386,7 @@
       </div>
     </div>
 
-    <!-- 8. Training vs fixed (hidden when RL tab is disabled) -->
+    <!-- 9. Training vs fixed (hidden when RL tab is disabled) -->
     <div class="howto-item" id="howto-training" data-rl>
       <button class="howto-trigger" onclick="howtoToggle('howto-training')" aria-expanded="false">
         <span class="howto-trigger-left"><i class="ti ti-school"></i> Training vs fixed behaviour</span>
