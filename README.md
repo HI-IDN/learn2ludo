@@ -10,6 +10,7 @@ A browser-based Ludo game with a Python/FastAPI backend, vanilla JS frontend, co
 |---|---|---|
 | Python | 3.12.10 | 3.10+ should work |
 | pip | — | comes with Python |
+| [uv](https://docs.astral.sh/uv/) | — | optional, faster alternative to pip/venv |
 | Node.js | 22.8.0 | only needed to compile SCSS |
 | npm | 10.8.2 | comes with Node.js |
 | Sass | 1.69.5 | `npm install -g sass` |
@@ -25,7 +26,18 @@ git clone https://github.com/HI-IDN/learn2ludo.git
 cd learn2ludo
 ```
 
-### 2. Virtual environment
+### 2. Install Python dependencies
+
+**Using uv** (creates `.venv` and installs everything in one step):
+
+```bash
+uv sync                # runtime dependencies only
+uv sync --extra dev    # also install dev/test dependencies (pytest, httpx)
+```
+
+Prefix subsequent commands with `uv run` (e.g. `uv run python -m uvicorn server:app --port 8000`), or activate `.venv` as below.
+
+**Using pip:**
 
 ```bash
 # Windows (PowerShell)
@@ -35,15 +47,11 @@ python -m venv .venv
 # macOS / Linux
 python -m venv .venv
 source .venv/bin/activate
-```
 
-### 3. Install Python dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Run the server
+### 3. Run the server
 
 **Just run it:**
 ```bash
@@ -72,7 +80,7 @@ set ADMIN_PASSWORD=mypassword && python -m uvicorn server:app --port 8000
 
 The password is never written to disk — it lives only in the server process for the duration of the session.
 
-### 5. Open the app
+### 4. Open the app
 
 ```
 http://localhost:8000
