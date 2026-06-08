@@ -194,6 +194,8 @@ function ensureTransportButtonStyles() {
 
 async function init(){
   ensureTransportButtonStyles(); loadSettings(); applySettingsToControls(); applyFeaturesPanelVisibility(); if(typeof initSoundControls==='function') initSoundControls(); await loadTabs(); await loadStats(); await loadBotRegistry(); renderPlayers(); renderLobbySlots(); if(typeof initProfilesPanel==='function') initProfilesPanel(); drawBoard(); _updateLiveSpeedControls();
+  const sharedCode=typeof parseGameCodeFromUrl==='function' ? parseGameCodeFromUrl() : null;
+  if(sharedCode) await joinGameByCode(sharedCode);
 }
 function loadSettings(){
   try{ settings=JSON.parse(localStorage.getItem('ludo_settings')||'{}'); }catch{settings={};}
@@ -569,7 +571,11 @@ async function newGame(startingPlayer=0){
   try{
     const r=await fetch('/api/game/new',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!r.ok) throw new Error(r.status);
-    gameState=normalizeEngineState(await r.json());
+    const data=await r.json();
+    currentGameId=data.game_id;
+    gameState=normalizeEngineState(data);
+    if(typeof setGameCodeInUrl==='function') setGameCodeInUrl(currentGameId);
+    if(typeof renderGameCodeBadge==='function') renderGameCodeBadge(currentGameId);
   } catch(e){
     gameState=makeDemoState(payload?.config?.player_count ?? 2, payload?.config?.explicit_slots);
   }
@@ -588,7 +594,7 @@ async function rollDice(){
   if(typeof isMoveJustificationActive==='function'&&isMoveJustificationActive())return;
   if(typeof primeAudioForUserGesture==='function') primeAudioForUserGesture(); if(!gameState)return;
   const diceEl=document.getElementById('dice-face'); if(diceEl){diceEl.style.cursor='default';diceEl.style.opacity='0.45';}
-  try{ const r=await fetch('/api/game/roll',{method:'POST'}); const d=await r.json(); const dice=Number(d.dice ?? d.roll ?? d.last_roll ?? d.value ?? d); await animateDice(dice); gameState=normalizeEngineState(d.game||d.state||d); if(!gameState.dice)gameState.dice=dice; }
+  try{ const r=await fetch(`/api/game/${currentGameId}/roll`,{method:'POST'}); const d=await r.json(); const dice=Number(d.dice ?? d.roll ?? d.last_roll ?? d.value ?? d); await animateDice(dice); gameState=normalizeEngineState(d.game||d.state||d); if(!gameState.dice)gameState.dice=dice; }
   catch{ const dice=1+Math.floor(Math.random()*6); await animateDice(dice); gameState.dice=dice; gameState.last_roll=dice; gameState.phase='moving'; gameState.valid_moves=demoValidMoves(gameState.current_player,dice); }
   renderGame();
 }
@@ -605,7 +611,7 @@ async function makeMove(pieceIdx,target,pawnIdValue=null,justification=null){ wi
   await animatePawnSteps(pieceIdx,from,target);
   const payload={piece_idx:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,target,target_position:target};
   if(justification != null) payload.justification=justification;
-  try{ const r=await fetch('/api/game/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
+  try{ const r=await fetch(`/api/game/${currentGameId}/move`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); if(!r.ok)throw new Error(); gameState=normalizeEngineState(await r.json()); }
   catch{ const _entry=homeEntryPosition(); const _hl=gameState?.config?.board?.home_length??6; pawn.position=target; pawn.in_yard=false; pawn.finished=target>=_entry+_hl-1; pawn.absolute_position=target<_entry?absForPlayerPosition(p,target):null; gameState.history.push({type:'move',player:p,piece:pieceIdx,pawn_id:pawnIdValue||pawn.pawn_id,from,to:target,dice:gameState.dice,round:gameState.round_count||0,events:{},justification:justification??null,timestamp:new Date().toISOString()}); if(gameState.dice===6){
       gameState.consecutive_sixes = (gameState.consecutive_sixes || 0) + 1;
       if (gameState.consecutive_sixes >= (settings.max_consecutive_sixes ?? 3)) {

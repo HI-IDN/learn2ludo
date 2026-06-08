@@ -46,7 +46,14 @@ GAMES_SUMMARY_PATH = Path(__file__).parent / "data" / "games_summary.json"
 PLAYERS_PATH  = Path(__file__).parent / "data" / "players.json"
 BUGS_DIR      = Path(__file__).parent / "data" / "bugs"
 
-active_game: Optional[GameSession] = None
+games: dict[str, GameSession] = {}
+games_lock = threading.Lock()
+game_locks: dict[str, threading.Lock] = {}
+game_last_seen: dict[str, float] = {}
+GAME_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+GAME_CODE_LENGTH = 4
+GAME_TTL_SECONDS = 4 * 60 * 60
+
 active_env: Optional[LudoEnv] = None
 active_session: Optional[TrainingSession] = None
 training_thread: Optional[threading.Thread] = None
@@ -533,6 +540,48 @@ def bot_move(req: BotMoveRequest):
 
 
 # ---------------------------------------------------------------------------
+# Game store — keyed by shareable code so concurrent games stay isolated
+# ---------------------------------------------------------------------------
+def generate_game_code() -> str:
+    for _ in range(10):
+        code = "".join(secrets.choice(GAME_CODE_ALPHABET) for _ in range(GAME_CODE_LENGTH))
+        if code not in games:
+            return code
+    raise HTTPException(status_code=503, detail="Could not allocate game code, try again")
+
+
+def get_game_session(game_id: str) -> GameSession:
+    game = games.get(game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail=f"No game with code {game_id}")
+    game_last_seen[game_id] = time.monotonic()
+    return game
+
+
+def get_game_lock(game_id: str) -> threading.Lock:
+    with games_lock:
+        return game_locks.setdefault(game_id, threading.Lock())
+
+
+def _evict_game(game_id: str):
+    with games_lock:
+        games.pop(game_id, None)
+        game_locks.pop(game_id, None)
+        game_last_seen.pop(game_id, None)
+
+
+def _sweep_stale_games():
+    while True:
+        time.sleep(15 * 60)
+        cutoff = time.monotonic() - GAME_TTL_SECONDS
+        for gid in [g for g, ts in game_last_seen.items() if ts < cutoff]:
+            _evict_game(gid)
+
+
+threading.Thread(target=_sweep_stale_games, daemon=True).start()
+
+
+# ---------------------------------------------------------------------------
 # Game API
 # ---------------------------------------------------------------------------
 class NewGameRequest(BaseModel):
@@ -544,7 +593,6 @@ class NewGameRequest(BaseModel):
 
 @app.post("/api/game/new")
 def new_game(req: NewGameRequest):
-    global active_game
     board_cfg = req.config.get("board", {})
     player_count = req.config.get("player_count", req.num_players)
     explicit_slots = req.config.get("explicit_slots") or list(range(player_count))
@@ -564,36 +612,40 @@ def new_game(req: NewGameRequest):
     )
     max_yard_rolls = int(req.rules.get("empty_board_rolls", 3))
     equal_rounds   = bool(req.rules.get("equal_rounds", False))
-    active_game = GameSession(cfg, max_yard_rolls=max_yard_rolls, starting_player=starting_player,
-                              equal_rounds=equal_rounds, seeds=req.seeds)
-    active_game.player_refs = build_game_player_registry(active_game)
+    session = GameSession(cfg, max_yard_rolls=max_yard_rolls, starting_player=starting_player,
+                          equal_rounds=equal_rounds, seeds=req.seeds)
+    session.player_refs = build_game_player_registry(session)
     incoming_refs = req.config.get("player_refs") or []
     if incoming_refs:
-        active_game.player_refs = normalize_game_player_refs(
+        session.player_refs = normalize_game_player_refs(
             incoming_refs,
-            active_game.seeds,
-            slots=active_game.game.slots,
-            starting_player=active_game.starting_player,
+            session.seeds,
+            slots=session.game.slots,
+            starting_player=session.starting_player,
         )
+    with games_lock:
+        game_id = generate_game_code()
+        games[game_id] = session
+        game_last_seen[game_id] = time.monotonic()
     stats = load_stats()
     stats["games_played"] += 1
     save_stats(stats)
-    return active_game.to_dict()
+    result = session.to_dict()
+    result["game_id"] = game_id
+    return result
 
 
-@app.get("/api/game/state")
-def game_state():
-    if not active_game:
-        raise HTTPException(status_code=404, detail="No active game")
-    return active_game.to_dict()
+@app.get("/api/game/{game_id}/state")
+def game_state(game_id: str):
+    return get_game_session(game_id).to_dict()
 
 
-@app.post("/api/game/roll")
-def roll_dice():
-    if not active_game:
-        raise HTTPException(status_code=404, detail="No active game")
-    value = active_game.roll_dice()
-    return {"dice": value, "game": active_game.to_dict()}
+@app.post("/api/game/{game_id}/roll")
+def roll_dice(game_id: str):
+    game = get_game_session(game_id)
+    with get_game_lock(game_id):
+        value = game.roll_dice()
+        return {"dice": value, "game": game.to_dict()}
 
 
 class MoveRequest(BaseModel):
@@ -603,38 +655,40 @@ class MoveRequest(BaseModel):
     justification: Optional[str] = Field(default=None, max_length=400)
 
 
-@app.post("/api/game/move")
-def make_move(req: MoveRequest):
-    if not active_game:
-        raise HTTPException(status_code=404, detail="No active game")
+@app.post("/api/game/{game_id}/move")
+def make_move(game_id: str, req: MoveRequest):
+    game = get_game_session(game_id)
     if req.piece_idx is None and not req.pawn_id:
         raise HTTPException(status_code=422, detail="piece_idx or pawn_id is required")
-    try:
-        events = active_game.apply_move(
-            req.piece_idx,
-            req.target,
-            pawn_id_value=req.pawn_id,
-            justification=req.justification,
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-    game_dict = active_game.to_dict()
-    if active_game.winner is not None:
-        game_dict["player_stats"] = active_game.compute_player_stats()
-        save_game_record(active_game)
-    return {"events": events, "game": game_dict}
+    with get_game_lock(game_id):
+        try:
+            events = game.apply_move(
+                req.piece_idx,
+                req.target,
+                pawn_id_value=req.pawn_id,
+                justification=req.justification,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        game_dict = game.to_dict()
+        if game.winner is not None:
+            game_dict["player_stats"] = game.compute_player_stats()
+            save_game_record(game)
+            _evict_game(game_id)
+        return {"events": events, "game": game_dict}
 
 
-@app.post("/api/game/skip")
-def skip_turn():
-    if not active_game:
-        raise HTTPException(status_code=404, detail="No active game")
-    active_game.skip_turn()
-    game_dict = active_game.to_dict()
-    if active_game.winner is not None:
-        game_dict["player_stats"] = active_game.compute_player_stats()
-        save_game_record(active_game)
-    return game_dict
+@app.post("/api/game/{game_id}/skip")
+def skip_turn(game_id: str):
+    game = get_game_session(game_id)
+    with get_game_lock(game_id):
+        game.skip_turn()
+        game_dict = game.to_dict()
+        if game.winner is not None:
+            game_dict["player_stats"] = game.compute_player_stats()
+            save_game_record(game)
+            _evict_game(game_id)
+        return game_dict
 
 
 class ReflectionsRequest(BaseModel):
@@ -853,6 +907,11 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 @app.get("/", response_class=HTMLResponse)
 def root():
+    return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/game/{code}", response_class=HTMLResponse)
+def game_route(code: str):
     return FileResponse(STATIC_DIR / "index.html")
 
 

@@ -1,0 +1,24 @@
+@use "../base/variables" as *;
+
+.game-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.lobby-join-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lobby-join-input {
+  width: 90px;
+  padding: 8px 10px;
+  border: 1px solid $border-medium;
+  border-radius: $radius;
+  font-family: $font-mono;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

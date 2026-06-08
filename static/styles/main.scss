@@ -37,6 +37,7 @@
 @use "features/stats";        // .stats-row, .stat-card, .dice-audit-*, .progress-bar-*, .mini-chart
 @use "features/profiles";     // .profiles-wrap, .profile-card, registration/consent modals
 @use "features/lobby";        // .lobby-wrap, .lobby-slot, .lobby-play-btn
+@use "features/game-link";    // .game-link-row, .lobby-join-row — share/join game by code
 @use "features/bots";         // .bots-sections, .bot-card, .bot-empty
 @use "features/bot-builder";  // .bot-builder-card, slider controls for custom CDR bot
 @use "features/pregame";      // #pregame-overlay, .pg-card, .pg-player-row

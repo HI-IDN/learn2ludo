@@ -38,10 +38,10 @@ def _finish_all(session, player: int):
             piece.finished = True
 
 
-def _advance_turn_via_skip(client: TestClient, expected_player: int, expect_finished: bool = False) -> dict:
-    session = server.active_game
+def _advance_turn_via_skip(client: TestClient, game_id: str, expected_player: int, expect_finished: bool = False) -> dict:
+    session = server.games[game_id]
     session.game.phase = Phase.NEXT
-    r = client.post("/api/game/skip")
+    r = client.post(f"/api/game/{game_id}/skip")
     assert r.status_code == 200
     state = r.json()
     assert state["current_player"] == expected_player
@@ -61,25 +61,30 @@ def client(monkeypatch):
         "history": [],
     })
     monkeypatch.setattr(server, "save_stats", lambda _stats: None)
-    server.active_game = None
+    server.games.clear()
+    server.game_locks.clear()
+    server.game_last_seen.clear()
     with TestClient(server.app) as c:
         yield c
-    server.active_game = None
+    server.games.clear()
+    server.game_locks.clear()
+    server.game_last_seen.clear()
 
 
 def test_api_equal_rounds_finishes_on_provisional_winner_wrap(client: TestClient):
     r = client.post("/api/game/new", json=_new_game_payload(equal_rounds=True))
     assert r.status_code == 200
+    game_id = r.json()["game_id"]
 
-    session = server.active_game
+    session = server.games[game_id]
     _finish_all(session, 2)
     session._finishing_round_player = 2
     session.game.player = 2
 
-    _advance_turn_via_skip(client, expected_player=3)
-    _advance_turn_via_skip(client, expected_player=0)
-    _advance_turn_via_skip(client, expected_player=1)
-    state = _advance_turn_via_skip(client, expected_player=2, expect_finished=True)
+    _advance_turn_via_skip(client, game_id, expected_player=3)
+    _advance_turn_via_skip(client, game_id, expected_player=0)
+    _advance_turn_via_skip(client, game_id, expected_player=1)
+    state = _advance_turn_via_skip(client, game_id, expected_player=2, expect_finished=True)
 
     assert state["winner"] == 2
     assert state["winners"] == [2]
@@ -88,17 +93,18 @@ def test_api_equal_rounds_finishes_on_provisional_winner_wrap(client: TestClient
 def test_api_equal_rounds_reports_co_winners_at_cutoff(client: TestClient):
     r = client.post("/api/game/new", json=_new_game_payload(equal_rounds=True))
     assert r.status_code == 200
+    game_id = r.json()["game_id"]
 
-    session = server.active_game
+    session = server.games[game_id]
     _finish_all(session, 2)
     _finish_all(session, 1)
     session._finishing_round_player = 2
     session.game.player = 2
 
-    _advance_turn_via_skip(client, expected_player=3)
-    _advance_turn_via_skip(client, expected_player=0)
-    _advance_turn_via_skip(client, expected_player=1)
-    state = _advance_turn_via_skip(client, expected_player=2, expect_finished=True)
+    _advance_turn_via_skip(client, game_id, expected_player=3)
+    _advance_turn_via_skip(client, game_id, expected_player=0)
+    _advance_turn_via_skip(client, game_id, expected_player=1)
+    state = _advance_turn_via_skip(client, game_id, expected_player=2, expect_finished=True)
 
     assert state["winner"] == 2
     assert state["winners"] == [1, 2]
@@ -107,13 +113,14 @@ def test_api_equal_rounds_reports_co_winners_at_cutoff(client: TestClient):
 def test_api_move_persists_justification_and_timestamp(client: TestClient):
     r = client.post("/api/game/new", json=_new_game_payload(equal_rounds=False))
     assert r.status_code == 200
+    game_id = r.json()["game_id"]
 
-    session = server.active_game
+    session = server.games[game_id]
     session.game.player = 0
     session.game.last_roll = 6
     session.game.phase = Phase.MOVING
 
-    r = client.post("/api/game/move", json={
+    r = client.post(f"/api/game/{game_id}/move", json={
         "piece_idx": 0,
         "target": 0,
         "justification": "  Open with R1.  ",
@@ -140,8 +147,9 @@ def test_game_player_registry_uses_uuid_and_seed(client: TestClient):
 
     r = client.post("/api/game/new", json=payload)
     assert r.status_code == 200
+    game_id = r.json()["game_id"]
 
-    registry = server.build_game_player_registry(server.active_game)
+    registry = server.build_game_player_registry(server.games[game_id])
     state_refs = r.json()["player_refs"]
 
     assert registry[0] == {
@@ -181,8 +189,9 @@ def test_saved_game_record_includes_duration_and_player_registry(client: TestCli
     ]
     r = client.post("/api/game/new", json=payload)
     assert r.status_code == 200
+    game_id = r.json()["game_id"]
 
-    session = server.active_game
+    session = server.games[game_id]
     session.started_at_ms -= 2500
     path = server.save_game_record(session)
     saved = json.loads(Path(path).read_text())

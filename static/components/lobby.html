@@ -62,5 +62,14 @@
       </button>
     </div>
 
+    <!-- ── Join an existing game by code ─────────────────────────────── -->
+    <div class="lobby-join-row">
+      <input type="text" id="lobby-join-code" class="lobby-join-input" placeholder="Game code" maxlength="4">
+      <button class="btn btn-sm" onclick="joinGameByCode(document.getElementById('lobby-join-code').value)">
+        Join game
+      </button>
+      <div id="lobby-join-error"></div>
+    </div>
+
   </div>
 </div>
